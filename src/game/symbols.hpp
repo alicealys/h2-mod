@@ -18,11 +18,11 @@ namespace game
 		DB_EnumXAssets_Internal{0x4129F0};
 	WEAK symbol<const char* (const XAsset* asset)> DB_GetXAssetName{0x3E4090};
 
-	WEAK symbol<dvar_t* (const char* name)> Dvar_FindVar{0x618F90};
+	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x618F90};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x5A75D0};
-	WEAK symbol<dvar_t* (const char* dvarName, bool value, unsigned int flags, const char* description)>
+	WEAK symbol<dvar_t*(const char* dvarName, bool value, unsigned int flags, const char* description)>
 		Dvar_RegisterBool{0x617BB0};
-	WEAK symbol<dvar_t* (int dvarName, const char* a2, float x, float y, float z, float w, float min, float max,
+	WEAK symbol<dvar_t*(int dvarName, const char* a2, float x, float y, float z, float w, float min, float max,
 		unsigned int flags)> Dvar_RegisterVec4{0x6185F0};
 	WEAK symbol<const char* (dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x61B8F0};
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x61A5C0};
@@ -31,6 +31,8 @@ namespace game
 
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
+
+	WEAK symbol<char*(char* string)> I_CleanStr{0x620660};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x759BA0};
 
@@ -56,7 +58,7 @@ namespace game
 
 	WEAK symbol<void()> Sys_ShowConsole{0x633080};
 
-	WEAK symbol<void* (jmp_buf* Buf, int Value)> longjmp{0x89EED0};
+	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x89EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x8EC2E0};
 
 	// Variables

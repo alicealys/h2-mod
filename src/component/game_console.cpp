@@ -57,8 +57,8 @@ namespace game_console
 		std::string fixed_input;
 		std::vector<std::string> matches;
 
-		float color_white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-		float color_iw6[4] = { 0.0f, 0.7f, 1.0f, 1.0f };
+		float color_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+		float color_h2[4] = {0.9f, 0.9f, 0.5f, 1.0f};
 
 		void clear()
 		{
@@ -215,7 +215,7 @@ namespace game_console
 			con.globals.left_x = con.screen_min[0] + 6.0f;
 
 			draw_input_box(1, dvars::con_inputBoxColor->current.vector);
-			draw_input_text_and_over("h1-mod >", color_iw6);
+			draw_input_text_and_over("h1-mod >", color_h2);
 
 			con.globals.left_x = con.globals.x;
 			con.globals.auto_complete_choice[0] = 0;
@@ -334,7 +334,7 @@ namespace game_console
 			const auto height = ((con.screen_max[1] - con.screen_min[1]) - 32.0f) - 12.0f;
 
 			game::R_AddCmdDrawText("h1-mod", 0x7FFFFFFF, console_font, x,
-				((height - 16.0f) + y) + console_font->pixelHeight, 1.0f, 1.0f, 0.0f, color_iw6, 0);
+				((height - 16.0f) + y) + console_font->pixelHeight, 1.0f, 1.0f, 0.0f, color_h2, 0);
 
 			draw_output_scrollbar(x, y, width, height);
 			draw_output_text(x, y);
@@ -381,7 +381,7 @@ namespace game_console
 
 	bool console_char_event(const int localClientNum, const int key)
 	{
-		if (key == game::keyNum_t::K_GRAVE || key == game::keyNum_t::K_TILDE)
+		if (key == '|' || key == '\\')
 		{
 			return false;
 		}
@@ -604,7 +604,7 @@ namespace game_console
 
 					history.push_front(con.buffer);
 
-					print("]"s.append(con.buffer));
+					print(""s.append(con.buffer));
 
 					if (history.size() > 10)
 					{
@@ -676,7 +676,7 @@ namespace game_console
 
 			dvars::con_outputSliderColor = game::Dvar_RegisterVec4(
 				game::generateHashValue("con_outputSliderColor"), a2,
-				0.0f, 0.7f, 1.0f, 1.00f,
+				0.9f, 0.9f, 0.5f, 1.00f,
 				0.0f, 1.0f,
 				1);
 
