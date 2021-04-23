@@ -196,7 +196,7 @@ namespace scripting
 	template <>
 	bool script_value::is<std::vector<script_value>>() const
 	{
-		/*if (this->get_raw().type != game::SCRIPT_OBJECT)
+		if (this->get_raw().type != game::SCRIPT_OBJECT)
 		{
 			return false;
 		}
@@ -204,9 +204,7 @@ namespace scripting
 		const auto id = this->get_raw().u.uintValue;
 		const auto type = game::scr_VarGlob->objectVariableValue[id].w.type;
 
-		return type == game::SCRIPT_ARRAY;*/
-
-		return false;
+		return type == game::SCRIPT_ARRAY;
 	}
 
 	/***************************************************************

@@ -5,7 +5,7 @@ namespace scripting::lua
 {
 	namespace
 	{
-		/*struct array_value
+		struct array_value
 		{
 			int index;
 			script_value value;
@@ -18,7 +18,7 @@ namespace scripting::lua
 
 			std::unordered_map<std::string, array_value> values;
 
-			const auto offset = 64000 * (id & 3);
+			const auto offset = 40960 * (id & 3);
 
 			auto current = game::scr_VarGlob->objectVariableChildren[id].firstChild;
 			auto idx = 1;
@@ -107,7 +107,7 @@ namespace scripting::lua
 			table[sol::metatable_key] = metatable;
 
 			return {state, table};
-		}*/
+		}
 
 		bool is_istring(const sol::lua_value& value)
 		{
@@ -206,10 +206,10 @@ namespace scripting::lua
 			return {state, value.as<std::string>()};
 		}
 		
-		/*if (value.is<std::vector<script_value>>())
+		if (value.is<std::vector<script_value>>())
 		{
 			return entity_to_array(state, value.get_raw().u.uintValue);
-		}*/
+		}
 
 		if (value.is<entity>())
 		{
