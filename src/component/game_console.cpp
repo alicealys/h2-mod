@@ -6,6 +6,10 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
+#include "game/scripting/event.hpp"
+#include "game/scripting/execution.hpp"
+#include "game/scripting/lua/engine.hpp"
+
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 #include <deque>
@@ -215,9 +219,9 @@ namespace game_console
 			con.globals.left_x = con.globals.x;
 			con.globals.auto_complete_choice[0] = 0;
 
-			game::R_AddCmdDrawText(con.buffer, 0x7FFFFFFF, console_font, con.globals.x,
-				con.globals.y + con.globals.font_height, 1.0f, 1.0f, 0.0f, color_white, 0/*,
-				con.cursor, '|'*/);
+			game::R_AddCmdDrawTextWithCursor(con.buffer, 0x7FFFFFFF, console_font, 18, con.globals.x,
+				con.globals.y + con.globals.font_height, 1.0f, 1.0f, 0, color_white, 0,
+				con.cursor, '|');
 
 			// check if using a prefixed '/' or not
 			const auto input = con.buffer[1] && (con.buffer[0] == '/' || con.buffer[0] == '\\')
@@ -470,6 +474,18 @@ namespace game_console
 		return true;
 	}
 
+	void execute(const char* cmd)
+	{
+		scripting::event e;
+		e.name = "console_command";
+		e.arguments.push_back(cmd);
+		e.entity = *game::levelEntityId;
+
+		scripting::lua::engine::notify(e);
+
+		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
+	}
+
 	bool console_key_event(const int localClientNum, const int key, const int down)
 	{
 		if (key == game::keyNum_t::K_F10)
@@ -573,7 +589,7 @@ namespace game_console
 
 				if (key == game::keyNum_t::K_ENTER)
 				{
-					game::Cbuf_AddText(0, utils::string::va("%s \n", fixed_input.data()));
+					execute(fixed_input.data());
 
 					if (history_index != -1)
 					{

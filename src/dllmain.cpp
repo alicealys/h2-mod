@@ -17,7 +17,7 @@ DWORD WINAPI dwConsole(LPVOID)
         std::cout << "\n";
         std::getline(std::cin, cmd);
 
-        game::Cbuf_AddText(0, cmd.data());
+        game_console::execute(cmd.data());
     }
 
     return 0;
@@ -36,6 +36,7 @@ void init()
     scheduler::init();
     game_console::init();
     scripting::init();
+    chat::init();
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
