@@ -146,6 +146,11 @@ namespace command
 	{
 		utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
 
+		add("say", [](const params& params)
+		{
+			chat::print(params.join(1));
+		});
+
 		add("listassetpool", [](const params& params)
 		{
 			if (params.size() < 2)

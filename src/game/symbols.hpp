@@ -44,8 +44,8 @@ namespace game
 					 float* color, Material* material)> R_AddCmdDrawStretchPic{0x3C9710};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale, 
 					 float rotation, float* color, int style)> R_AddCmdDrawText{0x76C660};
-	WEAK symbol<void(const char*, int, Font_s*, float, float, float, float, float, const float*, int, int, char)>
-	R_AddCmdDrawTextWithCursor{0x769D90};
+	WEAK symbol<void(const char* text, int maxChars, Font_s* font, int fontSize, float x, float y, float xScale, float yScale, float rotation, 
+		const float* color, int style, int cursorPos, char cursor)> R_AddCmdDrawTextWithCursor{0x76CAF0};
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x7472A0};
 

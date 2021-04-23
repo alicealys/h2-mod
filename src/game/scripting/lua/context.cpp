@@ -168,6 +168,11 @@ namespace scripting::lua
 			{
 				command::execute(command, false);
 			};
+
+			game_type["say"] = [](const game&, const std::string& msg)
+			{
+				chat::print(msg);
+			};
 		}
 	}
 

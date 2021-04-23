@@ -21,6 +21,15 @@
 #include <cstdarg>
 #include <unordered_set>
 #include <csetjmp>
+#include <deque>
+
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
 
 #include <MinHook.h>
 #include <gsl/gsl>
@@ -42,3 +51,4 @@ using namespace std::literals;
 #include "component/scheduler.hpp"
 #include "component/input.hpp"
 #include "component/game_console.hpp"
+#include "component/chat.hpp"
