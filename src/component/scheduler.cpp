@@ -1,6 +1,9 @@
 #include <stdinc.hpp>
+#include "loader/component_loader.hpp"
+
 #include "scheduler.hpp"
 #include "game/game.hpp"
+
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 
@@ -135,18 +138,24 @@ namespace scheduler
 		}, type, delay);
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		thread = std::thread([]()
+	public:
+		void post_unpack() override
 		{
-			while (!kill)
+			thread = std::thread([]()
 			{
-				execute(pipeline::async);
-				std::this_thread::sleep_for(10ms);
-			}
-		});
+				while (!kill)
+				{
+					execute(pipeline::async);
+					std::this_thread::sleep_for(10ms);
+				}
+			});
 
-		r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
-		g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
-	}
+			r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
+			g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
+		}
+	};
 }
+
+REGISTER_COMPONENT(scheduler::component)

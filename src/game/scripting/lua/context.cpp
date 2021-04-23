@@ -7,6 +7,7 @@
 #include "../functions.hpp"
 
 #include "../../../component/command.hpp"
+#include "../../../component/chat.hpp"
 
 #include <utils/string.hpp>
 

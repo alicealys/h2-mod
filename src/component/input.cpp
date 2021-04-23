@@ -1,4 +1,5 @@
 #include <stdinc.hpp>
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
 
@@ -34,9 +35,15 @@ namespace input
 		}
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		cl_char_event_hook.create(game::base_address + 0x3D27B0, cl_char_event_stub);
-		cl_key_event_hook.create(game::base_address + 0x3D2AE0, cl_key_event_stub);
-	}
+	public:
+		void post_unpack() override
+		{
+			cl_char_event_hook.create(game::base_address + 0x3D27B0, cl_char_event_stub);
+			cl_key_event_hook.create(game::base_address + 0x3D2AE0, cl_key_event_stub);
+		}
+	};
 }
+
+REGISTER_COMPONENT(input::component)

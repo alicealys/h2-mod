@@ -1,5 +1,7 @@
 #pragma once
 
+#include "structs.hpp"
+
 namespace game
 {
 	extern uint64_t base_address;

@@ -1,15 +1,16 @@
 #include <stdinc.hpp>
-#include "chat.hpp"
-#include "scheduler.hpp"
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
+
+#include "chat.hpp"
+#include "scheduler.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 
 #define chat_font game::R_RegisterFont("fonts/fira_mono_regular.ttf", 25)
-#define material_white game::Material_RegisterHandle("white")
 
 namespace chat
 {
@@ -78,11 +79,17 @@ namespace chat
 		history.push_front(m);
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		scheduler::loop([]()
+	public:
+		void post_unpack() override
 		{
-			draw_chat();
-		}, scheduler::pipeline::renderer);
-	}
+			scheduler::loop([]()
+			{
+				draw_chat();
+			}, scheduler::pipeline::renderer);
+		}
+	};
 }
+
+REGISTER_COMPONENT(chat::component)
