@@ -62,12 +62,12 @@ namespace scripting
 			static const auto function_table = 0xB153F90;
 			static const auto method_table = 0xB155890;
 
-			if (index < 0x2DF)
+			if (index < 0x320)
 			{
-				return reinterpret_cast<script_function*>(game::base_address + function_table)[index];
+				return reinterpret_cast<script_function*>(game::base_address + function_table)[index - 1];
 			}
 
-			return reinterpret_cast<script_function*>(game::base_address + method_table)[index];
+			return reinterpret_cast<script_function*>(game::base_address + method_table)[index - 0x8000];
 		}
 	}
 
