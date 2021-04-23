@@ -81,6 +81,7 @@ namespace scheduler
 		std::thread thread;
 		task_pipeline pipelines[pipeline::count];
 		utils::hook::detour r_end_frame_hook;
+		utils::hook::detour g_run_frame_hook;
 
 		void execute(const pipeline type)
 		{
@@ -96,7 +97,7 @@ namespace scheduler
 
 		void server_frame_stub()
 		{
-			//game::G_Glass_Update();
+			g_run_frame_hook.invoke<void>();
 			execute(pipeline::server);
 		}
 	}
@@ -146,6 +147,6 @@ namespace scheduler
 		});
 
 		r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
-		//utils::hook::call(0x1402F8879, scheduler::server_frame_stub);
+		g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
 	}
 }

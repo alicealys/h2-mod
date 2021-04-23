@@ -11,6 +11,8 @@ namespace command
 {
 	namespace
 	{
+		utils::hook::detour dvar_command_hook;
+
 		std::unordered_map<std::string, std::function<void(params&)>> handlers;
 
 		void main_handler()
@@ -31,6 +33,43 @@ namespace command
 				const auto& cb = *static_cast<const std::function<void(game::XAssetHeader)>*>(data);
 				cb(header);
 			}), &callback, includeOverride);
+		}
+
+		game::dvar_t* dvar_command_stub()
+		{
+			const params args;
+
+			if (args.size() <= 0)
+			{
+				return 0;
+			}
+
+			const auto dvar = game::Dvar_FindVar(args[0]);
+
+			if (dvar)
+			{
+				if (args.size() == 1)
+				{
+					const auto current = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
+					const auto reset = game::Dvar_ValueToString(dvar, nullptr, &dvar->reset);
+
+					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: %i",
+						args[0], current, reset, dvar->name);
+
+					game_console::print(game_console::con_type_info, "   %s\n",
+						dvars::dvar_get_domain(dvar->type, dvar->domain).data());
+				}
+				else
+				{
+					char command[0x1000] = { 0 };
+					game::Dvar_GetCombinedString(command, 1);
+					game::Dvar_SetCommand(dvar->name, "", command);
+				}
+
+				return dvar;
+			}
+
+			return 0;
 		}
 	}
 
@@ -105,6 +144,8 @@ namespace command
 
 	void init()
 	{
+		utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
+
 		add("listassetpool", [](const params& params)
 		{
 			if (params.size() < 2)
