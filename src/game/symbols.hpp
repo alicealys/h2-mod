@@ -80,5 +80,6 @@ namespace game
 	WEAK symbol<jmp_buf> g_script_error{0xBA9CD40};
 	WEAK symbol<scr_classStruct_t> g_classMap{0xBF95C0};
 
+	WEAK symbol<scrVarGlob_t> scr_VarGlob{0xB617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0xBA9EE40};
 }

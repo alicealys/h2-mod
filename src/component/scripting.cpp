@@ -22,7 +22,7 @@ namespace scripting
 
 		utils::hook::detour scr_add_class_field_hook;
 
-		std::string last_event;
+		std::unordered_map<std::string, int> known_events;
 
 		void vm_notify_stub(const unsigned int notify_list_owner_id, const game::scr_string_t string_value,
 		                    game::VariableValue* top)
@@ -39,11 +39,11 @@ namespace scripting
 					e.arguments.emplace_back(*value);
 				}
 
-				if (last_event != e.name)
+				if (known_events.find(e.name) == known_events.end())
 				{
-					last_event = e.name;
-
 					//printf("notify: %s\n", e.name.data());
+
+					known_events[e.name] = 1;
 				}
 
 				lua::engine::notify(e);
