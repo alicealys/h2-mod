@@ -1,7 +1,12 @@
 #include <stdinc.hpp>
-#include "command.hpp"
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
+#include "game/dvars.hpp"
+
+#include "command.hpp"
+#include "game_console.hpp"
+#include "chat.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -142,137 +147,77 @@ namespace command
 		}
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
-
-		add("say", [](const params& params)
+	public:
+		void post_unpack() override
 		{
-			chat::print(params.join(1));
-		});
+			utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
 
-		add("listassetpool", [](const params& params)
-		{
-			if (params.size() < 2)
+			add("say", [](const params& params)
 			{
-				game_console::print(game_console::con_type_info, "listassetpool <poolnumber>: list all the assets in the specified pool\n");
+				chat::print(params.join(1));
+			});
 
-				for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
+			add("listassetpool", [](const params& params)
+			{
+				if (params.size() < 2)
 				{
-					game_console::print(game_console::con_type_info, "%d %s\n", i, game::g_assetNames[i]);
+					game_console::print(game_console::con_type_info, "listassetpool <poolnumber>: list all the assets in the specified pool\n");
+
+					for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
+					{
+						game_console::print(game_console::con_type_info, "%d %s\n", i, game::g_assetNames[i]);
+					}
 				}
-			}
-			else
-			{
-				const auto type = static_cast<game::XAssetType>(atoi(params.get(1)));
-
-				if (type < 0 || type >= game::XAssetType::ASSET_TYPE_COUNT)
+				else
 				{
-					game_console::print(game_console::con_type_info, "Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
-					return;
+					const auto type = static_cast<game::XAssetType>(atoi(params.get(1)));
+
+					if (type < 0 || type >= game::XAssetType::ASSET_TYPE_COUNT)
+					{
+						game_console::print(game_console::con_type_info, "Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
+						return;
+					}
+
+					game_console::print(game_console::con_type_info, "Listing assets in pool %s\n", game::g_assetNames[type]);
+
+					enum_assets(type, [type](const game::XAssetHeader header)
+					{
+						const auto asset = game::XAsset{ type, header };
+						const auto* const asset_name = game::DB_GetXAssetName(&asset);
+						//const auto entry = game::DB_FindXAssetEntry(type, asset_name);
+						//TODO: display which zone the asset is from
+						game_console::print(game_console::con_type_info, "%s\n", asset_name);
+					}, true);
+				}
+			});
+
+			add("baseAddress", []()
+			{
+				printf("%p\n", (void*)game::base_address);
+			});
+
+			add("commandDump", []()
+			{
+				printf("======== Start command dump =========\n");
+
+				game::cmd_function_s* cmd = (*game::cmd_functions);
+
+				while (cmd)
+				{
+					if (cmd->name)
+					{
+						game_console::print(game_console::con_type_info, "%s\n", cmd->name);
+					}
+
+					cmd = cmd->next;
 				}
 
-				game_console::print(game_console::con_type_info, "Listing assets in pool %s\n", game::g_assetNames[type]);
-
-				enum_assets(type, [type](const game::XAssetHeader header)
-				{
-					const auto asset = game::XAsset{ type, header };
-					const auto* const asset_name = game::DB_GetXAssetName(&asset);
-					//const auto entry = game::DB_FindXAssetEntry(type, asset_name);
-					//TODO: display which zone the asset is from
-					game_console::print(game_console::con_type_info, "%s\n", asset_name);
-				}, true);
-			}
-		});
-
-		add("baseAddress", []()
-		{
-			printf("%p\n", (void*)game::base_address);
-		});
-
-		add("commandDump", []()
-		{
-			printf("======== Start command dump =========\n");
-
-			game::cmd_function_s* cmd = (*game::cmd_functions);
-
-			while (cmd)
-			{
-				if (cmd->name)
-				{
-					game_console::print(game_console::con_type_info, "%s\n", cmd->name);
-				}
-
-				cmd = cmd->next;
-			}
-
-			printf("======== End command dump =========\n");
-		});
-
-		/*add("noclip", [&]()
-		{
-			if (!game::SV_Loaded())
-			{
-				return;
-			}
-
-			game::sp::g_entities[0].client->flags ^= 1;
-			game::CG_GameMessage(0, utils::string::va("noclip %s",
-				game::sp::g_entities[0].client->flags & 1
-				? "^2on"
-				: "^1off"));
-		});
-
-		add("ufo", [&]()
-		{
-			if (!game::SV_Loaded())
-			{
-				return;
-			}
-
-			game::sp::g_entities[0].client->flags ^= 2;
-			game::CG_GameMessage(
-				0, utils::string::va("ufo %s", game::sp::g_entities[0].client->flags & 2 ? "^2on" : "^1off"));
-		});
-
-		add("give", [](const params& params)
-		{
-			if (!game::SV_Loaded())
-			{
-				return;
-			}
-
-			if (params.size() < 2)
-			{
-				game::CG_GameMessage(0, "You did not specify a weapon name");
-				return;
-			}
-
-			auto ps = game::SV_GetPlayerstateForClientNum(0);
-			auto wp = game::G_GetWeaponForName(params.get(1));
-			if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0))
-			{
-				game::G_InitializeAmmo(ps, wp, 0);
-				game::G_SelectWeapon(0, wp);
-			}
-		});
-
-		add("take", [](const params& params)
-		{
-			if (!game::SV_Loaded())
-			{
-				return;
-			}
-
-			if (params.size() < 2)
-			{
-				game::CG_GameMessage(0, "You did not specify a weapon name");
-				return;
-			}
-
-			auto ps = game::SV_GetPlayerstateForClientNum(0);
-			auto wp = game::G_GetWeaponForName(params.get(1));
-			game::G_TakePlayerWeapon(ps, wp);
-		});*/
-	}
+				printf("======== End command dump =========\n");
+			});
+		}
+	};
 }
+
+REGISTER_COMPONENT(command::component)

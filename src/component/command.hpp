@@ -25,6 +25,4 @@ namespace command
 	void add(const char* name, const std::function<void()>& callback);
 
 	void execute(std::string command, bool sync = false);
-
-	void init();
 }

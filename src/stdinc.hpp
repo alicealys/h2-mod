@@ -35,20 +35,3 @@
 #include <gsl/gsl>
 
 using namespace std::literals;
-
-#include "utils/memory.hpp"
-#include "utils/string.hpp"
-#include "utils/hook.hpp"
-#include "utils/string.hpp"
-#include "utils/io.hpp"
-
-#include "game/structs.hpp"
-#include "game/game.hpp"
-#include "game/dvars.hpp"
-
-#include "component/command.hpp"
-#include "component/scripting.hpp"
-#include "component/scheduler.hpp"
-#include "component/input.hpp"
-#include "component/game_console.hpp"
-#include "component/chat.hpp"

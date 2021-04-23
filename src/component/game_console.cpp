@@ -1,10 +1,12 @@
 #include <stdinc.hpp>
-#include "game_console.hpp"
-#include "command.hpp"
-#include "scheduler.hpp"
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
+
+#include "game_console.hpp"
+#include "command.hpp"
+#include "scheduler.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/execution.hpp"
@@ -12,7 +14,6 @@
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
-#include <deque>
 
 #define console_font game::R_RegisterFont("fonts/fira_mono_regular.ttf", 18)
 #define material_white game::Material_RegisterHandle("white")
@@ -620,82 +621,96 @@ namespace game_console
 		return true;
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		scheduler::loop(draw_console, scheduler::pipeline::renderer);
-
-		con.cursor = 0;
-		con.visible_line_count = 0;
-		con.output_visible = false;
-		con.display_line_offset = 0;
-		con.line_count = 0;
-		strncpy_s(con.buffer, "", 256);
-
-		con.globals.x = 0.0f;
-		con.globals.y = 0.0f;
-		con.globals.left_x = 0.0f;
-		con.globals.font_height = 0.0f;
-		con.globals.may_auto_complete = false;
-		con.globals.info_line_count = 0;
-		strncpy_s(con.globals.auto_complete_choice, "", 64);
-
-		// add clear command
-		command::add("clear", [&]()
+	public:
+		void post_unpack() override
 		{
-			clear();
+			scheduler::loop(draw_console, scheduler::pipeline::renderer);
+
+			con.cursor = 0;
+			con.visible_line_count = 0;
+			con.output_visible = false;
+			con.display_line_offset = 0;
 			con.line_count = 0;
-			con.output.clear();
-			history_index = -1;
-			history.clear();
-		});
+			strncpy_s(con.buffer, "", 256);
 
-		char a2[1] = {};
+			con.globals.x = 0.0f;
+			con.globals.y = 0.0f;
+			con.globals.left_x = 0.0f;
+			con.globals.font_height = 0.0f;
+			con.globals.may_auto_complete = false;
+			con.globals.info_line_count = 0;
+			strncpy_s(con.globals.auto_complete_choice, "", 64);
 
-		// add our dvars
-		dvars::con_inputBoxColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputBoxColor"), a2,
-														   0.2f, 0.2f, 0.2f, 0.9f, 
-														   0.0f, 1.0f,
-														   1);
+			// add clear command
+			command::add("clear", [&]()
+			{
+				clear();
+				con.line_count = 0;
+				con.output.clear();
+				history_index = -1;
+				history.clear();
+			});
 
-		dvars::con_inputHintBoxColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputHintBoxColor"), a2,
-															   0.3f, 0.3f, 0.3f, 1.0f, 
-															   0.0f, 1.0f,
-															   1);
+			char a2[1] = {};
 
-		dvars::con_outputBarColor = game::Dvar_RegisterVec4(game::generateHashValue("con_outputBarColor"), a2,
-															0.5f, 0.5f, 0.5f, 0.6f, 
-															0.0f, 1.0f,
-															1);
+			// add our dvars
+			dvars::con_inputBoxColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputBoxColor"), a2,
+				0.2f, 0.2f, 0.2f, 0.9f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_outputSliderColor = game::Dvar_RegisterVec4(game::generateHashValue("con_outputSliderColor"), a2,
-															   0.0f, 0.7f, 1.0f, 1.00f, 
-															   0.0f, 1.0f, 
-															   1);
+			dvars::con_inputHintBoxColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputHintBoxColor"), a2,
+				0.3f, 0.3f, 0.3f, 1.0f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_outputWindowColor = game::Dvar_RegisterVec4(game::generateHashValue("con_outputWindowColor"), a2,
-																0.25f, 0.25f, 0.25f, 0.85f, 
-																0.0f, 1.0f, 
-																1);
+			dvars::con_outputBarColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_outputBarColor"), a2,
+				0.5f, 0.5f, 0.5f, 0.6f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_inputDvarMatchColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputDvarMatchColor"), a2,
-																 1.0f, 1.0f, 0.8f, 1.0f, 
-																 0.0f, 1.0f, 
-																 1);
+			dvars::con_outputSliderColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_outputSliderColor"), a2,
+				0.0f, 0.7f, 1.0f, 1.00f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_inputDvarValueColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputDvarValueColor"), a2,
-																 1.0f, 1.0f, 0.8f, 1.0f,
-																 0.0f, 1.0f, 
-																 1);
+			dvars::con_outputWindowColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_outputWindowColor"), a2,
+				0.25f, 0.25f, 0.25f, 0.85f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_inputDvarInactiveValueColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputDvarInactiveValueColor"), a2,
-																		 0.8f, 0.8f, 0.8f, 1.0f, 
-																		 0.0f, 1.0f, 
-																		 1);
+			dvars::con_inputDvarMatchColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputDvarMatchColor"), a2,
+				1.0f, 1.0f, 0.8f, 1.0f,
+				0.0f, 1.0f,
+				1);
 
-		dvars::con_inputCmdMatchColor = game::Dvar_RegisterVec4(game::generateHashValue("con_inputCmdMatchColor"), a2,
-															    0.80f, 0.80f, 1.0f, 1.0f,
-																0.0f, 1.0f, 
-																1);
+			dvars::con_inputDvarValueColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputDvarValueColor"), a2,
+				1.0f, 1.0f, 0.8f, 1.0f,
+				0.0f, 1.0f,
+				1);
 
-	}
+			dvars::con_inputDvarInactiveValueColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputDvarInactiveValueColor"), a2,
+				0.8f, 0.8f, 0.8f, 1.0f,
+				0.0f, 1.0f,
+				1);
+
+			dvars::con_inputCmdMatchColor = game::Dvar_RegisterVec4(
+				game::generateHashValue("con_inputCmdMatchColor"), a2,
+				0.80f, 0.80f, 1.0f, 1.0f,
+				0.0f, 1.0f,
+				1);
+		}
+	};
 }
+
+REGISTER_COMPONENT(game_console::component)

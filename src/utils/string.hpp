@@ -1,5 +1,4 @@
 #pragma once
-#include "stdinc.hpp"
 
 namespace utils::string
 {

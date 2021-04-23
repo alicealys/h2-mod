@@ -1,6 +1,8 @@
 // https://github.com/momo5502/open-iw5
 
-#include "stdinc.hpp"
+#include <stdinc.hpp>
+
+#include "memory.hpp"
 
 namespace utils
 {
@@ -54,28 +56,12 @@ namespace utils
 		return this->pool_.empty();
 	}
 
-	/*char* memory::allocator::duplicate_string(const std::string& string)
-	{
-		std::lock_guard _(this->mutex_);
-
-		const auto data = memory::duplicate_string(string);
-		this->pool_.push_back(data);
-		return data;
-	}*/
-
 	void* memory::allocate(const size_t length)
 	{
 		const auto data = calloc(length, 1);
 		assert(data != nullptr);
 		return data;
 	}
-
-	/*char* memory::duplicate_string(const std::string& string)
-	{
-		const auto new_string = allocate_array<char>(string.size() + 1);
-		std::memcpy(new_string, string.data(), string.size());
-		return new_string;
-	}*/
 
 	void memory::free(void* data)
 	{

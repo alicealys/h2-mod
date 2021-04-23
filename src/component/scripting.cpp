@@ -1,13 +1,15 @@
 #include <stdinc.hpp>
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
-#include <utils/hook.hpp>
+
+#include "scheduler.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/execution.hpp"
 #include "game/scripting/lua/engine.hpp"
 
-#include "scheduler.hpp"
+#include <utils/hook.hpp>
 
 namespace scripting
 {
@@ -77,18 +79,24 @@ namespace scripting
 		}
 	}
 
-	void init()
+	class component final : public component_interface
 	{
-		vm_notify_hook.create(game::base_address + 0x5CC450, vm_notify_stub);
-
-		scr_load_level_hook.create(game::base_address + 0x520AB0, scr_load_level_stub);
-		g_shutdown_game_hook.create(game::base_address + 0x4CBAD0, g_shutdown_game_stub);
-
-		scr_add_class_field_hook.create(game::base_address + 0x5C2C30, scr_add_class_field_stub);
-
-		scheduler::loop([]()
+	public:
+		void post_unpack() override
 		{
-			lua::engine::run_frame();
-		}, scheduler::pipeline::server);
-	}
+			vm_notify_hook.create(game::base_address + 0x5CC450, vm_notify_stub);
+
+			scr_load_level_hook.create(game::base_address + 0x520AB0, scr_load_level_stub);
+			g_shutdown_game_hook.create(game::base_address + 0x4CBAD0, g_shutdown_game_stub);
+
+			scr_add_class_field_hook.create(game::base_address + 0x5C2C30, scr_add_class_field_stub);
+
+			scheduler::loop([]()
+			{
+				lua::engine::run_frame();
+			}, scheduler::pipeline::server);
+		}
+	};
 }
+
+REGISTER_COMPONENT(scripting::component)

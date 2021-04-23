@@ -28,6 +28,4 @@ namespace scheduler
 	          std::chrono::milliseconds delay = 0ms);
 	void once(const std::function<void()>& callback, pipeline type = pipeline::async,
 	          std::chrono::milliseconds delay = 0ms);
-
-	void init();
 }

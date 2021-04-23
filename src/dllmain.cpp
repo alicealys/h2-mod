@@ -1,8 +1,14 @@
-#include "stdinc.hpp"
+#include <stdinc.hpp>
+
+#include "game/game.hpp"
+
+#include "component/game_console.hpp"
+
+#include "loader/component_loader.hpp"
 
 #pragma warning(disable:4996)
 
-DWORD WINAPI dwConsole(LPVOID)
+DWORD WINAPI console(LPVOID)
 {
     AllocConsole();
     AttachConsole(GetCurrentProcessId());
@@ -25,18 +31,11 @@ DWORD WINAPI dwConsole(LPVOID)
 
 void init()
 {
-    CreateThread(0, 0, dwConsole, 0, 0, 0);
+    CreateThread(0, 0, console, 0, 0, 0);
 
     game::load_base_address();
 
-    utils::hook::set(game::base_address + 0xBE7F83C, true); // disable bnet popup
-
-    command::init();
-    input::init();
-    scheduler::init();
-    game_console::init();
-    scripting::init();
-    chat::init();
+    component_loader::post_unpack();
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
