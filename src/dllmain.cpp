@@ -35,6 +35,7 @@ void init()
     input::init();
     scheduler::init();
     game_console::init();
+    scripting::init();
 }
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)

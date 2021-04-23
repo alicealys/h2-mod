@@ -85,4 +85,6 @@ namespace utils::string
 	std::string get_clipboard_data();
 
 	void strip(const char* in, char* out, int max);
+
+	std::string replace(std::string str, const std::string& from, const std::string& to);
 }
