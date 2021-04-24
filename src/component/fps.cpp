@@ -25,10 +25,26 @@ namespace fps
 
 		float screen_max[2];
 
+		int history_count = 20;
+		int history[20] = { 0 };
+		int index;
+
 		void check_resize()
 		{
 			screen_max[0] = game::ScrPlace_GetViewPlacement()->realViewportSize[0];
 			screen_max[1] = game::ScrPlace_GetViewPlacement()->realViewportSize[1];
+		}
+
+		int average_fps()
+		{
+			auto total = 0;
+
+			for (auto i = 0; i < history_count; i++)
+			{
+				total += history[i];
+			}
+
+			return total / history_count;
 		}
 
 		void draw_fps()
@@ -41,7 +57,14 @@ namespace fps
 
 			const int fps = 1000000000 / frametime.count();
 
-			const auto fps_string = utils::string::va("%i", fps);
+			if (index >= history_count)
+			{
+				index = 0;
+			}
+
+			history[index++] = fps;
+
+			const auto fps_string = utils::string::va("%i", average_fps());
 			const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
 
 			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 25.f, 1.0f, 1.0f, 0.0f,
