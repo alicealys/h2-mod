@@ -22,6 +22,10 @@ namespace game
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x5A75D0};
 	WEAK symbol<dvar_t*(const char* dvarName, bool value, unsigned int flags, const char* description)>
 		Dvar_RegisterBool{0x617BB0};
+	WEAK symbol<dvar_t* (int hash, const char* dvarName, float value, float min, float max, unsigned int flags)>
+		Dvar_RegisterFloat{0x617F80};
+	WEAK symbol<dvar_t* (int hash, const char* dvarName, const char* value, unsigned int flags)>
+		Dvar_RegisterString{0x618170};
 	WEAK symbol<dvar_t*(int dvarName, const char* a2, float x, float y, float z, float w, float min, float max,
 		unsigned int flags)> Dvar_RegisterVec4{0x6185F0};
 	WEAK symbol<const char* (dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x61B8F0};
