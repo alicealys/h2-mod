@@ -24,6 +24,8 @@ namespace scripting
 
 		utils::hook::detour scr_add_class_field_hook;
 
+		bool running = false;
+
 		void vm_notify_stub(const unsigned int notify_list_owner_id, const game::scr_string_t string_value,
 		                    game::VariableValue* top)
 		{
@@ -39,6 +41,12 @@ namespace scripting
 					e.arguments.emplace_back(*value);
 				}
 
+				if (!running)
+				{
+					running = true;
+					lua::engine::start();
+				}
+
 				lua::engine::notify(e);
 			}
 
@@ -48,13 +56,15 @@ namespace scripting
 		void scr_load_level_stub()
 		{
 			scr_load_level_hook.invoke<void>();
+			running = true;
 			lua::engine::start();
 		}
 
 		void g_shutdown_game_stub(const int free_scripts)
 		{
 			lua::engine::stop();
-			return g_shutdown_game_hook.invoke<void>(free_scripts);
+			g_shutdown_game_hook.invoke<void>(free_scripts);
+			running = false;
 		}
 	
 		void scr_add_class_field_stub(unsigned int classnum, game::scr_string_t _name, unsigned int canonicalString, unsigned int offset)
@@ -77,7 +87,7 @@ namespace scripting
 		{
 			vm_notify_hook.create(game::base_address + 0x5CC450, vm_notify_stub);
 
-			scr_load_level_hook.create(game::base_address + 0x520AB0, scr_load_level_stub);
+			scr_load_level_hook.create(game::base_address + 0x4C7EB0, scr_load_level_stub);
 			g_shutdown_game_hook.create(game::base_address + 0x4CBAD0, g_shutdown_game_stub);
 
 			scr_add_class_field_hook.create(game::base_address + 0x5C2C30, scr_add_class_field_stub);
