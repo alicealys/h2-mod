@@ -186,6 +186,19 @@ namespace game_console
 		{
 			input = utils::string::to_lower(input);
 
+			for (const auto& dvar : dvars::dvar_list)
+			{
+				if (match_compare(input, dvar, exact))
+				{
+					suggestions.push_back(dvar);
+				}
+
+				if (exact && suggestions.size() > 1)
+				{
+					return;
+				}
+			}
+
 			game::cmd_function_s* cmd = (*game::cmd_functions);
 			while (cmd)
 			{
@@ -226,8 +239,8 @@ namespace game_console
 
 			// check if using a prefixed '/' or not
 			const auto input = con.buffer[1] && (con.buffer[0] == '/' || con.buffer[0] == '\\')
-				? std::string(con.buffer).substr(1)
-				: std::string(con.buffer);
+									? std::string(con.buffer).substr(1)
+									: std::string(con.buffer);
 
 			if (!input.length())
 			{
@@ -259,8 +272,25 @@ namespace game_console
 			}
 			else if (matches.size() == 1)
 			{
-				draw_hint_box(1, dvars::con_inputHintBoxColor->current.vector);
-				draw_hint_text(0, matches[0].data(), dvars::con_inputCmdMatchColor->current.vector);
+				auto* const dvar = game::Dvar_FindVar(matches[0].data());
+				const auto line_count = dvar ? 2 : 1;
+
+				draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
+				draw_hint_text(0, matches[0].data(), 
+							  dvar
+								  ? dvars::con_inputDvarMatchColor->current.vector
+								  : dvars::con_inputCmdMatchColor->current.vector);
+
+				if (dvar)
+				{
+					const auto offset = (con.screen_max[0] - con.globals.x) / 2.5f;
+
+					draw_hint_text(0, game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
+						dvars::con_inputDvarValueColor->current.vector, offset);
+					draw_hint_text(1, "  default", dvars::con_inputDvarInactiveValueColor->current.vector);
+					draw_hint_text(1, game::Dvar_ValueToString(dvar, nullptr, &dvar->reset),
+						dvars::con_inputDvarInactiveValueColor->current.vector, offset);
+				}
 
 				strncpy_s(con.globals.auto_complete_choice, matches[0].data(), 64);
 				con.globals.may_auto_complete = true;
@@ -273,7 +303,18 @@ namespace game_console
 
 				for (size_t i = 0; i < matches.size(); i++)
 				{
-					draw_hint_text(static_cast<int>(i), matches[i].data(), dvars::con_inputCmdMatchColor->current.vector);
+					auto* const dvar = game::Dvar_FindVar(matches[i].data());
+
+					draw_hint_text(static_cast<int>(i), matches[i].data(),
+					               dvar
+						               ? dvars::con_inputDvarMatchColor->current.vector
+						               : dvars::con_inputCmdMatchColor->current.vector);
+
+					if (dvar)
+					{
+						draw_hint_text(static_cast<int>(i), game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
+									   dvars::con_inputDvarValueColor->current.vector, offset);
+					}
 				}
 
 				strncpy_s(con.globals.auto_complete_choice, matches[0].data(), 64);

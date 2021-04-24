@@ -20,7 +20,6 @@ DWORD WINAPI console(LPVOID)
 
     while (true)
     {
-        std::cout << "\n";
         std::getline(std::cin, cmd);
 
         game_console::execute(cmd.data());
