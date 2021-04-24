@@ -188,7 +188,8 @@ namespace game_console
 
 			for (const auto& dvar : dvars::dvar_list)
 			{
-				if (match_compare(input, dvar, exact))
+				auto name = utils::string::to_lower(dvar);
+				if (match_compare(input, name, exact))
 				{
 					suggestions.push_back(dvar);
 				}
