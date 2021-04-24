@@ -518,12 +518,17 @@ namespace game_console
 
 	void execute(const char* cmd)
 	{
-		scripting::event e;
-		e.name = "console_command";
-		e.arguments.push_back(cmd);
-		e.entity = *game::levelEntityId;
+		const auto sv_running = game::Dvar_FindVar("sv_running")->current.enabled;
 
-		scripting::lua::engine::notify(e);
+		if (sv_running)
+		{
+			std::string command = cmd;
+
+			scheduler::once([command]()
+			{
+				scripting::notify(*game::levelEntityId, "console_command", {command});
+			}, scheduler::pipeline::server);
+		}
 
 		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
 	}
