@@ -186,6 +186,11 @@ namespace game_console
 		{
 			input = utils::string::to_lower(input);
 
+			if (game::Dvar_FindVar(input.data()))
+			{
+				suggestions.push_back(input.data());
+			}
+
 			for (const auto& dvar : dvars::dvar_list)
 			{
 				auto name = utils::string::to_lower(dvar);
