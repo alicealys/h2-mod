@@ -85,6 +85,7 @@ namespace scheduler
 		task_pipeline pipelines[pipeline::count];
 		utils::hook::detour r_end_frame_hook;
 		utils::hook::detour g_run_frame_hook;
+		utils::hook::detour main_frame_hook;
 
 		void execute(const pipeline type)
 		{
@@ -102,6 +103,12 @@ namespace scheduler
 		{
 			g_run_frame_hook.invoke<void>();
 			execute(pipeline::server);
+		}
+
+		void main_frame_stub()
+		{
+			main_frame_hook.invoke<void>();
+			execute(pipeline::main);
 		}
 	}
 
@@ -154,6 +161,7 @@ namespace scheduler
 
 			r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
 			g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
+			main_frame_hook.create(game::base_address + 0x417FA0, scheduler::main_frame_stub);
 		}
 	};
 }

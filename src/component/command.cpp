@@ -184,7 +184,7 @@ namespace command
 
 					enum_assets(type, [type](const game::XAssetHeader header)
 					{
-						const auto asset = game::XAsset{ type, header };
+						const auto asset = game::XAsset{type, header};
 						const auto* const asset_name = game::DB_GetXAssetName(&asset);
 						//const auto entry = game::DB_FindXAssetEntry(type, asset_name);
 						//TODO: display which zone the asset is from
