@@ -422,6 +422,11 @@ namespace game_console
 
 	bool console_char_event(const int localClientNum, const int key)
 	{
+		if (key > 255)
+		{
+			return true;
+		}
+
 		if (key == '|' || key == '\\')
 		{
 			return false;
