@@ -170,6 +170,11 @@ namespace scripting::lua
 				command::execute(command, false);
 			};
 
+			game_type["setdiscordstate"] = [](const game&, const std::string& state)
+			{
+				command::execute(utils::string::va("setdiscordstate %s", state.data()), false);
+			};
+
 			game_type["say"] = [](const game&, const std::string& msg)
 			{
 				chat::print(msg);

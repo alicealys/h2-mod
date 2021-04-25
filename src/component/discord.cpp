@@ -1,7 +1,10 @@
 #include <stdinc.hpp>
 #include "loader/component_loader.hpp"
-#include "scheduler.hpp"
+
 #include "game/game.hpp"
+
+#include "scheduler.hpp"
+#include "command.hpp"
 
 #include <utils/string.hpp>
 
@@ -12,6 +15,7 @@ namespace discord
 	namespace
 	{
 		DiscordRichPresence discord_presence;
+		std::string state;
 
 		void update_discord()
 		{
@@ -32,7 +36,7 @@ namespace discord
 				const auto mapname = game::UI_SafeTranslateString(utils::string::va("PRESENCE_SP_%s", map));
 
 				discord_presence.details = mapname;
-				discord_presence.state = "";
+				discord_presence.state = state.data();
 
 				if (!discord_presence.startTimestamp)
 				{
@@ -64,6 +68,17 @@ namespace discord
 			scheduler::loop(update_discord, scheduler::pipeline::async, 5s);
 
 			initialized_ = true;
+
+			command::add("setdiscordstate", [](const command::params& params)
+			{
+				const std::string _state = params.join(1);
+
+				scheduler::once([_state]()
+				{
+					state = _state;
+					update_discord();
+				}, scheduler::pipeline::async);
+			});
 		}
 
 	private:
@@ -74,6 +89,7 @@ namespace discord
 			ZeroMemory(&discord_presence, sizeof(discord_presence));
 
 			discord_presence.instance = 1;
+			discord_presence.state = "";
 
 			Discord_UpdatePresence(&discord_presence);
 		}
