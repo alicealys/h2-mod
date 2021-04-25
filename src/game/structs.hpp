@@ -24,7 +24,11 @@ namespace game
 
 	struct gentity_s
 	{
-		char __pad0[760];
+		char __pad0[0x1C];
+		vec3_t origin;
+		char __pad1[0xF0];
+		gclient_s* client;
+		//char __pad3[480];
 	}; // size = 760
 
 	struct Material

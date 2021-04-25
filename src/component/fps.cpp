@@ -19,9 +19,11 @@ namespace fps
 		std::chrono::nanoseconds frametime;
 		auto lastframe = std::chrono::high_resolution_clock::now();
 
-		float fps_color_good[4] = { 0.6f, 1.0f, 0.0f, 1.0f };
-		float fps_color_ok[4] = { 1.0f, 0.7f, 0.3f, 1.0f };
-		float fps_color_bad[4] = { 1.0f, 0.3f, 0.3f, 1.0f };
+		game::dvar_t* cg_drawfps;
+
+		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
+		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
+		float fps_color_bad[4] = {1.0f, 0.3f, 0.3f, 1.0f};
 
 		float screen_max[2];
 
@@ -67,8 +69,37 @@ namespace fps
 			const auto fps_string = utils::string::va("%i", average_fps());
 			const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
 
-			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 25.f, 1.0f, 1.0f, 0.0f,
+			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 35.f, 1.0f, 1.0f, 0.0f,
 				fps >= 60 ? fps_color_good : (fps >= 30 ? fps_color_ok : fps_color_bad), 0);
+		}
+
+		void draw_pos()
+		{
+			if (game::CL_IsCgameInitialized() && game::g_entities[0].origin)
+			{
+				const auto pos_string = utils::string::va("%f %f %f", 
+														  game::g_entities[0].origin[0],
+														  game::g_entities[0].origin[1],
+														  game::g_entities[0].origin[2]);
+
+				const auto x = screen_max[0] - 15.f - game::R_TextWidth(pos_string, 0x7FFFFFFF, fps_font);
+
+				game::R_AddCmdDrawText(pos_string, 0x7FFFFFFF, fps_font, x, 
+					60.f, 1.0f, 1.0f, 0.0f, fps_color_ok, 0);
+			}
+		}
+
+		void draw()
+		{
+			if (cg_drawfps->current.integer >= 1)
+			{
+				draw_fps(); 
+			}
+
+			if (cg_drawfps->current.integer >= 2)
+			{
+				draw_pos();
+			}
 		}
 	}
 
@@ -77,7 +108,9 @@ namespace fps
 	public:
 		void post_unpack() override
 		{
-			scheduler::loop(draw_fps, scheduler::pipeline::renderer);
+			cg_drawfps = game::Dvar_RegisterInt(game::generateHashValue("cg_drawfps"), "", 0, 0, 4, game::DVAR_FLAG_SAVED);
+
+			scheduler::loop(draw, scheduler::pipeline::renderer);
 		}
 	};
 }
