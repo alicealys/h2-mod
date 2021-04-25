@@ -10,3 +10,9 @@
 [submodule "deps/GSL"]
 	path = deps/GSL
 	url = https://github.com/Microsoft/GSL.git
+[submodule "deps/rapidjson"]
+	path = deps/rapidjson
+	url = https://github.com/Tencent/rapidjson.git
+[submodule "deps/discord-rpc"]
+	path = deps/discord-rpc
+	url = https://github.com/discord/discord-rpc.git

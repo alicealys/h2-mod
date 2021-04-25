@@ -33,6 +33,8 @@ namespace game
 
 	WEAK symbol<int(const char* fname)> generateHashValue{0x343D20};
 
+	WEAK symbol<bool()> CL_IsCgameInitialized{0x3CA0C0};
+
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
 
@@ -61,6 +63,8 @@ namespace game
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x5C0170};
 
 	WEAK symbol<void()> Sys_ShowConsole{0x633080};
+
+	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x5A2930};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x89EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x8EC2E0};
