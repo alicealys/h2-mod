@@ -154,6 +154,22 @@ namespace command
 		{
 			utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
 
+			add("startmap", [](const params& params)
+			{
+				const auto map = params.get(1);
+
+				const auto exists = utils::hook::invoke<bool>(game::base_address + 0x412B50, map, 0);
+
+				if (!exists)
+				{
+					game_console::print(game_console::con_type_error, "map '%s' not found\n", map);
+					return;
+				}
+
+				// SV_SpawnServer
+				utils::hook::invoke<void>(game::base_address + 0x6B3AA0, map, 0, 0, 0, 0);
+			});
+
 			add("say", [](const params& params)
 			{
 				chat::print(params.join(1));
