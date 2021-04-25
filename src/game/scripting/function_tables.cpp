@@ -5,8 +5,8 @@
 
 namespace scripting
 {
-	std::unordered_map<std::string, unsigned> function_map =
-	{
+    std::unordered_map<std::string, unsigned> function_map =
+    {
         {"precacheturret", 1},
         {"getweaponarray", 2},
         {"nullsub_428", 3},
@@ -618,9 +618,9 @@ namespace scripting
         {"sub_7ff7de293f00", 798},
         {"getmaxagents", 799},
         {"sub_7ff7de289110", 800},
-	};
+    };
 
-	std::unordered_map<std::string, unsigned> method_map =
+    std::unordered_map<std::string, unsigned> method_map =
     {
         {"thermaldrawenable", 32768},
         {"playerforcedeathanim", 32769},
@@ -1768,4 +1768,5 @@ namespace scripting
         {"isusingturret", 34256},
         {"begin", 34257},
         {"nullsub_727", 34258},
+    };
 }
