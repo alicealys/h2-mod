@@ -76,7 +76,7 @@ namespace game
 
 	WEAK symbol<const char*> g_assetNames{0xBEF280};
 
-	WEAK symbol<gentity_s> g_entities{0x52DDEC0};
+	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
 
 	WEAK symbol<int> keyCatchers{0x203F3C0};
 
