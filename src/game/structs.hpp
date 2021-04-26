@@ -9,7 +9,8 @@ namespace game
 
 	struct gclient_s
 	{
-
+		char __pad0[0x8C];
+		vec3_t velocity;
 	};
 
 	struct client_t
