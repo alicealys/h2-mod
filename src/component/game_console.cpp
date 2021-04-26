@@ -428,6 +428,11 @@ namespace game_console
 
 	bool console_char_event(const int localClientNum, const int key)
 	{
+		if (key == game::keyNum_t::K_GRAVE || key == game::keyNum_t::K_TILDE)
+		{
+			return false;
+		}
+		
 		if (key > 255)
 		{
 			return true;
@@ -546,11 +551,6 @@ namespace game_console
 
 	bool console_key_event(const int localClientNum, const int key, const int down)
 	{
-		if (key == game::keyNum_t::K_F10)
-		{
-			game::Cmd_ExecuteSingleCommand(localClientNum, 0, "lui_open menu_systemlink_join\n");
-		}
-
 		if (key == game::keyNum_t::K_GRAVE || key == game::keyNum_t::K_TILDE)
 		{
 			if (!down)
