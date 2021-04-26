@@ -713,59 +713,59 @@ namespace game_console
 			char a2[1] = {};
 
 			// add our dvars
-			dvars::con_inputBoxColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputBoxColor"), a2,
+			dvars::con_inputBoxColor = dvars::register_vec4(
+				"con_inputBoxColor",
 				0.2f, 0.2f, 0.2f, 0.9f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_inputHintBoxColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputHintBoxColor"), a2,
+			dvars::con_inputHintBoxColor = dvars::register_vec4(
+				"con_inputHintBoxColor",
 				0.3f, 0.3f, 0.3f, 1.0f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_outputBarColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_outputBarColor"), a2,
+			dvars::con_outputBarColor = dvars::register_vec4(
+				"con_outputBarColor",
 				0.5f, 0.5f, 0.5f, 0.6f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_outputSliderColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_outputSliderColor"), a2,
+			dvars::con_outputSliderColor = dvars::register_vec4(
+				"con_outputSliderColor",
 				0.9f, 0.9f, 0.5f, 1.00f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_outputWindowColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_outputWindowColor"), a2,
+			dvars::con_outputWindowColor = dvars::register_vec4(
+				"con_outputWindowColor",
 				0.25f, 0.25f, 0.25f, 0.85f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_inputDvarMatchColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputDvarMatchColor"), a2,
+			dvars::con_inputDvarMatchColor = dvars::register_vec4(
+				"con_inputDvarMatchColor",
 				1.0f, 1.0f, 0.8f, 1.0f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_inputDvarValueColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputDvarValueColor"), a2,
+			dvars::con_inputDvarValueColor = dvars::register_vec4(
+				"con_inputDvarValueColor",
 				1.0f, 1.0f, 0.8f, 1.0f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_inputDvarInactiveValueColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputDvarInactiveValueColor"), a2,
+			dvars::con_inputDvarInactiveValueColor = dvars::register_vec4(
+				"con_inputDvarInactiveValueColor",
 				0.8f, 0.8f, 0.8f, 1.0f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 
-			dvars::con_inputCmdMatchColor = game::Dvar_RegisterVec4(
-				game::generateHashValue("con_inputCmdMatchColor"), a2,
+			dvars::con_inputCmdMatchColor = dvars::register_vec4(
+				"con_inputCmdMatchColor",
 				0.80f, 0.80f, 1.0f, 1.0f,
 				0.0f, 1.0f,
-				1);
+				game::DVAR_FLAG_SAVED);
 		}
 	};
 }

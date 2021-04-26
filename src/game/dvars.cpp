@@ -15,23 +15,6 @@ namespace dvars
 	game::dvar_t* con_inputDvarInactiveValueColor = nullptr;
 	game::dvar_t* con_inputCmdMatchColor = nullptr;
 
-	game::dvar_t* g_playerEjection = nullptr;
-	game::dvar_t* g_playerCollision = nullptr;
-	game::dvar_t* g_gravity = nullptr;
-	game::dvar_t* g_speed = nullptr;
-
-	game::dvar_t* pm_bouncing = nullptr;
-
-	game::dvar_t* jump_slowDownEnable = nullptr;
-	game::dvar_t* jump_enableFallDamage = nullptr;
-	game::dvar_t* jump_height = nullptr;
-	game::dvar_t* jump_ladderPushVel = nullptr;
-
-	game::dvar_t* r_aspectRatioCustom = nullptr;
-	game::dvar_t* r_fullbright = nullptr;
-
-	game::dvar_t* aimassist_enabled = nullptr;
-
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)
@@ -134,7 +117,7 @@ namespace dvars
 		}
 	}
 
-	std::vector<const char*> dvar_list = 
+	std::vector<std::string> dvar_list = 
 	{
 		"ai_corpseLimit",
 		"band_12players",
@@ -1170,4 +1153,31 @@ namespace dvars
 		"xblive_privatematch",
 		"xblive_privatematch_solo"
 	};
+
+	game::dvar_t* register_int(const std::string& name, int value, int min, int max, game::DvarFlags flags)
+	{
+		const auto hash = game::generateHashValue(name.data());
+
+		dvar_list.push_back(name);
+
+		return game::Dvar_RegisterInt(hash, "", value, min, max, flags);
+	}
+
+	game::dvar_t* register_float(const std::string& name, float value, float min, float max, game::DvarFlags flags)
+	{
+		const auto hash = game::generateHashValue(name.data());
+
+		dvar_list.push_back(name);
+
+		return game::Dvar_RegisterFloat(hash, "", value, min, max, flags);
+	}
+
+	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z, float w, float min, float max, game::DvarFlags flags)
+	{
+		const auto hash = game::generateHashValue(name.data());
+
+		dvar_list.push_back(name);
+
+		return game::Dvar_RegisterVec4(hash, "", x, y, z, w, min, max, flags);
+	}
 }
