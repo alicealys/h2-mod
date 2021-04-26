@@ -428,7 +428,7 @@ namespace game_console
 
 	bool console_char_event(const int localClientNum, const int key)
 	{
-		if (key == game::keyNum_t::K_GRAVE || key == game::keyNum_t::K_TILDE)
+		if (key == '`' || key == '~')
 		{
 			return false;
 		}
