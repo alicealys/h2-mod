@@ -15,6 +15,8 @@ namespace dvars
 	game::dvar_t* con_inputDvarInactiveValueColor = nullptr;
 	game::dvar_t* con_inputCmdMatchColor = nullptr;
 
+	game::dvar_t* jump_enableFallDamage;
+
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)
@@ -1161,6 +1163,15 @@ namespace dvars
 		dvar_list.push_back(name);
 
 		return game::Dvar_RegisterInt(hash, "", value, min, max, flags);
+	}
+
+	game::dvar_t* register_bool(const std::string& name, bool value, game::DvarFlags flags)
+	{
+		const auto hash = game::generateHashValue(name.data());
+
+		dvar_list.push_back(name);
+
+		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
 
 	game::dvar_t* register_float(const std::string& name, float value, float min, float max, game::DvarFlags flags)
