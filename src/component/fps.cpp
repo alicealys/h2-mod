@@ -49,56 +49,45 @@ namespace fps
 			return total / history_count;
 		}
 
-		void draw_fps()
+		void draw()
 		{
 			check_resize();
 
-			const auto now = std::chrono::high_resolution_clock::now();
-			const auto frametime = now - lastframe;
-			lastframe = now;
-
-			const int fps = 1000000000 / frametime.count();
-
-			if (index >= history_count)
+			if (cg_drawfps->current.integer >= 1)
 			{
-				index = 0;
+				const auto now = std::chrono::high_resolution_clock::now();
+				const auto frametime = now - lastframe;
+				lastframe = now;
+
+				const int fps = 1000000000 / frametime.count();
+
+				if (index >= history_count)
+				{
+					index = 0;
+				}
+
+				history[index++] = fps;
+
+				const auto fps_string = utils::string::va("%i", average_fps());
+				const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
+
+				game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 35.f, 1.0f, 1.0f, 0.0f,
+					fps >= 60 ? fps_color_good : (fps >= 30 ? fps_color_ok : fps_color_bad), 0);
 			}
 
-			history[index++] = fps;
-
-			const auto fps_string = utils::string::va("%i", average_fps());
-			const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
-
-			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 35.f, 1.0f, 1.0f, 0.0f,
-				fps >= 60 ? fps_color_good : (fps >= 30 ? fps_color_ok : fps_color_bad), 0);
-		}
-
-		void draw_pos()
-		{
-			if (game::CL_IsCgameInitialized() && game::g_entities[0].origin)
+			if (game::CL_IsCgameInitialized() && cg_drawfps->current.integer >= 2)
 			{
-				const auto pos_string = utils::string::va("%f %f %f", 
+				const auto font = fps_font;
+
+				const auto pos_string = utils::string::va("%f %f %f",
 														  game::g_entities[0].origin[0],
 														  game::g_entities[0].origin[1],
 														  game::g_entities[0].origin[2]);
 
-				const auto x = screen_max[0] - 15.f - game::R_TextWidth(pos_string, 0x7FFFFFFF, fps_font);
+				const auto x = screen_max[0] - 15.f - game::R_TextWidth(pos_string, 0x7FFFFFFF, font);
 
-				game::R_AddCmdDrawText(pos_string, 0x7FFFFFFF, fps_font, x, 
+				game::R_AddCmdDrawText(pos_string, 0x7FFFFFFF, font, x,
 					60.f, 1.0f, 1.0f, 0.0f, fps_color_ok, 0);
-			}
-		}
-
-		void draw()
-		{
-			if (cg_drawfps->current.integer >= 1)
-			{
-				draw_fps(); 
-			}
-
-			if (cg_drawfps->current.integer >= 2)
-			{
-				draw_pos();
 			}
 		}
 	}
