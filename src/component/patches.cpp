@@ -2,6 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
+#include "game/dvars.hpp"
 
 #include <utils/hook.hpp>
 
@@ -9,7 +10,15 @@ namespace patches
 {
 	namespace
 	{
+		utils::hook::detour pm_crashland_hook;
 
+		void pm_crashland_stub(void* ps, void* pm)
+		{
+			if (dvars::jump_enableFallDamage->current.enabled)
+			{
+				pm_crashland_hook.invoke<void>(ps, pm);
+			}
+		}
 	}
 
 	class component final : public component_interface
@@ -22,6 +31,13 @@ namespace patches
 
 			// Disable battle net popup
 			utils::hook::set(game::base_address + 0xBE7F83C, true);
+
+			pm_crashland_hook.create(game::base_address + 0x688A20, pm_crashland_stub);
+			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", 1, game::DVAR_FLAG_REPLICATED);
+
+			dvars::jump_enableFallDamage = dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::jump_enableFallDamage = dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::jump_enableFallDamage = dvars::register_int("g_speed", 190, 0, 1000, game::DVAR_FLAG_REPLICATED);
 		}
 	};
 }
