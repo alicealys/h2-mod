@@ -35,9 +35,9 @@ namespace patches
 			pm_crashland_hook.create(game::base_address + 0x688A20, pm_crashland_stub);
 			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", 1, game::DVAR_FLAG_REPLICATED);
 
-			dvars::jump_enableFallDamage = dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
-			dvars::jump_enableFallDamage = dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);
-			dvars::jump_enableFallDamage = dvars::register_int("g_speed", 190, 0, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::register_int("g_speed", 190, 0, 1000, game::DVAR_FLAG_REPLICATED);
 		}
 	};
 }
