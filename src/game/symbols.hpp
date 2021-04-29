@@ -16,7 +16,8 @@ namespace game
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
 		DB_EnumXAssets_Internal{0x4129F0};
-	WEAK symbol<const char* (const XAsset* asset)> DB_GetXAssetName{0x3E4090};
+	WEAK symbol<const char*(const XAsset* asset)> DB_GetXAssetName{0x3E4090};
+	WEAK symbol<void(XZoneInfo* zoneInfo, unsigned int zoneCount, DBSyncMode syncMode)> DB_LoadXAssets{0x414FF0};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x618F90};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x5A75D0};
@@ -39,6 +40,8 @@ namespace game
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x620660};
+
+	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x5F0EE0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x759BA0};
 
@@ -75,6 +78,7 @@ namespace game
 	WEAK symbol<CmdArgs> cmd_args{0xAD17A60};
 
 	WEAK symbol<const char*> g_assetNames{0xBEF280};
+	WEAK symbol<int> g_poolSize{0xBF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
 
