@@ -538,6 +538,23 @@ namespace game
 		unsigned int nextPoolEntry;
 	};
 
+	enum DBSyncMode
+	{
+		DB_LOAD_ASYNC = 0x0,
+		DB_LOAD_SYNC = 0x1,
+		DB_LOAD_ASYNC_WAIT_ALLOC = 0x2,
+		DB_LOAD_ASYNC_FORCE_FREE = 0x3,
+		DB_LOAD_ASYNC_NO_SYNC_THREADS = 0x4,
+		DB_LOAD_SYNC_SKIP_ALWAYS_LOADED = 0x5,
+	};
+
+	struct XZoneInfo
+	{
+		const char* name;
+		int allocFlags;
+		int freeFlags;
+	};
+
 	enum scr_string_t
 	{
 		scr_string_t_dummy = 0x0,
