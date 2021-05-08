@@ -17,6 +17,8 @@ namespace dvars
 
 	game::dvar_t* jump_enableFallDamage;
 
+	game::dvar_t* r_fullbright;
+
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)
