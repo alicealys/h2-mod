@@ -59,6 +59,7 @@ namespace game
 		const float* color, int style, int cursorPos, char cursor)> R_AddCmdDrawTextWithCursor{0x76CAF0};
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x7472A0};
+	WEAK symbol<void()> R_SyncRenderThread{0x76E7D0};
 
 	WEAK symbol<ScreenPlacement* ()> ScrPlace_GetViewPlacement{0x3E16A0};
 
@@ -81,6 +82,8 @@ namespace game
 	WEAK symbol<int> g_poolSize{0xBF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
+
+	WEAK symbol<GfxDrawMethod_s> gfxDrawMethod{0xEDF9E00};
 
 	WEAK symbol<int> keyCatchers{0x203F3C0};
 
