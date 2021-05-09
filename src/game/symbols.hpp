@@ -11,8 +11,12 @@ namespace game
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x59A050};
 
+	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x37F450};
+
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x59A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x59ABA0};
+
+	WEAK symbol<void()> Com_Quit_f{0x5A50D0};
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
 		DB_EnumXAssets_Internal{0x4129F0};
@@ -65,6 +69,8 @@ namespace game
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x5BFBB0};
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x5C0170};
+
+	WEAK symbol<bool()> SV_Loaded{0x6B3860};
 
 	WEAK symbol<void()> Sys_ShowConsole{0x633080};
 

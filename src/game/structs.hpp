@@ -11,6 +11,8 @@ namespace game
 	{
 		char __pad0[0x8C];
 		vec3_t velocity;
+		char __pad1[59504];
+		char flags;
 	};
 
 	struct client_t
@@ -29,7 +31,9 @@ namespace game
 		vec3_t origin;
 		char __pad1[0xF0];
 		gclient_s* client;
-		//char __pad3[480];
+		char __pad2[0x4C];
+		char flags;
+		//char __pad3[392];
 	}; // size = 760
 
 	struct Material
