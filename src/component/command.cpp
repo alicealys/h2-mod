@@ -154,6 +154,8 @@ namespace command
 		{
 			utils::hook::jump(game::base_address + 0x5A74F0, dvar_command_stub, true);
 
+			add("quit", game::Com_Quit_f);
+
 			add("startmap", [](const params& params)
 			{
 				const auto map = params.get(1);
@@ -231,6 +233,60 @@ namespace command
 				}
 
 				printf("======== End command dump =========\n");
+			});
+
+			add("god", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				game::g_entities[0].flags ^= 1;
+				game::CG_GameMessage(0, utils::string::va("godmode %s",
+					game::g_entities[0].flags & 1
+					? "^2on"
+					: "^1off"));
+			});
+
+			add("demigod", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				game::g_entities[0].flags ^= 2;
+				game::CG_GameMessage(0, utils::string::va("demigod mode %s",
+					game::g_entities[0].flags & 2
+					? "^2on"
+					: "^1off"));
+			});
+
+			add("noclip", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				game::g_entities[0].client->flags ^= 1;
+				game::CG_GameMessage(0, utils::string::va("noclip %s",
+					game::g_entities[0].client->flags & 1
+					? "^2on"
+					: "^1off"));
+			});
+
+			add("ufo", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				game::g_entities[0].client->flags ^= 2;
+				game::CG_GameMessage(
+					0, utils::string::va("ufo %s", game::g_entities[0].client->flags & 2 ? "^2on" : "^1off"));
 			});
 		}
 	};
