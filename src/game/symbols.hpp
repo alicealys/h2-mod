@@ -43,6 +43,12 @@ namespace game
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
 
+	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x51B260};
+	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
+		G_GivePlayerWeapon{0x51B660};
+	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x4C4110};
+	WEAK symbol<void(int clientNum, const unsigned int weapon)> G_SelectWeapon{0x51C0D0};
+
 	WEAK symbol<char*(char* string)> I_CleanStr{0x620660};
 
 	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x5F0EE0};
