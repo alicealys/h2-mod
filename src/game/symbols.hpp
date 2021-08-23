@@ -22,6 +22,9 @@ namespace game
 		DB_EnumXAssets_Internal{0x4129F0};
 	WEAK symbol<const char*(const XAsset* asset)> DB_GetXAssetName{0x3E4090};
 	WEAK symbol<void(XZoneInfo* zoneInfo, unsigned int zoneCount, DBSyncMode syncMode)> DB_LoadXAssets{0x414FF0};
+	WEAK symbol<XAssetHeader(XAssetType type, const char* name, int allowCreateDefault)> DB_FindXAssetHeader{0x412F60};
+	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x413D80};
+	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x413C40};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x618F90};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x5A75D0};
@@ -51,6 +54,9 @@ namespace game
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x620660};
 
+	WEAK symbol<char* (GfxImage* image, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipCount, 
+		uint32_t imageFlags, DXGI_FORMAT imageFormat, int a8, const char* name, const void* initData)> Image_Setup{0x74B2A0};
+
 	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x5F0EE0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x759BA0};
@@ -70,6 +76,8 @@ namespace game
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x7472A0};
 	WEAK symbol<void()> R_SyncRenderThread{0x76E7D0};
+	WEAK symbol<void(const void* obj, void* pose, unsigned int entnum, unsigned int renderFxFlags, float* lightingOrigin, 
+		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x775C40};
 
 	WEAK symbol<ScreenPlacement* ()> ScrPlace_GetViewPlacement{0x3E16A0};
 
