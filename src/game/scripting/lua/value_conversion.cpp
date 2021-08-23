@@ -221,6 +221,6 @@ namespace scripting::lua
 			return {state, value.as<vector>()};
 		}
 
-		return {};
+		return {state, sol::lua_nil};
 	}
 }

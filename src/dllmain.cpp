@@ -1,10 +1,9 @@
 #include <stdinc.hpp>
+#include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
 
 #include "component/game_console.hpp"
-
-#include "loader/component_loader.hpp"
 
 #pragma warning(disable:4996)
 
@@ -37,9 +36,9 @@ void init()
     component_loader::post_unpack();
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD reason, LPVOID lpReserved)
 {
-    if (ul_reason_for_call == DLL_PROCESS_ATTACH)
+    if (reason == DLL_PROCESS_ATTACH)
     {
         init();
     }
