@@ -15,6 +15,57 @@ namespace scripting::lua
 {
 	namespace
 	{
+		vector normalize_vector(const vector& vec)
+		{
+			const auto length = sqrt((vec.get_x() * vec.get_x()) + (vec.get_y() * vec.get_y()) + (vec.get_z() * vec.get_z()));
+
+			return vector(
+				vec.get_x() / length,
+				vec.get_y() / length,
+				vec.get_z() / length
+			);
+		}
+
+		vector vector_to_angles(const vector& vec)
+		{
+			const auto x = vec.get_x();
+			const auto y = vec.get_y();
+			const auto z = vec.get_z();
+
+			float yaw = 0.f;
+			float pitch = 0.f;
+
+			if (x != 0.f && y != 0.f)
+			{
+				const auto v9 = atan2f(y, x) * 57.295776;
+				const auto v10 = v9 < 0.f
+					? 360.f
+					: 0.0;
+				
+				yaw = v9 + v10;
+				const auto v11 = sqrtf((x * x) + (y * y));
+				const auto v12 = atan2f(z, v11) * -57.295776;
+
+				const auto v3 = v12 < 0
+					? 360.f
+					: 0.f;
+
+				pitch = v12 + v3;
+			}
+			else
+			{
+				pitch = z < 0.f
+					? 270.f
+					: 90.f;
+			}
+
+			return vector(
+				pitch,
+				yaw,
+				0
+			);
+		}
+
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			state["level"] = entity{*game::levelEntityId};
@@ -27,6 +78,137 @@ namespace scripting::lua
 			vector_type["r"] = sol::property(&vector::get_x, &vector::set_x);
 			vector_type["g"] = sol::property(&vector::get_y, &vector::set_y);
 			vector_type["b"] = sol::property(&vector::get_z, &vector::set_z);
+
+			vector_type[sol::meta_function::addition] = sol::overload(
+				[](const vector& a, const vector& b)
+				{
+					return vector(
+						a.get_x() + b.get_x(),
+						a.get_y() + b.get_y(),
+						a.get_z() + b.get_z()
+					);
+				},
+				[](const vector& a, const int value)
+				{
+					return vector(
+						a.get_x() + value,
+						a.get_y() + value,
+						a.get_z() + value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::subtraction] = sol::overload(
+				[](const vector& a, const vector& b)
+				{
+					return vector(
+						a.get_x() - b.get_x(),
+						a.get_y() - b.get_y(),
+						a.get_z() - b.get_z()
+					);
+				},
+				[](const vector& a, const int value)
+				{
+					return vector(
+						a.get_x() - value,
+						a.get_y() - value,
+						a.get_z() - value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::multiplication] = sol::overload(
+				[](const vector& a, const vector& b)
+				{
+					return vector(
+						a.get_x() * b.get_x(),
+						a.get_y() * b.get_y(),
+						a.get_z() * b.get_z()
+					);
+				},
+				[](const vector& a, const int value)
+				{
+					return vector(
+						a.get_x() * value,
+						a.get_y() * value,
+						a.get_z() * value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::division] = sol::overload(
+				[](const vector& a, const vector& b)
+				{
+					return vector(
+						a.get_x() / b.get_x(),
+						a.get_y() / b.get_y(),
+						a.get_z() / b.get_z()
+					);
+				},
+				[](const vector& a, const int value)
+				{
+					return vector(
+						a.get_x() / value,
+						a.get_y() / value,
+						a.get_z() / value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::equal_to] = [](const vector& a, const vector& b)
+			{
+				const auto normal_a = normalize_vector(a);
+				const auto normal_b = normalize_vector(b);
+
+				return normal_a.get_x() == normal_b.get_x() &&
+					   normal_a.get_y() == normal_b.get_y() &&
+					   normal_a.get_z() == normal_b.get_z();
+			};
+
+			vector_type[sol::meta_function::length] = [](const vector& a)
+			{
+				return sqrt((a.get_x() * a.get_x()) + (a.get_y() * a.get_y()) + (a.get_z() * a.get_z()));
+			};
+
+			vector_type[sol::meta_function::to_string] = [](const vector& a)
+			{
+				return utils::string::va("{x: %f, y: %f, z: %f}", a.get_x(), a.get_y(), a.get_z());
+			};
+
+			vector_type["normalize"] = [](const vector& a)
+			{
+				return normalize_vector(a);
+			};
+
+			vector_type["toangles"] = [](const vector& a)
+			{
+				return call("vectortoangles", {a}).as<vector>();
+			};
+
+			vector_type["toyaw"] = [](const vector& a)
+			{
+				return call("vectortoyaw", {a}).as<vector>();
+			};
+
+			vector_type["tolerp"] = [](const vector& a)
+			{
+				return call("vectortolerp", {a}).as<vector>();
+			};
+
+			vector_type["toup"] = [](const vector& a)
+			{
+				return call("anglestoup", {a}).as<vector>();
+			};
+
+			vector_type["toright"] = [](const vector& a)
+			{
+				return call("anglestoright", {a}).as<vector>();
+			};
+
+			vector_type["toforward"] = [](const vector& a)
+			{
+				return call("anglestoforward", {a}).as<vector>();
+			};
 
 			auto entity_type = state.new_usertype<entity>("entity");
 
