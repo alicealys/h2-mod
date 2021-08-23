@@ -22,6 +22,7 @@
 #include <unordered_set>
 #include <csetjmp>
 #include <deque>
+#include <optional>
 
 #ifdef max
 #undef max

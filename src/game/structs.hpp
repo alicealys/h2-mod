@@ -1,4 +1,5 @@
 #pragma once
+#include <d3d11.h>
 
 namespace game
 {
@@ -20,6 +21,36 @@ namespace game
 		char __pad0[13508];
 	};
 
+	enum $219904913BC1E6DB920C78C8CC0BD8F1
+	{
+		FL_GODMODE = 0x1,
+		FL_DEMI_GODMODE = 0x2,
+		FL_NOTARGET = 0x4,
+		FL_NO_KNOCKBACK = 0x8,
+		FL_NO_RADIUS_DAMAGE = 0x10,
+		FL_SUPPORTS_LINKTO = 0x20,
+		FL_NO_AUTO_ANIM_UPDATE = 0x40,
+		FL_GRENADE_TOUCH_DAMAGE = 0x80,
+		FL_STABLE_MISSILES = 0x100,
+		FL_REPEAT_ANIM_UPDATE = 0x200,
+		FL_VEHICLE_TARGET = 0x400,
+		FL_GROUND_ENT = 0x800,
+		FL_CURSOR_HINT = 0x1000,
+		FL_MISSILE_ATTRACTOR_OR_REPULSOR = 0x2000,
+		FL_WEAPON_BEING_GRABBED = 0x4000,
+		FL_DELETE = 0x8000,
+		FL_BOUNCE = 0x10000,
+		FL_MOVER_SLIDE = 0x20000,
+		FL_MOVING = 0x40000,
+		FL_DONT_AUTOBOLT_MISSILE_EFFECTS = 0x80000,
+		FL_DISABLE_MISSILE_STICK = 0x100000,
+		FL_NO_MELEE_TARGET = 0x2000000,
+		FL_DYNAMICPATH = 0x8000000,
+		FL_AUTO_BLOCKPATHS = 0x10000000,
+		FL_OBSTACLE = 0x20000000,
+		FL_BADPLACE_VOLUME = 0x80000000,
+	};
+
 	struct EntityState
 	{
 		char entityNum;
@@ -33,7 +64,7 @@ namespace game
 		gclient_s* client;
 		char __pad2[0x4C];
 		char flags;
-		//char __pad3[392];
+		char __pad3[392];
 	}; // size = 760
 
 	struct Material
@@ -757,4 +788,66 @@ namespace game
 		int emissiveTechType;
 		int forceTechType;
 	};
+
+	struct GfxImageLoadDef
+	{
+		char levelCount;
+		char numElements;
+		char pad[2];
+		int flags;
+		int format;
+		int resourceSize;
+		char data[1];
+	};
+
+	union $3FA29451CE6F1FA138A5ABAB84BE9676
+	{
+		ID3D11Texture1D* linemap;
+		ID3D11Texture2D* map;
+		ID3D11Texture3D* volmap;
+		ID3D11Texture2D* cubemap;
+		GfxImageLoadDef* loadDef;
+	};
+
+	struct GfxTexture
+	{
+		$3FA29451CE6F1FA138A5ABAB84BE9676 ___u0;
+		ID3D11ShaderResourceView* shaderView;
+		ID3D11ShaderResourceView* shaderViewAlternate;
+	};
+
+	struct Picmip
+	{
+		char platform[2];
+	};
+
+	struct CardMemory
+	{
+		int platform[2];
+	};
+
+	struct GfxImage
+	{
+		GfxTexture textures;
+		int flags;
+		int imageFormat;
+		int resourceSize;
+		char mapType;
+		char semantic;
+		char category;
+		char flags2;
+		Picmip picmip;
+		char track;
+		//CardMemory cardMemory;
+		unsigned short width;
+		unsigned short height;
+		unsigned short depth;
+		unsigned short numElements;
+		char pad3[4];
+		void* pixelData;
+		//GfxImageLoadDef *loadDef;
+		uint64_t streams[4];
+		const char* name;
+	};
+
 }
