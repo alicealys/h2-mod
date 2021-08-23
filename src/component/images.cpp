@@ -18,14 +18,6 @@ namespace images
 		utils::hook::detour setup_texture_hook;
 		utils::concurrency::container<std::unordered_map<std::string, std::string>> overriden_textures;
 
-		static_assert(sizeof(game::GfxImage) == 104);
-		static_assert(offsetof(game::GfxImage, name) == (sizeof(game::GfxImage) - sizeof(void*)));
-		static_assert(offsetof(game::GfxImage, pixelData) == 56);
-		static_assert(offsetof(game::GfxImage, width) == 44);
-		static_assert(offsetof(game::GfxImage, height) == 46);
-		static_assert(offsetof(game::GfxImage, depth) == 48);
-		static_assert(offsetof(game::GfxImage, numElements) == 50);
-
 		std::optional<std::string> load_image(game::GfxImage* image)
 		{
 			std::string data{};
@@ -78,21 +70,12 @@ namespace images
 			return true;
 		}
 
-		std::unordered_map<std::string, bool> image_list;
-
 		void load_texture_stub(game::GfxImage* image, void* a2, int* a3)
 		{
-			if (image_list.find(image->name) == image_list.end())
-			{
-				//printf("Loading: %s\n", image->name);
-				image_list[image->name] = true;
-			}
-
 			try
 			{
 				if (load_custom_texture(image))
 				{
-					printf("Loaded custom image for: %s\n", image->name);
 					return;
 				}
 			}
