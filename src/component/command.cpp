@@ -242,9 +242,9 @@ namespace command
 					return;
 				}
 
-				game::g_entities[0].flags ^= 1;
+				game::g_entities[0].flags ^= game::FL_GODMODE;
 				game::CG_GameMessage(0, utils::string::va("godmode %s",
-					game::g_entities[0].flags & 1
+					game::g_entities[0].flags & game::FL_GODMODE
 					? "^2on"
 					: "^1off"));
 			});
@@ -256,9 +256,23 @@ namespace command
 					return;
 				}
 
-				game::g_entities[0].flags ^= 2;
+				game::g_entities[0].flags ^= game::FL_DEMI_GODMODE;
 				game::CG_GameMessage(0, utils::string::va("demigod mode %s",
-					game::g_entities[0].flags & 2
+					game::g_entities[0].flags & game::FL_DEMI_GODMODE
+					? "^2on"
+					: "^1off"));
+			});
+
+			add("notarget", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				game::g_entities[0].flags ^= game::FL_NOTARGET;
+				game::CG_GameMessage(0, utils::string::va("notarget %s",
+					game::g_entities[0].flags & game::FL_NOTARGET
 					? "^2on"
 					: "^1off"));
 			});
