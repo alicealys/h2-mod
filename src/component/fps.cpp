@@ -169,7 +169,7 @@ namespace fps
 		void post_unpack() override
 		{
 			cg_drawspeed = dvars::register_int("cg_drawSpeed", 0, 0, 2, game::DVAR_FLAG_SAVED);
-			cg_drawfps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED);
+			cg_drawfps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED, false);
 
 			scheduler::loop(draw, scheduler::pipeline::renderer);
 		}
