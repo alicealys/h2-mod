@@ -38,6 +38,27 @@ namespace patches
 			dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
 			dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);
 			dvars::register_int("g_speed", 190, 0, 1000, game::DVAR_FLAG_REPLICATED);
+
+			dvars::register_bool("sf_use_martyr_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_precision_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_greenberet_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_slowmo", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_fortitude_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_desperation_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_polterghost_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_wolf_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_attraction_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_starvation_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_ignoreammo", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_pineapple_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_football_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_tire_explosion", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_clustergrenade", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_pomegrenade_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_pinata_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_chaplin", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_edge_mode", false, game::DVAR_FLAG_NONE);
+			dvars::register_bool("sf_use_bw", false, game::DVAR_FLAG_NONE);
 		}
 	};
 }

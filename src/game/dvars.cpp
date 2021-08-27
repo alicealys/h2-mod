@@ -18,6 +18,7 @@ namespace dvars
 	game::dvar_t* jump_enableFallDamage;
 
 	game::dvar_t* r_fullbright;
+	game::dvar_t* r_chams;
 
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
@@ -1158,38 +1159,54 @@ namespace dvars
 		"xblive_privatematch_solo"
 	};
 
-	game::dvar_t* register_int(const std::string& name, int value, int min, int max, game::DvarFlags flags)
+	game::dvar_t* register_int(const std::string& name, int value, int min, int max, 
+		game::DvarFlags flags, bool add_to_list)
 	{
 		const auto hash = game::generateHashValue(name.data());
 
-		dvar_list.push_back(name);
+		if (add_to_list)
+		{
+			dvar_list.push_back(name);
+		}
 
 		return game::Dvar_RegisterInt(hash, "", value, min, max, flags);
 	}
 
-	game::dvar_t* register_bool(const std::string& name, bool value, game::DvarFlags flags)
+	game::dvar_t* register_bool(const std::string& name, bool value, 
+		game::DvarFlags flags, bool add_to_list)
 	{
 		const auto hash = game::generateHashValue(name.data());
 
-		dvar_list.push_back(name);
+		if (add_to_list)
+		{
+			dvar_list.push_back(name);
+		}
 
 		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
 
-	game::dvar_t* register_float(const std::string& name, float value, float min, float max, game::DvarFlags flags)
+	game::dvar_t* register_float(const std::string& name, float value, float min, 
+		float max, game::DvarFlags flags, bool add_to_list)
 	{
 		const auto hash = game::generateHashValue(name.data());
 
-		dvar_list.push_back(name);
+		if (add_to_list)
+		{
+			dvar_list.push_back(name);
+		}
 
 		return game::Dvar_RegisterFloat(hash, "", value, min, max, flags);
 	}
 
-	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z, float w, float min, float max, game::DvarFlags flags)
+	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z, 
+		float w, float min, float max, game::DvarFlags flags, bool add_to_list)
 	{
 		const auto hash = game::generateHashValue(name.data());
 
-		dvar_list.push_back(name);
+		if (add_to_list)
+		{
+			dvar_list.push_back(name);
+		}
 
 		return game::Dvar_RegisterVec4(hash, "", x, y, z, w, min, max, flags);
 	}
