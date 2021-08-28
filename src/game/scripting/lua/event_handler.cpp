@@ -3,6 +3,8 @@
 #include "error.hpp"
 #include "value_conversion.hpp"
 
+#include "event_handler.hpp"
+
 namespace scripting::lua
 {
 	event_handler::event_handler(sol::state& state)
@@ -14,26 +16,22 @@ namespace scripting::lua
 		{
 			this->remove(handle);
 		};
+
+		event_listener_handle_type["endon"] = [this](const event_listener_handle& handle, const entity& entity, const std::string& event)
+		{
+			this->add_endon_condition(handle, entity, event);
+		};
 	}
 
 	void event_handler::dispatch(const event& event)
 	{
-		std::vector<sol::lua_value> arguments;
+		bool has_built_arguments = false;
+		event_arguments arguments{};
 
-		for (const auto& argument : event.arguments)
-		{
-			arguments.emplace_back(convert(this->state_, argument));
-		}
-
-		this->dispatch_to_specific_listeners(event, arguments);
-	}
-
-	void event_handler::dispatch_to_specific_listeners(const event& event,
-	                                                   const event_arguments& arguments)
-	{
 		callbacks_.access([&](task_list& tasks)
 		{
 			this->merge_callbacks();
+			this->handle_endon_conditions(event);
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
@@ -72,6 +70,27 @@ namespace scripting::lua
 		});
 
 		return {id};
+	}
+
+	void event_handler::add_endon_condition(const event_listener_handle& handle, const entity& entity,
+		const std::string& event)
+	{
+		auto merger = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				if (task.id == handle.id)
+				{
+					task.endon_conditions.emplace_back(entity, event);
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+				merger(tasks);
+				new_callbacks_.access(merger);
+		});
 	}
 
 	void event_handler::clear()
@@ -115,5 +134,37 @@ namespace scripting::lua
 				new_tasks = {};
 			});
 		});
+	}
+
+	void event_handler::handle_endon_conditions(const event& event)
+	{
+		auto deleter = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				for (auto& condition : task.endon_conditions)
+				{
+					if (condition.first == event.entity && condition.second == event.name)
+					{
+						task.is_deleted = true;
+						break;
+					}
+				}
+			}
+		};
+
+		callbacks_.access(deleter);
+	}
+
+	event_arguments event_handler::build_arguments(const event& event) const
+	{
+		event_arguments arguments;
+
+		for (const auto& argument : event.arguments)
+		{
+			arguments.emplace_back(convert(this->state_, argument));
+		}
+
+		return arguments;
 	}
 }
