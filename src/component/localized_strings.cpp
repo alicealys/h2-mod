@@ -19,7 +19,7 @@ namespace localized_strings
 
 		const char* seh_string_ed_get_string(const char* reference)
 		{
-			game_console::print(game_console::con_type_info, "Loading string %s\n", reference);
+			//game_console::print(game_console::con_type_info, "Loading string %s\n", reference);
 			return localized_overrides.access<const char*>([&](const localized_map& map)
 			{
 				const auto entry = map.find(reference);
