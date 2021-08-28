@@ -93,7 +93,7 @@ namespace scripting::lua
 
 				if (values.find(key) == values.end())
 				{
-					return sol::lua_value{};
+					return sol::lua_value{s, sol::lua_nil};
 				}
 
 				return convert(s, values.at(key).value);
