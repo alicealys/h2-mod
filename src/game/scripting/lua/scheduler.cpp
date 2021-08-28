@@ -12,6 +12,35 @@ namespace scripting::lua
 		{
 			this->remove(handle);
 		};
+
+		task_handle_type["endon"] = [this](const task_handle& handle, const entity& entity, const std::string& event)
+		{
+			this->add_endon_condition(handle, entity, event);
+		};
+	}
+
+	void scheduler::dispatch(const event& event)
+	{
+		auto deleter = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				for (auto& condition : task.endon_conditions)
+				{
+					if (condition.first == event.entity && condition.second == event.name)
+					{
+						task.is_deleted = true;
+						break;
+					}
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+			deleter(tasks);
+			new_callbacks_.access(deleter);
+		});
 	}
 
 	void scheduler::run_frame()
@@ -87,6 +116,26 @@ namespace scripting::lua
 		});
 
 		return {id};
+	}
+
+	void scheduler::add_endon_condition(const task_handle& handle, const entity& entity, const std::string& event)
+	{
+		auto merger = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				if (task.id == handle.id)
+				{
+					task.endon_conditions.emplace_back(entity, event);
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+			merger(tasks);
+			new_callbacks_.access(merger);
+		});
 	}
 
 	void scheduler::remove(const task_handle& handle)
