@@ -417,6 +417,7 @@ namespace scripting::lua
 
 	void context::notify(const event& e)
 	{
+		this->scheduler_.dispatch(e);
 		this->event_handler_.dispatch(e);
 	}
 

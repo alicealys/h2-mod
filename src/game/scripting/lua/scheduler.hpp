@@ -19,6 +19,7 @@ namespace scripting::lua
 		std::chrono::milliseconds delay{};
 		bool is_volatile = false;
 		bool is_deleted = false;
+		std::vector<std::pair<entity, std::string>> endon_conditions{};
 	};
 
 	class scheduler final
@@ -32,6 +33,7 @@ namespace scripting::lua
 		scheduler(const scheduler&) = delete;
 		scheduler& operator=(const scheduler&) = delete;
 
+		void dispatch(const event& event);
 		void run_frame();
 		void clear();
 
@@ -43,6 +45,8 @@ namespace scripting::lua
 		utils::concurrency::container<task_list> new_callbacks_;
 		utils::concurrency::container<task_list, std::recursive_mutex> callbacks_;
 		std::atomic_int64_t current_task_id_ = 0;
+
+		void add_endon_condition(const task_handle& handle, const entity& entity, const std::string& event);
 
 		void remove(const task_handle& handle);
 		void merge_callbacks();

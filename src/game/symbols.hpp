@@ -12,6 +12,7 @@ namespace game
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x59A050};
 
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x37F450};
+	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x37F1B0};
 
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x59A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x59ABA0};
