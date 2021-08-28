@@ -289,18 +289,6 @@ namespace scripting::lua
 				return convert(s, entity.call(function, arguments));
 			};
 
-			entity_type["iprintln"] = [](const entity& entity, const std::string& string)
-			{
-				const std::string msg = string;
-				game::CG_GameMessage(0, msg.c_str());
-			};
-
-			entity_type["iprintlnbold"] = [](const entity& entity, const std::string& string)
-			{
-				const std::string msg = string;
-				game::CG_GameMessageBold(0, msg.c_str());
-			};
-
 			entity_type[sol::meta_function::new_index] = [](const entity& entity, const std::string& field,
 															const sol::lua_value& value)
 			{
