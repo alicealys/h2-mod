@@ -8,6 +8,8 @@
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
 
+#include "game_console.hpp"
+
 namespace branding
 {
 	class component final : public component_interface
@@ -29,8 +31,14 @@ namespace branding
 
 				if (!font) return;
 
-				game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, static_cast<float>(x),
-				                       y + static_cast<float>(font->pixelHeight) * scale,
+				game::screen screen;
+
+				// need to make it adjust per res
+				screen.width = *(int*)(game::base_address + 0x1EB392C);
+				screen.height = *(int*)(game::base_address + 0x1EB3930);
+
+				game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, (static_cast<float>(x)),
+				                       ((y + static_cast<float>(font->pixelHeight) * scale)),
 				                       scale, scale, 0.0f, color, 0);
 			}, scheduler::pipeline::renderer);
 		}

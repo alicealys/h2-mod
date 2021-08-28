@@ -850,4 +850,8 @@ namespace game
 		const char* name;
 	};
 
+	struct screen {
+		int width;
+		int height;
+	};
 }
