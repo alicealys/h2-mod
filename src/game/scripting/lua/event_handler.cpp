@@ -43,6 +43,12 @@ namespace scripting::lua
 
 				if (!i->is_deleted)
 				{
+					if (!has_built_arguments)
+					{
+						has_built_arguments = true;
+						arguments = this->build_arguments(event);
+					}
+
 					handle_error(i->callback(sol::as_args(arguments)));
 				}
 
