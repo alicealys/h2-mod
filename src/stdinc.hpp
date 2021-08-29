@@ -23,6 +23,7 @@
 #include <csetjmp>
 #include <deque>
 #include <optional>
+#include <map>
 
 #ifdef max
 #undef max

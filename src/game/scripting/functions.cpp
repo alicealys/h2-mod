@@ -71,6 +71,18 @@ namespace scripting
 		}
 	}
 
+	unsigned int find_token_id(const std::string& name)
+	{
+		const auto result = token_map.find(name);
+
+		if (result != token_map.end())
+		{
+			return result->second;
+		}
+
+		return 0;
+	}
+
 	script_function find_function(const std::string& name, const bool prefer_global)
 	{
 		const auto index = find_function_index(name, prefer_global);

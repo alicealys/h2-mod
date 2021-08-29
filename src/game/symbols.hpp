@@ -7,7 +7,10 @@ namespace game
 	// Functions
 	
 	WEAK symbol<void(int type, VariableUnion u)> AddRefToValue{0x5C0EB0};
+	WEAK symbol<void(unsigned int id)> AddRefToObject{0x5C0EA0};
+	WEAK symbol<unsigned int(unsigned int id)> AllocThread{0x5C1200};
 	WEAK symbol<void(int type, VariableUnion u)> RemoveRefToValue{0x5C29B0};
+	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0x5C28A0};
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x59A050};
 
@@ -44,6 +47,7 @@ namespace game
 
 	WEAK symbol<bool()> CL_IsCgameInitialized{0x3CA0C0};
 
+	WEAK symbol<unsigned int (unsigned int parentId, unsigned int name)> FindVariable{0x5C1D50};
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
 
@@ -68,6 +72,8 @@ namespace game
 	WEAK symbol<scr_entref_t(unsigned int entId)> Scr_GetEntityIdRef{0x5C56C0};
 	WEAK symbol<int(unsigned int classnum, int entnum, int offset)> Scr_SetObjectField{0x512190};
 	WEAK symbol<void(unsigned int id, scr_string_t stringValue, unsigned int paramcount)> Scr_NotifyId{0x5C8240};
+
+	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x5C8DB0};
 
 	WEAK symbol<void(float x, float y, float width, float height, float s0, float t0, float s1, float t1,
 					 float* color, Material* material)> R_AddCmdDrawStretchPic{0x3C9710};
