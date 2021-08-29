@@ -1,5 +1,7 @@
 #include <stdinc.hpp>
 #include "value_conversion.hpp"
+#include "../functions.hpp"
+#include "../execution.hpp"
 
 namespace scripting::lua
 {
@@ -18,7 +20,7 @@ namespace scripting::lua
 
 			std::unordered_map<std::string, array_value> values;
 
-			const auto offset = 40960 * (id & 3);
+			const auto offset = 0xA000 * (id & 3);
 
 			auto current = game::scr_VarGlob->objectVariableChildren[id].firstChild;
 			auto idx = 1;
@@ -137,6 +139,89 @@ namespace scripting::lua
 
 			return script_value(variable);
 		}
+
+		sol::lua_value convert_function(lua_State* state, const char* pos)
+		{
+			return [pos](const entity& entity, const sol::this_state s, sol::variadic_args va)
+			{
+				std::vector<script_value> arguments{};
+
+				for (auto arg : va)
+				{
+					arguments.push_back(convert({s, arg}));
+				}
+
+				return convert(s, scripting::exec_ent_thread(entity, pos, arguments));
+			};
+		}
+	}
+
+	sol::lua_value entity_to_struct(lua_State* state, unsigned int parent_id)
+	{
+		auto table = sol::table::create(state);
+		auto metatable = sol::table::create(state);
+
+		const auto offset = 0xA000 * (parent_id & 3);
+
+		metatable[sol::meta_function::new_index] = [offset, parent_id](const sol::table t, const sol::this_state s,
+			const sol::lua_value& field, const sol::lua_value& value)
+		{
+			const auto id = field.is<std::string>()
+				? scripting::find_token_id(field.as<std::string>())
+				: field.as<int>();
+
+			if (!id)
+			{
+				return;
+			}
+
+			const auto variable_id = game::FindVariable(parent_id, id);
+			if (!variable_id)
+			{
+				return;
+			}
+
+			const auto variable = &game::scr_VarGlob->childVariableValue[variable_id + offset];
+
+			const auto new_variable = convert({ s, value }).get_raw();
+
+			game::AddRefToValue(new_variable.type, new_variable.u);
+			game::RemoveRefToValue(variable->type, variable->u.u);
+
+			variable->type = (char)new_variable.type;
+			variable->u.u = new_variable.u;
+		};
+
+		metatable[sol::meta_function::index] = [offset, parent_id](const sol::table t, const sol::this_state s,
+			const sol::lua_value& field)
+		{
+			const auto id = field.is<std::string>()
+				? scripting::find_token_id(field.as<std::string>())
+				: field.as<int>();
+
+			if (!id)
+			{
+				return sol::lua_value{s, sol::lua_nil};
+			}
+
+			const auto variable_id = game::FindVariable(parent_id, id);
+			if (!variable_id)
+			{
+				return sol::lua_value{s, sol::lua_nil};
+			}
+
+			const auto variable = game::scr_VarGlob->childVariableValue[variable_id + offset];
+
+			game::VariableValue result{};
+			result.u = variable.u.u;
+			result.type = (game::scriptType_e)variable.type;
+
+			return convert(s, result);
+		};
+
+		table[sol::metatable_key] = metatable;
+
+		return {state, table};
 	}
 
 	script_value convert(const sol::lua_value& value)
@@ -206,9 +291,19 @@ namespace scripting::lua
 			return {state, value.as<std::string>()};
 		}
 		
+		if (value.is<std::map<std::string, script_value>>())
+		{
+			return entity_to_struct(state, value.get_raw().u.uintValue);
+		}
+
 		if (value.is<std::vector<script_value>>())
 		{
 			return entity_to_array(state, value.get_raw().u.uintValue);
+		}
+
+		if (value.is<std::function<void()>>())
+		{
+			return convert_function(state, value.get_raw().u.codePosValue);
 		}
 
 		if (value.is<entity>())

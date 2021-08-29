@@ -611,7 +611,9 @@ namespace game
 		SCRIPT_FLOAT = 5,
 		SCRIPT_INTEGER = 6,
 		SCRIPT_END = 8,
-		SCRIPT_ARRAY = 22
+		SCRIPT_FUNCTION = 9,
+		SCRIPT_STRUCT = 19,
+		SCRIPT_ARRAY = 22,
 	};
 
 	struct VariableStackBuffer
