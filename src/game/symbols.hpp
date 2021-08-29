@@ -59,6 +59,7 @@ namespace game
 		uint32_t imageFlags, DXGI_FORMAT imageFormat, int a8, const char* name, const void* initData)> Image_Setup{0x74B2A0};
 
 	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x5F0EE0};
+	WEAK symbol<bool(int clientNum, const char* menu)> Menu_IsMenuOpenAndVisible{0x5EE1A0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x759BA0};
 
