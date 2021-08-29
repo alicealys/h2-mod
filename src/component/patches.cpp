@@ -1,6 +1,8 @@
 #include <stdinc.hpp>
 #include "loader/component_loader.hpp"
 
+#include "scheduler.hpp"
+
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
@@ -31,6 +33,14 @@ namespace patches
 
 			// Disable battle net popup
 			utils::hook::set(game::base_address + 0xBE7F83C, true);
+
+			scheduler::once([]()
+			{
+				if (game::Menu_IsMenuOpenAndVisible(0, "bnet_error_popup"))
+				{
+					game::LUI_OpenMenu(0, "", 1, 0, 0);
+				}
+			}, scheduler::pipeline::main);
 
 			pm_crashland_hook.create(game::base_address + 0x688A20, pm_crashland_stub);
 			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", 1, game::DVAR_FLAG_REPLICATED);
