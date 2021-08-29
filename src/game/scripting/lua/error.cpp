@@ -24,14 +24,20 @@ namespace scripting::lua
 	{
 		if (!result.valid())
 		{
-			game_console::print(game_console::con_type_error, "************** Script execution error **************\n");
+			try
+			{
+				game_console::print(game_console::con_type_error, "************** Script execution error **************\n");
 
-			const sol::error err = result;
-			game_console::print(game_console::con_type_error, "%s\n", err.what());
+				const sol::error err = result;
+				game_console::print(game_console::con_type_error, "%s\n", err.what());
 
-			game_console::print(game_console::con_type_error, "****************************************************\n");
+				game_console::print(game_console::con_type_error, "****************************************************\n");
 
-			notify_error();
+				notify_error();
+			}
+			catch (...)
+			{
+			}
 		}
 	}
 }
