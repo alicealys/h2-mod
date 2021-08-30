@@ -443,6 +443,71 @@ namespace scripting::lua
 
 				return functions;
 			};
+
+			game_type["include"] = [](const game&, const sol::this_state s,
+				const std::string& filename)
+			{
+				sol::state_view state = s;
+
+				if (scripting::script_function_table.find(filename) == scripting::script_function_table.end())
+				{
+					throw std::runtime_error("File '" + filename + "' not found");
+				}
+
+				for (const auto& function : scripting::script_function_table[filename])
+				{
+					const auto name = utils::string::to_lower(function.first);
+
+					state["game_"][name] = [filename, function](const game&, const sol::this_state s,
+						sol::variadic_args va)
+					{
+						std::vector<script_value> arguments{};
+
+						for (auto arg : va)
+						{
+							arguments.push_back(convert({ s, arg }));
+						}
+
+						notifies::hook_enabled = false;
+						const auto result = convert(s, call_script_function(*::game::levelEntityId, filename, function.first, arguments));
+						notifies::hook_enabled = true;
+					};
+
+					state["entity"][name] = [filename, function](const entity& entity, const sol::this_state s,
+						sol::variadic_args va)
+					{
+						std::vector<script_value> arguments{};
+
+						for (auto arg : va)
+						{
+							arguments.push_back(convert({ s, arg }));
+						}
+
+						notifies::hook_enabled = false;
+						const auto result = convert(s, call_script_function(entity, filename, function.first, arguments));
+						notifies::hook_enabled = true;
+					};
+				}
+			};
+
+			game_type["scriptcall"] = [](const game&, const sol::this_state s, const std::string& filename,
+				const std::string function, sol::variadic_args va)
+			{
+				std::vector<script_value> arguments{};
+
+				for (auto arg : va)
+				{
+					arguments.push_back(convert({ s, arg }));
+				}
+
+				const auto level = entity{*::game::levelEntityId};
+
+				notifies::hook_enabled = false;
+				const auto result = convert(s, call_script_function(level, filename, function, arguments));
+				notifies::hook_enabled = true;
+
+				return result;
+			};
 		}
 	}
 
