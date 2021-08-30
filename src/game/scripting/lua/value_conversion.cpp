@@ -2,6 +2,7 @@
 #include "value_conversion.hpp"
 #include "../functions.hpp"
 #include "../execution.hpp"
+#include ".../../component/notifies.hpp"
 
 namespace scripting::lua
 {
@@ -138,6 +139,20 @@ namespace scripting::lua
 			});
 
 			return script_value(variable);
+		}
+
+		game::VariableValue convert_function(sol::lua_value value)
+		{
+			const auto function = value.as<sol::protected_function>();
+			const auto index = (char*)notifies::vm_execute_hooks.size() + 1;
+
+			notifies::vm_execute_hooks[index] = function;
+
+			game::VariableValue func;
+			func.type = game::SCRIPT_FUNCTION;
+			func.u.codePosValue = index;
+
+			return func;
 		}
 
 		sol::lua_value convert_function(lua_State* state, const char* pos)

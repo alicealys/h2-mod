@@ -4,9 +4,10 @@
 #include "game/game.hpp"
 
 #include "scheduler.hpp"
+#include "scripting.hpp"
 
 #include "game/scripting/event.hpp"
-#include "game/scripting/execution.hpp"
+#include "game/scripting/functions.hpp"
 #include "game/scripting/lua/engine.hpp"
 
 #include <utils/hook.hpp>
@@ -14,6 +15,7 @@
 namespace scripting
 {
 	std::unordered_map<int, std::unordered_map<std::string, int>> fields_table;
+	std::unordered_map<std::string, std::unordered_map<std::string, const char*>> script_function_table;
 
 	namespace
 	{
@@ -23,6 +25,11 @@ namespace scripting
 		utils::hook::detour g_shutdown_game_hook;
 
 		utils::hook::detour scr_add_class_field_hook;
+
+		utils::hook::detour scr_set_thread_position_hook;
+		utils::hook::detour process_script_hook;
+
+		std::string current_file;
 
 		bool running = false;
 
@@ -78,6 +85,28 @@ namespace scripting
 
 			scr_add_class_field_hook.invoke<void>(classnum, _name, canonicalString, offset);
 		}
+
+		void process_script_stub(const char* filename)
+		{
+			current_file = filename;
+
+			const auto file_id = atoi(filename);
+			if (file_id)
+			{
+				current_file = scripting::find_token(file_id);
+			}
+
+			process_script_hook.invoke<void>(filename);
+		}
+
+		void scr_set_thread_position_stub(unsigned int threadName, const char* codePos)
+		{
+			const auto function_name = scripting::find_token(threadName);
+
+			script_function_table[current_file][function_name] = codePos;
+
+			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
+		}
 	}
 
 	class component final : public component_interface
@@ -91,6 +120,8 @@ namespace scripting
 			g_shutdown_game_hook.create(game::base_address + 0x4CBAD0, g_shutdown_game_stub);
 
 			scr_add_class_field_hook.create(game::base_address + 0x5C2C30, scr_add_class_field_stub);
+			scr_set_thread_position_hook.create(game::base_address + 0x5BC7E0, scr_set_thread_position_stub);
+			process_script_hook.create(game::base_address + 0x5C6160, process_script_stub);
 
 			scheduler::loop([]()
 			{
