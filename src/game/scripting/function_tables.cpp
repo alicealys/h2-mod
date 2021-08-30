@@ -12,10 +12,10 @@ namespace scripting
         {"nullsub_428", 0x3},
         {"sub_502950", 0x4},
         {"sub_504f40", 0x5},
-        {"meleeapplyinitialvelocity", 0x6},
-        {"sub_508680", 0x7},
-        {"sub_5086a0", 0x8},
-        {"sub_5087a0", 0x9},
+        {"setphysicsgravitydir", 0x6},
+        {"gettimescale", 0x7},
+        {"settimescale", 0x8},
+        {"setslowmotionview", 0x9},
         {"sub_5086c0", 0xA},
         {"sub_5085a0", 0xB},
         {"sub_504fd0", 0xC},
@@ -125,11 +125,11 @@ namespace scripting
         {"setblur", 0x76},
         {"musicplay", 0x77},
         {"musicstop", 0x78},
-        {"sub_507890", 0x79},
-        {"setteammode", 0x7A},
-        {"sub_4f6990", 0x7B},
-        {"sub_4f6a20", 0x7C},
-        {"sub_4f6c90", 0x7D},
+        {"soundfade", 0x79},
+        {"soundsettimescalefactor", 0x7A},
+        {"soundresettimescale", 0x7B},
+        {"setocclusionpreset", 0x7C},
+        {"levelsoundfade", 0x7D},
         {"sub_4f6da0", 0x7E},
         {"sub_4f6dd0", 0x7F},
         {"sub_507a70", 0x80},
@@ -223,8 +223,8 @@ namespace scripting
         {"sub_504c60", 0xDB},
         {"sub_505030", 0xDC},
         {"sub_5050a0", 0xDD},
-        {"sub_505360", 0xDE},
-        {"sub_505520", 0xDF},
+        {"getaiarray", 0xDE},
+        {"getaispeciesarray", 0xDF},
         {"getspawnerarray", 0xE0},
         {"getcorpsearray", 0xE1},
         {"getspawnerteamarray", 0xE2},
@@ -874,12 +874,12 @@ namespace scripting
         {"allowprone", 0x8123},
         {"allowlean", 0x8124},
         {"allowswim", 0x8125},
-        {"sub_4bb590", 0x8126},
-        {"sub_4bb320", 0x8128},
-        {"sub_4bb3a0", 0x8129},
-        {"sub_4bb730", 0x812A},
-        {"sub_4bb780", 0x812F},
-        {"sub_4bb3c0", 0x8130},
+        {"setocclusion", 0x8126},
+        {"deactivateocclusion", 0x8128},
+        {"deactivateallocclusion", 0x8129},
+        {"isocclusionenabled", 0x812A},
+        {"setreverbfromtable", 0x812F},
+        {"setvolmodfromtable", 0x8130},
         {"sub_4bb7d0", 0x8131},
         {"sub_4bb930", 0x8132},
         {"sub_4bb240", 0x8133},
@@ -1772,7 +1772,13 @@ namespace scripting
 
     std::unordered_map<std::string, unsigned> token_map =
     {
+        {"main", 616},
         {"player", 794},
         {"default_start", 10126},
+    };
+
+    std::unordered_map<unsigned, std::string> file_list =
+    {
+
     };
 }

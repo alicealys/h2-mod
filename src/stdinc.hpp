@@ -24,6 +24,7 @@
 #include <deque>
 #include <optional>
 #include <map>
+#include <stdexcept>
 
 #ifdef max
 #undef max
@@ -35,5 +36,8 @@
 
 #include <MinHook.h>
 #include <gsl/gsl>
+
+#include <asmjit/core/jitruntime.h>
+#include <asmjit/x86/x86assembler.h>
 
 using namespace std::literals;

@@ -25,6 +25,76 @@ namespace utils::hook
 		} __;
 	}
 
+	void assembler::pushad64()
+	{
+		this->push(rax);
+		this->push(rcx);
+		this->push(rdx);
+		this->push(rbx);
+		this->push(rsp);
+		this->push(rbp);
+		this->push(rsi);
+		this->push(rdi);
+
+		this->sub(rsp, 0x40);
+	}
+
+	void assembler::popad64()
+	{
+		this->add(rsp, 0x40);
+
+		this->pop(rdi);
+		this->pop(rsi);
+		this->pop(rbp);
+		this->pop(rsp);
+		this->pop(rbx);
+		this->pop(rdx);
+		this->pop(rcx);
+		this->pop(rax);
+	}
+
+	void assembler::prepare_stack_for_call()
+	{
+		const auto reserve_callee_space = this->newLabel();
+		const auto stack_unaligned = this->newLabel();
+
+		this->test(rsp, 0xF);
+		this->jnz(stack_unaligned);
+
+		this->sub(rsp, 0x8);
+		this->push(rsp);
+
+		this->push(rax);
+		this->mov(rax, ptr(rsp, 8, 8));
+		this->add(rax, 0x8);
+		this->mov(ptr(rsp, 8, 8), rax);
+		this->pop(rax);
+
+		this->jmp(reserve_callee_space);
+
+		this->bind(stack_unaligned);
+		this->push(rsp);
+
+		this->bind(reserve_callee_space);
+		this->sub(rsp, 0x40);
+	}
+
+	void assembler::restore_stack_after_call()
+	{
+		this->lea(rsp, ptr(rsp, 0x40));
+		this->pop(rsp);
+	}
+
+	asmjit::Error assembler::call(void* target)
+	{
+		return Assembler::call(size_t(target));
+	}
+
+	asmjit::Error assembler::jmp(void* target)
+	{
+		return Assembler::jmp(size_t(target));
+	}
+
 	detour::detour(const size_t place, void* target) : detour(reinterpret_cast<void*>(place), target)
 	{
 	}
@@ -115,7 +185,7 @@ namespace utils::hook
 		copy(reinterpret_cast<void*>(place), data, length);
 	}
 
-	bool is_relatively_far(const void* pointer, const void* data, int offset)
+	bool is_relatively_far(const void* pointer, const void* data, const int offset)
 	{
 		const int64_t diff = size_t(data) - (size_t(pointer) + offset);
 		const auto small_diff = int32_t(diff);
@@ -177,5 +247,48 @@ namespace utils::hook
 	void jump(const size_t pointer, const size_t data, const bool use_far)
 	{
 		return jump(pointer, reinterpret_cast<void*>(data), use_far);
+	}
+
+	void* assemble(const std::function<void(assembler&)>& asm_function)
+	{
+		static asmjit::JitRuntime runtime;
+
+		asmjit::CodeHolder code;
+		code.init(runtime.environment());
+
+		assembler a(&code);
+
+		asm_function(a);
+
+		void* result = nullptr;
+		runtime.add(&result, &code);
+
+		return result;
+	}
+
+	void inject(void* pointer, const void* data)
+	{
+		if (is_relatively_far(pointer, data, 4))
+		{
+			throw std::runtime_error("Too far away to create 32bit relative branch");
+		}
+
+		set<int32_t>(pointer, int32_t(size_t(data) - (size_t(pointer) + 4)));
+	}
+
+	void inject(const size_t pointer, const void* data)
+	{
+		return inject(reinterpret_cast<void*>(pointer), data);
+	}
+
+	void* follow_branch(void* address)
+	{
+		auto* const data = static_cast<uint8_t*>(address);
+		if (*data != 0xE8 && *data != 0xE9)
+		{
+			throw std::runtime_error("No branch instruction found");
+		}
+
+		return extract<void*>(data + 1);
 	}
 }

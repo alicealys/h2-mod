@@ -1,7 +1,36 @@
 #pragma once
+#include <asmjit/core/jitruntime.h>
+#include <asmjit/x86/x86assembler.h>
+
+using namespace asmjit::x86;
 
 namespace utils::hook
 {
+	class assembler : public Assembler
+	{
+	public:
+		using Assembler::Assembler;
+		using Assembler::call;
+		using Assembler::jmp;
+
+		void pushad64();
+		void popad64();
+
+		void prepare_stack_for_call();
+		void restore_stack_after_call();
+
+		template <typename T>
+		void call_aligned(T&& target)
+		{
+			this->prepare_stack_for_call();
+			this->call(std::forward<T>(target));
+			this->restore_stack_after_call();
+		}
+
+		asmjit::Error call(void* target);
+		asmjit::Error jmp(void* target);
+	};
+
 	class detour
 	{
 	public:
@@ -15,7 +44,7 @@ namespace utils::hook
 			this->operator=(std::move(other));
 		}
 
-		detour& operator= (detour&& other) noexcept
+		detour& operator=(detour&& other) noexcept
 		{
 			if (this != &other)
 			{
@@ -32,7 +61,7 @@ namespace utils::hook
 		}
 
 		detour(const detour&) = delete;
-		detour& operator= (const detour&) = delete;
+		detour& operator=(const detour&) = delete;
 
 		void enable() const;
 		void disable() const;
@@ -47,8 +76,8 @@ namespace utils::hook
 			return static_cast<T*>(this->get_original());
 		}
 
-		template <typename T, typename... Args>
-		T invoke(Args... args)
+		template <typename T = void, typename... Args>
+		T invoke(Args ... args)
 		{
 			return static_cast<T(*)(Args ...)>(this->get_original())(args...);
 		}
@@ -76,15 +105,17 @@ namespace utils::hook
 	void jump(size_t pointer, void* data, bool use_far = false);
 	void jump(size_t pointer, size_t data, bool use_far = false);
 
+	void* assemble(const std::function<void(assembler&)>& asm_function);
+
 	void inject(void* pointer, const void* data);
 	void inject(size_t pointer, const void* data);
 
 	template <typename T>
 	T extract(void* address)
 	{
-		const auto data = static_cast<uint8_t*>(address);
+		auto* const data = static_cast<uint8_t*>(address);
 		const auto offset = *reinterpret_cast<int32_t*>(data);
-		return  reinterpret_cast<T>(data + offset + 4);
+		return reinterpret_cast<T>(data + offset + 4);
 	}
 
 	void* follow_branch(void* address);
@@ -108,13 +139,13 @@ namespace utils::hook
 	}
 
 	template <typename T, typename... Args>
-	static T invoke(size_t func, Args... args)
+	static T invoke(size_t func, Args ... args)
 	{
 		return reinterpret_cast<T(*)(Args ...)>(func)(args...);
 	}
 
 	template <typename T, typename... Args>
-	static T invoke(void* func, Args... args)
+	static T invoke(void* func, Args ... args)
 	{
 		return static_cast<T(*)(Args ...)>(func)(args...);
 	}

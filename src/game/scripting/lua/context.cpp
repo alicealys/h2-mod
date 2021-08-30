@@ -6,6 +6,8 @@
 #include "../execution.hpp"
 #include "../functions.hpp"
 
+#include "../../../component/notifies.hpp"
+#include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 #include "../../../component/chat.hpp"
 
@@ -372,6 +374,74 @@ namespace scripting::lua
 			game_type["say"] = [](const game&, const std::string& msg)
 			{
 				chat::print(msg);
+			};
+
+			game_type["detour"] = [](const game&, const sol::this_state s, const std::string& filename,
+				const std::string function_name, const sol::protected_function& function)
+			{
+				const auto pos = get_function_pos(filename, function_name);
+				notifies::vm_execute_hooks[pos] = function;
+
+				auto detour = sol::table::create(function.lua_state());
+
+				detour["disable"] = [pos]()
+				{
+					notifies::vm_execute_hooks.erase(pos);
+				};
+
+				detour["enable"] = [pos, function]()
+				{
+					notifies::vm_execute_hooks[pos] = function;
+				};
+
+				detour["invoke"] = [filename, function_name](const entity& entity, const sol::this_state s, sol::variadic_args va)
+				{
+					std::vector<script_value> arguments{};
+
+					for (auto arg : va)
+					{
+						arguments.push_back(convert({s, arg}));
+					}
+
+					notifies::hook_enabled = false;
+					const auto result = convert(s, call_script_function(entity, filename, function_name, arguments));
+					notifies::hook_enabled = true;
+
+					return result;
+				};
+
+				return detour;
+			};
+
+			game_type["getfunctions"] = [entity_type](const game&, const sol::this_state s, const std::string& filename)
+			{
+				if (scripting::script_function_table.find(filename) == scripting::script_function_table.end())
+				{
+					throw std::runtime_error("File '" + filename + "' not found");
+				}
+
+				auto functions = sol::table::create(s.lua_state());
+
+				for (const auto& function : scripting::script_function_table[filename])
+				{
+					functions[function.first] = [filename, function](const entity& entity, const sol::this_state s, sol::variadic_args va)
+					{
+						std::vector<script_value> arguments{};
+
+						for (auto arg : va)
+						{
+							arguments.push_back(convert({s, arg}));
+						}
+
+						notifies::hook_enabled = false;
+						const auto result = convert(s, call_script_function(entity, filename, function.first, arguments));
+						notifies::hook_enabled = true;
+
+						return result;
+					};
+				}
+
+				return functions;
 			};
 		}
 	}
