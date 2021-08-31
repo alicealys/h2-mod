@@ -102,7 +102,6 @@ namespace scripting
 		void scr_set_thread_position_stub(unsigned int threadName, const char* codePos)
 		{
 			const auto function_name = scripting::find_token(threadName);
-
 			script_function_table[current_file][function_name] = codePos;
 
 			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
