@@ -65,6 +65,11 @@ namespace fps
 
 		void draw_speed()
 		{
+			if (!game::CL_IsCgameInitialized() || !game::g_entities[0].client)
+			{
+				return;
+			}
+
 			const auto speed = sqrt(pow(game::g_entities[0].client->velocity[0], 2) +
 									pow(game::g_entities[0].client->velocity[1], 2) +
 									pow(game::g_entities[0].client->velocity[2], 2));

@@ -717,7 +717,7 @@ namespace scripting
         {"nullsub_367", 0x8079},
         {"nullsub_533", 0x807A},
         {"sub_503ad0", 0x807B},
-        {"sub_503af0", 0x807C},
+        {"playloopsound", 0x807C},
         {"sub_503c10", 0x807D},
         {"sub_503c90", 0x807E},
         {"sub_503d20", 0x807F},
@@ -1772,13 +1772,9 @@ namespace scripting
 
     std::unordered_map<std::string, unsigned> token_map =
     {
+        {"init", 521},
         {"main", 616},
         {"player", 794},
         {"default_start", 10126},
-    };
-
-    std::unordered_map<unsigned, std::string> file_list =
-    {
-
     };
 }
