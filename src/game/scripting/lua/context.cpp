@@ -28,46 +28,6 @@ namespace scripting::lua
 			);
 		}
 
-		vector vector_to_angles(const vector& vec)
-		{
-			const auto x = vec.get_x();
-			const auto y = vec.get_y();
-			const auto z = vec.get_z();
-
-			float yaw = 0.f;
-			float pitch = 0.f;
-
-			if (x != 0.f && y != 0.f)
-			{
-				const auto v9 = atan2f(y, x) * 57.295776;
-				const auto v10 = v9 < 0.f
-					? 360.f
-					: 0.0;
-				
-				yaw = v9 + v10;
-				const auto v11 = sqrtf((x * x) + (y * y));
-				const auto v12 = atan2f(z, v11) * -57.295776;
-
-				const auto v3 = v12 < 0
-					? 360.f
-					: 0.f;
-
-				pitch = v12 + v3;
-			}
-			else
-			{
-				pitch = z < 0.f
-					? 270.f
-					: 90.f;
-			}
-
-			return vector(
-				pitch,
-				yaw,
-				0
-			);
-		}
-
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			state["level"] = entity{*game::levelEntityId};
