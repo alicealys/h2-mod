@@ -34,6 +34,10 @@ namespace patches
 			// Disable battle net popup
 			utils::hook::set(game::base_address + 0xBE7F83C, true);
 
+			// Allow kbam input when gamepad is enabled
+			utils::hook::nop(game::base_address + 0x3D2F8E, 2);
+			utils::hook::nop(game::base_address + 0x3D0C9C, 6);
+
 			scheduler::once([]()
 			{
 				if (game::Menu_IsMenuOpenAndVisible(0, "bnet_error_popup"))
