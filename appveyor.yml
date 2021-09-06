@@ -1,0 +1,47 @@
+# AppVeyor CI configuration
+
+version: "#{build} ({branch})"
+
+environment:
+  matrix:
+    - APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      PREMAKE_ACTION: vs2019
+      CI: 1
+
+branches:
+  only:
+    - master
+    - develop
+
+skip_branch_with_pr: true
+
+# Doesn't work :(
+#cache:
+#  - build
+
+configuration:
+  - Debug
+  - Release
+
+platform: x64
+
+install:
+  - ps: |
+      Write-Host "Updating version information..." -ForegroundColor Cyan
+      Update-AppveyorBuild -Version $(& tools/premake5.exe version | select -Last 1)
+  - git submodule update --init --recursive
+  - ps: |
+      Write-Host "Generating project files with premake..." -ForegroundColor Cyan
+      & "./tools/premake5.exe" $env:PREMAKE_ACTION
+      Write-Host "Generated" -ForegroundColor Green
+
+build:
+  project: build/h2-mod.sln
+  parallel: true
+  verbosity: minimal
+
+artifacts:
+  - path: build/version.txt
+  - path: build/bin/**/h2-mod.exe
+#  - path: build/bin/**/*.exe
+#  - path: build/bin/**/*.pdb
