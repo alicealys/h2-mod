@@ -10,14 +10,9 @@ environment:
 
 branches:
   only:
-    - master
-    - develop
+    - main
 
 skip_branch_with_pr: true
-
-# Doesn't work :(
-#cache:
-#  - build
 
 configuration:
   - Debug
@@ -43,5 +38,3 @@ build:
 artifacts:
   - path: build/version.txt
   - path: build/bin/**/h2-mod.exe
-#  - path: build/bin/**/*.exe
-#  - path: build/bin/**/*.pdb
