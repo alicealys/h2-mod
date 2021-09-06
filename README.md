@@ -3,6 +3,11 @@
 
 
 # H2: Mod
+<p align="center">
+  <img src="assets/github/banner.png?raw=true" />
+</p>
+
+<br/>
 
 ## Compile from source
 
