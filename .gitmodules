@@ -22,3 +22,21 @@
 [submodule "deps/asmjit"]
 	path = deps/asmjit
 	url = https://github.com/asmjit/asmjit.git
+[submodule "deps/protobuf"]
+	path = deps/protobuf
+	url = https://github.com/google/protobuf.git
+[submodule "deps/udis86"]
+	path = deps/udis86
+	url = https://github.com/vmt/udis86.git
+[submodule "deps/WinToast"]
+	path = deps/WinToast
+	url = https://github.com/mohabouje/WinToast.git
+[submodule "deps/libtomcrypt"]
+	path = deps/libtomcrypt
+	url = https://github.com/libtom/libtomcrypt.git
+[submodule "deps/libtommath"]
+	path = deps/libtommath
+	url = https://github.com/libtom/libtommath.git
+[submodule "deps/zlib"]
+	path = deps/zlib
+	url = https://github.com/madler/zlib.git
