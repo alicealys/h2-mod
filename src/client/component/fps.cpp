@@ -69,9 +69,9 @@ namespace fps
 				return;
 			}
 
-			const auto speed = sqrt(pow(game::g_entities[0].client->velocity[0], 2) +
-									pow(game::g_entities[0].client->velocity[1], 2) +
-									pow(game::g_entities[0].client->velocity[2], 2));
+			const auto speed = (float)sqrt(pow(game::g_entities[0].client->velocity[0], 2) +
+										   pow(game::g_entities[0].client->velocity[1], 2) +
+									       pow(game::g_entities[0].client->velocity[2], 2));
 
 			if (cg_drawspeed->current.integer >= 1)
 			{
@@ -83,7 +83,7 @@ namespace fps
 				const auto x = (screen_max[0] / 2) - (width / 2);
 				const auto y = screen_max[1] - 400.f;
 
-				const auto color = speed >= 300
+				const auto color = speed >= 300.f
 					? color_blue
 					: fps_color_bad;
 
