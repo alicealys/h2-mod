@@ -90,6 +90,15 @@ void remove_crash_file()
 	utils::io::remove_file("__h2Exe");
 }
 
+void verify_version()
+{
+	const auto value = *reinterpret_cast<DWORD*>(game::base_address + 0x123456);
+	if (value != 0xE465E151)
+	{
+		throw std::runtime_error("Unsupported Call of Duty: Modern Warfare 2 Campaign Remastered version");
+	}
+}
+
 void enable_dpi_awareness()
 {
 	const utils::nt::library user32{"user32.dll"};
@@ -178,6 +187,7 @@ int main()
 			}
 
 			game::base_address = base_address;
+			verify_version();
 
 			if (!component_loader::post_load())
 			{
