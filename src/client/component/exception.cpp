@@ -85,7 +85,7 @@ namespace exception
 		{
 			std::string error_str = utils::string::va("Fatal error (0x%08X) at 0x%p.\n"
 			                                          "A minidump has been written.\n\n",
-			                                          exception_data.code, (uint64_t)exception_data.address - game::base_address);
+			                                          exception_data.code, exception_data.address);
 
 			error_str += "Make sure to update your graphics card drivers and install operating system updates!";
 
@@ -157,7 +157,7 @@ namespace exception
 			line("Environment: "s + game::environment::get_string());
 			line("Timestamp: "s + get_timestamp());
 			line(utils::string::va("Exception: 0x%08X", exceptioninfo->ExceptionRecord->ExceptionCode));
-			line(utils::string::va("Address: 0x%llX", (uint64_t)exceptioninfo->ExceptionRecord->ExceptionAddress - game::base_address));
+			line(utils::string::va("Address: 0x%llX", exceptioninfo->ExceptionRecord->ExceptionAddress));
 			line(utils::string::va("Base: 0x%llX", game::base_address));
 
 #pragma warning(push)

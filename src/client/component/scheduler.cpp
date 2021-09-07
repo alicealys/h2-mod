@@ -4,6 +4,7 @@
 #include "scheduler.hpp"
 #include "game/game.hpp"
 
+#include <utils/thread.hpp>
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 
@@ -163,9 +164,9 @@ namespace scheduler
 	class component final : public component_interface
 	{
 	public:
-		void post_unpack() override
+		void post_start() override
 		{
-			thread = std::thread([]()
+			thread = utils::thread::create_named_thread("Async Scheduler", []()
 			{
 				while (!kill)
 				{
@@ -173,10 +174,22 @@ namespace scheduler
 					std::this_thread::sleep_for(10ms);
 				}
 			});
+		}
 
+		void post_unpack() override
+		{
 			r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
 			g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
 			main_frame_hook.create(game::base_address + 0x417FA0, scheduler::main_frame_stub);
+		}
+
+		void pre_destroy() override
+		{
+			kill = true;
+			if (thread.joinable())
+			{
+				thread.join();
+			}
 		}
 	};
 }
