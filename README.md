@@ -10,6 +10,11 @@
 
 <br/>
 
+## Download
+
+- **[Click here to get the latest release](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=main&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202019%2C%20PREMAKE_ACTION%3Dvs2019%2C%20CI%3D1%3B%20Configuration%3A%20Release)**
+- **You will need to drop this in your Call of Duty: Modern Warfare 2 Campaign Remastered installation folder. If you don't have Call of Duty: Modern Warfare 2 Campaign Remastered, get those game files first.**
+
 ## Compile from source
 
 - Clone the Git repo. Do NOT download it as ZIP, that won't work.
