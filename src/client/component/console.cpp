@@ -1,31 +1,20 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 
+#include "command.hpp"
 #include "game_console.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
+#include <utils/thread.hpp>
 #include <utils/hook.hpp>
 
 namespace console
 {
 	namespace
 	{
-		DWORD WINAPI console(LPVOID)
-		{
-			ShowWindow(GetConsoleWindow(), SW_SHOW);
-
-			std::string cmd;
-
-			while (true)
-			{
-				std::getline(std::cin, cmd);
-				game_console::execute(cmd.data());
-			}
-
-			return 0;
-		}
+		std::thread console_thread;
 	}
 
 	class component final : public component_interface
@@ -33,7 +22,18 @@ namespace console
 	public:
 		void post_unpack() override
 		{
-			CreateThread(0, 0, console, 0, 0, 0);
+			ShowWindow(GetConsoleWindow(), SW_SHOW);
+			SetConsoleTitle("H2-Mod");
+
+			console_thread = utils::thread::create_named_thread("Console", []()
+			{
+				std::string cmd;
+				while (true)
+				{
+					std::getline(std::cin, cmd);
+					command::execute(cmd.data(), false);
+				}
+			});
 		}
 	};
 }
