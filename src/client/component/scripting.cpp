@@ -31,8 +31,6 @@ namespace scripting
 
 		std::string current_file;
 
-		bool running = false;
-
 		void vm_notify_stub(const unsigned int notify_list_owner_id, const game::scr_string_t string_value,
 		                    game::VariableValue* top)
 		{
@@ -48,12 +46,6 @@ namespace scripting
 					e.arguments.emplace_back(*value);
 				}
 
-				if (!running)
-				{
-					running = true;
-					lua::engine::start();
-				}
-
 				lua::engine::notify(e);
 			}
 
@@ -63,15 +55,19 @@ namespace scripting
 		void scr_load_level_stub()
 		{
 			scr_load_level_hook.invoke<void>();
-			running = true;
 			lua::engine::start();
 		}
 
 		void g_shutdown_game_stub(const int free_scripts)
 		{
 			lua::engine::stop();
+
+			if (!free_scripts)
+			{
+				lua::engine::start();
+			}
+
 			g_shutdown_game_hook.invoke<void>(free_scripts);
-			running = false;
 		}
 	
 		void scr_add_class_field_stub(unsigned int classnum, game::scr_string_t _name, unsigned int canonicalString, unsigned int offset)
