@@ -10,7 +10,6 @@
 #include "ui_scripting.hpp"
 
 #include "game/ui_scripting/lua/engine.hpp"
-#include "game/ui_scripting/lua/context.hpp"
 
 #include <utils/string.hpp>
 
@@ -46,7 +45,7 @@ namespace ui_scripting
 				const std::string name = params.get(1);
 				scheduler::once([name]()
 				{
-					ui_scripting::lua::open_menu(name);
+					ui_scripting::lua::engine::open_menu(name);
 				}, scheduler::pipeline::renderer);
 			});
 
@@ -55,7 +54,7 @@ namespace ui_scripting
 				const std::string name = params.get(1);
 				scheduler::once([name]()
 				{
-					ui_scripting::lua::close_menu(name);
+					ui_scripting::lua::engine::close_menu(name);
 				}, scheduler::pipeline::renderer);
 			});
 		}

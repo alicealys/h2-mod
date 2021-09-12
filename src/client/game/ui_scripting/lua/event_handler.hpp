@@ -1,6 +1,5 @@
 #pragma once
 #include <utils/concurrency.hpp>
-#include "../element.hpp"
 
 namespace ui_scripting::lua
 {
@@ -21,6 +20,7 @@ namespace ui_scripting::lua
 		event_callback callback = {};
 		bool is_volatile = false;
 		bool is_deleted = false;
+		std::vector<std::pair<uint64_t, std::string>> endon_conditions{};
 	};
 
 	class event_handler final
@@ -50,5 +50,10 @@ namespace ui_scripting::lua
 
 		void remove(const event_listener_handle& handle);
 		void merge_callbacks();
+		void handle_endon_conditions(const event& event);
+
+		void add_endon_condition(const event_listener_handle& handle, const element* element, const std::string& event);
+
+		event_arguments build_arguments(const event& event) const;
 	};
 }

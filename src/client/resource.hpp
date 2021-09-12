@@ -20,3 +20,5 @@
 #define RUNNER                312
 
 #define ICON_IMAGE            313
+
+#define LUA_ANIMATION_SCRIPT  314

@@ -1,6 +1,7 @@
 #include "std_include.hpp"
 #include "context.hpp"
 #include "error.hpp"
+#include "../../scripting/lua/value_conversion.hpp"
 
 #include "event_handler.hpp"
 
@@ -15,13 +16,22 @@ namespace ui_scripting::lua
 		{
 			this->remove(handle);
 		};
+
+		event_listener_handle_type["endon"] = [this](const event_listener_handle& handle, const element* entity, const std::string& event)
+		{
+			this->add_endon_condition(handle, entity, event);
+		};
 	}
 
 	void event_handler::dispatch(const event& event)
 	{
+		bool has_built_arguments = false;
+		event_arguments arguments{};
+
 		callbacks_.access([&](task_list& tasks)
 		{
 			this->merge_callbacks();
+			this->handle_endon_conditions(event);
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
@@ -33,7 +43,13 @@ namespace ui_scripting::lua
 
 				if (!i->is_deleted)
 				{
-					handle_error(i->callback(sol::as_args(event.arguments)));
+					if (!has_built_arguments)
+					{
+						has_built_arguments = true;
+						arguments = this->build_arguments(event);
+					}
+
+					handle_error(i->callback(sol::as_args(arguments)));
 				}
 
 				if (i->is_volatile || i->is_deleted)
@@ -60,6 +76,27 @@ namespace ui_scripting::lua
 		});
 
 		return {id};
+	}
+
+	void event_handler::add_endon_condition(const event_listener_handle& handle, const element* element,
+											const std::string& event)
+	{
+		auto merger = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				if (task.id == handle.id)
+				{
+					task.endon_conditions.emplace_back(element->id, event);
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+			merger(tasks);
+			new_callbacks_.access(merger);
+		});
 	}
 
 	void event_handler::clear()
@@ -99,9 +136,54 @@ namespace ui_scripting::lua
 			new_callbacks_.access([&](task_list& new_tasks)
 			{
 				tasks.insert(tasks.end(), std::move_iterator<task_list::iterator>(new_tasks.begin()),
-				             std::move_iterator<task_list::iterator>(new_tasks.end()));
+							 std::move_iterator<task_list::iterator>(new_tasks.end()));
 				new_tasks = {};
 			});
 		});
+	}
+
+	void event_handler::handle_endon_conditions(const event& event)
+	{
+		auto deleter = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				for (auto& condition : task.endon_conditions)
+				{
+					if (condition.first == event.element->id && condition.second == event.name)
+					{
+						task.is_deleted = true;
+						break;
+					}
+				}
+			}
+		};
+
+		callbacks_.access(deleter);
+	}
+
+	event_arguments event_handler::build_arguments(const event& event) const
+	{
+		event_arguments arguments;
+
+		for (const auto& argument : event.arguments)
+		{
+			const auto index = argument.index();
+
+			if (index == 0)
+			{
+				const sol::lua_value value = {this->state_, std::get<int>(argument)};
+				arguments.emplace_back(value);
+			}
+
+			if (index == 1)
+			{
+				const sol::lua_value value = {this->state_, std::get<std::string>(argument)};
+				arguments.emplace_back(value);
+			}
+
+		}
+
+		return arguments;
 	}
 }
