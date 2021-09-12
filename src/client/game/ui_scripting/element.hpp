@@ -33,6 +33,8 @@ namespace ui_scripting
 		void set_border_width(float top, float right, float bottom);
 		void set_border_width(float top, float right, float bottom, float left);
 
+		void set_slice(float left_percent, float top_percent, float right_percent, float bottom_percent);
+
 		void set_rect(const float _x, const float _y, const float _w, const float _h);
 
 		uint64_t id;
@@ -51,6 +53,7 @@ namespace ui_scripting
 		float background_color[4] = {0.f, 0.f, 0.f, 0.f};
 		float border_color[4] = {0.f, 0.f, 0.f, 0.f};
 		float border_width[4] = {0.f, 0.f, 0.f, 0.f};
+		float slice[4] = {0.f, 0.f, 1.f, 1.f};
 
 		alignment horzalign = alignment::start;
 		alignment vertalign = alignment::start;

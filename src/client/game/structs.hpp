@@ -72,6 +72,22 @@ namespace game
 		const char* name;
 	};
 
+	struct point
+	{
+		float x;
+		float y;
+		float f2;
+		float f3;
+	};
+
+	struct rectangle
+	{
+		point p0;
+		point p1;
+		point p2;
+		point p3;
+	};
+
 	struct Glyph
 	{
 		unsigned short letter;

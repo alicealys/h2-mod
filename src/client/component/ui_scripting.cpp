@@ -13,15 +13,9 @@
 #include "game/ui_scripting/lua/context.hpp"
 
 #include <utils/string.hpp>
-#include <utils/hook.hpp>
 
 namespace ui_scripting
 {
-	namespace
-	{
-
-	}
-
 	class component final : public component_interface
 	{
 	public:
@@ -49,27 +43,21 @@ namespace ui_scripting
 
 			command::add("openluamenu", [](const command::params& params)
 			{
-				printf("command openmenu\n");
 				const std::string name = params.get(1);
 				scheduler::once([name]()
 				{
-					printf("command openmenu scheduler\n");
 					ui_scripting::lua::open_menu(name);
 				}, scheduler::pipeline::renderer);
 			});
 
 			command::add("closeluamenu", [](const command::params& params)
 			{
-				printf("command closemenu\n");
 				const std::string name = params.get(1);
 				scheduler::once([name]()
 				{
-					printf("command closemenu scheduler\n");
 					ui_scripting::lua::close_menu(name);
 				}, scheduler::pipeline::renderer);
 			});
-
-			utils::hook::nop(game::base_address + 0x5F22B1, 5);
 		}
 	};
 }
