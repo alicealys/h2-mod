@@ -313,8 +313,7 @@ namespace ui_scripting
 				relative(this->x) + relative(this->text_offset[0]) + _horzalign + relative(this->border_width[3]),
 				relative(this->y) + relative(this->text_offset[1]) + _vertalign + relative(this->fontsize) + relative(this->border_width[0]),
 				1.0f, 1.0f, 0.0f, 
-				(float*)this->color,
-				0
+				(float*)this->color, 0
 			);
 		}
 	}
