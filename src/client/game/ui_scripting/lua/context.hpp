@@ -14,8 +14,10 @@
 
 namespace ui_scripting::lua
 {
-	void open_menu(const std::string& name);
-	void close_menu(const std::string& name);
+	extern std::unordered_map<std::string, menu> menus;
+	extern std::vector<element*> elements;
+	extern element ui_element;
+	extern int mouse[2];
 
 	class context
 	{
@@ -30,7 +32,7 @@ namespace ui_scripting::lua
 		context& operator=(const context&) = delete;
 
 		void run_frame();
-		void ui_event(const std::string&, const std::vector<int>&);
+		void notify(const event& e);
 
 	private:
 		sol::state state_{};

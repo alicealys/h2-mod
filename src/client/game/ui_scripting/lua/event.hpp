@@ -8,6 +8,6 @@ namespace ui_scripting::lua
 	{
 		std::string name;
 		element* element{};
-		std::vector<sol::lua_value> arguments;
+		std::vector<std::variant<int, std::string>> arguments;
 	};
 }

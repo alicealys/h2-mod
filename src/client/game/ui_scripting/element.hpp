@@ -19,6 +19,7 @@ namespace ui_scripting
 		void set_vertalign(const std::string& value);
 
 		void set_text(const std::string& text);
+		void set_font(const std::string& _font);
 		void set_font(const std::string& _font, const int _fontsize);
 		void set_color(float r, float g, float b, float a);
 		void set_text_offset(float x, float y);

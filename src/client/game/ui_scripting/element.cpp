@@ -148,11 +148,25 @@ namespace ui_scripting
 
 		if (font_map.find(lowercase) == font_map.end())
 		{
-			this->font = font_map["default"];
+			this->font = "default";
 		}
 		else
 		{
-			this->font = font_map[lowercase];
+			this->font = lowercase;
+		}
+	}
+
+	void element::set_font(const std::string& _font)
+	{
+		const auto lowercase = utils::string::to_lower(_font);
+
+		if (font_map.find(lowercase) == font_map.end())
+		{
+			this->font = "default";
+		}
+		else
+		{
+			this->font = lowercase;
 		}
 	}
 
@@ -303,7 +317,8 @@ namespace ui_scripting
 
 		if (!this->text.empty())
 		{
-			const auto _font = game::R_RegisterFont(this->font.data(), relative(this->fontsize));
+			const auto fontname = font_map[this->font];
+			const auto _font = game::R_RegisterFont(fontname.data(), relative(this->fontsize));
 			const auto text_width = game::R_TextWidth(this->text.data(), 0x7FFFFFFF, _font);
 
 			auto _horzalign = get_align_value(this->horzalign, (float)text_width, relative(this->w));

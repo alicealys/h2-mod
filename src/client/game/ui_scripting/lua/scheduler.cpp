@@ -12,6 +12,35 @@ namespace ui_scripting::lua
 		{
 			this->remove(handle);
 		};
+
+		task_handle_type["endon"] = [this](const task_handle& handle, const element* element, const std::string& event)
+		{
+			this->add_endon_condition(handle, element, event);
+		};
+	}
+
+	void scheduler::dispatch(const event& event)
+	{
+		auto deleter = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				for (auto& condition : task.endon_conditions)
+				{
+					if (condition.first == event.element->id && condition.second == event.name)
+					{
+						task.is_deleted = true;
+						break;
+					}
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+			deleter(tasks);
+			new_callbacks_.access(deleter);
+		});
 	}
 
 	void scheduler::run_frame()
@@ -63,13 +92,13 @@ namespace ui_scripting::lua
 	}
 
 	task_handle scheduler::add(const sol::protected_function& callback, const long long milliseconds,
-	                           const bool is_volatile)
+							   const bool is_volatile)
 	{
 		return this->add(callback, std::chrono::milliseconds(milliseconds), is_volatile);
 	}
 
 	task_handle scheduler::add(const sol::protected_function& callback, const std::chrono::milliseconds delay,
-	                           const bool is_volatile)
+							   const bool is_volatile)
 	{
 		const uint64_t id = ++this->current_task_id_;
 
@@ -87,6 +116,26 @@ namespace ui_scripting::lua
 		});
 
 		return {id};
+	}
+
+	void scheduler::add_endon_condition(const task_handle& handle, const element* element, const std::string& event)
+	{
+		auto merger = [&](task_list& tasks)
+		{
+			for (auto& task : tasks)
+			{
+				if (task.id == handle.id)
+				{
+					task.endon_conditions.emplace_back(element->id, event);
+				}
+			}
+		};
+
+		callbacks_.access([&](task_list& tasks)
+		{
+			merger(tasks);
+			new_callbacks_.access(merger);
+		});
 	}
 
 	void scheduler::remove(const task_handle& handle)
@@ -114,7 +163,7 @@ namespace ui_scripting::lua
 			new_callbacks_.access([&](task_list& new_tasks)
 			{
 				tasks.insert(tasks.end(), std::move_iterator<task_list::iterator>(new_tasks.begin()),
-				             std::move_iterator<task_list::iterator>(new_tasks.end()));
+							 std::move_iterator<task_list::iterator>(new_tasks.end()));
 				new_tasks = {};
 			});
 		});
