@@ -24,8 +24,6 @@ namespace ui_scripting::lua::engine
 				return;
 			}
 
-			printf("here\n");
-
 			const auto scripts = utils::io::list_files(script_dir);
 
 			for (const auto& script : scripts)

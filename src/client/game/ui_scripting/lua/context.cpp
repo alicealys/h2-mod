@@ -17,6 +17,28 @@ namespace ui_scripting::lua
 		std::unordered_map<std::string, menu> menus;
 		std::vector<element*> elements;
 		element ui_element;
+		float screen_max[2];
+
+		void check_resize()
+		{
+			screen_max[0] = game::ScrPlace_GetViewPlacement()->realViewportSize[0];
+			screen_max[1] = game::ScrPlace_GetViewPlacement()->realViewportSize[1];
+		}
+
+		int relative_mouse(int value)
+		{
+			return (int)(((float)value / screen_max[0]) * 1920.f);
+		}
+
+		int relative(int value)
+		{
+			return (int)(((float)value / 1920.f) * screen_max[0]);
+		}
+
+		float relative(float value)
+		{
+			return (value / 1920.f) * screen_max[0];
+		}
 
 		scripting::script_value convert(const sol::lua_value& value)
 		{
@@ -64,6 +86,8 @@ namespace ui_scripting::lua
 
 		void render_menus()
 		{
+			check_resize();
+
 			for (const auto& menu : menus)
 			{
 				if (menu.second.visible)
@@ -483,6 +507,7 @@ namespace ui_scripting::lua
 				static_cast<void(element::*)(float, float, float, float)>(&element::set_border_width)
 			);
 			element_type["settextoffset"] = &element::set_text_offset;
+			element_type["setslice"] = &element::set_slice;
 
 			element_type["onnotify"] = [&handler](element& element, const std::string& event,
 												  const event_callback& callback)
@@ -704,6 +729,22 @@ namespace ui_scripting::lua
 				::game::R_AddCmdDrawStretchPic(x, y, width, height, s0, t0, s1, t1, _color, _material);
 			};
 
+			game_type["playsound"] = [](const game&, const std::string& sound)
+			{
+				::game::UI_PlayLocalSoundAlias(0, sound.data());
+			};
+
+			game_type["getwindowsize"] = [](const game&, const sol::this_state s)
+			{
+				const auto size = ::game::ScrPlace_GetViewPlacement()->realViewportSize;
+
+				auto screen = sol::table::create(s.lua_state());
+				screen["x"] = size[0];
+				screen["y"] = size[1];
+
+				return screen;
+			};
+
 			struct player
 			{
 			};
@@ -787,8 +828,6 @@ namespace ui_scripting::lua
 
 	void open_menu(const std::string& name)
 	{
-		printf("open_menu\n");
-
 		if (menus.find(name) == menus.end())
 		{
 			return;
@@ -799,8 +838,6 @@ namespace ui_scripting::lua
 
 	void close_menu(const std::string& name)
 	{
-		printf("close_menu\n");
-
 		if (menus.find(name) == menus.end())
 		{
 			return;
@@ -874,7 +911,8 @@ namespace ui_scripting::lua
 
 		if (type == "mousemove")
 		{
-			handle_mousemove_event(this->state_, this->event_handler_, arguments[0], arguments[1]);
+			handle_mousemove_event(this->state_, this->event_handler_, 
+				relative_mouse(arguments[0]), relative_mouse(arguments[1]));
 		}
 	}
 
