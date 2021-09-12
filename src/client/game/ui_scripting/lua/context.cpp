@@ -84,13 +84,18 @@ namespace ui_scripting::lua
 			return (px > x && px < x + w && py > y && py < y + h);
 		}
 
+		bool is_menu_visible(const menu& menu)
+		{
+			return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
+		}
+
 		void render_menus()
 		{
 			check_resize();
 
 			for (const auto& menu : menus)
 			{
-				if (menu.second.visible)
+				if (is_menu_visible(menu.second))
 				{
 					menu.second.render();
 				}
@@ -103,7 +108,7 @@ namespace ui_scripting::lua
 
 			for (const auto& menu : menus)
 			{
-				if (!menu.second.visible)
+				if (!is_menu_visible(menu.second))
 				{
 					continue;
 				}
@@ -571,6 +576,14 @@ namespace ui_scripting::lua
 			game_type["newmenu"] = [](const sol::lua_value&, const std::string& name)
 			{
 				menus[name] = {};
+				return &menus[name];
+			};
+
+			game_type["newmenuoverlay"] = [](const sol::lua_value&, const std::string& name, const std::string& menu_name)
+			{
+				menus[name] = {};
+				menus[name].type = menu_type::overlay;
+				menus[name].overlay_menu = menu_name;
 				return &menus[name];
 			};
 
