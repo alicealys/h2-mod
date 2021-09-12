@@ -263,7 +263,7 @@ flags {"FatalCompileWarnings"}
 
 configuration "Debug"
 optimize "Debug"
-
+buildoptions {"/bigobj"}
 defines {"DEBUG", "_DEBUG"}
 
 configuration {}
