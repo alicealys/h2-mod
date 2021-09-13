@@ -358,15 +358,15 @@ namespace ui_scripting::lua::engine
 
 	void start()
 	{
-		clear_menus();
 		get_scripts().clear();
+		clear_menus();
 		load_scripts();
 	}
 
 	void stop()
 	{
-		clear_menus();
 		get_scripts().clear();
+		clear_menus();
 	}
 
 	void ui_event(const std::string& type, const std::vector<int>& arguments)
