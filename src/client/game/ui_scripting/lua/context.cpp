@@ -757,6 +757,7 @@ namespace ui_scripting::lua
 	{
 		this->state_.collect_garbage();
 		this->scheduler_.clear();
+		this->event_handler_.clear();
 		this->state_ = {};
 	}
 
