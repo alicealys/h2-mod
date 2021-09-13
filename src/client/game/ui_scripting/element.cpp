@@ -262,58 +262,65 @@ namespace ui_scripting
 	{
 		check_resize();
 
-		const auto background_material = game::Material_RegisterHandle(this->material.data());
-		draw_image(
-			relative(this->x) + relative(this->border_width[3]),
-			relative(this->y) + relative(this->border_width[0]),
-			relative(this->w), 
-			relative(this->h),
-			(float*)this->slice,
-			(float*)this->background_color,
-			background_material
-		);
+		if (this->background_color[3] > 0)
+		{
+			const auto background_material = game::Material_RegisterHandle(this->material.data());
 
-		const auto _border_material = game::Material_RegisterHandle(this->border_material.data());
+			draw_image(
+				relative(this->x) + relative(this->border_width[3]),
+				relative(this->y) + relative(this->border_width[0]),
+				relative(this->w),
+				relative(this->h),
+				(float*)this->slice,
+				(float*)this->background_color,
+				background_material
+			);
+		}
 
-		draw_image(
-			relative(this->x),
-			relative(this->y),
-			relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
-			relative(this->border_width[0]),
-			(float*)this->slice,
-			(float*)this->border_color,
-			_border_material
-		);
+		if (this->border_color[3] > 0)
+		{
+			const auto _border_material = game::Material_RegisterHandle(this->border_material.data());
 
-		draw_image(
-			relative(this->x) + relative(this->border_width[3]) + relative(this->w),
-			relative(this->y) + relative(this->border_width[0]),
-			relative(this->border_width[1]),
-			relative(this->h),
-			(float*)this->slice,
-			(float*)this->border_color,
-			_border_material
-		);
+			draw_image(
+				relative(this->x),
+				relative(this->y),
+				relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
+				relative(this->border_width[0]),
+				(float*)this->slice,
+				(float*)this->border_color,
+				_border_material
+			);
 
-		draw_image(
-			relative(this->x),
-			relative(this->y) + relative(this->h) + relative(this->border_width[0]),
-			relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
-			relative(this->border_width[2]),
-			(float*)this->slice,
-			(float*)this->border_color,
-			_border_material
-		);
+			draw_image(
+				relative(this->x) + relative(this->border_width[3]) + relative(this->w),
+				relative(this->y) + relative(this->border_width[0]),
+				relative(this->border_width[1]),
+				relative(this->h),
+				(float*)this->slice,
+				(float*)this->border_color,
+				_border_material
+			);
 
-		draw_image(
-			relative(this->x),
-			relative(this->y) + relative(this->border_width[0]),
-			relative(this->border_width[3]),
-			relative(this->h),
-			(float*)this->slice,
-			(float*)this->border_color,
-			_border_material
-		);
+			draw_image(
+				relative(this->x),
+				relative(this->y) + relative(this->h) + relative(this->border_width[0]),
+				relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
+				relative(this->border_width[2]),
+				(float*)this->slice,
+				(float*)this->border_color,
+				_border_material
+			);
+
+			draw_image(
+				relative(this->x),
+				relative(this->y) + relative(this->border_width[0]),
+				relative(this->border_width[3]),
+				relative(this->h),
+				(float*)this->slice,
+				(float*)this->border_color,
+				_border_material
+			);
+		}
 
 		if (!this->text.empty())
 		{

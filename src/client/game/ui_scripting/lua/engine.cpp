@@ -2,6 +2,8 @@
 #include "engine.hpp"
 #include "context.hpp"
 
+#include "../../../component/scheduler.hpp"
+
 #include <utils/io.hpp>
 #include <utils/string.hpp>
 
@@ -216,6 +218,11 @@ namespace ui_scripting::lua::engine
 		std::vector<element*> previous_elements;
 		void handle_mousemove_event(const int x, const int y)
 		{
+			if (mouse[0] == x && mouse[1] == y)
+			{
+				return;
+			}
+
 			mouse[0] = x;
 			mouse[1] = y;
 
@@ -371,20 +378,23 @@ namespace ui_scripting::lua::engine
 
 	void ui_event(const std::string& type, const std::vector<int>& arguments)
 	{
-		if (type == "key")
+		::scheduler::once([type, arguments]()
 		{
-			handle_key_event(arguments[0], arguments[1]);
-		}
+			if (type == "key")
+			{
+				handle_key_event(arguments[0], arguments[1]);
+			}
 
-		if (type == "char")
-		{
-			handle_char_event(arguments[0]);
-		}
+			if (type == "char")
+			{
+				handle_char_event(arguments[0]);
+			}
 
-		if (type == "mousemove")
-		{
-			handle_mousemove_event(relative_mouse(arguments[0]), relative_mouse(arguments[1]));
-		}
+			if (type == "mousemove")
+			{
+				handle_mousemove_event(relative_mouse(arguments[0]), relative_mouse(arguments[1]));
+			}
+		}, ::scheduler::pipeline::renderer);
 	}
 
 	void notify(const event& e)
