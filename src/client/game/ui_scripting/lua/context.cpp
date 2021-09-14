@@ -741,7 +741,14 @@ namespace ui_scripting::lua
 						arguments.push_back(convert({s, arg}));
 					}
 
-					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+					const auto player_value = scripting::call("getentbynum", {0});
+					if (player_value.get_raw().type != ::game::SCRIPT_OBJECT)
+					{
+						return;
+					}
+
+					const auto player = player_value.as<scripting::entity>();
+
 					scripting::notify(player, name, arguments);
 				}, ::scheduler::pipeline::server);
 			};
