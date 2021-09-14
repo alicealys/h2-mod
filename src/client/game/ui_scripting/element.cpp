@@ -192,6 +192,14 @@ namespace ui_scripting
 		this->color[3] = a;
 	}
 
+	void element::set_glow_color(float r, float g, float b, float a)
+	{
+		this->glow_color[0] = r;
+		this->glow_color[1] = g;
+		this->glow_color[2] = b;
+		this->glow_color[3] = a;
+	}
+
 	void element::set_border_material(const std::string& _material)
 	{
 		this->border_material = _material;
@@ -331,11 +339,16 @@ namespace ui_scripting
 			auto _horzalign = get_align_value(this->horzalign, (float)text_width, relative(this->w));
 			auto _vertalign = get_align_value(this->vertalign, (float)relative(this->fontsize), relative(this->h));
 
-			game::R_AddCmdDrawText(this->text.data(), 0x7FFFFFFF, _font,
+			game::CL_DrawTextPhysicalWithEffects(
+				this->text.data(),
+				0x7FFFFFFF,
+				_font,
 				relative(this->x) + relative(this->text_offset[0]) + _horzalign + relative(this->border_width[3]),
 				relative(this->y) + relative(this->text_offset[1]) + _vertalign + relative(this->fontsize) + relative(this->border_width[0]),
-				1.0f, 1.0f, 0.0f, 
-				(float*)this->color, 0
+				1.f, 1.f,
+				(float*)this->color, 0,
+				(float*)this->glow_color,
+				0, 0, 0, 0, 0, 0, 0
 			);
 		}
 	}
