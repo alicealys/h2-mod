@@ -35,7 +35,7 @@ namespace ui_scripting::lua
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
-				if (i->event != event.name || i->element->id != event.element->id)
+				if (i->event != event.name || i->element != event.element)
 				{
 					++i;
 					continue;
@@ -87,7 +87,7 @@ namespace ui_scripting::lua
 			{
 				if (task.id == handle.id)
 				{
-					task.endon_conditions.emplace_back(element->id, event);
+					task.endon_conditions.emplace_back((uint64_t)element, event);
 				}
 			}
 		};
@@ -150,7 +150,7 @@ namespace ui_scripting::lua
 			{
 				for (auto& condition : task.endon_conditions)
 				{
-					if (condition.first == event.element->id && condition.second == event.name)
+					if (condition.first == (uint64_t)event.element && condition.second == event.name)
 					{
 						task.is_deleted = true;
 						break;

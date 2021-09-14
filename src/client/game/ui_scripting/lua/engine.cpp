@@ -350,7 +350,14 @@ namespace ui_scripting::lua::engine
 			return;
 		}
 
-		menus[name].open();
+		const auto menu = &menus[name];
+
+		event event;
+		event.element = menu;
+		event.name = "open";
+		notify(event);
+
+		menu->open();
 	}
 
 	void close_menu(const std::string& name)
@@ -360,7 +367,14 @@ namespace ui_scripting::lua::engine
 			return;
 		}
 
-		menus[name].close();
+		const auto menu = &menus[name];
+
+		event event;
+		event.element = menu;
+		event.name = "close";
+		notify(event);
+
+		menu->close();
 	}
 
 	void start()

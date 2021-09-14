@@ -16,7 +16,7 @@ namespace ui_scripting::lua
 	{
 	public:
 		std::string event = {};
-		element* element{};
+		void* element{};
 		event_callback callback = {};
 		bool is_volatile = false;
 		bool is_deleted = false;

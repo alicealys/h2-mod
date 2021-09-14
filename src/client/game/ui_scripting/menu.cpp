@@ -16,37 +16,23 @@ namespace ui_scripting
 
 	void menu::open()
 	{
-		if (this->visible)
-		{
-			return;
-		}
-
-		this->cursor_was_enabled = *game::keyCatchers & 0x40;
-		if (!this->cursor_was_enabled && this->cursor)
-		{
-			*game::keyCatchers |= 0x40;
-		}
-
+		*game::keyCatchers |= 0x40;
 		this->visible = true;
 	}
 
 	void menu::close()
 	{
-		if (!this->visible)
-		{
-			return;
-		}
-
-		if (!this->cursor_was_enabled && this->cursor)
-		{
-			*game::keyCatchers &= ~0x40;
-		}		
-		
+		*game::keyCatchers &= ~0x40;
 		this->visible = false;
 	}
 
 	void menu::render() const
 	{
+		if (this->cursor)
+		{
+			*game::keyCatchers |= 0x40;
+		}
+
 		for (auto& element : this->children)
 		{
 			element->render();
