@@ -331,9 +331,28 @@ namespace ui_scripting::lua::engine
 			}
 		}
 
+		void close_all_menus()
+		{
+			for (auto& menu : menus)
+			{
+				if (!is_menu_visible(menu.second))
+				{
+					continue;
+				}
+
+				event event;
+				event.element = &menu.second;
+				event.name = "close";
+				notify(event);
+
+				menu.second.close();
+			}
+		}
+
 		void clear_menus()
 		{
 			menus.clear();
+
 			for (const auto element : elements)
 			{
 				delete element;
@@ -379,6 +398,7 @@ namespace ui_scripting::lua::engine
 
 	void start()
 	{
+		close_all_menus();
 		get_scripts().clear();
 		clear_menus();
 		load_scripts();
@@ -386,6 +406,7 @@ namespace ui_scripting::lua::engine
 
 	void stop()
 	{
+		close_all_menus();
 		get_scripts().clear();
 		clear_menus();
 	}
