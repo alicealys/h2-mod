@@ -27,7 +27,7 @@ namespace ui_scripting::lua
 			{
 				for (auto& condition : task.endon_conditions)
 				{
-					if (condition.first == event.element->id && condition.second == event.name)
+					if (condition.first == (uint64_t)event.element && condition.second == event.name)
 					{
 						task.is_deleted = true;
 						break;

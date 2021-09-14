@@ -28,7 +28,6 @@ namespace ui_scripting
 
 			scheduler::loop([]()
 			{
-				ShowCursor(true);
 				ui_scripting::lua::engine::run_frame();
 			}, scheduler::pipeline::renderer);
 

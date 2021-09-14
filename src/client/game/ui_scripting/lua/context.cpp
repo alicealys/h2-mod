@@ -206,18 +206,6 @@ namespace ui_scripting::lua
 			element_type["settextoffset"] = &element::set_text_offset;
 			element_type["setslice"] = &element::set_slice;
 
-			element_type["onnotify"] = [&handler](element& element, const std::string& event,
-												  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.element = &element;
-				listener.event = event;
-				listener.is_volatile = false;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
 			element_type["getrect"] = [](const sol::this_state s, element& element)
 			{
 				auto rect = sol::table::create(s.lua_state());
@@ -371,6 +359,18 @@ namespace ui_scripting::lua
 				}
 			);
 
+			element_type["onnotify"] = [&handler](element& element, const std::string& event,
+												  const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &element;
+				listener.event = event;
+				listener.is_volatile = false;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
 			element_type["onnotifyonce"] = [&handler](element& element, const std::string& event,
 													  const event_callback& callback)
 			{
@@ -408,6 +408,53 @@ namespace ui_scripting::lua
 
 			auto menu_type = state.new_usertype<menu>("menu");
 
+			menu_type["onnotify"] = [&handler](menu& menu, const std::string& event,
+											   const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &menu;
+				listener.event = event;
+				listener.is_volatile = false;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			menu_type["onnotifyonce"] = [&handler](menu& menu, const std::string& event,
+												   const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &menu;
+				listener.event = event;
+				listener.is_volatile = true;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			menu_type["notify"] = [&handler](menu& element, const sol::this_state s, const std::string& _event,
+									         sol::variadic_args va)
+			{
+				event event;
+				event.element = &element;
+				event.name = _event;
+
+				for (auto arg : va)
+				{
+					if (arg.get_type() == sol::type::number)
+					{
+						event.arguments.push_back(arg.as<int>());
+					}
+
+					if (arg.get_type() == sol::type::string)
+					{
+						event.arguments.push_back(arg.as<std::string>());
+					}
+				}
+
+				handler.dispatch(event);
+			};
+
 			menu_type["addchild"] = [](const sol::this_state s, menu& menu, element& element)
 			{
 				menu.add_child(&element);
@@ -423,6 +470,31 @@ namespace ui_scripting::lua
 					menu.cursor = cursor;
 				}
 			);
+
+			menu_type["isopen"] = [](menu& menu)
+			{
+				return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
+			};
+
+			menu_type["open"] = [&handler](menu& menu)
+			{
+				event event;
+				event.element = &menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu.open();
+			};
+
+			menu_type["close"] = [&handler](menu& menu)
+			{
+				event event;
+				event.element = &menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu.close();
+			};
 
 			struct game
 			{
@@ -459,24 +531,38 @@ namespace ui_scripting::lua
 				return pos;
 			};
 
-			game_type["openmenu"] = [](const game&, const std::string& name)
+			game_type["openmenu"] = [&handler](const game&, const std::string& name)
 			{
 				if (menus.find(name) == menus.end())
 				{
 					return;
 				}
 
-				menus[name].open();
+				const auto menu = &menus[name];
+
+				event event;
+				event.element = menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu->open();
 			};
 
-			game_type["closemenu"] = [](const game&, const std::string& name)
+			game_type["closemenu"] = [&handler](const game&, const std::string& name)
 			{
 				if (menus.find(name) == menus.end())
 				{
 					return;
 				}
 
-				menus[name].close();
+				const auto menu = &menus[name];
+
+				event event;
+				event.element = menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu->close();
 			};
 
 			game_type["onframe"] = [&scheduler](const game&, const sol::protected_function& callback)
@@ -646,15 +732,15 @@ namespace ui_scripting::lua
 					throw std::runtime_error("Not in game");
 				}
 
-				std::vector<scripting::script_value> arguments{};
-
-				for (auto arg : va)
+				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
 				{
-					arguments.push_back(convert({s, arg}));
-				}
+					std::vector<scripting::script_value> arguments{};
 
-				::scheduler::once([s, va, name, arguments]()
-				{
+					for (auto arg : args)
+					{
+						arguments.push_back(convert({s, arg}));
+					}
+
 					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
 					scripting::notify(player, name, arguments);
 				}, ::scheduler::pipeline::server);

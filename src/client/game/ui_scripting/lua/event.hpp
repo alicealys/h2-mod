@@ -7,7 +7,7 @@ namespace ui_scripting::lua
 	struct event
 	{
 		std::string name;
-		element* element{};
+		const void* element{};
 		std::vector<std::variant<int, std::string>> arguments;
 	};
 }
