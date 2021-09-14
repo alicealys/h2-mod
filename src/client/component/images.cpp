@@ -34,7 +34,7 @@ namespace images
 				return {};
 			}
 
-			return { std::move(data) };
+			return {std::move(data)};
 		}
 
 		std::optional<utils::image> load_raw_image_from_file(game::GfxImage* image)

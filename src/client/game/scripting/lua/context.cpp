@@ -119,12 +119,9 @@ namespace scripting::lua
 
 			vector_type[sol::meta_function::equal_to] = [](const vector& a, const vector& b)
 			{
-				const auto normal_a = normalize_vector(a);
-				const auto normal_b = normalize_vector(b);
-
-				return normal_a.get_x() == normal_b.get_x() &&
-					   normal_a.get_y() == normal_b.get_y() &&
-					   normal_a.get_z() == normal_b.get_z();
+				return a.get_x() == b.get_x() &&
+					   a.get_y() == b.get_y() &&
+					   a.get_z() == b.get_z();
 			};
 
 			vector_type[sol::meta_function::length] = [](const vector& a)

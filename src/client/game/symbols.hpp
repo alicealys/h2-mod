@@ -43,6 +43,7 @@ namespace game
 		unsigned int flags)> Dvar_RegisterVec4{0x6185F0};
 	WEAK symbol<const char* (dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x61B8F0};
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x61A5C0};
+	WEAK symbol<void(const char* dvarName, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x61A910};
 
 	WEAK symbol<int(const char* fname)> generateHashValue{0x343D20};
 
@@ -78,8 +79,11 @@ namespace game
 
 	WEAK symbol<void(float x, float y, float width, float height, float s0, float t0, float s1, float t1,
 					 float* color, Material* material)> R_AddCmdDrawStretchPic{0x3C9710};
+	WEAK symbol<void(float x, float y, float width, float height, float s0, float t0, float s1, float t1,
+					 float angle, float* color, Material* material)> R_AddCmdDrawStretchPicRotateXY{0x3C99B0};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale, 
 					 float rotation, float* color, int style)> R_AddCmdDrawText{0x76C660};
+	WEAK symbol<void(rectangle* rect, float a2, float a3, float a4, float a5, float* color, Material* material)> R_DrawRectangle{0x76A280};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, int fontSize, float x, float y, float xScale, float yScale, float rotation, 
 		const float* color, int style, int cursorPos, char cursor)> R_AddCmdDrawTextWithCursor{0x76CAF0};
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x746FE0};
@@ -99,6 +103,7 @@ namespace game
 	WEAK symbol<bool()> Sys_IsDatabaseReady2{0x5A9FE0};
 
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x5A2930};
+	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x606080};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x89EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x8EC2E0};

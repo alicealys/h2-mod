@@ -1,0 +1,879 @@
+#include <std_include.hpp>
+#include "context.hpp"
+#include "error.hpp"
+#include "../../scripting/execution.hpp"
+
+#include "../../../component/ui_scripting.hpp"
+
+#include "component/game_console.hpp"
+#include "component/scheduler.hpp"
+
+#include <utils/string.hpp>
+#include <utils/nt.hpp>
+
+namespace ui_scripting::lua
+{
+	std::unordered_map<std::string, menu> menus;
+	std::vector<element*> elements;
+	element ui_element;
+	int mouse[2];
+
+	namespace
+	{
+		const auto animation_script = utils::nt::load_resource(LUA_ANIMATION_SCRIPT);
+
+		scripting::script_value convert(const sol::lua_value& value)
+		{
+			if (value.is<int>())
+			{
+				return {value.as<int>()};
+			}
+
+			if (value.is<unsigned int>())
+			{
+				return {value.as<unsigned int>()};
+			}
+
+			if (value.is<bool>())
+			{
+				return {value.as<bool>()};
+			}
+
+			if (value.is<double>())
+			{
+				return {value.as<double>()};
+			}
+
+			if (value.is<float>())
+			{
+				return {value.as<float>()};
+			}
+			if (value.is<std::string>())
+			{
+				return {value.as<std::string>()};
+			}
+
+			if (value.is<scripting::vector>())
+			{
+				return {value.as<scripting::vector>()};
+			}
+
+			return {};
+		}
+
+		bool valid_dvar_name(const std::string& name)
+		{
+			for (const auto c : name)
+			{
+				if (!isalnum(c))
+				{
+					return false;
+				}
+			}
+			
+			return true;
+		}
+
+		void setup_types(sol::state& state, event_handler& handler, scheduler& scheduler)
+		{
+			auto vector_type = state.new_usertype<scripting::vector>("vector", sol::constructors<scripting::vector(float, float, float)>());
+			vector_type["x"] = sol::property(&scripting::vector::get_x, &scripting::vector::set_x);
+			vector_type["y"] = sol::property(&scripting::vector::get_y, &scripting::vector::set_y);
+			vector_type["z"] = sol::property(&scripting::vector::get_z, &scripting::vector::set_z);
+
+			vector_type["r"] = sol::property(&scripting::vector::get_x, &scripting::vector::set_x);
+			vector_type["g"] = sol::property(&scripting::vector::get_y, &scripting::vector::set_y);
+			vector_type["b"] = sol::property(&scripting::vector::get_z, &scripting::vector::set_z);
+
+			vector_type[sol::meta_function::addition] = sol::overload(
+				[](const scripting::vector& a, const scripting::vector& b)
+				{
+					return scripting::vector(
+						a.get_x() + b.get_x(),
+						a.get_y() + b.get_y(),
+						a.get_z() + b.get_z()
+					);
+				},
+				[](const scripting::vector& a, const int value)
+				{
+					return scripting::vector(
+						a.get_x() + value,
+						a.get_y() + value,
+						a.get_z() + value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::subtraction] = sol::overload(
+				[](const scripting::vector& a, const scripting::vector& b)
+				{
+					return scripting::vector(
+						a.get_x() - b.get_x(),
+						a.get_y() - b.get_y(),
+						a.get_z() - b.get_z()
+					);
+				},
+				[](const scripting::vector& a, const int value)
+				{
+					return scripting::vector(
+						a.get_x() - value,
+						a.get_y() - value,
+						a.get_z() - value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::multiplication] = sol::overload(
+				[](const scripting::vector& a, const scripting::vector& b)
+				{
+					return scripting::vector(
+						a.get_x() * b.get_x(),
+						a.get_y() * b.get_y(),
+						a.get_z() * b.get_z()
+					);
+				},
+				[](const scripting::vector& a, const int value)
+				{
+					return scripting::vector(
+						a.get_x() * value,
+						a.get_y() * value,
+						a.get_z() * value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::division] = sol::overload(
+				[](const scripting::vector& a, const scripting::vector& b)
+				{
+					return scripting::vector(
+						a.get_x() / b.get_x(),
+						a.get_y() / b.get_y(),
+						a.get_z() / b.get_z()
+					);
+				},
+				[](const scripting::vector& a, const int value)
+				{
+					return scripting::vector(
+						a.get_x() / value,
+						a.get_y() / value,
+						a.get_z() / value
+					);
+				}
+			);
+
+			vector_type[sol::meta_function::equal_to] = [](const scripting::vector& a, const scripting::vector& b)
+			{
+				return a.get_x() == b.get_x() &&
+					   a.get_y() == b.get_y() &&
+					   a.get_z() == b.get_z();
+			};
+
+			vector_type[sol::meta_function::length] = [](const scripting::vector& a)
+			{
+				return sqrt((a.get_x() * a.get_x()) + (a.get_y() * a.get_y()) + (a.get_z() * a.get_z()));
+			};
+
+			vector_type[sol::meta_function::to_string] = [](const scripting::vector& a)
+			{
+				return utils::string::va("{x: %f, y: %f, z: %f}", a.get_x(), a.get_y(), a.get_z());
+			};
+
+			auto element_type = state.new_usertype<element>("element", "new", []()
+			{
+				const auto el = new element();
+				elements.push_back(el);
+				return el;
+			});
+
+			element_type["setvertalign"] = &element::set_vertalign;
+			element_type["sethorzalign"] = &element::set_horzalign;
+			element_type["setrect"] = &element::set_rect;
+			element_type["setfont"] = sol::overload(
+				static_cast<void(element::*)(const std::string&)>(&element::set_font),
+				static_cast<void(element::*)(const std::string&, int)>(&element::set_font)
+			);
+			element_type["settext"] = &element::set_text;
+			element_type["setmaterial"] = &element::set_material;
+			element_type["setcolor"] = &element::set_color;
+			element_type["setbackcolor"] = &element::set_background_color;
+			element_type["setbordercolor"] = &element::set_border_color;
+			element_type["setborderwidth"] = sol::overload(
+				static_cast<void(element::*)(float)>(&element::set_border_width),
+				static_cast<void(element::*)(float, float)>(&element::set_border_width),
+				static_cast<void(element::*)(float, float, float)>(&element::set_border_width),
+				static_cast<void(element::*)(float, float, float, float)>(&element::set_border_width)
+			);
+			element_type["settextoffset"] = &element::set_text_offset;
+			element_type["setslice"] = &element::set_slice;
+
+			element_type["getrect"] = [](const sol::this_state s, element& element)
+			{
+				auto rect = sol::table::create(s.lua_state());
+				rect["x"] = element.x;
+				rect["y"] = element.y;
+				rect["w"] = element.w + element.border_width[1] + element.border_width[3];
+				rect["h"] = element.h + element.border_width[0] + element.border_width[2];
+
+				return rect;
+			};
+
+			element_type["x"] = sol::property(
+				[](element& element)
+				{
+					return element.x;
+				},
+				[](element& element, float x)
+				{
+					element.x = x;
+				}
+			);
+
+			element_type["y"] = sol::property(
+				[](element& element)
+				{
+					return element.y;
+				},
+				[](element& element, float y)
+				{
+					element.y = y;
+				}
+			);
+
+			element_type["w"] = sol::property(
+				[](element& element)
+				{
+					return element.w;
+				},
+				[](element& element, float w)
+				{
+					element.w = w;
+				}
+			);
+
+			element_type["h"] = sol::property(
+				[](element& element)
+				{
+					return element.h;
+				},
+				[](element& element, float h)
+				{
+					element.h = h;
+				}
+			);
+
+			element_type["color"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["r"] = element.color[0];
+					color["g"] = element.color[1];
+					color["b"] = element.color[2];
+					color["a"] = element.color[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
+					element.color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
+					element.color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
+					element.color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["backcolor"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["r"] = element.background_color[0];
+					color["g"] = element.background_color[1];
+					color["b"] = element.background_color[2];
+					color["a"] = element.background_color[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.background_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
+					element.background_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
+					element.background_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
+					element.background_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["bordercolor"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["r"] = element.border_color[0];
+					color["g"] = element.border_color[1];
+					color["b"] = element.border_color[2];
+					color["a"] = element.border_color[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.border_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
+					element.border_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
+					element.border_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
+					element.border_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["borderwidth"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["top"] = element.border_width[0];
+					color["right"] = element.border_width[1];
+					color["bottom"] = element.border_width[2];
+					color["left"] = element.border_width[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.border_width[0] = color["top"].get_type() == sol::type::number ? color["top"].get<float>() : 0.f;
+					element.border_width[1] = color["right"].get_type() == sol::type::number ? color["right"].get<float>() : element.border_width[1];
+					element.border_width[2] = color["bottom"].get_type() == sol::type::number ? color["bottom"].get<float>() : element.border_width[2];
+					element.border_width[3] = color["left"].get_type() == sol::type::number ? color["left"].get<float>() : element.border_width[3];
+				}
+			);
+
+			element_type["font"] = sol::property(
+				[](element& element)
+				{
+					return element.font;
+				},
+				[](element& element, const std::string& font)
+				{
+					element.set_font(font);
+				}
+			);
+
+			element_type["fontsize"] = sol::property(
+				[](element& element)
+				{
+					return element.fontsize;
+				},
+				[](element& element, float fontsize)
+				{
+					element.fontsize = (int)fontsize;
+				}
+			);
+
+			element_type["onnotify"] = [&handler](element& element, const std::string& event,
+												  const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &element;
+				listener.event = event;
+				listener.is_volatile = false;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			element_type["onnotifyonce"] = [&handler](element& element, const std::string& event,
+													  const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &element;
+				listener.event = event;
+				listener.is_volatile = true;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			element_type["notify"] = [&handler](element& element, const sol::this_state s, const std::string& _event,
+									            sol::variadic_args va)
+			{
+				event event;
+				event.element = &element;
+				event.name = _event;
+
+				for (auto arg : va)
+				{
+					if (arg.get_type() == sol::type::number)
+					{
+						event.arguments.push_back(arg.as<int>());
+					}
+
+					if (arg.get_type() == sol::type::string)
+					{
+						event.arguments.push_back(arg.as<std::string>());
+					}
+				}
+
+				handler.dispatch(event);
+			};
+
+			auto menu_type = state.new_usertype<menu>("menu");
+
+			menu_type["onnotify"] = [&handler](menu& menu, const std::string& event,
+											   const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &menu;
+				listener.event = event;
+				listener.is_volatile = false;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			menu_type["onnotifyonce"] = [&handler](menu& menu, const std::string& event,
+												   const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &menu;
+				listener.event = event;
+				listener.is_volatile = true;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			menu_type["notify"] = [&handler](menu& element, const sol::this_state s, const std::string& _event,
+									         sol::variadic_args va)
+			{
+				event event;
+				event.element = &element;
+				event.name = _event;
+
+				for (auto arg : va)
+				{
+					if (arg.get_type() == sol::type::number)
+					{
+						event.arguments.push_back(arg.as<int>());
+					}
+
+					if (arg.get_type() == sol::type::string)
+					{
+						event.arguments.push_back(arg.as<std::string>());
+					}
+				}
+
+				handler.dispatch(event);
+			};
+
+			menu_type["addchild"] = [](const sol::this_state s, menu& menu, element& element)
+			{
+				menu.add_child(&element);
+			};
+
+			menu_type["cursor"] = sol::property(
+				[](menu& menu)
+				{
+					return menu.cursor;
+				},
+				[](menu& menu, bool cursor)
+				{
+					menu.cursor = cursor;
+				}
+			);
+
+			menu_type["isopen"] = [](menu& menu)
+			{
+				return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
+			};
+
+			menu_type["open"] = [&handler](menu& menu)
+			{
+				event event;
+				event.element = &menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu.open();
+			};
+
+			menu_type["close"] = [&handler](menu& menu)
+			{
+				event event;
+				event.element = &menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu.close();
+			};
+
+			struct game
+			{
+			};
+			auto game_type = state.new_usertype<game>("game_");
+			state["game"] = game();
+
+			game_type["time"] = []()
+			{
+				const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+				return now.count();
+			};
+
+			game_type["newmenu"] = [](const sol::lua_value&, const std::string& name)
+			{
+				menus[name] = {};
+				return &menus[name];
+			};
+
+			game_type["newmenuoverlay"] = [](const sol::lua_value&, const std::string& name, const std::string& menu_name)
+			{
+				menus[name] = {};
+				menus[name].type = menu_type::overlay;
+				menus[name].overlay_menu = menu_name;
+				return &menus[name];
+			};
+
+			game_type["getmouseposition"] = [](const sol::this_state s, const game&)
+			{
+				auto pos = sol::table::create(s.lua_state());
+				pos["x"] = mouse[0];
+				pos["y"] = mouse[1];
+
+				return pos;
+			};
+
+			game_type["openmenu"] = [&handler](const game&, const std::string& name)
+			{
+				if (menus.find(name) == menus.end())
+				{
+					return;
+				}
+
+				const auto menu = &menus[name];
+
+				event event;
+				event.element = menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu->open();
+			};
+
+			game_type["closemenu"] = [&handler](const game&, const std::string& name)
+			{
+				if (menus.find(name) == menus.end())
+				{
+					return;
+				}
+
+				const auto menu = &menus[name];
+
+				event event;
+				event.element = menu;
+				event.name = "close";
+				handler.dispatch(event);
+
+				menu->close();
+			};
+
+			game_type["onframe"] = [&scheduler](const game&, const sol::protected_function& callback)
+			{
+				return scheduler.add(callback, 0, false);
+			};
+
+			game_type["ontimeout"] = [&scheduler](const game&, const sol::protected_function& callback,
+			                                      const long long milliseconds)
+			{
+				return scheduler.add(callback, milliseconds, true);
+			};
+
+			game_type["oninterval"] = [&scheduler](const game&, const sol::protected_function& callback,
+			                                       const long long milliseconds)
+			{
+				return scheduler.add(callback, milliseconds, false);
+			};
+
+			game_type["onnotify"] = [&handler](const game&, const std::string& event,
+												  const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &ui_element;
+				listener.event = event;
+				listener.is_volatile = false;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			game_type["onnotifyonce"] = [&handler](const game&, const std::string& event,
+													  const event_callback& callback)
+			{
+				event_listener listener{};
+				listener.callback = callback;
+				listener.element = &ui_element;
+				listener.event = event;
+				listener.is_volatile = true;
+
+				return handler.add_event_listener(std::move(listener));
+			};
+
+			game_type["isingame"] = []()
+			{
+				return ::game::CL_IsCgameInitialized() && ::game::g_entities[0].client;
+			};
+
+			game_type["getdvar"] = [](const game&, const sol::this_state s, const std::string& name)
+			{
+				const auto dvar = ::game::Dvar_FindVar(name.data());
+				if (!dvar)
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+
+				const std::string value = ::game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
+				return sol::lua_value{s, value};
+			};
+
+			game_type["getdvarint"] = [](const game&, const sol::this_state s, const std::string& name)
+			{
+				const auto dvar = ::game::Dvar_FindVar(name.data());
+				if (!dvar)
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+
+				const auto value = atoi(::game::Dvar_ValueToString(dvar, nullptr, &dvar->current));
+				return sol::lua_value{s, value};
+			};
+
+			game_type["getdvarfloat"] = [](const game&, const sol::this_state s, const std::string& name)
+			{
+				const auto dvar = ::game::Dvar_FindVar(name.data());
+				if (!dvar)
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+
+				const auto value = atof(::game::Dvar_ValueToString(dvar, nullptr, &dvar->current));
+				return sol::lua_value{s, value};
+			};
+
+			game_type["setdvar"] = [](const game&, const std::string& name, const sol::lua_value& value)
+			{
+				if (!valid_dvar_name(name))
+				{
+					throw std::runtime_error("Invalid DVAR name, must be alphanumeric");
+				}
+
+				const auto hash = ::game::generateHashValue(name.data());
+				std::string string_value;
+
+				if (value.is<bool>())
+				{
+					string_value = utils::string::va("%i", value.as<bool>());
+				} 
+				else if (value.is<int>())
+				{
+					string_value = utils::string::va("%i", value.as<int>());
+				} 
+				else if (value.is<float>())
+				{
+					string_value = utils::string::va("%f", value.as<float>());
+				}
+				else if (value.is<scripting::vector>())
+				{
+					const auto v = value.as<scripting::vector>();
+					string_value = utils::string::va("%f %f %f", 
+						v.get_x(),
+						v.get_y(),
+						v.get_z()
+					);
+				}
+
+				if (value.is<std::string>())
+				{
+					string_value = value.as<std::string>();
+				}
+
+				::game::Dvar_SetCommand(hash, "", string_value.data());
+			};
+
+			game_type["drawmaterial"] = [](const game&, float x, float y, float width, float height, float s0, float t0, float s1, float t1,
+				const sol::lua_value& color_value, const std::string& material)
+			{
+				const auto color = color_value.as<std::vector<float>>();
+				float _color[4] =
+				{
+					color[0],
+					color[1],
+					color[2],
+					color[3],
+				};
+
+				const auto _material = ::game::Material_RegisterHandle(material.data());
+				::game::R_AddCmdDrawStretchPic(x, y, width, height, s0, t0, s1, t1, _color, _material);
+			};
+
+			game_type["playsound"] = [](const game&, const std::string& sound)
+			{
+				::game::UI_PlayLocalSoundAlias(0, sound.data());
+			};
+
+			game_type["getwindowsize"] = [](const game&, const sol::this_state s)
+			{
+				const auto size = ::game::ScrPlace_GetViewPlacement()->realViewportSize;
+
+				auto screen = sol::table::create(s.lua_state());
+				screen["x"] = size[0];
+				screen["y"] = size[1];
+
+				return screen;
+			};
+
+			struct player
+			{
+			};
+			auto player_type = state.new_usertype<player>("player_");
+			state["player"] = player();
+
+			player_type["notify"] = [](const player&, const sol::this_state s, const std::string& name, sol::variadic_args va)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
+				{
+					std::vector<scripting::script_value> arguments{};
+
+					for (auto arg : args)
+					{
+						arguments.push_back(convert({s, arg}));
+					}
+
+					const auto player_value = scripting::call("getentbynum", {0});
+					if (player_value.get_raw().type != ::game::SCRIPT_OBJECT)
+					{
+						return;
+					}
+
+					const auto player = player_value.as<scripting::entity>();
+
+					scripting::notify(player, name, arguments);
+				}, ::scheduler::pipeline::server);
+			};
+
+			player_type["getorigin"] = [](const player&)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				return scripting::vector(
+					::game::g_entities[0].origin[0],
+					::game::g_entities[0].origin[1],
+					::game::g_entities[0].origin[2]
+				);
+			};
+
+			player_type["setorigin"] = [](const player&, const scripting::vector& velocity)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				::game::g_entities[0].origin[0] = velocity.get_x();
+				::game::g_entities[0].origin[1] = velocity.get_y();
+				::game::g_entities[0].origin[2] = velocity.get_z();
+			};
+
+			player_type["getvelocity"] = [](const player&)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				return scripting::vector(
+					::game::g_entities[0].client->velocity[0],
+					::game::g_entities[0].client->velocity[1],
+					::game::g_entities[0].client->velocity[2]
+				);
+			};
+
+			player_type["setvelocity"] = [](const player&, const scripting::vector& velocity)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				::game::g_entities[0].client->velocity[0] = velocity.get_x();
+				::game::g_entities[0].client->velocity[1] = velocity.get_y();
+				::game::g_entities[0].client->velocity[2] = velocity.get_z();
+			};
+
+			state.script(animation_script);
+		}
+	}
+
+	context::context(std::string folder)
+		: folder_(std::move(folder))
+		  , scheduler_(state_)
+		  , event_handler_(state_)
+
+	{
+		this->state_.open_libraries(sol::lib::base,
+		                            sol::lib::package,
+		                            sol::lib::io,
+		                            sol::lib::string,
+		                            sol::lib::os,
+		                            sol::lib::math,
+		                            sol::lib::table);
+
+		this->state_["include"] = [this](const std::string& file)
+		{
+			this->load_script(file);
+		};
+
+		sol::function old_require = this->state_["require"];
+		auto base_path = utils::string::replace(this->folder_, "/", ".") + ".";
+		this->state_["require"] = [base_path, old_require](const std::string& path)
+		{
+			return old_require(base_path + path);
+		};
+
+		this->state_["scriptdir"] = [this]()
+		{
+			return this->folder_;
+		};
+
+		setup_types(this->state_, this->event_handler_, this->scheduler_);
+
+		printf("Loading ui script '%s'\n", this->folder_.data());
+		this->load_script("__init__");
+	}
+
+	context::~context()
+	{
+		this->state_.collect_garbage();
+		this->scheduler_.clear();
+		this->event_handler_.clear();
+		this->state_ = {};
+	}
+
+	void context::run_frame()
+	{
+		this->scheduler_.run_frame();
+		this->state_.collect_garbage();
+	}
+
+	void context::notify(const event& e)
+	{
+		this->scheduler_.dispatch(e);
+		this->event_handler_.dispatch(e);
+	}
+
+	void context::load_script(const std::string& script)
+	{
+		if (!this->loaded_scripts_.emplace(script).second)
+		{
+			return;
+		}
+
+		const auto file = (std::filesystem::path{this->folder_} / (script + ".lua")).generic_string();
+		handle_error(this->state_.safe_script_file(file, &sol::script_pass_on_error));
+	}
+}
