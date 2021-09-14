@@ -22,6 +22,7 @@ namespace ui_scripting
 		void set_font(const std::string& _font);
 		void set_font(const std::string& _font, const int _fontsize);
 		void set_color(float r, float g, float b, float a);
+		void set_glow_color(float r, float g, float b, float a);
 		void set_text_offset(float x, float y);
 
 		void set_background_color(float r, float g, float b, float a);
@@ -51,6 +52,7 @@ namespace ui_scripting
 
 		float text_offset[2] = {0.f, 0.f};
 		float color[4] = {1.f, 1.f, 1.f, 1.f};
+		float glow_color[4] = {0.f, 0.f, 0.f, 0.f};
 		float background_color[4] = {0.f, 0.f, 0.f, 0.f};
 		float border_color[4] = {0.f, 0.f, 0.f, 0.f};
 		float border_width[4] = {0.f, 0.f, 0.f, 0.f};
@@ -59,7 +61,7 @@ namespace ui_scripting
 		alignment horzalign = alignment::start;
 		alignment vertalign = alignment::start;
 
-		std::string font = "fonts/fira_mono_regular.ttf";
+		std::string font = "default";
 		std::string material = "white";
 		std::string border_material = "white";
 		std::string text{};
