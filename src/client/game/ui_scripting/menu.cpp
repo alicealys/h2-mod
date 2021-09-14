@@ -16,13 +16,21 @@ namespace ui_scripting
 
 	void menu::open()
 	{
-		*game::keyCatchers |= 0x40;
+		if (this->cursor)
+		{
+			*game::keyCatchers |= 0x40;
+		}
+
 		this->visible = true;
 	}
 
 	void menu::close()
 	{
-		*game::keyCatchers &= ~0x40;
+		if (this->cursor)
+		{
+			*game::keyCatchers &= ~0x40;
+		}
+
 		this->visible = false;
 	}
 

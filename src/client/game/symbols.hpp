@@ -48,6 +48,9 @@ namespace game
 	WEAK symbol<int(const char* fname)> generateHashValue{0x343D20};
 
 	WEAK symbol<bool()> CL_IsCgameInitialized{0x3CA0C0};
+	WEAK symbol<void(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale,
+		const float* color, int style, const float* glowColor, Material* fxMaterial, Material* fxMaterialGlow,
+		int fxBirthTime, int fxLetterTime, int fxDecayStartTime, int fxDecayDuration, int a17)> CL_DrawTextPhysicalWithEffects{0x3D4990};
 
 	WEAK symbol<unsigned int (unsigned int parentId, unsigned int name)> FindVariable{0x5C1D50};
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};

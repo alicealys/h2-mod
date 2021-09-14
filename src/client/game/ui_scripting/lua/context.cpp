@@ -195,6 +195,7 @@ namespace ui_scripting::lua
 			element_type["settext"] = &element::set_text;
 			element_type["setmaterial"] = &element::set_material;
 			element_type["setcolor"] = &element::set_color;
+			element_type["setglowcolor"] = &element::set_glow_color;
 			element_type["setbackcolor"] = &element::set_background_color;
 			element_type["setbordercolor"] = &element::set_border_color;
 			element_type["setborderwidth"] = sol::overload(
@@ -277,6 +278,25 @@ namespace ui_scripting::lua
 					element.color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
 					element.color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
 					element.color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["glowcolor"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["r"] = element.glow_color[0];
+					color["g"] = element.glow_color[1];
+					color["b"] = element.glow_color[2];
+					color["a"] = element.glow_color[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.glow_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
+					element.glow_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
+					element.glow_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
+					element.glow_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
 				}
 			);
 
