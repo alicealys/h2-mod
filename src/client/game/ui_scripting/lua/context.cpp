@@ -426,6 +426,21 @@ namespace ui_scripting::lua
 				handler.dispatch(event);
 			};
 
+			element_type[sol::meta_function::new_index] = [](element& element, const std::string& attribute, const std::string& value)
+			{
+				element.attributes[attribute] = value;
+			};
+
+			element_type[sol::meta_function::index] = [](element& element, const sol::this_state s, const std::string& attribute)
+			{
+				if (element.attributes.find(attribute) == element.attributes.end())
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+
+				return sol::lua_value{s, element.attributes[attribute]};
+			};
+
 			auto menu_type = state.new_usertype<menu>("menu");
 
 			menu_type["onnotify"] = [&handler](menu& menu, const std::string& event,
@@ -516,11 +531,95 @@ namespace ui_scripting::lua
 				menu.close();
 			};
 
+			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const std::string& value, const std::string& attribute)
+			{
+				for (const auto& element : menu.children)
+				{
+					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+					{
+						return sol::lua_value{s, element};
+					}
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			menu_type["getelements"] = sol::overload
+			(
+				[](menu& menu, const sol::this_state s, const std::string& value, const std::string& attribute)
+				{
+					auto result = sol::table::create(s.lua_state());
+
+					for (const auto& element : menu.children)
+					{
+						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+						{
+							result.add(element);
+						}
+					}
+
+					return result;
+				},
+				[](menu& menu, const sol::this_state s)
+				{
+					auto result = sol::table::create(s.lua_state());
+
+					for (const auto& element : menu.children)
+					{
+						result.add(element);
+					}
+
+					return result;
+				}
+			);
+
 			struct game
 			{
 			};
 			auto game_type = state.new_usertype<game>("game_");
 			state["game"] = game();
+
+			game_type["getelement"] = [](const game&, const sol::this_state s, const std::string& value, const std::string& attribute)
+			{
+				for (const auto& element : elements)
+				{
+					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+					{
+						return sol::lua_value{s, element};
+					}
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			game_type["getelements"] = sol::overload
+			(
+				[](const game&, const sol::this_state s, const std::string& value, const std::string& attribute)
+				{
+					auto result = sol::table::create(s.lua_state());
+
+					for (const auto& element : elements)
+					{
+						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+						{
+							result.add(element);
+						}
+					}
+
+					return result;
+				},
+				[](const game&, const sol::this_state s)
+				{
+					auto result = sol::table::create(s.lua_state());
+
+					for (const auto& element : elements)
+					{
+						result.add(element);
+					}
+
+					return result;
+				}
+			);
 
 			game_type["time"] = []()
 			{

@@ -61,6 +61,7 @@ namespace ui_scripting
 		alignment horzalign = alignment::start;
 		alignment vertalign = alignment::start;
 
+		std::unordered_map<std::string, std::string> attributes = {};
 		std::string font = "default";
 		std::string material = "white";
 		std::string border_material = "white";
