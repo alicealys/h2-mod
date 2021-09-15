@@ -10,18 +10,6 @@
 
 namespace branding
 {
-	namespace
-	{
-		void draw_brand()
-		{
-			const auto font = game::R_RegisterFont("fonts/defaultBold.otf", 22);
-			float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
-
-			game::R_AddCmdDrawText("h2-mod", 0x7FFFFFFF, font, 15.f, 15.f + static_cast<float>(font->pixelHeight), 
-				1.f, 1.f, 0.0f, color, 0);
-		}
-	}
-
 	class component final : public component_interface
 	{
 	public:
@@ -29,12 +17,21 @@ namespace branding
 		{
 			localized_strings::override("MENU_SP_CAMPAIGN", "H2-Mod");
 
-			scheduler::once([]()
+			scheduler::loop([]()
 			{
-				scheduler::loop([]()
-				{
-					draw_brand();
-				}, scheduler::pipeline::renderer);
+				const auto x = 15.f;
+				const auto y = 15.f;
+				const auto scale = 1.0f;
+				float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
+				const auto* text = "h2-mod";
+
+				auto* font = game::R_RegisterFont("fonts/defaultBold.otf", 22);
+
+				if (!font) return;
+
+				game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, static_cast<float>(x),
+				                       y + static_cast<float>(font->pixelHeight) * scale,
+				                       scale, scale, 0.0f, color, 0);
 			}, scheduler::pipeline::renderer);
 		}
 	};

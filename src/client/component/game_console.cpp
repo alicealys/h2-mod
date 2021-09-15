@@ -683,11 +683,7 @@ namespace game_console
 	public:
 		void post_unpack() override
 		{
-			scheduler::once([]()
-			{
-				scheduler::loop(draw_console, scheduler::pipeline::renderer);
-			}, scheduler::pipeline::renderer);
-
+			scheduler::loop(draw_console, scheduler::pipeline::renderer);
 
 			con.cursor = 0;
 			con.visible_line_count = 0;
