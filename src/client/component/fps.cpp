@@ -262,6 +262,11 @@ namespace fps
 	public:
 		void post_unpack() override
 		{
+			scheduler::once([]()
+			{
+				scheduler::loop(draw, scheduler::pipeline::renderer);
+			}, scheduler::pipeline::renderer);
+
 			cg_drawSpeed = dvars::register_int("cg_drawSpeed", 0, 0, 2, game::DVAR_FLAG_SAVED);
 			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED, false);
 
@@ -277,7 +282,6 @@ namespace fps
 			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED);
 			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED);
 
-			scheduler::loop(draw, scheduler::pipeline::renderer);
 		}
 	};
 }
