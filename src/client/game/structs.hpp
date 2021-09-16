@@ -58,7 +58,8 @@ namespace game
 
 	struct gentity_s
 	{
-		char __pad0[0x1C];
+		EntityState s;
+		char __pad0[0x1B];
 		vec3_t origin;
 		char __pad1[0xF0];
 		gclient_s* client;
