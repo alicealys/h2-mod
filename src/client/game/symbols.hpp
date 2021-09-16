@@ -12,6 +12,9 @@ namespace game
 	WEAK symbol<void(int type, VariableUnion u)> RemoveRefToValue{0x5C29B0};
 	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0x5C28A0};
 
+	WEAK symbol<void(unsigned int weapon, bool isAlternate, 
+		char* output, unsigned int maxStringLen)> BG_GetWeaponNameComplete{0x6A0800};
+
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x59A050};
 
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x37F450};

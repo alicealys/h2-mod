@@ -423,7 +423,7 @@ namespace scripting::lua
 
 						for (auto arg : va)
 						{
-							arguments.push_back(convert({ s, arg }));
+							arguments.push_back(convert({s, arg}));
 						}
 
 						notifies::hook_enabled = false;
@@ -438,7 +438,7 @@ namespace scripting::lua
 
 						for (auto arg : va)
 						{
-							arguments.push_back(convert({ s, arg }));
+							arguments.push_back(convert({s, arg}));
 						}
 
 						notifies::hook_enabled = false;
@@ -455,7 +455,7 @@ namespace scripting::lua
 
 				for (auto arg : va)
 				{
-					arguments.push_back(convert({ s, arg }));
+					arguments.push_back(convert({s, arg}));
 				}
 
 				const auto level = entity{*::game::levelEntityId};
@@ -465,6 +465,11 @@ namespace scripting::lua
 				notifies::hook_enabled = true;
 
 				return result;
+			};
+
+			game_type["onentitydamage"] = [](const game&, const sol::protected_function& callback)
+			{
+				notifies::add_entity_damage_callback(callback);
 			};
 		}
 	}
