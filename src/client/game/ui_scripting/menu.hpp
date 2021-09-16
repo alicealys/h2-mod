@@ -17,12 +17,13 @@ namespace ui_scripting
 
 		bool visible = false;
 		bool cursor = false;
+		bool cursor_was_enabled = false;
 
 		void open();
 		void close();
 
 		void add_child(element* el);
-		void render() const;
+		void render();
 
 		menu_type type = normal;
 
