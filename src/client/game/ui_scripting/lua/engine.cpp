@@ -322,7 +322,7 @@ namespace ui_scripting::lua::engine
 		{
 			check_resize();
 
-			for (const auto& menu : menus)
+			for (auto& menu : menus)
 			{
 				if (is_menu_visible(menu.second))
 				{
