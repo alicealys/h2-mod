@@ -31,7 +31,6 @@ namespace scripting::lua
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			state["level"] = entity{*game::levelEntityId};
-			state["player"] = call("getentbynum", {0}).as<entity>();
 
 			auto vector_type = state.new_usertype<vector>("vector", sol::constructors<vector(float, float, float)>());
 			vector_type["x"] = sol::property(&vector::get_x, &vector::set_x);
