@@ -12,6 +12,7 @@
 #include "../../../component/chat.hpp"
 
 #include <utils/string.hpp>
+#include <utils/io.hpp>
 
 namespace scripting::lua
 {
@@ -31,6 +32,16 @@ namespace scripting::lua
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			state["level"] = entity{*game::levelEntityId};
+
+			state["io"]["fileexists"] = utils::io::file_exists;
+			state["io"]["writefile"] = utils::io::write_file;
+			state["io"]["filesize"] = utils::io::file_size;
+			state["io"]["createdirectory"] = utils::io::create_directory;
+			state["io"]["directoryexists"] = utils::io::directory_exists;
+			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
+			state["io"]["listfiles"] = utils::io::list_files;
+			state["io"]["copyfolder"] = utils::io::copy_folder;
+			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
 
 			auto vector_type = state.new_usertype<vector>("vector", sol::constructors<vector(float, float, float)>());
 			vector_type["x"] = sol::property(&vector::get_x, &vector::set_x);
