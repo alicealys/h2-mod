@@ -10,6 +10,7 @@
 
 #include <utils/string.hpp>
 #include <utils/nt.hpp>
+#include <utils/io.hpp>
 
 namespace ui_scripting::lua
 {
@@ -65,7 +66,7 @@ namespace ui_scripting::lua
 		{
 			for (const auto c : name)
 			{
-				if (!isalnum(c))
+				if (!isalnum(c) && c != '_')
 				{
 					return false;
 				}
@@ -76,6 +77,16 @@ namespace ui_scripting::lua
 
 		void setup_types(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
+			state["io"]["fileexists"] = utils::io::file_exists;
+			state["io"]["writefile"] = utils::io::write_file;
+			state["io"]["filesize"] = utils::io::file_size;
+			state["io"]["createdirectory"] = utils::io::create_directory;
+			state["io"]["directoryexists"] = utils::io::directory_exists;
+			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
+			state["io"]["listfiles"] = utils::io::list_files;
+			state["io"]["copyfolder"] = utils::io::copy_folder;
+			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+
 			auto vector_type = state.new_usertype<scripting::vector>("vector", sol::constructors<scripting::vector(float, float, float)>());
 			vector_type["x"] = sol::property(&scripting::vector::get_x, &scripting::vector::set_x);
 			vector_type["y"] = sol::property(&scripting::vector::get_y, &scripting::vector::set_y);

@@ -3,6 +3,7 @@
 
 #include "game/game.hpp"
 
+#include "command.hpp"
 #include "scheduler.hpp"
 #include "scripting.hpp"
 
@@ -55,6 +56,7 @@ namespace scripting
 		void scr_load_level_stub()
 		{
 			scr_load_level_hook.invoke<void>();
+			command::execute("reloadmenus");
 			lua::engine::start();
 		}
 

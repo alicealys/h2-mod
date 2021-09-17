@@ -39,7 +39,6 @@ launcher::mode detect_mode_from_arguments()
 	return launcher::mode::none;
 }
 
-
 FARPROC load_binary(const launcher::mode mode, uint64_t* base_address)
 {
 	loader loader;
