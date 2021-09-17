@@ -8,7 +8,6 @@
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/functions.hpp"
-#include "game/scripting/execution.hpp"
 #include "game/scripting/lua/engine.hpp"
 
 #include <utils/hook.hpp>
@@ -22,8 +21,8 @@ namespace scripting
 	{
 		utils::hook::detour vm_notify_hook;
 
+		utils::hook::detour scr_load_level_hook;
 		utils::hook::detour g_shutdown_game_hook;
-		utils::hook::detour player_spawn_hook;
 
 		utils::hook::detour scr_add_class_field_hook;
 
@@ -53,15 +52,21 @@ namespace scripting
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
 		}
 
-		void player_spawn_stub(const game::gentity_s* player)
+		void scr_load_level_stub()
 		{
-			player_spawn_hook.invoke<void>(player);
+			scr_load_level_hook.invoke<void>();
 			lua::engine::start();
 		}
 
 		void g_shutdown_game_stub(const int free_scripts)
 		{
 			lua::engine::stop();
+
+			if (!free_scripts)
+			{
+				lua::engine::start();
+			}
+
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
 	
@@ -94,6 +99,7 @@ namespace scripting
 		{
 			const auto function_name = scripting::find_token(threadName);
 			script_function_table[current_file][function_name] = codePos;
+
 			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
 		}
 	}
@@ -105,8 +111,8 @@ namespace scripting
 		{
 			vm_notify_hook.create(game::base_address + 0x5CC450, vm_notify_stub);
 
+			scr_load_level_hook.create(game::base_address + 0x4C7EB0, scr_load_level_stub);
 			g_shutdown_game_hook.create(game::base_address + 0x4CBAD0, g_shutdown_game_stub);
-			player_spawn_hook.create(game::base_address + 0x4B0710, player_spawn_stub);
 
 			scr_add_class_field_hook.create(game::base_address + 0x5C2C30, scr_add_class_field_stub);
 			scr_set_thread_position_hook.create(game::base_address + 0x5BC7E0, scr_set_thread_position_stub);
