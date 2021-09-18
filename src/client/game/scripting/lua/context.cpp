@@ -32,6 +32,7 @@ namespace scripting::lua
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			state["level"] = entity{*game::levelEntityId};
+			state["player"] = call("getentbynum", {0}).as<entity>();
 
 			state["io"]["fileexists"] = utils::io::file_exists;
 			state["io"]["writefile"] = utils::io::write_file;
