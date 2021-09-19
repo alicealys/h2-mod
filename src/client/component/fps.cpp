@@ -240,21 +240,21 @@ namespace fps
 			game::R_AddCmdDrawText(pos_string, 0x7FFFFFFF, font, x,
 				60.f, 1.0f, 1.0f, 0.0f, fps_color_ok, 0);
 		}
+	}
 
-		void draw()
+	void draw()
+	{
+		check_resize();
+		draw_fps();
+
+		if (!game::CL_IsCgameInitialized() || !game::g_entities[0].client)
 		{
-			check_resize();
-			draw_fps();
-
-			if (!game::CL_IsCgameInitialized() || !game::g_entities[0].client)
-			{
-				return;
-			}
-
-			draw_pos();
-			draw_speed();
-			draw_speed_graph();
+			return;
 		}
+
+		draw_pos();
+		draw_speed();
+		draw_speed_graph();
 	}
 
 	class component final : public component_interface
@@ -276,8 +276,6 @@ namespace fps
 
 			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED);
 			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED);
-
-			scheduler::loop(draw, scheduler::pipeline::renderer);
 		}
 	};
 }
