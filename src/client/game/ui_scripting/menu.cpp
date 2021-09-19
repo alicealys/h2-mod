@@ -55,6 +55,11 @@ namespace ui_scripting
 
 		for (auto& element : this->children)
 		{
+			if (element->hidden)
+			{
+				continue;
+			}
+
 			element->render();
 		}
 	}

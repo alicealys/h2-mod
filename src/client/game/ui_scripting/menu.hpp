@@ -16,6 +16,7 @@ namespace ui_scripting
 		menu();
 
 		bool visible = false;
+		bool hidden = false;
 		bool cursor = false;
 		bool cursor_was_enabled = false;
 
