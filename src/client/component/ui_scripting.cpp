@@ -7,6 +7,11 @@
 #include "chat.hpp"
 #include "scheduler.hpp"
 #include "command.hpp"
+
+#include "game_console.hpp"
+#include "fps.hpp"
+#include "branding.hpp"
+
 #include "ui_scripting.hpp"
 
 #include "game/ui_scripting/lua/engine.hpp"
@@ -29,6 +34,9 @@ namespace ui_scripting
 			scheduler::loop([]()
 			{
 				ui_scripting::lua::engine::run_frame();
+				fps::draw();
+				branding::draw();
+				game_console::draw_console();
 			}, scheduler::pipeline::renderer);
 
 			command::add("reloadmenus", []()
