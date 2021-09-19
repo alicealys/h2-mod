@@ -43,7 +43,7 @@ namespace ui_scripting::lua::engine
 
 		bool is_menu_visible(const menu& menu)
 		{
-			return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
+			return menu.visible && !menu.hidden || (!menu.hidden && menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
 		}
 
 		std::vector<element*> elements_in_point(int x, int y)
@@ -59,6 +59,11 @@ namespace ui_scripting::lua::engine
 
 				for (const auto& child : menu.second.children)
 				{
+					if (child->hidden)
+					{
+						continue;
+					}
+
 					const auto in_rect = point_in_rect(
 						x, y,
 						(int)child->x,

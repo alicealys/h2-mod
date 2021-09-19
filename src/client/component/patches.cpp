@@ -26,11 +26,6 @@ namespace patches
 			off_11C52460 = game::base_address + 0xAD0C58;
 			return &off_11C52460;
 		}
-		
-		bool _true()
-		{
-			return true;
-		}
 	}
 
 	class component final : public component_interface
@@ -39,8 +34,8 @@ namespace patches
 		void post_unpack() override
 		{
 			// Not sure but it works
-			utils::hook::jump(game::base_address + 0x633080, _true, true);
-			utils::hook::jump(game::base_address + 0x272F70, _true, true);
+			utils::hook::set(game::base_address + 0x633080, 0xC301B0);
+			utils::hook::set(game::base_address + 0x272F70, 0xC301B0);
 			utils::hook::jump(game::base_address + 0x46148, sub_46148, true);
 
 			// Unlock fps in main menu

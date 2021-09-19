@@ -4,6 +4,7 @@
 #include "../../scripting/execution.hpp"
 
 #include "../../../component/ui_scripting.hpp"
+#include "../../../component/command.hpp"
 
 #include "component/game_console.hpp"
 #include "component/scheduler.hpp"
@@ -437,6 +438,17 @@ namespace ui_scripting::lua
 				handler.dispatch(event);
 			};
 
+			element_type["hidden"] = sol::property(
+				[](element& element)
+				{
+					return element.hidden;
+				},
+				[](element& element, bool hidden)
+				{
+					element.hidden = hidden;
+				}
+			);
+
 			element_type[sol::meta_function::new_index] = [](element& element, const std::string& attribute, const std::string& value)
 			{
 				element.attributes[attribute] = value;
@@ -514,6 +526,17 @@ namespace ui_scripting::lua
 				[](menu& menu, bool cursor)
 				{
 					menu.cursor = cursor;
+				}
+			);
+
+			menu_type["hidden"] = sol::property(
+				[](menu& menu)
+				{
+					return menu.hidden;
+				},
+				[](menu& menu, bool hidden)
+				{
+					menu.hidden = hidden;
 				}
 			);
 
@@ -646,7 +669,7 @@ namespace ui_scripting::lua
 
 			game_type["executecommand"] = [](const game&, const std::string& command)
 			{
-				::game::Cbuf_AddText(0, command.data());
+				command::execute(command, false);
 			};
 
 			game_type["luiopen"] = [](const game&, const std::string& menu)

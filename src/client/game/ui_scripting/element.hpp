@@ -43,6 +43,8 @@ namespace ui_scripting
 
 		void render() const;
 
+		bool hidden = false;
+
 		float x = 0.f;
 		float y = 0.f;
 		float w = 0.f;
