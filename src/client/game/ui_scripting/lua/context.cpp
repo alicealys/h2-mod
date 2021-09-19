@@ -638,13 +638,23 @@ namespace ui_scripting::lua
 				return now.count();
 			};
 
-			game_type["newmenu"] = [](const sol::lua_value&, const std::string& name)
+			game_type["newmenu"] = [](const game&, const std::string& name)
 			{
 				menus[name] = {};
 				return &menus[name];
 			};
 
-			game_type["newmenuoverlay"] = [](const sol::lua_value&, const std::string& name, const std::string& menu_name)
+			game_type["executecommand"] = [](const game&, const std::string& command)
+			{
+				::game::Cbuf_AddText(0, command.data());
+			};
+
+			game_type["luiopen"] = [](const game&, const std::string& menu)
+			{
+				::game::LUI_OpenMenu(0, menu.data(), 0, 0, 0);
+			};
+
+			game_type["newmenuoverlay"] = [](const game&, const std::string& name, const std::string& menu_name)
 			{
 				menus[name] = {};
 				menus[name].type = menu_type::overlay;
