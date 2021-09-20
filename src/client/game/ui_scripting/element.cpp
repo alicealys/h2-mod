@@ -97,12 +97,12 @@ namespace ui_scripting
 
 		float relative(float value)
 		{
-			return (value / 1920.f) * screen_max[0];
+			return ceil((value / 1920.f) * screen_max[0]);
 		}
 
 		int relative(int value)
 		{
-			return (int)(((float)value / 1920.f) * screen_max[0]);
+			return (int)ceil(((float)value / 1920.f) * screen_max[0]);
 		}
 	}
 

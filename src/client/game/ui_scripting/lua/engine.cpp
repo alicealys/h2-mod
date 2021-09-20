@@ -23,17 +23,17 @@ namespace ui_scripting::lua::engine
 
 		int relative_mouse(int value)
 		{
-			return (int)(((float)value / screen_max[0]) * 1920.f);
+			return (int)ceil(((float)value / screen_max[0]) * 1920.f);
 		}
 
 		int relative(int value)
 		{
-			return (int)(((float)value / 1920.f) * screen_max[0]);
+			return (int)ceil(((float)value / 1920.f) * screen_max[0]);
 		}
 
 		float relative(float value)
 		{
-			return (value / 1920.f) * screen_max[0];
+			return ceil((value / 1920.f) * screen_max[0]);
 		}
 
 		bool point_in_rect(int px, int py, int x, int y, int w, int h)
