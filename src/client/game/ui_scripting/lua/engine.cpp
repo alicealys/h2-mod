@@ -52,7 +52,7 @@ namespace ui_scripting::lua::engine
 
 			for (const auto& menu : menus)
 			{
-				if (!is_menu_visible(menu.second))
+				if (!is_menu_visible(menu.second) || menu.second.ignoreevents)
 				{
 					continue;
 				}

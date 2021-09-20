@@ -34,6 +34,7 @@ namespace ui_scripting
 			{"fira_mono_bold", "fonts/fira_mono_bold.ttf"},
 			{"fira_mono_regular", "fonts/fira_mono_regular.ttf"},
 			{"defaultbold", "fonts/defaultbold.otf"},
+			{"objective", "fonts/defaultbold.otf"},
 			{"default", "fonts/default.otf"},
 		};
 
