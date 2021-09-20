@@ -18,6 +18,7 @@ namespace ui_scripting
 		bool visible = false;
 		bool hidden = false;
 		bool cursor = false;
+		bool ignoreevents = false;
 		bool cursor_was_enabled = false;
 
 		void open();

@@ -540,6 +540,17 @@ namespace ui_scripting::lua
 				}
 			);
 
+			menu_type["ignoreevents"] = sol::property(
+				[](menu& menu)
+				{
+					return menu.ignoreevents;
+				},
+				[](menu& menu, bool ignoreevents)
+				{
+					menu.ignoreevents = ignoreevents;
+				}
+			);
+
 			menu_type["isopen"] = [](menu& menu)
 			{
 				return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
@@ -880,6 +891,12 @@ namespace ui_scripting::lua
 				screen["y"] = size[1];
 
 				return screen;
+			};
+
+			game_type["playmenuvideo"] = [](const game&, const std::string& video)
+			{
+				reinterpret_cast<void (*)(const char* a1, int a2, int a3)>
+					(::game::base_address + 0x71B970)(video.data(), 64, 0);
 			};
 
 			struct player
