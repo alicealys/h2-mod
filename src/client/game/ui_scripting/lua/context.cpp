@@ -624,6 +624,16 @@ namespace ui_scripting::lua
 			auto game_type = state.new_usertype<game>("game_");
 			state["game"] = game();
 
+			game_type["getmenu"] = [](const game&, const sol::this_state s, const std::string& name)
+			{
+				if (menus.find(name) == menus.end())
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+
+				return sol::lua_value{s, &menus[name]};
+			};
+
 			game_type["getelement"] = [](const game&, const sol::this_state s, const std::string& value, const std::string& attribute)
 			{
 				for (const auto& element : elements)
@@ -716,7 +726,7 @@ namespace ui_scripting::lua
 
 				event event;
 				event.element = menu;
-				event.name = "close";
+				event.name = "open";
 				handler.dispatch(event);
 
 				menu->open();
