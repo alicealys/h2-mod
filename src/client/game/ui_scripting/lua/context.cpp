@@ -207,6 +207,7 @@ namespace ui_scripting::lua
 			element_type["settext"] = &element::set_text;
 			element_type["setmaterial"] = &element::set_material;
 			element_type["setcolor"] = &element::set_color;
+			element_type["setsecondcolor"] = &element::set_second_color;
 			element_type["setglowcolor"] = &element::set_glow_color;
 			element_type["setbackcolor"] = &element::set_background_color;
 			element_type["setbordercolor"] = &element::set_border_color;
@@ -217,6 +218,9 @@ namespace ui_scripting::lua
 				static_cast<void(element::*)(float, float, float, float)>(&element::set_border_width)
 			);
 			element_type["settextoffset"] = &element::set_text_offset;
+			element_type["setscale"] = &element::set_scale;
+			element_type["setrotation"] = &element::set_rotation;
+			element_type["setyle"] = &element::set_style;
 			element_type["setslice"] = &element::set_slice;
 
 			element_type["getrect"] = [](const sol::this_state s, element& element)
@@ -274,6 +278,50 @@ namespace ui_scripting::lua
 				}
 			);
 
+			element_type["scalex"] = sol::property(
+				[](element& element)
+				{
+					return element.x_scale;
+				},
+				[](element& element, float x_scale)
+				{
+					element.x_scale = x_scale;
+				}
+			);
+
+			element_type["scaley"] = sol::property(
+				[](element& element)
+				{
+					return element.y_scale;
+				},
+				[](element& element, float y_scale)
+				{
+					element.y_scale = y_scale;
+				}
+			);
+
+			element_type["rotation"] = sol::property(
+				[](element& element)
+				{
+					return element.rotation;
+				},
+				[](element& element, float rotation)
+				{
+					element.rotation = rotation;
+				}
+			);
+
+			element_type["style"] = sol::property(
+				[](element& element)
+				{
+					return element.style;
+				},
+				[](element& element, int style)
+				{
+					element.style = style;
+				}
+			);
+
 			element_type["color"] = sol::property(
 				[](element& element, const sol::this_state s)
 				{
@@ -290,6 +338,37 @@ namespace ui_scripting::lua
 					element.color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
 					element.color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
 					element.color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["secondcolor"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					auto color = sol::table::create(s.lua_state());
+					color["r"] = element.second_color[0];
+					color["g"] = element.second_color[1];
+					color["b"] = element.second_color[2];
+					color["a"] = element.second_color[3];
+					return color;
+				},
+				[](element& element, const sol::lua_table color)
+				{
+					element.use_gradient = true;
+					element.second_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
+					element.second_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
+					element.second_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
+					element.second_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
+				}
+			);
+
+			element_type["usegradient"] = sol::property(
+				[](element& element, const sol::this_state s)
+				{
+					return element.use_gradient;
+				},
+				[](element& element, bool use_gradient)
+				{
+					element.use_gradient = use_gradient;
 				}
 			);
 
@@ -695,7 +774,10 @@ namespace ui_scripting::lua
 
 			game_type["luiopen"] = [](const game&, const std::string& menu)
 			{
-				::game::LUI_OpenMenu(0, menu.data(), 0, 0, 0);
+				::scheduler::once([menu]()
+				{
+					::game::LUI_OpenMenu(0, menu.data(), 0, 0, 0);
+				}, ::scheduler::pipeline::renderer);
 			};
 
 			game_type["newmenuoverlay"] = [](const game&, const std::string& name, const std::string& menu_name)

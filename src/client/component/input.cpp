@@ -49,7 +49,6 @@ namespace input
 		void cl_mouse_move_stub(const int local_client_num, int x, int y)
 		{
 			ui_scripting::lua::engine::ui_event("mousemove", {x, y});
-
 			cl_mouse_move_hook.invoke<void>(local_client_num, x, y);
 		}
 	}
