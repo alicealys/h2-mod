@@ -32,7 +32,7 @@ namespace branding
 	public:
 		void post_unpack() override
 		{
-			localized_strings::override("MENU_SP_CAMPAIGN", "H2-Mod");
+			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
 		}
 	};
 }

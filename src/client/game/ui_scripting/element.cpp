@@ -104,6 +104,27 @@ namespace ui_scripting
 		{
 			return (int)ceil(((float)value / 1920.f) * screen_max[0]);
 		}
+
+		game::rgba float_to_rgba(const float* color)
+		{
+			game::rgba rgba;
+			rgba.r = (uint8_t)(color[0] * 255.f);
+			rgba.g = (uint8_t)(color[1] * 255.f);
+			rgba.b = (uint8_t)(color[2] * 255.f);
+			rgba.a = (uint8_t)(color[3] * 255.f);
+			return rgba;
+		}
+		
+		void draw_text(const char* text, game::Font_s* font, float x, float y, float x_scale, float y_scale, float rotation, 
+			int style, float* color, float* second_color, float* glow_color)
+		{
+			const auto result = (uint64_t)game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, x, y, x_scale, y_scale, rotation, color, style);
+			*reinterpret_cast<float*>(result + 188) = glow_color[0];
+			*reinterpret_cast<float*>(result + 192) = glow_color[1];
+			*reinterpret_cast<float*>(result + 196) = glow_color[2];
+			*reinterpret_cast<float*>(result + 200) = glow_color[3];
+			*reinterpret_cast<game::rgba*>(result + 228) = float_to_rgba(second_color);
+		}
 	}
 
 	element::element()
@@ -177,6 +198,22 @@ namespace ui_scripting
 		this->text_offset[1] = _y;
 	}
 
+	void element::set_scale(float _x, float _y)
+	{
+		this->x_scale = _x;
+		this->y_scale = _y;
+	}
+
+	void element::set_rotation(float _rotation)
+	{
+		this->rotation = _rotation;
+	}
+
+	void element::set_style(int _style)
+	{
+		this->style = _style;
+	}
+
 	void element::set_background_color(float r, float g, float b, float a)
 	{
 		this->background_color[0] = r;
@@ -191,6 +228,15 @@ namespace ui_scripting
 		this->color[1] = g;
 		this->color[2] = b;
 		this->color[3] = a;
+	}
+
+	void element::set_second_color(float r, float g, float b, float a)
+	{
+		this->use_gradient = true;
+		this->second_color[0] = r;
+		this->second_color[1] = g;
+		this->second_color[2] = b;
+		this->second_color[3] = a;
 	}
 
 	void element::set_glow_color(float r, float g, float b, float a)
@@ -340,16 +386,22 @@ namespace ui_scripting
 			auto _horzalign = get_align_value(this->horzalign, (float)text_width, relative(this->w));
 			auto _vertalign = get_align_value(this->vertalign, (float)relative(this->fontsize), relative(this->h));
 
-			game::CL_DrawTextPhysicalWithEffects(
+			float transparent[4] = {0.f, 0.f, 0.f, 0.f};
+
+			const auto _x = relative(this->x) + relative(this->text_offset[0]) + _horzalign + relative(this->border_width[3]);
+			const auto _y = relative(this->y) + relative(this->text_offset[1]) + _vertalign + relative(this->fontsize) + relative(this->border_width[0]);
+
+			draw_text(
 				this->text.data(),
-				0x7FFFFFFF,
 				_font,
-				relative(this->x) + relative(this->text_offset[0]) + _horzalign + relative(this->border_width[3]),
-				relative(this->y) + relative(this->text_offset[1]) + _vertalign + relative(this->fontsize) + relative(this->border_width[0]),
-				1.f, 1.f,
-				(float*)this->color, 0,
-				(float*)this->glow_color,
-				0, 0, 0, 0, 0, 0, 0
+				_x, _y,
+				this->x_scale,
+				this->y_scale,
+				this->rotation,
+				this->style,
+				(float*)this->color,
+				(float*)(this->use_gradient ? this->second_color : this->color),
+				(float*)this->glow_color
 			);
 		}
 	}

@@ -418,23 +418,20 @@ namespace ui_scripting::lua::engine
 
 	void ui_event(const std::string& type, const std::vector<int>& arguments)
 	{
-		::scheduler::once([type, arguments]()
+		if (type == "key")
 		{
-			if (type == "key")
-			{
-				handle_key_event(arguments[0], arguments[1]);
-			}
+			handle_key_event(arguments[0], arguments[1]);
+		}
 
-			if (type == "char")
-			{
-				handle_char_event(arguments[0]);
-			}
+		if (type == "char")
+		{
+			handle_char_event(arguments[0]);
+		}
 
-			if (type == "mousemove")
-			{
-				handle_mousemove_event(relative_mouse(arguments[0]), relative_mouse(arguments[1]));
-			}
-		}, ::scheduler::pipeline::renderer);
+		if (type == "mousemove")
+		{
+			handle_mousemove_event(relative_mouse(arguments[0]), relative_mouse(arguments[1]));
+		}
 	}
 
 	void notify(const event& e)
