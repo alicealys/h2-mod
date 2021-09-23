@@ -324,8 +324,8 @@ namespace ui_scripting
 			draw_image(
 				relative(this->x) + relative(this->border_width[3]),
 				relative(this->y) + relative(this->border_width[0]),
-				relative(this->w),
-				relative(this->h),
+				relative(this->w) - relative(this->border_width[1]) - relative(this->border_width[3]),
+				relative(this->h) - relative(this->border_width[0]) - relative(this->border_width[2]),
 				(float*)this->slice,
 				(float*)this->background_color,
 				background_material
@@ -339,7 +339,7 @@ namespace ui_scripting
 			draw_image(
 				relative(this->x),
 				relative(this->y),
-				relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
+				relative(this->w),
 				relative(this->border_width[0]),
 				(float*)this->slice,
 				(float*)this->border_color,
@@ -347,10 +347,10 @@ namespace ui_scripting
 			);
 
 			draw_image(
-				relative(this->x) + relative(this->border_width[3]) + relative(this->w),
+				relative(this->x) + relative(this->w) - relative(this->border_width[1]),
 				relative(this->y) + relative(this->border_width[0]),
 				relative(this->border_width[1]),
-				relative(this->h),
+				relative(this->h) - relative(this->border_width[0]) - relative(this->border_width[2]),
 				(float*)this->slice,
 				(float*)this->border_color,
 				_border_material
@@ -358,8 +358,8 @@ namespace ui_scripting
 
 			draw_image(
 				relative(this->x),
-				relative(this->y) + relative(this->h) + relative(this->border_width[0]),
-				relative(this->w) + relative(this->border_width[1]) + relative(this->border_width[3]),
+				relative(this->y) + relative(this->h) - relative(this->border_width[2]),
+				relative(this->w),
 				relative(this->border_width[2]),
 				(float*)this->slice,
 				(float*)this->border_color,
@@ -370,7 +370,7 @@ namespace ui_scripting
 				relative(this->x),
 				relative(this->y) + relative(this->border_width[0]),
 				relative(this->border_width[3]),
-				relative(this->h),
+				relative(this->h) - relative(this->border_width[0]) - relative(this->border_width[2]),
 				(float*)this->slice,
 				(float*)this->border_color,
 				_border_material
@@ -383,10 +383,8 @@ namespace ui_scripting
 			const auto _font = game::R_RegisterFont(fontname.data(), relative(this->fontsize));
 			const auto text_width = game::R_TextWidth(this->text.data(), 0x7FFFFFFF, _font);
 
-			auto _horzalign = get_align_value(this->horzalign, (float)text_width, relative(this->w));
-			auto _vertalign = get_align_value(this->vertalign, (float)relative(this->fontsize), relative(this->h));
-
-			float transparent[4] = {0.f, 0.f, 0.f, 0.f};
+			const auto _horzalign = get_align_value(this->horzalign, (float)text_width, relative(this->w));
+			const auto _vertalign = get_align_value(this->vertalign, (float)relative(this->fontsize), relative(this->h));
 
 			const auto _x = relative(this->x) + relative(this->text_offset[0]) + _horzalign + relative(this->border_width[3]);
 			const auto _y = relative(this->y) + relative(this->text_offset[1]) + _vertalign + relative(this->fontsize) + relative(this->border_width[0]);
