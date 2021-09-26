@@ -56,7 +56,6 @@ namespace scripting
 
 		void player_spawn_stub(const game::gentity_s* player)
 		{
-			command::execute("reloadmenus");
 			player_spawn_hook.invoke<void>(player);
 			lua::engine::start();
 		}
