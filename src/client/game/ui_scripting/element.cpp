@@ -119,11 +119,14 @@ namespace ui_scripting
 			int style, float* color, float* second_color, float* glow_color)
 		{
 			const auto result = (uint64_t)game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, x, y, x_scale, y_scale, rotation, color, style);
-			*reinterpret_cast<float*>(result + 188) = glow_color[0];
-			*reinterpret_cast<float*>(result + 192) = glow_color[1];
-			*reinterpret_cast<float*>(result + 196) = glow_color[2];
-			*reinterpret_cast<float*>(result + 200) = glow_color[3];
-			*reinterpret_cast<game::rgba*>(result + 228) = float_to_rgba(second_color);
+			if (result)
+			{
+				*reinterpret_cast<float*>(result + 188) = glow_color[0];
+				*reinterpret_cast<float*>(result + 192) = glow_color[1];
+				*reinterpret_cast<float*>(result + 196) = glow_color[2];
+				*reinterpret_cast<float*>(result + 200) = glow_color[3];
+				*reinterpret_cast<game::rgba*>(result + 228) = float_to_rgba(second_color);
+			}
 		}
 	}
 
