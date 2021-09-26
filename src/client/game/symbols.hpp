@@ -147,4 +147,11 @@ namespace game
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0xB617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0xBA9EE40};
 	WEAK symbol<function_stack_t> scr_function_stack{0xBAA93C0};
+
+	namespace hks
+	{
+		WEAK symbol<lua_State*> lua_state{0x19D83E8};
+		WEAK symbol<void(lua_State* s, const char* str, unsigned int l)> hksi_lua_pushlstring{0x287410};
+		WEAK symbol<const char*(lua_State* s, const HksObject* obj, unsigned int* len)> hks_obj_tolstring{0x287410};
+	}
 }

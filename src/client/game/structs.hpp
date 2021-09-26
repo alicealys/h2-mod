@@ -914,5 +914,69 @@ namespace game
 		uint64_t streams[4];
 		const char* name;
 	};
+	
+	namespace hks
+	{
+		struct InternString
+		{
+			unsigned __int64 m_flags;
+			unsigned __int64 m_lengthbits;
+			unsigned int m_hash;
+			char m_data[30];
+		};
 
+		union HksValue
+		{
+			void* cClosure;
+			void* closure;
+			void* userData;
+			void* table;
+			void* tstruct;
+			InternString* str;
+			void* thread;
+			void* ptr;
+			float number;
+			unsigned int native;
+			bool boolean;
+		};
+
+		enum HksType
+		{
+			HKS_LUA_TNONE = 0xFFFFFFFF,
+			HKS_LUA_TNIL = 0x0,
+			HKS_LUA_TBOOLEAN = 0x1,
+			HKS_LUA_TLIGHTUSERDATA = 0x2,
+			HKS_LUA_TNUMBER = 0x3,
+			HKS_LUA_TSTRING = 0x4,
+			HKS_LUA_TTABLE = 0x5,
+			HKS_LUA_TFUNCTION = 0x6,
+			HKS_LUA_TUSERDATA = 0x7,
+			HKS_LUA_TTHREAD = 0x8,
+			HKS_LUA_TUI64 = 0xB,
+			HKS_LUA_TSTRUCT = 0xC,
+		};
+
+		struct HksObject
+		{
+			HksType t;
+			HksValue v;
+		};
+
+		struct lua_State
+		{
+			char __pad0[72];
+			HksObject* top;
+			HksObject* base;
+			HksObject* alloc_top;
+			HksObject* bottom;
+		};
+
+		using lua_function = int(__fastcall*)(lua_State*);
+
+		struct luaL_Reg
+		{
+			const char* name;
+			lua_function function;
+		};
+	}
 }

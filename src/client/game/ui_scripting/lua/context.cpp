@@ -2,6 +2,7 @@
 #include "context.hpp"
 #include "error.hpp"
 #include "../../scripting/execution.hpp"
+#include "../execution.hpp"
 
 #include "../../../component/ui_scripting.hpp"
 #include "../../../component/command.hpp"
@@ -953,27 +954,6 @@ namespace ui_scripting::lua
 				::game::Dvar_SetCommand(hash, "", string_value.data());
 			};
 
-			game_type["drawmaterial"] = [](const game&, float x, float y, float width, float height, float s0, float t0, float s1, float t1,
-				const sol::lua_value& color_value, const std::string& material)
-			{
-				const auto color = color_value.as<std::vector<float>>();
-				float _color[4] =
-				{
-					color[0],
-					color[1],
-					color[2],
-					color[3],
-				};
-
-				const auto _material = ::game::Material_RegisterHandle(material.data());
-				::game::R_AddCmdDrawStretchPic(x, y, width, height, s0, t0, s1, t1, _color, _material);
-			};
-
-			game_type["playsound"] = [](const game&, const std::string& sound)
-			{
-				::game::UI_PlayLocalSoundAlias(0, sound.data());
-			};
-
 			game_type["getwindowsize"] = [](const game&, const sol::this_state s)
 			{
 				const auto size = ::game::ScrPlace_GetViewPlacement()->realViewportSize;
@@ -989,6 +969,49 @@ namespace ui_scripting::lua
 			{
 				reinterpret_cast<void (*)(const char* a1, int a2, int a3)>
 					(::game::base_address + 0x71B970)(video.data(), 64, 0);
+			};
+
+			game_type[sol::meta_function::index] = [](const game&, const std::string& name)
+			{
+				return [name](const game&, const sol::this_state s, sol::variadic_args va)
+				{
+					arguments arguments;
+
+					for (auto arg : va)
+					{
+						arguments.push_back(arg);
+					}
+
+					const auto value = call(name, arguments);
+					if (value.index() == 0)
+					{
+						return sol::lua_value{s, sol::lua_nil};
+					}
+					else
+					{
+						return sol::lua_value{s, value};
+					}
+				};
+			};
+
+			game_type["call"] = [](const game&, const sol::this_state s, const std::string& name, sol::variadic_args va)
+			{
+				arguments arguments;
+
+				for (auto arg : va)
+				{
+					arguments.push_back(arg);
+				}
+
+				const auto value = call(name, arguments);
+				if (value.index() == 0)
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+				else
+				{
+					return sol::lua_value{s, value};
+				}
 			};
 
 			struct player
