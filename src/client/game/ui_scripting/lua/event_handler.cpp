@@ -1,7 +1,6 @@
 #include "std_include.hpp"
 #include "context.hpp"
 #include "error.hpp"
-#include "../../scripting/lua/value_conversion.hpp"
 
 #include "event_handler.hpp"
 
@@ -168,20 +167,14 @@ namespace ui_scripting::lua
 
 		for (const auto& argument : event.arguments)
 		{
-			const auto index = argument.index();
-
-			if (index == 0)
+			if (argument.index() > 0)
 			{
-				const sol::lua_value value = {this->state_, std::get<int>(argument)};
-				arguments.emplace_back(value);
+				arguments.emplace_back(argument);
 			}
-
-			if (index == 1)
+			else
 			{
-				const sol::lua_value value = {this->state_, std::get<std::string>(argument)};
-				arguments.emplace_back(value);
+				arguments.emplace_back(sol::lua_value{this->state_, sol::lua_nil});
 			}
-
 		}
 
 		return arguments;

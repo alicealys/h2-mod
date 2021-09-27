@@ -9,8 +9,6 @@
 
 namespace ui_scripting::lua::engine
 {
-	void notify(const event& e);
-
 	namespace
 	{
 		float screen_max[2];

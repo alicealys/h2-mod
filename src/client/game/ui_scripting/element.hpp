@@ -1,5 +1,6 @@
 #pragma once
 #include "game/game.hpp"
+#include "value.hpp"
 
 namespace ui_scripting
 {
@@ -75,7 +76,7 @@ namespace ui_scripting
 		alignment horzalign = alignment::start;
 		alignment vertalign = alignment::start;
 
-		std::unordered_map<std::string, std::string> attributes = {};
+		std::unordered_map<std::string, value> attributes = {};
 		std::string font = "default";
 		std::string material = "white";
 		std::string border_material = "white";

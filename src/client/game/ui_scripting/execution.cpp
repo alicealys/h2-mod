@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+#include "value.hpp"
 #include "execution.hpp"
 
 #include "component/ui_scripting.hpp"
