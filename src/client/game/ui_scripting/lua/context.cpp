@@ -2,6 +2,7 @@
 #include "context.hpp"
 #include "error.hpp"
 #include "../../scripting/execution.hpp"
+#include "../value.hpp"
 #include "../execution.hpp"
 
 #include "../../../component/ui_scripting.hpp"
@@ -504,18 +505,17 @@ namespace ui_scripting::lua
 
 				for (auto arg : va)
 				{
-					if (arg.get_type() == sol::type::number)
+					if (arg.is<value>())
 					{
-						event.arguments.push_back(arg.as<int>());
+						event.arguments.push_back(arg.as<value>());
 					}
-
-					if (arg.get_type() == sol::type::string)
+					else
 					{
-						event.arguments.push_back(arg.as<std::string>());
+						event.arguments.push_back({});
 					}
 				}
 
-				handler.dispatch(event);
+				lua::engine::notify(event);
 			};
 
 			element_type["hidden"] = sol::property(
@@ -529,7 +529,7 @@ namespace ui_scripting::lua
 				}
 			);
 
-			element_type[sol::meta_function::new_index] = [](element& element, const std::string& attribute, const std::string& value)
+			element_type[sol::meta_function::new_index] = [](element& element, const std::string& attribute, const value& value)
 			{
 				element.attributes[attribute] = value;
 			};
@@ -579,18 +579,17 @@ namespace ui_scripting::lua
 
 				for (auto arg : va)
 				{
-					if (arg.get_type() == sol::type::number)
+					if (arg.is<value>())
 					{
-						event.arguments.push_back(arg.as<int>());
+						event.arguments.push_back(arg.as<value>());
 					}
-
-					if (arg.get_type() == sol::type::string)
+					else
 					{
-						event.arguments.push_back(arg.as<std::string>());
+						event.arguments.push_back({});
 					}
 				}
 
-				handler.dispatch(event);
+				lua::engine::notify(event);
 			};
 
 			menu_type["addchild"] = [](const sol::this_state s, menu& menu, element& element)
@@ -656,7 +655,7 @@ namespace ui_scripting::lua
 				menu.close();
 			};
 
-			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const std::string& value, const std::string& attribute)
+			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const value& value, const std::string& attribute)
 			{
 				for (const auto& element : menu.children)
 				{
@@ -671,7 +670,7 @@ namespace ui_scripting::lua
 
 			menu_type["getelements"] = sol::overload
 			(
-				[](menu& menu, const sol::this_state s, const std::string& value, const std::string& attribute)
+				[](menu& menu, const sol::this_state s, const value& value, const std::string& attribute)
 				{
 					auto result = sol::table::create(s.lua_state());
 
@@ -714,7 +713,7 @@ namespace ui_scripting::lua
 				return sol::lua_value{s, &menus[name]};
 			};
 
-			game_type["getelement"] = [](const game&, const sol::this_state s, const std::string& value, const std::string& attribute)
+			game_type["getelement"] = [](const game&, const sol::this_state s, const value& value, const std::string& attribute)
 			{
 				for (const auto& element : elements)
 				{
@@ -729,7 +728,7 @@ namespace ui_scripting::lua
 
 			game_type["getelements"] = sol::overload
 			(
-				[](const game&, const sol::this_state s, const std::string& value, const std::string& attribute)
+				[](const game&, const sol::this_state s, const value& value, const std::string& attribute)
 				{
 					auto result = sol::table::create(s.lua_state());
 
@@ -952,6 +951,11 @@ namespace ui_scripting::lua
 				}
 
 				::game::Dvar_SetCommand(hash, "", string_value.data());
+			};
+
+			game_type["playsound"] = [](const game&, const std::string& sound)
+			{
+				::game::UI_PlayLocalSoundAlias(0, sound.data());
 			};
 
 			game_type["getwindowsize"] = [](const game&, const sol::this_state s)

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../event.hpp"
+#include "../menu.hpp"
+
 #pragma warning(push)
 #pragma warning(disable: 4702)
 
@@ -7,8 +10,7 @@
 #define SOL_PRINT_ERRORS 0
 #include <sol/sol.hpp>
 
-#include "../menu.hpp"
-#include "event.hpp"
+#include "engine.hpp"
 #include "scheduler.hpp"
 #include "event_handler.hpp"
 
