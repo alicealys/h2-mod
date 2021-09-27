@@ -80,7 +80,6 @@ namespace ui_scripting
 
 		void hks_shutdown_stub()
 		{
-			printf("shutdown\n");
 			ui_scripting::lua::engine::stop();
 			hks_shutdown_hook.invoke<void*>();
 		}
