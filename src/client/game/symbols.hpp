@@ -153,5 +153,7 @@ namespace game
 		WEAK symbol<lua_State*> lua_state{0x19D83E8};
 		WEAK symbol<void(lua_State* s, const char* str, unsigned int l)> hksi_lua_pushlstring{0x287410};
 		WEAK symbol<const char*(lua_State* s, const HksObject* obj, unsigned int* len)> hks_obj_tolstring{0x287410};
+		WEAK symbol<int(lua_State* s, const HksObject* obj, HksObject* ret)> hks_obj_getmetatable{0x2DA210};
+		WEAK symbol<HksObject*(HksObject* result, lua_State* s, const HksObject* table, const HksObject* key)> hks_obj_getfield{0x2D9E20};
 	}
 }

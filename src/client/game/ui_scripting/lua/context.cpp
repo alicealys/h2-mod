@@ -515,7 +515,7 @@ namespace ui_scripting::lua
 					}
 				}
 
-				lua::engine::notify(event);
+				notify(event);
 			};
 
 			element_type["hidden"] = sol::property(
@@ -589,7 +589,7 @@ namespace ui_scripting::lua
 					}
 				}
 
-				lua::engine::notify(event);
+				notify(event);
 			};
 
 			menu_type["addchild"] = [](const sol::this_state s, menu& menu, element& element)
@@ -640,7 +640,7 @@ namespace ui_scripting::lua
 				event event;
 				event.element = &menu;
 				event.name = "close";
-				handler.dispatch(event);
+				notify(event);
 
 				menu.open();
 			};
@@ -650,7 +650,7 @@ namespace ui_scripting::lua
 				event event;
 				event.element = &menu;
 				event.name = "close";
-				handler.dispatch(event);
+				notify(event);
 
 				menu.close();
 			};
@@ -809,7 +809,7 @@ namespace ui_scripting::lua
 				event event;
 				event.element = menu;
 				event.name = "open";
-				handler.dispatch(event);
+				notify(event);
 
 				menu->open();
 			};
@@ -826,7 +826,7 @@ namespace ui_scripting::lua
 				event event;
 				event.element = menu;
 				event.name = "close";
-				handler.dispatch(event);
+				notify(event);
 
 				menu->close();
 			};
@@ -953,11 +953,6 @@ namespace ui_scripting::lua
 				::game::Dvar_SetCommand(hash, "", string_value.data());
 			};
 
-			game_type["playsound"] = [](const game&, const std::string& sound)
-			{
-				::game::UI_PlayLocalSoundAlias(0, sound.data());
-			};
-
 			game_type["getwindowsize"] = [](const game&, const sol::this_state s)
 			{
 				const auto size = ::game::ScrPlace_GetViewPlacement()->realViewportSize;
@@ -1001,14 +996,7 @@ namespace ui_scripting::lua
 				}
 
 				const auto values = call(name, arguments);
-				if (values.size() == 0)
-				{
-					return sol::lua_value{s, sol::lua_nil};
-				}
-				else
-				{
-					return sol::lua_value{s, sol::as_returns(values)};
-				}
+				return sol::as_returns(values);
 			};
 
 			struct player
