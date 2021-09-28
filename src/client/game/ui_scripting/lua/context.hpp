@@ -10,7 +10,6 @@
 #define SOL_PRINT_ERRORS 0
 #include <sol/sol.hpp>
 
-#include "engine.hpp"
 #include "scheduler.hpp"
 #include "event_handler.hpp"
 

@@ -1,7 +1,7 @@
 #include <std_include.hpp>
 #include "value.hpp"
 #include "execution.hpp"
-
+#include "stack_isolation.hpp"
 #include "component/ui_scripting.hpp"
 
 #include <utils/string.hpp>
@@ -59,7 +59,6 @@ namespace ui_scripting
 			case 5:
 			{
 				const auto data = std::get<lightuserdata>(value_);
-
 				state->top->t = game::hks::HksObjectType::TLIGHTUSERDATA;
 				state->top->v.ptr = data.ptr;
 				state->top++;
@@ -125,16 +124,15 @@ namespace ui_scripting
 			throw std::runtime_error("Invalid lua state");
 		}
 
-		const auto state = *game::hks::lua_state;
-		state->top = state->base;
-
 		const auto function = ui_scripting::find_function(name);
 		if (!function)
 		{
 			throw std::runtime_error("Function " + name + " not found");
 		}
 
-		const auto _ = gsl::finally([]()
+		stack_isolation _;
+
+		const auto __ = gsl::finally([]()
 		{
 			disable_error_hook();
 		});
@@ -154,6 +152,11 @@ namespace ui_scripting
 			for (auto i = 0; i < count; i++)
 			{
 				values.push_back(get_return_value(i));
+			}
+
+			if (values.size() == 0)
+			{
+				values.push_back({});
 			}
 
 			return values;

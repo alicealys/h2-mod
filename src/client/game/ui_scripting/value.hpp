@@ -6,7 +6,6 @@ namespace ui_scripting
 	struct lightuserdata
 	{
 		void* ptr;
-
 		bool operator==(const lightuserdata other) const noexcept
 		{
 			return this->ptr == other.ptr;
