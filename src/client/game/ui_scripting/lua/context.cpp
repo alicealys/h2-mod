@@ -986,15 +986,8 @@ namespace ui_scripting::lua
 						arguments.push_back(arg);
 					}
 
-					const auto value = call(name, arguments);
-					if (value.index() == 0)
-					{
-						return sol::lua_value{s, sol::lua_nil};
-					}
-					else
-					{
-						return sol::lua_value{s, value};
-					}
+					const auto values = call(name, arguments);
+					return sol::as_returns(values);
 				};
 			};
 
@@ -1007,14 +1000,14 @@ namespace ui_scripting::lua
 					arguments.push_back(arg);
 				}
 
-				const auto value = call(name, arguments);
-				if (value.index() == 0)
+				const auto values = call(name, arguments);
+				if (values.size() == 0)
 				{
 					return sol::lua_value{s, sol::lua_nil};
 				}
 				else
 				{
-					return sol::lua_value{s, value};
+					return sol::lua_value{s, sol::as_returns(values)};
 				}
 			};
 

@@ -917,6 +917,23 @@ namespace game
 	
 	namespace hks
 	{
+		struct GenericChunkHeader
+		{
+			unsigned __int64 m_flags;
+		};
+
+		struct ChunkHeader : GenericChunkHeader
+		{
+			ChunkHeader* m_next;
+		};
+
+		struct UserData : ChunkHeader
+		{
+			unsigned __int64 m_envAndSizeOffsetHighBits;
+			unsigned __int64 m_metaAndSizeOffsetLowBits;
+			char m_data[8];
+		};
+
 		struct InternString
 		{
 			unsigned __int64 m_flags;
@@ -929,7 +946,7 @@ namespace game
 		{
 			void* cClosure;
 			void* closure;
-			void* userData;
+			UserData* userData;
 			void* table;
 			void* tstruct;
 			InternString* str;
@@ -940,25 +957,29 @@ namespace game
 			bool boolean;
 		};
 
-		enum HksType
+		enum HksObjectType
 		{
-			HKS_LUA_TNONE = 0xFFFFFFFF,
-			HKS_LUA_TNIL = 0x0,
-			HKS_LUA_TBOOLEAN = 0x1,
-			HKS_LUA_TLIGHTUSERDATA = 0x2,
-			HKS_LUA_TNUMBER = 0x3,
-			HKS_LUA_TSTRING = 0x4,
-			HKS_LUA_TTABLE = 0x5,
-			HKS_LUA_TFUNCTION = 0x6,
-			HKS_LUA_TUSERDATA = 0x7,
-			HKS_LUA_TTHREAD = 0x8,
-			HKS_LUA_TUI64 = 0xB,
-			HKS_LUA_TSTRUCT = 0xC,
+			TANY = 0xFFFFFFFE,
+			TNONE = 0xFFFFFFFF,
+			TNIL = 0x0,
+			TBOOLEAN = 0x1,
+			TLIGHTUSERDATA = 0x2,
+			TNUMBER = 0x3,
+			TSTRING = 0x4,
+			TTABLE = 0x5,
+			TFUNCTION = 0x6,
+			TUSERDATA = 0x7,
+			TTHREAD = 0x8,
+			TIFUNCTION = 0x9,
+			TCFUNCTION = 0xA,
+			TUI64 = 0xB,
+			TSTRUCT = 0xC,
+			NUM_TYPE_OBJECTS = 0xE,
 		};
 
 		struct HksObject
 		{
-			HksType t;
+			HksObjectType t;
 			HksValue v;
 		};
 

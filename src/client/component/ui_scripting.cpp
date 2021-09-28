@@ -27,6 +27,7 @@ namespace ui_scripting
 	{
 		utils::hook::detour hksi_open_lib_hook;
 		utils::hook::detour hksi_lual_error_hook;
+		utils::hook::detour hksi_add_function_hook;
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
 
@@ -82,6 +83,18 @@ namespace ui_scripting
 		{
 			ui_scripting::lua::engine::stop();
 			hks_shutdown_hook.invoke<void*>();
+		}
+
+		void hksi_add_function_stub(game::hks::lua_State* s, game::hks::lua_function f, int a3, const char* name, int a5)
+		{
+			if (name != "( lua_CFunction )LUI_CoD_LuaCall_UIExpression"s)
+			{
+				std::string name_ = name;
+				const auto sub = name_.substr(13, name_.size() - 14);
+				libs["Global"][sub] = f;
+			}
+
+			hksi_add_function_hook.invoke<void>(s, f, a3, name, a5);
 		}
 	}
 
@@ -158,6 +171,7 @@ namespace ui_scripting
 			hks_shutdown_hook.create(game::base_address + 0x3203B0, hks_shutdown_stub);
 			hksi_open_lib_hook.create(game::base_address + 0x2E4530, hksi_open_lib_stub);
 			hksi_lual_error_hook.create(game::base_address + 0x2E3E40, hksi_lual_error_stub);
+			hksi_add_function_hook.create(game::base_address + 0x2DB570, hksi_add_function_stub);
 		}
 	};
 }

@@ -29,7 +29,7 @@ namespace ui_scripting
 			case 1:
 			{
 				const auto value = std::get<bool>(value_);
-				state->top->t = game::hks::HksType::HKS_LUA_TBOOLEAN;
+				state->top->t = game::hks::HksObjectType::TBOOLEAN;
 				state->top->v.boolean = value;
 				state->top++;
 				break;
@@ -37,7 +37,7 @@ namespace ui_scripting
 			case 2:
 			{
 				const auto value = std::get<int>(value_);
-				state->top->t = game::hks::HksType::HKS_LUA_TNUMBER;
+				state->top->t = game::hks::HksObjectType::TNUMBER;
 				state->top->v.number = static_cast<float>(value);
 				state->top++;
 				break;
@@ -45,7 +45,7 @@ namespace ui_scripting
 			case 3:
 			{
 				const auto value = std::get<float>(value_);
-				state->top->t = game::hks::HksType::HKS_LUA_TNUMBER;
+				state->top->t = game::hks::HksObjectType::TNUMBER;
 				state->top->v.number = value;
 				state->top++;
 				break;
@@ -54,6 +54,15 @@ namespace ui_scripting
 			{
 				const auto str = std::get<std::string>(value_);
 				game::hks::hksi_lua_pushlstring(state, str.data(), (unsigned int)str.size());
+				break;
+			}
+			case 5:
+			{
+				const auto data = std::get<lightuserdata>(value_);
+
+				state->top->t = game::hks::HksObjectType::TLIGHTUSERDATA;
+				state->top->v.ptr = data.ptr;
+				state->top++;
 				break;
 			}
 			}
@@ -65,7 +74,7 @@ namespace ui_scripting
 		return static_cast<int>(number) == number;
 	}
 
-	value get_return_value()
+	value get_return_value(int offset)
 	{
 		if (!valid_state())
 		{
@@ -73,16 +82,15 @@ namespace ui_scripting
 		}
 
 		const auto state = *game::hks::lua_state;
-		const auto top = &state->top[-1];
+		const auto top = &state->top[-1 - offset];
 
 		switch (top->t)
 		{
-		case game::hks::HksType::HKS_LUA_TBOOLEAN:
+		case game::hks::HksObjectType::TBOOLEAN:
 		{
 			return {top->v.boolean};
 		}
-		break;
-		case game::hks::HksType::HKS_LUA_TNUMBER:
+		case game::hks::HksObjectType::TNUMBER:
 		{
 			const auto number = top->v.number;
 			if (is_integer(number))
@@ -94,13 +102,15 @@ namespace ui_scripting
 				return {top->v.number};
 			}
 		}
-		break;
-		case game::hks::HksType::HKS_LUA_TSTRING:
+		case game::hks::HksObjectType::TSTRING:
 		{
 			const auto value = top->v.str->m_data;
 			return {std::string(value)};
 		}
-		break;
+		case game::hks::HksObjectType::TLIGHTUSERDATA:
+		{
+			return lightuserdata{top->v.ptr};
+		}
 		default:
 		{
 			return {};
@@ -108,12 +118,15 @@ namespace ui_scripting
 		}
 	}
 
-	value call(const std::string& name, const arguments& arguments)
+	std::vector<value> call(const std::string& name, const arguments& arguments)
 	{
 		if (!valid_state())
 		{
 			throw std::runtime_error("Invalid lua state");
 		}
+
+		const auto state = *game::hks::lua_state;
+		state->top = state->base;
 
 		const auto function = ui_scripting::find_function(name);
 		if (!function)
@@ -135,8 +148,15 @@ namespace ui_scripting
 
 		try
 		{
-			function(*game::hks::lua_state);
-			return get_return_value();
+			const auto count = function(*game::hks::lua_state);
+			std::vector<value> values;
+
+			for (auto i = 0; i < count; i++)
+			{
+				values.push_back(get_return_value(i));
+			}
+
+			return values;
 		}
 		catch (const std::exception& e)
 		{

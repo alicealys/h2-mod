@@ -3,5 +3,5 @@
 
 namespace ui_scripting
 {
-	value call(const std::string& name, const arguments& arguments);
+	std::vector<value> call(const std::string& name, const arguments& arguments);
 }
