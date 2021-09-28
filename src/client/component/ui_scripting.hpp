@@ -10,5 +10,5 @@ namespace ui_scripting
 	game::hks::lua_function find_function(const std::string& name);
 	game::hks::lua_function find_method(const std::string& name);
 
-	void notify(event e);
+	void notify(const event& e);
 }
