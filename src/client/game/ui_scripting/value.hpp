@@ -3,15 +3,56 @@
 
 namespace ui_scripting
 {
-	struct lightuserdata
+	class lightuserdata;
+	class userdata;
+	class table;
+	class function;
+
+	class value
 	{
-		void* ptr;
-		bool operator==(const lightuserdata other) const noexcept
+	public:
+		value() = default;
+		value(const game::hks::HksObject& value);
+
+		value(int value);
+		value(unsigned int value);
+		value(bool value);
+
+		value(float value);
+		value(double value);
+
+		value(const char* value);
+		value(const std::string& value);
+
+		value(const lightuserdata& value);
+		value(const userdata& value);
+		value(const table& value);
+		value(const function& value);
+
+		bool value::operator==(const value& other);
+
+		template <typename T>
+		bool is() const;
+
+		template <typename T>
+		T as() const
 		{
-			return this->ptr == other.ptr;
+			if (!this->is<T>())
+			{
+				throw std::runtime_error("Invalid type");
+			}
+
+			return get<T>();
 		}
+
+		const game::hks::HksObject& get_raw() const;
+
+	private:
+		template <typename T>
+		T get() const;
+
+		game::hks::HksObject value_{};
 	};
 
-	using value = std::variant<std::monostate, bool, int, float, std::string, lightuserdata>;
 	using arguments = std::vector<value>;
 }

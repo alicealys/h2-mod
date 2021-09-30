@@ -7,24 +7,24 @@ namespace ui_scripting
 	{
 		const auto state = *game::hks::lua_state;
 
-		this->top_ = state->top;
-		this->base_ = state->base;
-		this->alloc_top_ = state->alloc_top;
-		this->bottom_ = state->bottom;
+		this->top_ = state->m_apistack.top;
+		this->base_ = state->m_apistack.base;
+		this->alloc_top_ = state->m_apistack.alloc_top;
+		this->bottom_ = state->m_apistack.bottom;
 
-		state->top = this->stack_;
-		state->base = state->top;
-		state->alloc_top = &this->stack_[ARRAYSIZE(this->stack_) - 1];
-		state->bottom = state->top;
+		state->m_apistack.top = this->stack_;
+		state->m_apistack.base = state->m_apistack.top;
+		state->m_apistack.alloc_top = &this->stack_[ARRAYSIZE(this->stack_) - 1];
+		state->m_apistack.bottom = state->m_apistack.top;
 	}
 
 	stack_isolation::~stack_isolation()
 	{
 		const auto state = *game::hks::lua_state;
 
-		state->top = this->top_;
-		state->base = this->base_;
-		state->alloc_top = this->alloc_top_;
-		state->bottom = this->bottom_;
+		state->m_apistack.top = this->top_;
+		state->m_apistack.base = this->base_;
+		state->m_apistack.alloc_top = this->alloc_top_;
+		state->m_apistack.bottom = this->bottom_;
 	}
 }

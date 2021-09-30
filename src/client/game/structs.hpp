@@ -942,12 +942,14 @@ namespace game
 			char m_data[30];
 		};
 
+		struct HashTable;
+
 		union HksValue
 		{
 			void* cClosure;
 			void* closure;
 			UserData* userData;
-			void* table;
+			HashTable* table;
 			void* tstruct;
 			InternString* str;
 			void* thread;
@@ -983,13 +985,29 @@ namespace game
 			HksValue v;
 		};
 
-		struct lua_State
+		struct CallStack
 		{
-			char __pad0[72];
+			void* m_records;
+			void* m_lastrecord;
+			void* m_current;
+			const unsigned int* m_current_lua_pc;
+			const unsigned int* m_hook_return_addr;
+			int m_hook_level;
+		};
+
+		struct ApiStack
+		{
 			HksObject* top;
 			HksObject* base;
 			HksObject* alloc_top;
 			HksObject* bottom;
+		};
+
+		struct lua_State
+		{
+			char __pad0[24];
+			CallStack m_callStack;
+			ApiStack m_apistack;
 		};
 
 		using lua_function = int(__fastcall*)(lua_State*);
@@ -998,6 +1016,27 @@ namespace game
 		{
 			const char* name;
 			lua_function function;
+		};
+
+		struct Node
+		{
+			HksObject m_key;
+			HksObject m_value;
+		};
+
+		struct Metatable
+		{
+		};
+
+		struct HashTable : ChunkHeader
+		{
+			Metatable* m_meta;
+			unsigned int m_version;
+			unsigned int m_mask;
+			Node* m_hashPart;
+			HksObject* m_arrayPart;
+			unsigned int m_arraySize;
+			Node* m_freeNode;
 		};
 	}
 }
