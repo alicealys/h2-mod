@@ -29,7 +29,7 @@ namespace ui_scripting
 		value(const table& value);
 		value(const function& value);
 
-		bool value::operator==(const value& other);
+		bool operator==(const value& other);
 
 		template <typename T>
 		bool is() const;
