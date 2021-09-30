@@ -3,6 +3,7 @@
 #include "error.hpp"
 
 #include "event_handler.hpp"
+#include "value_conversion.hpp"
 
 namespace ui_scripting::lua
 {
@@ -167,14 +168,7 @@ namespace ui_scripting::lua
 
 		for (const auto& argument : event.arguments)
 		{
-			if (argument.index() > 0)
-			{
-				arguments.emplace_back(argument);
-			}
-			else
-			{
-				arguments.emplace_back(sol::lua_value{this->state_, sol::lua_nil});
-			}
+			arguments.emplace_back(convert(this->state_, argument));
 		}
 
 		return arguments;

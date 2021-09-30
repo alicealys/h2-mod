@@ -1,5 +1,4 @@
 #include <std_include.hpp>
-#include "value.hpp"
 #include "execution.hpp"
 #include "stack_isolation.hpp"
 #include "component/ui_scripting.hpp"
@@ -8,122 +7,206 @@
 
 namespace ui_scripting
 {
-	namespace
+	void push_value(const value& value)
 	{
-		bool valid_state()
-		{
-			return *game::hks::lua_state != 0;
-		}
-
-		void push_value(const value& value_)
-		{
-			if (!valid_state())
-			{
-				throw std::runtime_error("Invalid lua state");
-			}
-
-			const auto state = *game::hks::lua_state;
-
-			switch (value_.index())
-			{
-			case 1:
-			{
-				const auto value = std::get<bool>(value_);
-				state->top->t = game::hks::HksObjectType::TBOOLEAN;
-				state->top->v.boolean = value;
-				state->top++;
-				break;
-			}
-			case 2:
-			{
-				const auto value = std::get<int>(value_);
-				state->top->t = game::hks::HksObjectType::TNUMBER;
-				state->top->v.number = static_cast<float>(value);
-				state->top++;
-				break;
-			}
-			case 3:
-			{
-				const auto value = std::get<float>(value_);
-				state->top->t = game::hks::HksObjectType::TNUMBER;
-				state->top->v.number = value;
-				state->top++;
-				break;
-			}
-			case 4:
-			{
-				const auto str = std::get<std::string>(value_);
-				game::hks::hksi_lua_pushlstring(state, str.data(), (unsigned int)str.size());
-				break;
-			}
-			case 5:
-			{
-				const auto data = std::get<lightuserdata>(value_);
-				state->top->t = game::hks::HksObjectType::TLIGHTUSERDATA;
-				state->top->v.ptr = data.ptr;
-				state->top++;
-				break;
-			}
-			}
-		}
-	}
-
-	bool is_integer(float number)
-	{
-		return static_cast<int>(number) == number;
+		const auto state = *game::hks::lua_state;
+		const auto value_ = value.get_raw();
+		*state->m_apistack.top = value_;
+		state->m_apistack.top++;
 	}
 
 	value get_return_value(int offset)
 	{
-		if (!valid_state())
-		{
-			throw std::runtime_error("Invalid lua state");
-		}
-
 		const auto state = *game::hks::lua_state;
-		const auto top = &state->top[-1 - offset];
+		const auto top = &state->m_apistack.top[-1 - offset];
+		return *top;
+	}
 
-		switch (top->t)
+	void call_script_function(const function& function, const arguments& arguments)
+	{
+		const auto state = *game::hks::lua_state;
+
+		stack_isolation _;
+		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
 		{
-		case game::hks::HksObjectType::TBOOLEAN:
-		{
-			return {top->v.boolean};
+			push_value(*i);
 		}
-		case game::hks::HksObjectType::TNUMBER:
+		push_value(function);
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
 		{
-			const auto number = top->v.number;
-			if (is_integer(number))
-			{
-				return {static_cast<int>(top->v.number)};
-			}
-			else
-			{
-				return {top->v.number};
-			}
-		}
-		case game::hks::HksObjectType::TSTRING:
+			disable_error_hook();
+		});
+
+		// Not sure about this
+
+		try
 		{
-			const auto value = top->v.str->m_data;
-			return {std::string(value)};
+			game::hks::vm_call_internal(state, static_cast<int>(arguments.size()), 0, 0);
 		}
-		case game::hks::HksObjectType::TLIGHTUSERDATA:
+		catch (const std::exception& e)
 		{
-			return lightuserdata{top->v.ptr};
-		}
-		default:
-		{
-			return {};
-		}
+			throw std::runtime_error(std::string("Error executing script function: ") + e.what());
 		}
 	}
 
-	std::vector<value> call(const std::string& name, const arguments& arguments)
+	value get_field(const userdata& self, const value& key)
 	{
-		if (!valid_state())
+		const auto state = *game::hks::lua_state;
+
+		stack_isolation _;
+		push_value(key);
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
 		{
-			throw std::runtime_error("Invalid lua state");
+			disable_error_hook();
+		});
+
+		game::hks::HksObject value{};
+		game::hks::HksObject userdata{};
+		userdata.t = game::hks::TUSERDATA;
+		userdata.v.ptr = self.ptr;
+
+		try
+		{
+			game::hks::hks_obj_getfield(&value, state, &userdata, &state->m_apistack.top[-1]);
+			return value;
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error getting userdata field: ") + e.what());
+		}
+	}
+
+	value get_field(const table& self, const value& key)
+	{
+		const auto state = *game::hks::lua_state;
+
+		stack_isolation _;
+		push_value(key);
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
+		{
+			disable_error_hook();
+		});
+
+		game::hks::HksObject value{};
+		game::hks::HksObject userdata{};
+		userdata.t = game::hks::TTABLE;
+		userdata.v.ptr = self.ptr;
+
+		try
+		{
+			game::hks::hks_obj_getfield(&value, state, &userdata, &state->m_apistack.top[-1]);
+			return value;
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error getting table field: ") + e.what());
+		}
+	}
+
+	void set_field(const userdata& self, const value& key, const value& value)
+	{
+		const auto state = *game::hks::lua_state;
+
+		stack_isolation _;
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
+		{
+			disable_error_hook();
+		});
+
+		game::hks::HksObject userdata{};
+		userdata.t = game::hks::TUSERDATA;
+		userdata.v.ptr = self.ptr;
+
+		try
+		{
+			game::hks::hks_obj_settable(state, &userdata, &key.get_raw(), &value.get_raw());
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error setting userdata field: ") + e.what());
+		}
+	}
+
+	void set_field(const table& self, const value& key, const value& value)
+	{
+		const auto state = *game::hks::lua_state;
+
+		stack_isolation _;
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
+		{
+			disable_error_hook();
+		});
+
+		game::hks::HksObject userdata{};
+		userdata.t = game::hks::TTABLE;
+		userdata.v.ptr = self.ptr;
+
+		try
+		{
+			game::hks::hks_obj_settable(state, &userdata, &key.get_raw(), &value.get_raw());
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error(std::string("Error setting table field: ") + e.what());
+		}
+	}
+
+	arguments call_method(const userdata& self, const std::string& name, const arguments& arguments)
+	{
+		const auto function = ui_scripting::find_method(name);
+		if (!function)
+		{
+			throw std::runtime_error("Function " + name + " not found");
 		}
 
+		stack_isolation _;
+		push_value(self);
+		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
+		{
+			push_value(*i);
+		}
+
+		enable_error_hook();
+		const auto __ = gsl::finally([]()
+		{
+			disable_error_hook();
+		});
+
+		try
+		{
+			const auto count = function(*game::hks::lua_state);
+			std::vector<value> values;
+
+			for (auto i = 0; i < count; i++)
+			{
+				values.push_back(get_return_value(i));
+			}
+
+			if (values.size() == 0)
+			{
+				values.push_back({});
+			}
+
+			return values;
+		}
+		catch (const std::exception& e)
+		{
+			throw std::runtime_error("Error executing method " + name + ": " + e.what());
+		}
+	}
+
+	arguments call(const std::string& name, const arguments& arguments)
+	{
 		const auto function = ui_scripting::find_function(name);
 		if (!function)
 		{
@@ -131,18 +214,16 @@ namespace ui_scripting
 		}
 
 		stack_isolation _;
+		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
+		{
+			push_value(*i);
+		}
 
+		enable_error_hook();
 		const auto __ = gsl::finally([]()
 		{
 			disable_error_hook();
 		});
-
-		enable_error_hook();
-
-		for (const auto& value_ : arguments)
-		{
-			push_value(value_);
-		}
 
 		try
 		{

@@ -21,18 +21,19 @@
 
 namespace ui_scripting
 {
+	std::unordered_map<std::string, game::hks::lua_function> functions;
+	std::unordered_map<std::string, game::hks::lua_function> methods;
+
 	namespace
 	{
 		utils::hook::detour hksi_open_lib_hook;
 		utils::hook::detour hksi_lual_error_hook;
+		utils::hook::detour hksi_lual_error_hook2;
 		utils::hook::detour hksi_add_function_hook;
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
 
 		bool error_hook_enabled = false;
-
-		std::unordered_map<std::string, game::hks::lua_function> functions;
-		std::unordered_map<std::string, game::hks::lua_function> methods;
 
 		void* hksi_open_lib_stub(game::hks::lua_State* s, const char* libname, game::hks::luaL_Reg* l)
 		{
@@ -184,6 +185,7 @@ namespace ui_scripting
 			hks_shutdown_hook.create(game::base_address + 0x3203B0, hks_shutdown_stub);
 			hksi_open_lib_hook.create(game::base_address + 0x2E4530, hksi_open_lib_stub);
 			hksi_lual_error_hook.create(game::base_address + 0x2E3E40, hksi_lual_error_stub);
+			hksi_lual_error_hook2.create(game::base_address + 0x2DCB40, hksi_lual_error_stub);
 			hksi_add_function_hook.create(game::base_address + 0x2DB570, hksi_add_function_stub);
 		}
 	};

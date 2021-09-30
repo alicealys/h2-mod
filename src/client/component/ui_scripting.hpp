@@ -4,6 +4,9 @@
 
 namespace ui_scripting
 {
+	extern std::unordered_map<std::string, game::hks::lua_function> functions;
+	extern std::unordered_map<std::string, game::hks::lua_function> methods;
+
 	void enable_error_hook();
 	void disable_error_hook();
 

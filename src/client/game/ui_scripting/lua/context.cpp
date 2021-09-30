@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "context.hpp"
 #include "error.hpp"
+#include "value_conversion.hpp"
 #include "../../scripting/execution.hpp"
 #include "../value.hpp"
 #include "../execution.hpp"
@@ -26,7 +27,7 @@ namespace ui_scripting::lua
 	{
 		const auto animation_script = utils::nt::load_resource(LUA_ANIMATION_SCRIPT);
 
-		scripting::script_value convert(const sol::lua_value& value)
+		scripting::script_value script_convert(const sol::lua_value& value)
 		{
 			if (value.is<int>())
 			{
@@ -505,14 +506,7 @@ namespace ui_scripting::lua
 
 				for (auto arg : va)
 				{
-					if (arg.is<value>())
-					{
-						event.arguments.push_back(arg.as<value>());
-					}
-					else
-					{
-						event.arguments.push_back({});
-					}
+					event.arguments.push_back(convert({s, arg}));
 				}
 
 				notify(event);
@@ -529,9 +523,9 @@ namespace ui_scripting::lua
 				}
 			);
 
-			element_type[sol::meta_function::new_index] = [](element& element, const std::string& attribute, const value& value)
+			element_type[sol::meta_function::new_index] = [](element& element, const sol::this_state s, const std::string& attribute, const sol::lua_value& value)
 			{
-				element.attributes[attribute] = value;
+				element.attributes[attribute] = convert({s, value});
 			};
 
 			element_type[sol::meta_function::index] = [](element& element, const sol::this_state s, const std::string& attribute)
@@ -541,7 +535,7 @@ namespace ui_scripting::lua
 					return sol::lua_value{s, sol::lua_nil};
 				}
 
-				return sol::lua_value{s, element.attributes[attribute]};
+				return sol::lua_value{s, convert(s, element.attributes[attribute])};
 			};
 
 			auto menu_type = state.new_usertype<menu>("menu");
@@ -579,14 +573,7 @@ namespace ui_scripting::lua
 
 				for (auto arg : va)
 				{
-					if (arg.is<value>())
-					{
-						event.arguments.push_back(arg.as<value>());
-					}
-					else
-					{
-						event.arguments.push_back({});
-					}
+					event.arguments.push_back(convert({s, arg}));
 				}
 
 				notify(event);
@@ -655,11 +642,13 @@ namespace ui_scripting::lua
 				menu.close();
 			};
 
-			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const value& value, const std::string& attribute)
+			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
 			{
+				const auto value_ = convert({s, value});
+
 				for (const auto& element : menu.children)
 				{
-					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
 					{
 						return sol::lua_value{s, element};
 					}
@@ -670,13 +659,14 @@ namespace ui_scripting::lua
 
 			menu_type["getelements"] = sol::overload
 			(
-				[](menu& menu, const sol::this_state s, const value& value, const std::string& attribute)
+				[](menu& menu, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
 				{
+					const auto value_ = convert({s, value});
 					auto result = sol::table::create(s.lua_state());
 
 					for (const auto& element : menu.children)
 					{
-						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
 						{
 							result.add(element);
 						}
@@ -713,11 +703,13 @@ namespace ui_scripting::lua
 				return sol::lua_value{s, &menus[name]};
 			};
 
-			game_type["getelement"] = [](const game&, const sol::this_state s, const value& value, const std::string& attribute)
+			game_type["getelement"] = [](const game&, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
 			{
+				const auto value_ = convert({s, value});
+
 				for (const auto& element : elements)
 				{
-					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
 					{
 						return sol::lua_value{s, element};
 					}
@@ -728,13 +720,14 @@ namespace ui_scripting::lua
 
 			game_type["getelements"] = sol::overload
 			(
-				[](const game&, const sol::this_state s, const value& value, const std::string& attribute)
+				[](const game&, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
 				{
+					const auto value_ = convert({s, value});
 					auto result = sol::table::create(s.lua_state());
 
 					for (const auto& element : elements)
 					{
-						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value)
+						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
 						{
 							result.add(element);
 						}
@@ -974,29 +967,128 @@ namespace ui_scripting::lua
 			{
 				return [name](const game&, const sol::this_state s, sol::variadic_args va)
 				{
-					arguments arguments;
+					arguments arguments{};
 
 					for (auto arg : va)
 					{
-						arguments.push_back(arg);
+						arguments.push_back(convert({s, arg}));
 					}
 
 					const auto values = call(name, arguments);
-					return sol::as_returns(values);
+					std::vector<sol::lua_value> returns;
+
+					for (const auto& value : values)
+					{
+						returns.push_back(convert(s, value));
+					}
+
+					return sol::as_returns(returns);
 				};
 			};
 
 			game_type["call"] = [](const game&, const sol::this_state s, const std::string& name, sol::variadic_args va)
 			{
-				arguments arguments;
+				arguments arguments{};
 
 				for (auto arg : va)
 				{
-					arguments.push_back(arg);
+					arguments.push_back(convert({s, arg}));
 				}
 
 				const auto values = call(name, arguments);
-				return sol::as_returns(values);
+				std::vector<sol::lua_value> returns;
+
+				for (const auto& value : values)
+				{
+					returns.push_back(convert(s, value));
+				}
+
+				return sol::as_returns(returns);
+			};
+
+			auto userdata_type = state.new_usertype<userdata>("userdata_");
+
+			for (const auto method : methods)
+			{
+				const auto name = method.first;
+
+				userdata_type[name] = [name](const userdata& userdata, const sol::this_state s, sol::variadic_args va)
+				{
+					arguments arguments{};
+
+					for (auto arg : va)
+					{
+						arguments.push_back(convert({s, arg}));
+					}
+
+					const auto values = call_method(userdata, name, arguments);
+					std::vector<sol::lua_value> returns;
+
+					for (const auto& value : values)
+					{
+						returns.push_back(convert(s, value));
+					}
+
+					return sol::as_returns(returns);
+				};
+			}
+
+			userdata_type[sol::meta_function::index] = [](const userdata& userdata, const sol::this_state s, 
+				const std::string& name)
+			{
+				return convert(s, userdata.get(name));
+			};
+
+			userdata_type[sol::meta_function::new_index] = [](const userdata& userdata, const sol::this_state s, 
+				const std::string& name, const sol::lua_value& value)
+			{
+				userdata.set(name, convert({s, value}));
+			};
+
+			auto table_type = state.new_usertype<table>("table_");
+
+			table_type[sol::meta_function::index] = [](const table& table, const sol::this_state s,
+				const std::string& name)
+			{
+				return convert(s, table.get(name));
+			};
+
+			table_type[sol::meta_function::new_index] = [](const table& table, const sol::this_state s,
+				const std::string& name, const sol::lua_value& value)
+			{
+				table.set(name, convert({s, value}));
+			};
+
+			table_type[sol::meta_function::length] = [](const table& table)
+			{
+				return table.size();
+			};
+
+			table_type["getkeys"] = [](const table& table, const sol::this_state s)
+			{
+				std::vector<sol::lua_value> result;
+				const auto keys = table.get_keys();
+
+				for (const auto& key : keys)
+				{
+					result.push_back(convert(s, key));
+				}
+
+				return result;
+			};
+
+			auto function_type = state.new_usertype<function>("function");
+
+			function_type[sol::meta_function::call] = [](const function& function, const sol::this_state s, sol::variadic_args va)
+			{
+				arguments arguments{};
+
+				for (auto arg : va)
+				{
+					arguments.push_back(convert({s, arg}));
+				}
+
+				function.call(arguments);
 			};
 
 			struct player
@@ -1018,7 +1110,7 @@ namespace ui_scripting::lua
 
 					for (auto arg : args)
 					{
-						arguments.push_back(convert({s, arg}));
+						arguments.push_back(script_convert({s, arg}));
 					}
 
 					const auto player_value = scripting::call("getentbynum", {0});
