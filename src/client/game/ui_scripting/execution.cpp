@@ -21,6 +21,23 @@ namespace ui_scripting
 		return state->m_apistack.top[-1 - offset];
 	}
 
+	arguments get_return_values(int count)
+	{
+		std::vector<value> values;
+
+		for (auto i = count - 1; i >= 0; i--)
+		{
+			values.push_back(get_return_value(i));
+		}
+
+		if (values.size() == 0)
+		{
+			values.push_back({});
+		}
+
+		return values;
+	}
+
 	arguments call_script_function(const function& function, const arguments& arguments)
 	{
 		const auto state = *game::hks::lua_state;
@@ -41,24 +58,8 @@ namespace ui_scripting
 		try
 		{
 			game::hks::vm_call_internal(state, static_cast<int>(arguments.size()), -1, 0);
-			std::vector<value> values;
-
-			const auto top = state->m_apistack.top;
-			const auto base = state->m_apistack.base;
-
-			const auto num = top - base;
-
-			for (auto i = 0; i < num; i++)
-			{
-				values.push_back(get_return_value(i));
-			}
-
-			if (values.size() == 0)
-			{
-				values.push_back({});
-			}
-
-			return values;
+			const auto count = static_cast<int>(state->m_apistack.top - state->m_apistack.base);
+			return get_return_values(count);
 		}
 		catch (const std::exception& e)
 		{
@@ -186,7 +187,7 @@ namespace ui_scripting
 
 		stack_isolation _;
 		push_value(self);
-		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
+		for (auto i = arguments.begin(); i != arguments.end(); ++i)
 		{
 			push_value(*i);
 		}
@@ -200,19 +201,7 @@ namespace ui_scripting
 		try
 		{
 			const auto count = function(*game::hks::lua_state);
-			std::vector<value> values;
-
-			for (auto i = 0; i < count; i++)
-			{
-				values.push_back(get_return_value(i));
-			}
-
-			if (values.size() == 0)
-			{
-				values.push_back({});
-			}
-
-			return values;
+			return get_return_values(count);
 		}
 		catch (const std::exception& e)
 		{
@@ -229,7 +218,7 @@ namespace ui_scripting
 		}
 
 		stack_isolation _;
-		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
+		for (auto i = arguments.begin(); i != arguments.end(); ++i)
 		{
 			push_value(*i);
 		}
@@ -243,19 +232,7 @@ namespace ui_scripting
 		try
 		{
 			const auto count = function(*game::hks::lua_state);
-			std::vector<value> values;
-
-			for (auto i = 0; i < count; i++)
-			{
-				values.push_back(get_return_value(i));
-			}
-
-			if (values.size() == 0)
-			{
-				values.push_back({});
-			}
-
-			return values;
+			return get_return_values(count);
 		}
 		catch (const std::exception& e)
 		{
