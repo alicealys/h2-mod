@@ -969,11 +969,11 @@ namespace game
 			TNUMBER = 0x3,
 			TSTRING = 0x4,
 			TTABLE = 0x5,
-			TFUNCTION = 0x6,
+			TFUNCTION = 0x6,  // idk
 			TUSERDATA = 0x7,
 			TTHREAD = 0x8,
-			TIFUNCTION = 0x9,
-			TCFUNCTION = 0xA,
+			TIFUNCTION = 0x9, // Lua function
+			TCFUNCTION = 0xA, // C function
 			TUI64 = 0xB,
 			TSTRUCT = 0xC,
 			NUM_TYPE_OBJECTS = 0xE,
@@ -985,13 +985,27 @@ namespace game
 			HksValue v;
 		};
 
+		const struct hksInstruction
+		{
+			unsigned int code;
+		};
+
+		struct ActivationRecord
+		{
+			HksObject* m_base;
+			const hksInstruction* m_returnAddress;
+			__int16 m_tailCallDepth;
+			__int16 m_numVarargs;
+			int m_numExpectedReturns;
+		};
+
 		struct CallStack
 		{
-			void* m_records;
-			void* m_lastrecord;
-			void* m_current;
-			const unsigned int* m_current_lua_pc;
-			const unsigned int* m_hook_return_addr;
+			ActivationRecord* m_records;
+			ActivationRecord* m_lastrecord;
+			ActivationRecord* m_current;
+			const hksInstruction* m_current_lua_pc;
+			const hksInstruction* m_hook_return_addr;
 			int m_hook_level;
 		};
 
@@ -1003,11 +1017,73 @@ namespace game
 			HksObject* bottom;
 		};
 
-		struct lua_State
+		struct UpValue : ChunkHeader
 		{
-			char __pad0[24];
+			HksObject m_storage;
+			HksObject* loc;
+			UpValue* m_next;
+		};
+
+		struct CallSite
+		{
+			_SETJMP_FLOAT128 m_jumpBuffer[16];
+			CallSite* m_prev;
+		};
+
+		enum Status
+		{
+			NEW = 0x1,
+			RUNNING = 0x2,
+			YIELDED = 0x3,
+			DEAD_ERROR = 0x4,
+		};
+
+		enum HksError
+		{
+			HKS_NO_ERROR = 0x0,
+			LUA_ERRSYNTAX = 0xFFFFFFFC,
+			LUA_ERRFILE = 0xFFFFFFFB,
+			LUA_ERRRUN = 0xFFFFFF9C,
+			LUA_ERRMEM = 0xFFFFFF38,
+			LUA_ERRERR = 0xFFFFFED4,
+			HKS_THROWING_ERROR = 0xFFFFFE0C,
+			HKS_GC_YIELD = 0x1,
+		};
+
+		struct lua_Debug
+		{
+			int event;
+			const char* name;
+			const char* namewhat;
+			const char* what;
+			const char* source;
+			int currentline;
+			int nups;
+			int nparams;
+			int ishksfunc;
+			int linedefined;
+			int lastlinedefined;
+			char short_src[512];
+			int callstack_level;
+			int is_tail_call;
+		};
+
+		struct lua_State : ChunkHeader
+		{
+			void* m_global;
 			CallStack m_callStack;
 			ApiStack m_apistack;
+			UpValue* pending;
+			HksObject globals;
+			HksObject m_cEnv;
+			CallSite* m_callsites;
+			int m_numberOfCCalls;
+			void* m_context;
+			InternString* m_name;
+			lua_State* m_nextState;
+			lua_State* m_nextStateStack;
+			Status m_status;
+			HksError m_error;
 		};
 
 		using lua_function = int(__fastcall*)(lua_State*);

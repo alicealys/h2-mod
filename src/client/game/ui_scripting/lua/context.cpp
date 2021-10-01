@@ -1047,6 +1047,18 @@ namespace ui_scripting::lua
 
 			auto table_type = state.new_usertype<table>("table_");
 
+			table_type["get"] = [](const table& table, const sol::this_state s,
+				const std::string& name)
+			{
+				return convert(s, table.get(name));
+			};
+
+			table_type["set"] = [](const table& table, const sol::this_state s,
+				const std::string& name, const sol::lua_value& value)
+			{
+				table.set(name, convert({s, value}));
+			};
+
 			table_type[sol::meta_function::index] = [](const table& table, const sol::this_state s,
 				const std::string& name)
 			{
@@ -1077,7 +1089,9 @@ namespace ui_scripting::lua
 				return result;
 			};
 
-			auto function_type = state.new_usertype<function>("function");
+			state["luiglobals"] = table((*::game::hks::lua_state)->globals.v.table);
+
+			auto function_type = state.new_usertype<function>("function_");
 
 			function_type[sol::meta_function::call] = [](const function& function, const sol::this_state s, sol::variadic_args va)
 			{
@@ -1088,7 +1102,15 @@ namespace ui_scripting::lua
 					arguments.push_back(convert({s, arg}));
 				}
 
-				function.call(arguments);
+				const auto values = function.call(arguments);
+				std::vector<sol::lua_value> returns;
+
+				for (const auto& value : values)
+				{
+					returns.push_back(convert(s, value));
+				}
+
+				return sol::as_returns(returns);
 			};
 
 			struct player

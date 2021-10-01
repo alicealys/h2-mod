@@ -18,20 +18,19 @@ namespace ui_scripting
 	value get_return_value(int offset)
 	{
 		const auto state = *game::hks::lua_state;
-		const auto top = &state->m_apistack.top[-1 - offset];
-		return *top;
+		return state->m_apistack.top[-1 - offset];
 	}
 
-	void call_script_function(const function& function, const arguments& arguments)
+	arguments call_script_function(const function& function, const arguments& arguments)
 	{
 		const auto state = *game::hks::lua_state;
 
 		stack_isolation _;
-		for (auto i = arguments.rbegin(); i != arguments.rend(); ++i)
+		push_value(function);
+		for (auto i = arguments.begin(); i != arguments.end(); ++i)
 		{
 			push_value(*i);
 		}
-		push_value(function);
 
 		enable_error_hook();
 		const auto __ = gsl::finally([]()
@@ -39,11 +38,27 @@ namespace ui_scripting
 			disable_error_hook();
 		});
 
-		// Not sure about this
-
 		try
 		{
-			game::hks::vm_call_internal(state, static_cast<int>(arguments.size()), 0, 0);
+			game::hks::vm_call_internal(state, static_cast<int>(arguments.size()), -1, 0);
+			std::vector<value> values;
+
+			const auto top = state->m_apistack.top;
+			const auto base = state->m_apistack.base;
+
+			const auto num = top - base;
+
+			for (auto i = 0; i < num; i++)
+			{
+				values.push_back(get_return_value(i));
+			}
+
+			if (values.size() == 0)
+			{
+				values.push_back({});
+			}
+
+			return values;
 		}
 		catch (const std::exception& e)
 		{
