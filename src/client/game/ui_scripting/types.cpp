@@ -85,8 +85,9 @@ namespace ui_scripting
 	 * Function
 	 **************************************************************/
 
-	function::function(void* ptr_)
+	function::function(game::hks::cclosure* ptr_, game::hks::HksObjectType type_)
 		: ptr(ptr_)
+		, type(type_)
 	{
 	}
 
