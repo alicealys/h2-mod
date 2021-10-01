@@ -92,7 +92,6 @@ namespace ui_scripting
 
 	arguments function::call(const arguments& arguments) const
 	{
-		call_script_function(*this, arguments);
-		return {};
+		return call_script_function(*this, arguments);
 	}
 }

@@ -8,7 +8,7 @@ namespace ui_scripting
 	void push_value(const value& value);
 	value get_return_value(int offset);
 
-	void call_script_function(const function& function, const arguments& arguments);
+	arguments call_script_function(const function& function, const arguments& arguments);
 
 	value get_field(const userdata& self, const value& key);
 	value get_field(const table& self, const value& key);

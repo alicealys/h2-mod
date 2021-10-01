@@ -259,8 +259,7 @@ namespace ui_scripting
 	template <>
 	bool value::is<function>() const
 	{
-		return this->get_raw().t == game::hks::TIFUNCTION
-			|| this->get_raw().t == game::hks::TCFUNCTION;
+		return this->get_raw().t == game::hks::TIFUNCTION;
 	}
 
 	template <>
