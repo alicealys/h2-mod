@@ -41,10 +41,11 @@ namespace ui_scripting
 	class function
 	{
 	public:
-		function(void*);
+		function(game::hks::cclosure*, game::hks::HksObjectType);
 
 		arguments call(const arguments& arguments) const;
 
-		void* ptr;
+		game::hks::cclosure* ptr;
+		game::hks::HksObjectType type;
 	};
 }

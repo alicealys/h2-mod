@@ -943,10 +943,11 @@ namespace game
 		};
 
 		struct HashTable;
+		struct cclosure;
 
 		union HksValue
 		{
-			void* cClosure;
+			cclosure* cClosure;
 			void* closure;
 			UserData* userData;
 			HashTable* table;
@@ -1113,6 +1114,16 @@ namespace game
 			HksObject* m_arrayPart;
 			unsigned int m_arraySize;
 			Node* m_freeNode;
+		};
+
+		struct cclosure : ChunkHeader
+		{
+			lua_function m_function;
+			HashTable* m_env;
+			__int16 m_numUpvalues;
+			__int16 m_flags;
+			InternString* m_name;
+			HksObject m_upvalues[1];
 		};
 	}
 }

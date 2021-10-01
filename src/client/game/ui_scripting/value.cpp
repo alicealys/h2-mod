@@ -89,7 +89,7 @@ namespace ui_scripting
 
 	value::value(const function& value)
 	{
-		this->value_.t = game::hks::TIFUNCTION;
+		this->value_.t = value.type;
 		this->value_.v.ptr = value.ptr;
 	}
 
@@ -259,13 +259,14 @@ namespace ui_scripting
 	template <>
 	bool value::is<function>() const
 	{
-		return this->get_raw().t == game::hks::TIFUNCTION;
+		return this->get_raw().t == game::hks::TIFUNCTION
+			|| this->get_raw().t == game::hks::TCFUNCTION;
 	}
 
 	template <>
 	function value::get() const
 	{
-		return this->get_raw().v.ptr;
+		return {this->get_raw().v.cClosure, this->get_raw().t};
 	}
 
 	/***************************************************************
