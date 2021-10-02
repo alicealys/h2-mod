@@ -1,6 +1,8 @@
 #include <std_include.hpp>
 #include "value_conversion.hpp"
 #include "../execution.hpp"
+#include "../stack_isolation.hpp"
+#include "../../../component/ui_scripting.hpp"
 
 namespace ui_scripting::lua
 {
@@ -16,6 +18,18 @@ namespace ui_scripting::lua
 			});
 
 			return res;
+		}
+
+		value convert_function(const sol::protected_function& function)
+		{
+			const auto closure = game::hks::cclosure_Create(*game::hks::lua_state, main_function_handler, 0, 0, 0);
+			add_converted_function(closure, function);
+
+			game::hks::HksObject value{};
+			value.t = game::hks::TCFUNCTION;
+			value.v.cClosure = closure;
+
+			return value;
 		}
 	}
 
@@ -74,6 +88,11 @@ namespace ui_scripting::lua
 		if (value.is<sol::table>())
 		{
 			return {convert_table(value.as<sol::table>())};
+		}
+
+		if (value.is<sol::protected_function>())
+		{
+			return {convert_function(value.as<sol::protected_function>())};
 		}
 
 		return {};

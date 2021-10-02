@@ -7,6 +7,7 @@ namespace ui_scripting
 {
 	void push_value(const value& value);
 	value get_return_value(int offset);
+	arguments get_return_values(int count);
 
 	arguments call_script_function(const function& function, const arguments& arguments);
 
