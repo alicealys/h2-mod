@@ -29,9 +29,6 @@ namespace ui_scripting
 		table();
 		table(game::hks::HashTable* ptr_);
 
-		arguments get_keys() const;
-		unsigned int size() const;
-
 		value get(const value& key) const;
 		void set(const value& key, const value& value) const;
 

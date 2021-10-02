@@ -52,25 +52,6 @@ namespace ui_scripting
 	{
 	}
 
-	arguments table::get_keys() const
-	{
-		arguments keys{};
-		auto current = this->ptr->m_hashPart;
-
-		while (current->m_key.t)
-		{
-			keys.push_back(current->m_key);
-			current++;
-		}
-
-		return keys;
-	}
-
-	unsigned int table::size() const
-	{
-		return static_cast<unsigned int>(this->get_keys().size());
-	}
-
 	void table::set(const value& key, const value& value) const
 	{
 		set_field(*this, key, value);

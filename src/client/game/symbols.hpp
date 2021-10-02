@@ -160,6 +160,7 @@ namespace game
 		WEAK symbol<void(lua_State* s, int index)> hksi_lua_pushvalue{0x2DE040};
 		WEAK symbol<HashTable*(lua_State* s, unsigned int arraySize, unsigned int hashSize)> Hashtable_Create{0x2C8290};
 		WEAK symbol<HksObject*(HashTable* t, HksObject* result, HksObject* key)> Hashtable_getNextHash{0x2D5150};
+		WEAK symbol<void(lua_State* s, const HksObject* tbl, HksObject* key, HksObject* retval)> hks_obj_next{0x2DA850};
 		WEAK symbol<cclosure*(lua_State* s, lua_function function, int num_upvalues, 
 			int internal_, int profilerTreatClosureAsFunc)> cclosure_Create{0x2C84B0};
 	}
