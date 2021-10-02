@@ -59,7 +59,7 @@ namespace notifies
 			const auto result = hook(self, sol::as_args(args));
 			scripting::lua::handle_error(result);
 
-			const auto value = scripting::lua::convert({ state, result });
+			const auto value = scripting::lua::convert({state, result});
 			const auto type = value.get_raw().type;
 
 			game::Scr_ClearOutParams();

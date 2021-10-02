@@ -15,6 +15,7 @@
 #include "ui_scripting.hpp"
 
 #include "game/ui_scripting/lua/engine.hpp"
+#include "game/ui_scripting/execution.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -26,6 +27,9 @@ namespace ui_scripting
 
 	namespace
 	{
+		unsigned int function_id = 0;
+		std::unordered_map<game::hks::cclosure*, sol::protected_function> converted_functions;
+
 		utils::hook::detour hksi_open_lib_hook;
 		utils::hook::detour hksi_lual_error_hook;
 		utils::hook::detour hksi_lual_error_hook2;
@@ -104,6 +108,52 @@ namespace ui_scripting
 
 			hksi_add_function_hook.invoke<void>(s, f, a3, name, a5);
 		}
+	}
+
+	int main_function_handler(game::hks::lua_State* state)
+	{
+		const auto value = state->m_apistack.base[-1];
+		if (value.t != game::hks::TCFUNCTION)
+		{
+			return 0;
+		}
+
+		const auto closure = value.v.cClosure;
+		if (converted_functions.find(closure) == converted_functions.end())
+		{
+			return 0;
+		}
+
+		const auto function = converted_functions[closure];
+		const auto count = static_cast<int>(state->m_apistack.top - state->m_apistack.base);
+		const auto arguments = get_return_values(count);
+		const auto s = function.lua_state();
+
+		std::vector<sol::lua_value> converted_args;
+
+		for (const auto& argument : arguments)
+		{
+			converted_args.push_back(lua::convert(s, argument));
+		}
+
+		const auto results = function(sol::as_args(converted_args));
+
+		for (const auto& result : results)
+		{
+			push_value(lua::convert({s, result}));
+		}
+
+		return results.return_count();
+	}
+
+	void add_converted_function(game::hks::cclosure* closure, const sol::protected_function& function)
+	{
+		converted_functions[closure] = function;
+	}
+
+	void clear_converted_functions()
+	{
+		converted_functions.clear();
 	}
 
 	void enable_error_hook()

@@ -3,6 +3,7 @@
 #include "context.hpp"
 
 #include "../../../component/scheduler.hpp"
+#include "../../../component/ui_scripting.hpp"
 
 #include <utils/io.hpp>
 #include <utils/string.hpp>
@@ -200,7 +201,7 @@ namespace ui_scripting::lua::engine
 					: "keyup";
 				event.arguments = {key};
 
-				notify(event);
+				engine::notify(event);
 
 				break;
 			}
@@ -346,7 +347,7 @@ namespace ui_scripting::lua::engine
 				event event;
 				event.element = &menu.second;
 				event.name = "close";
-				notify(event);
+				engine::notify(event);
 
 				menu.second.close();
 			}
@@ -377,7 +378,7 @@ namespace ui_scripting::lua::engine
 		event event;
 		event.element = menu;
 		event.name = "open";
-		notify(event);
+		engine::notify(event);
 
 		menu->open();
 	}
@@ -394,13 +395,14 @@ namespace ui_scripting::lua::engine
 		event event;
 		event.element = menu;
 		event.name = "close";
-		notify(event);
+		engine::notify(event);
 
 		menu->close();
 	}
 
 	void start()
 	{
+		clear_converted_functions();
 		close_all_menus();
 		get_scripts().clear();
 		clear_menus();
@@ -409,6 +411,7 @@ namespace ui_scripting::lua::engine
 
 	void stop()
 	{
+		clear_converted_functions();
 		close_all_menus();
 		get_scripts().clear();
 		clear_menus();
