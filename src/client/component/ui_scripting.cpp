@@ -27,7 +27,6 @@ namespace ui_scripting
 
 	namespace
 	{
-		unsigned int function_id = 0;
 		std::unordered_map<game::hks::cclosure*, sol::protected_function> converted_functions;
 
 		utils::hook::detour hksi_open_lib_hook;
