@@ -1071,25 +1071,11 @@ namespace ui_scripting::lua
 				table.set(name, convert({s, value}));
 			};
 
-			table_type[sol::meta_function::length] = [](const table& table)
-			{
-				return table.size();
-			};
-
-			table_type["getkeys"] = [](const table& table, const sol::this_state s)
-			{
-				std::vector<sol::lua_value> result;
-				const auto keys = table.get_keys();
-
-				for (const auto& key : keys)
-				{
-					result.push_back(convert(s, key));
-				}
-
-				return result;
-			};
-
 			state["luiglobals"] = table((*::game::hks::lua_state)->globals.v.table);
+			state["CoD"] = state["luiglobals"]["CoD"];
+			state["LUI"] = state["luiglobals"]["LUI"];
+			state["Engine"] = state["luiglobals"]["Engine"];
+			state["Game"] = state["luiglobals"]["Game"];
 
 			auto function_type = state.new_usertype<function>("function_");
 
