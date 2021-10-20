@@ -7,7 +7,7 @@
 
 namespace ui_scripting
 {
-	void push_value(const value& value)
+	void push_value(const script_value& value)
 	{
 		const auto state = *game::hks::lua_state;
 		const auto value_ = value.get_raw();
@@ -15,7 +15,7 @@ namespace ui_scripting
 		state->m_apistack.top++;
 	}
 
-	value get_return_value(int offset)
+	script_value get_return_value(int offset)
 	{
 		const auto state = *game::hks::lua_state;
 		return state->m_apistack.top[-1 - offset];
@@ -23,7 +23,7 @@ namespace ui_scripting
 
 	arguments get_return_values(int count)
 	{
-		std::vector<value> values;
+		arguments values;
 
 		for (auto i = count - 1; i >= 0; i--)
 		{
@@ -49,11 +49,8 @@ namespace ui_scripting
 			push_value(*i);
 		}
 
+		const auto _1 = gsl::finally(&disable_error_hook);
 		enable_error_hook();
-		const auto __ = gsl::finally([]()
-		{
-			disable_error_hook();
-		});
 
 		try
 		{
@@ -67,18 +64,15 @@ namespace ui_scripting
 		}
 	}
 
-	value get_field(const userdata& self, const value& key)
+	script_value get_field(const userdata& self, const script_value& key)
 	{
 		const auto state = *game::hks::lua_state;
 
 		stack_isolation _;
 		push_value(key);
 
+		const auto _1 = gsl::finally(&disable_error_hook);
 		enable_error_hook();
-		const auto __ = gsl::finally([]()
-		{
-			disable_error_hook();
-		});
 
 		game::hks::HksObject value{};
 		game::hks::HksObject userdata{};
@@ -87,7 +81,7 @@ namespace ui_scripting
 
 		try
 		{
-			game::hks::hks_obj_getfield(&value, state, &userdata, &state->m_apistack.top[-1]);
+			game::hks::hks_obj_gettable(&value, state, &userdata, &state->m_apistack.top[-1]);
 			return value;
 		}
 		catch (const std::exception& e)
@@ -96,18 +90,15 @@ namespace ui_scripting
 		}
 	}
 
-	value get_field(const table& self, const value& key)
+	script_value get_field(const table& self, const script_value& key)
 	{
 		const auto state = *game::hks::lua_state;
 
 		stack_isolation _;
 		push_value(key);
 
+		const auto _1 = gsl::finally(&disable_error_hook);
 		enable_error_hook();
-		const auto __ = gsl::finally([]()
-		{
-			disable_error_hook();
-		});
 
 		game::hks::HksObject value{};
 		game::hks::HksObject userdata{};
@@ -116,7 +107,7 @@ namespace ui_scripting
 
 		try
 		{
-			game::hks::hks_obj_getfield(&value, state, &userdata, &state->m_apistack.top[-1]);
+			game::hks::hks_obj_gettable(&value, state, &userdata, &state->m_apistack.top[-1]);
 			return value;
 		}
 		catch (const std::exception& e)
@@ -125,17 +116,14 @@ namespace ui_scripting
 		}
 	}
 
-	void set_field(const userdata& self, const value& key, const value& value)
+	void set_field(const userdata& self, const script_value& key, const script_value& value)
 	{
 		const auto state = *game::hks::lua_state;
 
 		stack_isolation _;
 
+		const auto _1 = gsl::finally(&disable_error_hook);
 		enable_error_hook();
-		const auto __ = gsl::finally([]()
-		{
-			disable_error_hook();
-		});
 
 		game::hks::HksObject userdata{};
 		userdata.t = game::hks::TUSERDATA;
@@ -151,17 +139,14 @@ namespace ui_scripting
 		}
 	}
 
-	void set_field(const table& self, const value& key, const value& value)
+	void set_field(const table& self, const script_value& key, const script_value& value)
 	{
 		const auto state = *game::hks::lua_state;
 
 		stack_isolation _;
 
+		const auto _1 = gsl::finally(&disable_error_hook);
 		enable_error_hook();
-		const auto __ = gsl::finally([]()
-		{
-			disable_error_hook();
-		});
 
 		game::hks::HksObject userdata{};
 		userdata.t = game::hks::TTABLE;

@@ -1,5 +1,5 @@
 #pragma once
-#include "value.hpp"
+#include "script_value.hpp"
 
 namespace ui_scripting
 {

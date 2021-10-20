@@ -20,7 +20,7 @@ namespace ui_scripting::lua
 			return res;
 		}
 
-		value convert_function(const sol::protected_function& function)
+		script_value convert_function(const sol::protected_function& function)
 		{
 			const auto closure = game::hks::cclosure_Create(*game::hks::lua_state, main_function_handler, 0, 0, 0);
 			add_converted_function(closure, function);
@@ -33,8 +33,13 @@ namespace ui_scripting::lua
 		}
 	}
 
-	value convert(const sol::lua_value& value)
+	script_value convert(const sol::lua_value& value)
 	{
+		if (value.is<bool>())
+		{
+			return {value.as<bool>()};
+		}
+
 		if (value.is<int>())
 		{
 			return {value.as<int>()};
@@ -43,11 +48,6 @@ namespace ui_scripting::lua
 		if (value.is<unsigned int>())
 		{
 			return {value.as<unsigned int>()};
-		}
-
-		if (value.is<bool>())
-		{
-			return {value.as<bool>()};
 		}
 
 		if (value.is<double>())
@@ -98,7 +98,7 @@ namespace ui_scripting::lua
 		return {};
 	}
 
-	sol::lua_value convert(lua_State* state, const value& value)
+	sol::lua_value convert(lua_State* state, const script_value& value)
 	{
 		if (value.is<int>())
 		{
@@ -108,6 +108,11 @@ namespace ui_scripting::lua
 		if (value.is<float>())
 		{
 			return {state, value.as<float>()};
+		}
+
+		if (value.is<bool>())
+		{
+			return {state, value.as<bool>()};
 		}
 
 		if (value.is<std::string>())

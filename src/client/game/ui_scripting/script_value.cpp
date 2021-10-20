@@ -2,7 +2,7 @@
 #include "execution.hpp"
 #include "types.hpp"
 #include "stack_isolation.hpp"
-#include "value.hpp"
+#include "script_value.hpp"
 
 namespace ui_scripting
 {
@@ -10,12 +10,12 @@ namespace ui_scripting
 	 * Constructors
 	 **************************************************************/
 
-	value::value(const game::hks::HksObject& value)
+	script_value::script_value(const game::hks::HksObject& value)
 		: value_(value)
 	{
 	}
 
-	value::value(const int value)
+	script_value::script_value(const int value)
 	{
 		game::hks::HksObject obj{};
 		obj.t = game::hks::TNUMBER;
@@ -24,7 +24,7 @@ namespace ui_scripting
 		this->value_ = obj;
 	}
 
-	value::value(const unsigned int value)
+	script_value::script_value(const unsigned int value)
 	{
 		game::hks::HksObject obj{};
 		obj.t = game::hks::TNUMBER;
@@ -33,12 +33,16 @@ namespace ui_scripting
 		this->value_ = obj;
 	}
 
-	value::value(const bool value)
-		: value(static_cast<unsigned>(value))
+	script_value::script_value(const bool value)
 	{
+		game::hks::HksObject obj{};
+		obj.t = game::hks::TBOOLEAN;
+		obj.v.boolean = value;
+
+		this->value_ = obj;
 	}
 
-	value::value(const float value)
+	script_value::script_value(const float value)
 	{
 		game::hks::HksObject obj{};
 		obj.t = game::hks::TNUMBER;
@@ -47,12 +51,12 @@ namespace ui_scripting
 		this->value_ = obj;
 	}
 
-	value::value(const double value)
-		: value(static_cast<float>(value))
+	script_value::script_value(const double value)
+		: script_value(static_cast<float>(value))
 	{
 	}
 
-	value::value(const char* value)
+	script_value::script_value(const char* value)
 	{
 		game::hks::HksObject obj{};
 		stack_isolation _;
@@ -64,30 +68,30 @@ namespace ui_scripting
 		this->value_ = obj;
 	}
 
-	value::value(const std::string& value)
-		: value(value.data())
+	script_value::script_value(const std::string& value)
+		: script_value(value.data())
 	{
 	}
 
-	value::value(const lightuserdata& value)
+	script_value::script_value(const lightuserdata& value)
 	{
 		this->value_.t = game::hks::TLIGHTUSERDATA;
 		this->value_.v.ptr = value.ptr;
 	}
 
-	value::value(const userdata& value)
+	script_value::script_value(const userdata& value)
 	{
 		this->value_.t = game::hks::TUSERDATA;
 		this->value_.v.ptr = value.ptr;
 	}
 
-	value::value(const table& value)
+	script_value::script_value(const table& value)
 	{
 		this->value_.t = game::hks::TTABLE;
 		this->value_.v.ptr = value.ptr;
 	}
 
-	value::value(const function& value)
+	script_value::script_value(const function& value)
 	{
 		this->value_.t = value.type;
 		this->value_.v.ptr = value.ptr;
@@ -98,39 +102,44 @@ namespace ui_scripting
 	 **************************************************************/
 
 	template <>
-	bool value::is<int>() const
+	bool script_value::is<int>() const
 	{
-		return this->get_raw().t == game::hks::TNUMBER;
+		const auto number = this->get_raw().v.number;
+		return this->get_raw().t == game::hks::TNUMBER && static_cast<int>(number) == number;
 	}
 
 	template <>
-	bool value::is<unsigned int>() const
-	{
-		return this->is<int>();
-	}
-
-	template <>
-	bool value::is<bool>() const
+	bool script_value::is<unsigned int>() const
 	{
 		return this->is<int>();
 	}
 
 	template <>
-	int value::get() const
+	int script_value::get() const
 	{
 		return static_cast<int>(this->get_raw().v.number);
 	}
 
 	template <>
-	unsigned int value::get() const
+	unsigned int script_value::get() const
 	{
 		return static_cast<unsigned int>(this->get_raw().v.number);
 	}
 
+	/***************************************************************
+	 * Boolean
+	 **************************************************************/
+
 	template <>
-	bool value::get() const
+	bool script_value::is<bool>() const
 	{
-		return this->get_raw().v.native != 0;
+		return this->get_raw().t == game::hks::TBOOLEAN;
+	}
+
+	template <>
+	bool script_value::get() const
+	{
+		return this->get_raw().v.boolean;
 	}
 
 	/***************************************************************
@@ -138,25 +147,25 @@ namespace ui_scripting
 	 **************************************************************/
 
 	template <>
-	bool value::is<float>() const
+	bool script_value::is<float>() const
 	{
 		return this->get_raw().t == game::hks::TNUMBER;
 	}
 
 	template <>
-	bool value::is<double>() const
+	bool script_value::is<double>() const
 	{
 		return this->is<float>();
 	}
 
 	template <>
-	float value::get() const
+	float script_value::get() const
 	{
 		return this->get_raw().v.number;
 	}
 
 	template <>
-	double value::get() const
+	double script_value::get() const
 	{
 		return static_cast<double>(this->get_raw().v.number);
 	}
@@ -166,30 +175,104 @@ namespace ui_scripting
 	 **************************************************************/
 
 	template <>
-	bool value::is<const char*>() const
+	bool script_value::is<const char*>() const
 	{
 		return this->get_raw().t == game::hks::TSTRING;
 	}
 
 	template <>
-	bool value::is<std::string>() const
+	bool script_value::is<std::string>() const
 	{
 		return this->is<const char*>();
 	}
 
 	template <>
-	const char* value::get() const
+	const char* script_value::get() const
 	{
 		return this->get_raw().v.str->m_data;
 	}
 
 	template <>
-	std::string value::get() const
+	std::string script_value::get() const
 	{
 		return this->get<const char*>();
 	}
 
-	bool value::operator==(const value& other)
+	/***************************************************************
+	 * Lightuserdata
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<lightuserdata>() const
+	{
+		return this->get_raw().t == game::hks::TLIGHTUSERDATA;
+	}
+
+	template <>
+	lightuserdata script_value::get() const
+	{
+		return this->get_raw().v.ptr;
+	}
+
+	/***************************************************************
+	 * Userdata
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<userdata>() const
+	{
+		return this->get_raw().t == game::hks::TUSERDATA;
+	}
+
+	template <>
+	userdata script_value::get() const
+	{
+		return this->get_raw().v.ptr;
+	}
+
+	/***************************************************************
+	 * Table
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<table>() const
+	{
+		return this->get_raw().t == game::hks::TTABLE;
+	}
+
+	template <>
+	table script_value::get() const
+	{
+		return this->get_raw().v.table;
+	}
+
+	/***************************************************************
+	 * Function
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<function>() const
+	{
+		return this->get_raw().t == game::hks::TIFUNCTION
+			|| this->get_raw().t == game::hks::TCFUNCTION;
+	}
+
+	template <>
+	function script_value::get() const
+	{
+		return { this->get_raw().v.cClosure, this->get_raw().t };
+	}
+
+	/***************************************************************
+	 *
+	 **************************************************************/
+
+	const game::hks::HksObject& script_value::get_raw() const
+	{
+		return this->value_;
+	}
+
+	bool script_value::operator==(const script_value& other)
 	{
 		if (this->get_raw().t != other.get_raw().t)
 		{
@@ -202,79 +285,5 @@ namespace ui_scripting
 		}
 
 		return this->get_raw().v.native == other.get_raw().v.native;
-	}
-
-	/***************************************************************
-	 * Lightuserdata
-	 **************************************************************/
-
-	template <>
-	bool value::is<lightuserdata>() const
-	{
-		return this->get_raw().t == game::hks::TLIGHTUSERDATA;
-	}
-
-	template <>
-	lightuserdata value::get() const
-	{
-		return this->get_raw().v.ptr;
-	}
-
-	/***************************************************************
-	 * Userdata
-	 **************************************************************/
-
-	template <>
-	bool value::is<userdata>() const
-	{
-		return this->get_raw().t == game::hks::TUSERDATA;
-	}
-
-	template <>
-	userdata value::get() const
-	{
-		return this->get_raw().v.ptr;
-	}
-
-	/***************************************************************
-	 * Table
-	 **************************************************************/
-
-	template <>
-	bool value::is<table>() const
-	{
-		return this->get_raw().t == game::hks::TTABLE;
-	}
-
-	template <>
-	table value::get() const
-	{
-		return this->get_raw().v.table;
-	}
-
-	/***************************************************************
-	 * Function
-	 **************************************************************/
-
-	template <>
-	bool value::is<function>() const
-	{
-		return this->get_raw().t == game::hks::TIFUNCTION
-			|| this->get_raw().t == game::hks::TCFUNCTION;
-	}
-
-	template <>
-	function value::get() const
-	{
-		return {this->get_raw().v.cClosure, this->get_raw().t};
-	}
-
-	/***************************************************************
-	 *
-	 **************************************************************/
-
-	const game::hks::HksObject& value::get_raw() const
-	{
-		return this->value_;
 	}
 }
