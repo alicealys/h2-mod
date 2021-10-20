@@ -16,6 +16,7 @@
 
 #include "game/ui_scripting/lua/engine.hpp"
 #include "game/ui_scripting/execution.hpp"
+#include "game/ui_scripting/lua/error.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -136,6 +137,7 @@ namespace ui_scripting
 		}
 
 		const auto results = function(sol::as_args(converted_args));
+		lua::handle_error(results);
 
 		for (const auto& result : results)
 		{
@@ -206,10 +208,7 @@ namespace ui_scripting
 
 			command::add("reloadmenus", []()
 			{
-				scheduler::once([]()
-				{
-					ui_scripting::lua::engine::start();
-				}, scheduler::pipeline::renderer);
+				scheduler::once(ui_scripting::lua::engine::start, scheduler::pipeline::renderer);
 			});
 
 			command::add("openluamenu", [](const command::params& params)

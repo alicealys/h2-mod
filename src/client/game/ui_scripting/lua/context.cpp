@@ -3,7 +3,7 @@
 #include "error.hpp"
 #include "value_conversion.hpp"
 #include "../../scripting/execution.hpp"
-#include "../value.hpp"
+#include "../script_value.hpp"
 #include "../execution.hpp"
 
 #include "../../../component/ui_scripting.hpp"
@@ -1008,6 +1008,17 @@ namespace ui_scripting::lua
 
 			auto userdata_type = state.new_usertype<userdata>("userdata_");
 
+			userdata_type["new"] = sol::property(
+				[](const userdata& userdata, const sol::this_state s)
+				{
+					return convert(s, userdata.get("new"));
+				},
+				[](const userdata& userdata, const sol::this_state s, const sol::lua_value& value)
+				{
+					userdata.set("new", convert({s, value}));
+				}
+			);
+
 			for (const auto method : methods)
 			{
 				const auto name = method.first;
@@ -1046,6 +1057,17 @@ namespace ui_scripting::lua
 			};
 
 			auto table_type = state.new_usertype<table>("table_");
+
+			table_type["new"] = sol::property(
+				[](const table& table, const sol::this_state s)
+				{
+					return convert(s, table.get("new"));
+				},
+				[](const table& table, const sol::this_state s, const sol::lua_value& value)
+				{
+					table.set("new", convert({s, value}));
+				}
+			);
 
 			table_type["get"] = [](const table& table, const sol::this_state s,
 				const std::string& name)
