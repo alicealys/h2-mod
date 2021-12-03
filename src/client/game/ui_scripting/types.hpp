@@ -4,72 +4,86 @@
 
 namespace ui_scripting
 {
-	class lightuserdata
-	{
-	public:
-		lightuserdata(void*);
-		void* ptr;
-	};
+    class lightuserdata
+    {
+    public:
+        lightuserdata(void*);
+        void* ptr;
+    };
 
-	class userdata
-	{
-	public:
-		userdata(void*);
+    class userdata
+    {
+    public:
+        userdata(void*);
 
-		script_value get(const script_value& key) const;
-		void set(const script_value& key, const script_value& value) const;
+        userdata(const userdata& other);
+        userdata(userdata&& other) noexcept;
 
-		void* ptr;
-	};
+        ~userdata();
 
-	class table
-	{
-	public:
-		table();
-		table(game::hks::HashTable* ptr_);
+        userdata& operator=(const userdata& other);
+        userdata& operator=(userdata&& other) noexcept;
 
-		table(const table& other);
-		table(table&& other) noexcept;
+        script_value get(const script_value& key) const;
+        void set(const script_value& key, const script_value& value) const;
 
-		~table();
+        void* ptr;
 
-		table& operator=(const table& other);
-		table& operator=(table&& other) noexcept;
+    private:
+        void add();
+        void release();
 
-		script_value get(const script_value& key) const;
-		void set(const script_value& key, const script_value& value) const;
+        int ref{};
+    };
 
-		game::hks::HashTable* ptr;
+    class table
+    {
+    public:
+        table();
+        table(game::hks::HashTable* ptr_);
 
-	private:
-		void add();
-		void release();
+        table(const table& other);
+        table(table&& other) noexcept;
 
-		int ref;
-	};
+        ~table();
 
-	class function
-	{
-	public:
-		function(game::hks::cclosure*, game::hks::HksObjectType);
+        table& operator=(const table& other);
+        table& operator=(table&& other) noexcept;
 
-		function(const function& other);
-		function(function&& other) noexcept;
+        script_value get(const script_value& key) const;
+        void set(const script_value& key, const script_value& value) const;
 
-		~function();
+        game::hks::HashTable* ptr;
 
-		function& operator=(const function& other);
-		function& operator=(function&& other) noexcept;
+    private:
+        void add();
+        void release();
 
-		arguments call(const arguments& arguments) const;
+        int ref{};
+    };
 
-		game::hks::cclosure* ptr;
-		game::hks::HksObjectType type;
+    class function
+    {
+    public:
+        function(game::hks::cclosure*, game::hks::HksObjectType);
 
-	private:
-		void add();
-		void release();
+        function(const function& other);
+        function(function&& other) noexcept;
 
-		int ref;
-	};
+        ~function();
+
+        function& operator=(const function& other);
+        function& operator=(function&& other) noexcept;
+
+        arguments call(const arguments& arguments) const;
+
+        game::hks::cclosure* ptr;
+        game::hks::HksObjectType type;
+
+    private:
+        void add();
+        void release();
+
+        int ref{};
+    };
 }
