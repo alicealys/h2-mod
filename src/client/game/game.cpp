@@ -79,3 +79,8 @@ namespace game
 		}
 	}
 }
+
+uintptr_t operator"" _b(const uintptr_t ptr)
+{
+	return game::base_address + ptr;
+}

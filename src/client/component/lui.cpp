@@ -39,8 +39,8 @@ namespace lui
 
 			command::add("lui_restart", []()
 			{
-				utils::hook::invoke<void>(game::base_address + 0x3203B0);
-				utils::hook::invoke<void>(game::base_address + 0x32D370);
+				utils::hook::invoke<void>(0x3203B0_b);
+				utils::hook::invoke<void>(0x32D370_b);
 			});
 		}
 	};

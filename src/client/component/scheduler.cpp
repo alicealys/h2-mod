@@ -178,9 +178,9 @@ namespace scheduler
 
 		void post_unpack() override
 		{
-			r_end_frame_hook.create(game::base_address + 0x76D7B0, scheduler::r_end_frame_stub);
-			g_run_frame_hook.create(game::base_address + 0x4CB030, scheduler::server_frame_stub);
-			main_frame_hook.create(game::base_address + 0x417FA0, scheduler::main_frame_stub);
+			r_end_frame_hook.create(0x76D7B0_b, scheduler::r_end_frame_stub);
+			g_run_frame_hook.create(0x4CB030_b, scheduler::server_frame_stub);
+			main_frame_hook.create(0x417FA0_b, scheduler::main_frame_stub);
 		}
 
 		void pre_destroy() override

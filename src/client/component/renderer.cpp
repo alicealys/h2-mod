@@ -63,8 +63,8 @@ namespace renderer
 		{
 			dvars::r_fullbright = dvars::register_int("r_fullbright", 0, 0, 3, game::DVAR_FLAG_SAVED);
 
-			r_init_draw_method_hook.create(game::base_address + 0x72F950, &r_init_draw_method_stub);
-			r_update_front_end_dvar_options_hook.create(game::base_address + 0x76EE70, &r_update_front_end_dvar_options_stub);
+			r_init_draw_method_hook.create(0x72F950_b, &r_init_draw_method_stub);
+			r_update_front_end_dvar_options_hook.create(0x76EE70_b, &r_update_front_end_dvar_options_stub);
 		}
 	};
 }

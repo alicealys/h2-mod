@@ -91,7 +91,7 @@ void remove_crash_file()
 
 void verify_version()
 {
-	const auto value = *reinterpret_cast<DWORD*>(game::base_address + 0x123456);
+	const auto value = *reinterpret_cast<DWORD*>(0x123456_b);
 	if (value != 0xE465E151)
 	{
 		throw std::runtime_error("Unsupported Call of Duty: Modern Warfare 2 Campaign Remastered version");
