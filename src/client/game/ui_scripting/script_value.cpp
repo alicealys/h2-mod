@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "execution.hpp"
 #include "types.hpp"
-#include "stack_isolation.hpp"
 #include "script_value.hpp"
 
 namespace ui_scripting
@@ -59,9 +58,10 @@ namespace ui_scripting
 	script_value::script_value(const char* value)
 	{
 		game::hks::HksObject obj{};
-		stack_isolation _;
 
 		const auto state = *game::hks::lua_state;
+		state->m_apistack.top = state->m_apistack.base;
+
 		game::hks::hksi_lua_pushlstring(state, value, (unsigned int)strlen(value));
 		obj = state->m_apistack.top[-1];
 

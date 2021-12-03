@@ -1,7 +1,6 @@
 #include <std_include.hpp>
 #include "value_conversion.hpp"
 #include "../execution.hpp"
-#include "../stack_isolation.hpp"
 #include "../../../component/ui_scripting.hpp"
 
 namespace ui_scripting::lua

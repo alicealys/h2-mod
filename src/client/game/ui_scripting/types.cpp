@@ -1,205 +1,276 @@
 #include <std_include.hpp>
 #include "types.hpp"
 #include "execution.hpp"
-#include "stack_isolation.hpp"
 
 namespace ui_scripting
 {
-	/***************************************************************
-	 * Lightuserdata
-	 **************************************************************/
+    /***************************************************************
+     * Lightuserdata
+     **************************************************************/
 
-	lightuserdata::lightuserdata(void* ptr_)
-		: ptr(ptr_)
-	{
-	}
+    lightuserdata::lightuserdata(void* ptr_)
+        : ptr(ptr_)
+    {
+    }
 
-	/***************************************************************
-	 * Userdata
-	 **************************************************************/
+    /***************************************************************
+     * Userdata
+     **************************************************************/
 
-	userdata::userdata(void* ptr_)
-		: ptr(ptr_)
-	{
-	}
+    userdata::userdata(void* ptr_)
+        : ptr(ptr_)
+    {
+        this->add();
+    }
 
-	void userdata::set(const script_value& key, const script_value& value) const
-	{
-		set_field(*this, key, value);
-	}
+    userdata::userdata(const userdata& other)
+    {
+        this->operator=(other);
+    }
 
-	script_value userdata::get(const script_value& key) const
-	{
-		return get_field(*this, key);
-	}
+    userdata::userdata(userdata&& other) noexcept
+    {
+        this->ptr = other.ptr;
+        this->ref = other.ref;
+        other.ref = 0;
+    }
 
-	/***************************************************************
-	 * Table
-	 **************************************************************/
+    userdata::~userdata()
+    {
+        this->release();
+    }
 
-	table::table()
-	{
-		const auto state = *game::hks::lua_state;
-		this->ptr = game::hks::Hashtable_Create(state, 0, 0);
-		this->add();
-	}
+    userdata& userdata::operator=(const userdata& other)
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->ref = other.ref;
+            this->add();
+        }
 
-	table::table(game::hks::HashTable* ptr_)
-		: ptr(ptr_)
-	{
-		this->add();
-	}
+        return *this;
+    }
 
-	table::table(const table& other) : table(other.ptr)
-	{
-	}
+    userdata& userdata::operator=(userdata&& other) noexcept
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->ref = other.ref;
+            other.ref = 0;
+        }
 
-	table::table(table&& other) noexcept
-	{
-		this->ptr = other.ptr;
-		this->ref = other.ref;
-		other.ref = 0;
-	}
+        return *this;
+    }
 
-	table::~table()
-	{
-		this->release();
-	}
+    void userdata::add()
+    {
+        game::hks::HksObject value{};
+        value.v.ptr = this->ptr;
+        value.t = game::hks::TUSERDATA;
 
-	table& table::operator=(const table& other)
-	{
-		if (&other != this)
-		{
-			this->release();
-			this->ptr = other.ptr;
-			this->ref = other.ref;
-			this->add();
-		}
+        const auto state = *game::hks::lua_state;
+        state->m_apistack.top = state->m_apistack.base;
 
-		return *this;
-	}
+        push_value(value);
 
-	table& table::operator=(table&& other) noexcept
-	{
-		if (&other != this)
-		{
-			this->release();
-			this->ptr = other.ptr;
-			this->ref = other.ref;
-			other.ref = 0;
-		}
+        this->ref = game::hks::hksi_luaL_ref(*game::hks::lua_state, -10000);
+    }
 
-		return *this;
-	}
+    void userdata::release()
+    {
+        if (this->ref)
+        {
+            game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref);
+        }
+    }
 
-	void table::add()
-	{
-		game::hks::HksObject value{};
-		value.v.table = this->ptr;
-		value.t = game::hks::TTABLE;
+    void userdata::set(const script_value& key, const script_value& value) const
+    {
+        set_field(*this, key, value);
+    }
 
-		stack_isolation _;
-		push_value(value);
+    script_value userdata::get(const script_value& key) const
+    {
+        return get_field(*this, key);
+    }
 
-		this->ref = game::hks::hksi_luaL_ref(*game::hks::lua_state, -10000);
-	}
+    /***************************************************************
+     * Table
+     **************************************************************/
 
-	void table::release()
-	{
-		if (this->ref)
-		{
-			game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref);
-		}
-	}
+    table::table()
+    {
+        const auto state = *game::hks::lua_state;
+        this->ptr = game::hks::Hashtable_Create(state, 0, 0);
+        this->add();
+    }
 
-	void table::set(const script_value& key, const script_value& value) const
-	{
-		set_field(*this, key, value);
-	}
+    table::table(game::hks::HashTable* ptr_)
+        : ptr(ptr_)
+    {
+        this->add();
+    }
 
-	script_value table::get(const script_value& key) const
-	{
-		return get_field(*this, key);
-	}
+    table::table(const table& other)
+    {
+        this->operator=(other);
+    }
 
-	/***************************************************************
-	 * Function
-	 **************************************************************/
+    table::table(table&& other) noexcept
+    {
+        this->ptr = other.ptr;
+        this->ref = other.ref;
+        other.ref = 0;
+    }
 
-	function::function(game::hks::cclosure* ptr_, game::hks::HksObjectType type_)
-		: ptr(ptr_)
-		, type(type_)
-	{
-		this->add();
-	}
+    table::~table()
+    {
+        this->release();
+    }
 
-	function::function(const function& other) : function(other.ptr, other.type)
-	{
-	}
+    table& table::operator=(const table& other)
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->ref = other.ref;
+            this->add();
+        }
 
-	function::function(function&& other) noexcept
-	{
-		this->ptr = other.ptr;
-		this->type = other.type;
-		this->ref = other.ref;
-		other.ref = 0;
-	}
+        return *this;
+    }
 
-	function::~function()
-	{
-		this->release();
-	}
+    table& table::operator=(table&& other) noexcept
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->ref = other.ref;
+            other.ref = 0;
+        }
 
-	function& function::operator=(const function& other)
-	{
-		if (&other != this)
-		{
-			this->release();
-			this->ptr = other.ptr;
-			this->type = other.type;
-			this->ref = other.ref;
-			this->add();
-		}
+        return *this;
+    }
 
-		return *this;
-	}
+    void table::add()
+    {
+        game::hks::HksObject value{};
+        value.v.table = this->ptr;
+        value.t = game::hks::TTABLE;
 
-	function& function::operator=(function&& other) noexcept
-	{
-		if (&other != this)
-		{
-			this->release();
-			this->ptr = other.ptr;
-			this->type = other.type;
-			this->ref = other.ref;
-			other.ref = 0;
-		}
+        const auto state = *game::hks::lua_state;
+        state->m_apistack.top = state->m_apistack.base;
 
-		return *this;
-	}
+        push_value(value);
 
-	void function::add()
-	{
-		game::hks::HksObject value{};
-		value.v.cClosure = this->ptr;
-		value.t = this->type;
+        this->ref = game::hks::hksi_luaL_ref(*game::hks::lua_state, -10000);
+    }
 
-		stack_isolation _;
-		push_value(value);
+    void table::release()
+    {
+        if (this->ref)
+        {
+            game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref);
+        }
+    }
 
-		this->ref = game::hks::hksi_luaL_ref(*game::hks::lua_state, -10000);
-	}
+    void table::set(const script_value& key, const script_value& value) const
+    {
+        set_field(*this, key, value);
+    }
 
-	void function::release()
-	{
-		if (this->ref)
-		{
-			game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref);
-		}
-	}
+    script_value table::get(const script_value& key) const
+    {
+        return get_field(*this, key);
+    }
 
-	arguments function::call(const arguments& arguments) const
-	{
-		return call_script_function(*this, arguments);
-	}
+    /***************************************************************
+     * Function
+     **************************************************************/
+
+    function::function(game::hks::cclosure* ptr_, game::hks::HksObjectType type_)
+        : ptr(ptr_)
+        , type(type_)
+    {
+        this->add();
+    }
+
+    function::function(const function& other)
+    {
+        this->operator=(other);
+    }
+
+    function::function(function&& other) noexcept
+    {
+        this->ptr = other.ptr;
+        this->type = other.type;
+        this->ref = other.ref;
+        other.ref = 0;
+    }
+
+    function::~function()
+    {
+        this->release();
+    }
+
+    function& function::operator=(const function& other)
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->type = other.type;
+            this->ref = other.ref;
+            this->add();
+        }
+
+        return *this;
+    }
+
+    function& function::operator=(function&& other) noexcept
+    {
+        if (&other != this)
+        {
+            this->release();
+            this->ptr = other.ptr;
+            this->type = other.type;
+            this->ref = other.ref;
+            other.ref = 0;
+        }
+
+        return *this;
+    }
+
+    void function::add()
+    {
+        game::hks::HksObject value{};
+        value.v.cClosure = this->ptr;
+        value.t = this->type;
+
+        const auto state = *game::hks::lua_state;
+        state->m_apistack.top = state->m_apistack.base;
+
+        push_value(value);
+
+        this->ref = game::hks::hksi_luaL_ref(*game::hks::lua_state, -10000);
+    }
+
+    void function::release()
+    {
+        if (this->ref)
+        {
+            game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref);
+        }
+    }
+
+    arguments function::call(const arguments& arguments) const
+    {
+        return call_script_function(*this, arguments);
+    }
 }
