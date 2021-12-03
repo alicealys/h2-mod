@@ -960,7 +960,7 @@ namespace ui_scripting::lua
 			game_type["playmenuvideo"] = [](const game&, const std::string& video)
 			{
 				reinterpret_cast<void (*)(const char* a1, int a2, int a3)>
-					(::game::base_address + 0x71B970)(video.data(), 64, 0);
+					(0x71B970_b)(video.data(), 64, 0);
 			};
 
 			game_type[sol::meta_function::index] = [](const game&, const std::string& name)

@@ -23,7 +23,7 @@ namespace patches
 		uint64_t off_11C52460;
 		void* sub_46148()
 		{
-			off_11C52460 = game::base_address + 0xAD0C58;
+			off_11C52460 = 0xAD0C58_b;
 			return &off_11C52460;
 		}
 	}
@@ -34,17 +34,17 @@ namespace patches
 		void post_unpack() override
 		{
 			// Not sure but it works
-			utils::hook::set(game::base_address + 0x633080, 0xC301B0);
-			utils::hook::set(game::base_address + 0x272F70, 0xC301B0);
-			utils::hook::jump(game::base_address + 0x46148, sub_46148, true);
+			utils::hook::set(0x633080_b, 0xC301B0);
+			utils::hook::set(0x272F70_b, 0xC301B0);
+			utils::hook::jump(0x46148_b, sub_46148, true);
 
 			// Unlock fps in main menu
-			utils::hook::set<BYTE>(game::base_address + 0x3D8E1B, 0xEB);
+			utils::hook::set<BYTE>(0x3D8E1B_b, 0xEB);
 
 			// Disable battle net popup
-			utils::hook::nop(game::base_address + 0x5F4496, 5);
+			utils::hook::nop(0x5F4496_b, 5);
 
-			pm_crashland_hook.create(game::base_address + 0x688A20, pm_crashland_stub);
+			pm_crashland_hook.create(0x688A20_b, pm_crashland_stub);
 			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", 1, game::DVAR_FLAG_REPLICATED);
 
 			dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);

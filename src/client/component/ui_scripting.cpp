@@ -229,12 +229,12 @@ namespace ui_scripting
 				}, scheduler::pipeline::renderer);
 			});
 
-			hks_start_hook.create(game::base_address + 0x328BE0, hks_start_stub);
-			hks_shutdown_hook.create(game::base_address + 0x3203B0, hks_shutdown_stub);
-			hksi_open_lib_hook.create(game::base_address + 0x2E4530, hksi_open_lib_stub);
-			hksi_lual_error_hook.create(game::base_address + 0x2E3E40, hksi_lual_error_stub);
-			hksi_lual_error_hook2.create(game::base_address + 0x2DCB40, hksi_lual_error_stub);
-			hksi_add_function_hook.create(game::base_address + 0x2DB570, hksi_add_function_stub);
+			hks_start_hook.create(0x328BE0_b, hks_start_stub);
+			hks_shutdown_hook.create(0x3203B0_b, hks_shutdown_stub);
+			hksi_open_lib_hook.create(0x2E4530_b, hksi_open_lib_stub);
+			hksi_lual_error_hook.create(0x2E3E40_b, hksi_lual_error_stub);
+			hksi_lual_error_hook2.create(0x2DCB40_b, hksi_lual_error_stub);
+			hksi_add_function_hook.create(0x2DB570_b, hksi_add_function_stub);
 		}
 	};
 }

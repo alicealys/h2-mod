@@ -42,7 +42,7 @@ namespace fastfiles
 	public:
 		void post_unpack() override
 		{
-			db_try_load_x_file_internal_hook.create(game::base_address + 0x4173B0, &db_try_load_x_file_internal);
+			db_try_load_x_file_internal_hook.create(0x4173B0_b, &db_try_load_x_file_internal);
 
 			command::add("loadzone", [](const command::params& params)
 			{
