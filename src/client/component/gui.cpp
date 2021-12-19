@@ -5,6 +5,7 @@
 #include "game/dvars.hpp"
 
 #include "scheduler.hpp"
+#include "gui.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -83,13 +84,6 @@ namespace gui
 			return result;
 		}
 
-		utils::hook::detour dxgi_swap_chain_present_hook;
-		void* dxgi_swap_chain_present_stub()
-		{
-			on_frame();
-			return dxgi_swap_chain_present_hook.invoke<void*>();
-		}
-
 		utils::hook::detour wnd_proc_hook;
 		LRESULT wnd_proc_stub(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
@@ -138,7 +132,7 @@ namespace gui
 
 		void post_unpack() override
 		{
-			dxgi_swap_chain_present_hook.create(0x7A13A0_b, dxgi_swap_chain_present_stub);
+			scheduler::loop(on_frame, scheduler::pipeline::renderer);
 			wnd_proc_hook.create(0x650F10_b, wnd_proc_stub);
 		}
 
