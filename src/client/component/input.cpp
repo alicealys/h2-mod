@@ -4,6 +4,7 @@
 #include "game/game.hpp"
 
 #include "game_console.hpp"
+#include "gui.hpp"
 #include "game/ui_scripting/lua/engine.hpp"
 
 #include <utils/hook.hpp>
@@ -31,6 +32,11 @@ namespace input
 				return;
 			}
 
+			if (!gui::gui_char_event(local_client_num, key))
+			{
+				return;
+			}
+
 			cl_char_event_hook.invoke<void>(local_client_num, key);
 		}
 
@@ -43,11 +49,21 @@ namespace input
 				return;
 			}
 
+			if (!gui::gui_key_event(local_client_num, key, down))
+			{
+				return;
+			}
+
 			cl_key_event_hook.invoke<void>(local_client_num, key, down);
 		}
 
 		void cl_mouse_move_stub(const int local_client_num, int x, int y)
 		{
+			if (!gui::gui_mouse_event(local_client_num, x, y))
+			{
+				return;
+			}
+
 			ui_scripting::lua::engine::ui_event("mousemove", {x, y});
 			cl_mouse_move_hook.invoke<void>(local_client_num, x, y);
 		}
