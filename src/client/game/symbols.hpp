@@ -123,6 +123,8 @@ namespace game
 	WEAK symbol<cmd_function_s*> cmd_functions{0xAD17BB8};
 	WEAK symbol<CmdArgs> cmd_args{0xAD17A60};
 
+	WEAK symbol<HWND> hWnd{0xCCF81C0};
+
 	WEAK symbol<const char*> g_assetNames{0xBEF280};
 	WEAK symbol<int> g_poolSize{0xBF2E40};
 
