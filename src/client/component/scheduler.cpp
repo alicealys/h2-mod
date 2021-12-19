@@ -94,10 +94,10 @@ namespace scheduler
 			pipelines[type].execute();
 		}
 
-		void r_end_frame_stub()
+		void* r_end_frame_stub()
 		{
 			execute(pipeline::renderer);
-			r_end_frame_hook.invoke<void>();
+			return r_end_frame_hook.invoke<void*>();
 		}
 
 		void server_frame_stub()
@@ -178,7 +178,7 @@ namespace scheduler
 
 		void post_unpack() override
 		{
-			r_end_frame_hook.create(0x76D7B0_b, scheduler::r_end_frame_stub);
+			r_end_frame_hook.create(0x7A13A0_b, scheduler::r_end_frame_stub);
 			g_run_frame_hook.create(0x4CB030_b, scheduler::server_frame_stub);
 			main_frame_hook.create(0x417FA0_b, scheduler::main_frame_stub);
 		}
