@@ -1,6 +1,9 @@
 #include <std_include.hpp>
 #include "script_value.hpp"
 #include "entity.hpp"
+#include "array.hpp"
+
+#include <utils/string.hpp>
 
 namespace scripting
 {
@@ -70,6 +73,15 @@ namespace scripting
 	}
 
 	script_value::script_value(const entity& value)
+	{
+		game::VariableValue variable{};
+		variable.type = game::SCRIPT_OBJECT;
+		variable.u.pointerValue = value.get_entity_id();
+
+		this->value_ = variable;
+	}
+
+	script_value::script_value(const array& value)
 	{
 		game::VariableValue variable{};
 		variable.type = game::SCRIPT_OBJECT;
@@ -251,6 +263,30 @@ namespace scripting
 	}
 
 	/***************************************************************
+	 * Array
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<array>() const
+	{
+		if (this->get_raw().type != game::SCRIPT_OBJECT)
+		{
+			return false;
+		}
+
+		const auto id = this->get_raw().u.uintValue;
+		const auto type = game::scr_VarGlob->objectVariableValue[id].w.type;
+
+		return type == game::SCRIPT_ARRAY;
+	}
+
+	template <>
+	array script_value::get() const
+	{
+		return array(this->get_raw().u.uintValue);
+	}
+
+	/***************************************************************
 	 * Vector
 	 **************************************************************/
 
@@ -273,5 +309,35 @@ namespace scripting
 	const game::VariableValue& script_value::get_raw() const
 	{
 		return this->value_.get();
+	}
+
+	std::string script_value::to_string() const
+	{
+		if (this->is<int>())
+		{
+			return utils::string::va("%i", this->as<int>());
+		}
+
+		if (this->is<float>())
+		{
+			return utils::string::va("%f", this->as<float>());
+		}
+
+		if (this->is<std::string>())
+		{
+			return this->as<std::string>();
+		}
+
+		if (this->is<vector>())
+		{
+			const auto vec = this->as<vector>();
+			return utils::string::va("(%g, %g, %g)",
+				vec.get_x(),
+				vec.get_y(),
+				vec.get_z()
+			);
+		}
+
+		return {};
 	}
 }

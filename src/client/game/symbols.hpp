@@ -9,6 +9,7 @@ namespace game
 	WEAK symbol<void(int type, VariableUnion u)> AddRefToValue{0x5C0EB0};
 	WEAK symbol<void(unsigned int id)> AddRefToObject{0x5C0EA0};
 	WEAK symbol<unsigned int(unsigned int id)> AllocThread{0x5C1200};
+	WEAK symbol<ObjectVariableValue*(unsigned int* id)> AllocVariable{0x5C1260};
 	WEAK symbol<void(int type, VariableUnion u)> RemoveRefToValue{0x5C29B0};
 	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0x5C28A0};
 
@@ -58,6 +59,11 @@ namespace game
 	WEAK symbol<unsigned int (unsigned int parentId, unsigned int name)> FindVariable{0x5C1D50};
 	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> FindEntityId{0x5C1C50};
 	WEAK symbol<void(VariableValue* result, unsigned int classnum, int entnum, int offset)> GetEntityFieldValue{0x5C6100};
+	WEAK symbol<unsigned int(unsigned int parentId, unsigned int unsignedValue)> GetVariable{0x5C2690};
+	WEAK symbol<unsigned int(unsigned int parentId, unsigned int unsignedValue)> GetNewVariable{0x5C22B0};
+	WEAK symbol<unsigned int(unsigned int parentId, unsigned int unsignedValue)> GetNewArrayVariable{0x5C2130};
+	WEAK symbol<void(unsigned int parentId, unsigned int id, VariableValue* value)> SetNewVariableValue{0x5C5EA0};
+	WEAK symbol<void(unsigned int parentId, unsigned int index)> RemoveVariableValue{0x5C2A50};
 
 	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x51B260};
 	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
@@ -80,6 +86,7 @@ namespace game
 	WEAK symbol<scr_entref_t(unsigned int entId)> Scr_GetEntityIdRef{0x5C56C0};
 	WEAK symbol<int(unsigned int classnum, int entnum, int offset)> Scr_SetObjectField{0x512190};
 	WEAK symbol<void(unsigned int id, scr_string_t stringValue, unsigned int paramcount)> Scr_NotifyId{0x5C8240};
+	WEAK symbol<unsigned int(unsigned int threadId)> Scr_GetSelf{0x5C57C0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x5C8DB0};
 

@@ -5,16 +5,22 @@
 #include "game/dvars.hpp"
 
 #include "scheduler.hpp"
+#include "gui.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
+#include <utils/concurrency.hpp>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace gui
 {
+	std::unordered_map<std::string, bool> enabled_menus;
+
 	namespace
 	{
+		utils::concurrency::container<std::vector<std::function<void()>>> on_frame_callbacks;
+
 		ID3D11Device* device;
 		ID3D11DeviceContext* device_context;
 		bool initialized = false;
@@ -47,12 +53,43 @@ namespace gui
 			ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 		}
 
-		void gui_draw()
+		void toggle_menu(const std::string& name)
 		{
-			
+			enabled_menus[name] = !enabled_menus[name];
 		}
 
-		void on_frame()
+		void gui_draw()
+		{
+			on_frame_callbacks.access([](std::vector<std::function<void()>>& callbacks)
+			{
+				for (const auto& callback : callbacks)
+				{
+					callback();
+				}
+			});
+
+			if (ImGui::BeginMainMenuBar())
+			{
+				if (ImGui::BeginMenu("Windows"))
+				{
+					if (ImGui::MenuItem("Asset list"))
+					{
+						toggle_menu("asset_list");
+					}
+
+					if (ImGui::MenuItem("Entity list"))
+					{
+						toggle_menu("entity_list");
+					}
+
+					ImGui::EndMenu();
+				}
+
+				ImGui::EndMainMenuBar();
+			}
+		}
+
+		void gui_on_frame()
 		{
 			if (!initialized)
 			{
@@ -83,11 +120,19 @@ namespace gui
 			return result;
 		}
 
-		utils::hook::detour dxgi_swap_chain_present_hook;
-		void* dxgi_swap_chain_present_stub()
+		void dxgi_swap_chain_present_stub(utils::hook::assembler& a)
 		{
-			on_frame();
-			return dxgi_swap_chain_present_hook.invoke<void*>();
+			a.pushad64();
+			a.call_aligned(gui_on_frame);
+			a.popad64();
+
+			a.mov(r8d, esi);
+			a.mov(edx, r15d);
+			a.mov(rcx, rdi);
+			a.call_aligned(rbx);
+			a.mov(ecx, eax);
+
+			a.jmp(0x7A14D1_b);
 		}
 
 		utils::hook::detour wnd_proc_hook;
@@ -110,6 +155,12 @@ namespace gui
 			return false;
 		}
 
+		if (key == game::K_ESCAPE && down && toggled)
+		{
+			toggled = false;
+			return false;
+		}
+
 		return !toggled;
 	}
 
@@ -121,6 +172,19 @@ namespace gui
 	bool gui_mouse_event(const int local_client_num, int x, int y)
 	{
 		return !toggled;
+	}
+
+	void on_frame(const std::function<void()>& callback)
+	{
+		on_frame_callbacks.access([callback](std::vector<std::function<void()>>& callbacks)
+		{
+			callbacks.push_back(callback);
+		});
+	}
+
+	bool is_menu_open(const std::string& name)
+	{
+		return enabled_menus[name];
 	}
 
 	class component final : public component_interface
@@ -138,7 +202,7 @@ namespace gui
 
 		void post_unpack() override
 		{
-			dxgi_swap_chain_present_hook.create(0x7A13A0_b, dxgi_swap_chain_present_stub);
+			utils::hook::jump(0x7A14C4_b, utils::hook::assemble(dxgi_swap_chain_present_stub), true);
 			wnd_proc_hook.create(0x650F10_b, wnd_proc_stub);
 		}
 

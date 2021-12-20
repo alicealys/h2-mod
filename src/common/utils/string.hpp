@@ -90,6 +90,7 @@ namespace utils::string
 	std::string dump_hex(const std::string& data, const std::string& separator = " ");
 
 	std::string get_clipboard_data();
+	void set_clipboard_data(const std::string& text);
 
 	void strip(const char* in, char* out, int max);
 

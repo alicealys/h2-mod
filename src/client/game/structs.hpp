@@ -676,6 +676,7 @@ namespace game
 		SCRIPT_END = 8,
 		SCRIPT_FUNCTION = 9,
 		SCRIPT_STRUCT = 19,
+		SCRIPT_ENTITY = 21,
 		SCRIPT_ARRAY = 22,
 	};
 
