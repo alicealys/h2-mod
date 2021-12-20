@@ -789,6 +789,7 @@ namespace entity_list
 						if (ImGui::Button(field.first.data()))
 						{
 							utils::string::set_clipboard_data(field.first);
+							gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", field.first.data()));
 						}
 
 						ImGui::SameLine();
@@ -796,6 +797,7 @@ namespace entity_list
 						if (ImGui::Button(field.second.data()))
 						{
 							utils::string::set_clipboard_data(field.second);
+							gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", field.second.data()));
 						}
 					}
 
