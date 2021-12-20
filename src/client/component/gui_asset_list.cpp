@@ -81,6 +81,7 @@ namespace asset_list
 					if (ImGui::Button(asset_name))
 					{
 						utils::string::set_clipboard_data(asset_name);
+						gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", asset_name));
 					}
 				}, true);
 
