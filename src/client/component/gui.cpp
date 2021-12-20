@@ -72,15 +72,8 @@ namespace gui
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
-					if (ImGui::MenuItem("Asset list"))
-					{
-						toggle_menu("asset_list");
-					}
-
-					if (ImGui::MenuItem("Entity list"))
-					{
-						toggle_menu("entity_list");
-					}
+					ImGui::Checkbox("Asset list", &enabled_menus["asset_list"]);
+					ImGui::Checkbox("Entity list", &enabled_menus["entity_list"]);
 
 					ImGui::EndMenu();
 				}

@@ -19,6 +19,8 @@ namespace entity_list
 {
 	namespace
 	{
+		game::dvar_t* sv_running = nullptr;
+
 		enum entity_type
 		{
 			type_any,
@@ -70,6 +72,7 @@ namespace entity_list
 			std::chrono::milliseconds interval{};
 			std::chrono::high_resolution_clock::time_point last_call{};
 			std::vector<entity_info_t> entity_info{};
+			std::vector<std::function<void()>> tasks;
 			std::unordered_map<std::string, bool> selected_fields = 
 			{
 				{"code_classname", false},
@@ -277,6 +280,19 @@ namespace entity_list
 		};
 
 		utils::concurrency::container<data_t> data_;
+		unsigned int selected_entity{};
+		bool set_field_window{};
+		int selected_type = game::SCRIPT_INTEGER;
+
+		bool is_sv_running()
+		{
+			if (!sv_running)
+			{
+				return false;
+			}
+
+			return sv_running->current.enabled;
+		}
 
 		bool verify_entity(unsigned int id)
 		{
@@ -368,6 +384,13 @@ namespace entity_list
 		{
 			data_.access([](data_t& data)
 			{
+				for (const auto& task : data.tasks)
+				{
+					task();
+				}
+
+				data.tasks = {};
+
 				const auto now = std::chrono::high_resolution_clock::now();
 				if (!data.force_update && (!data.auto_update || (now - data.last_call < data.interval)))
 				{
@@ -455,9 +478,9 @@ namespace entity_list
 			});
 		}
 
-		void teleport_to(unsigned int id)
+		void teleport_to(data_t& data, unsigned int id)
 		{
-			scheduler::once([id]()
+			data.tasks.push_back([id]()
 			{
 				if (!verify_entity(id))
 				{
@@ -473,12 +496,12 @@ namespace entity_list
 
 				const auto player = value.as<scripting::entity>();
 				player.call("setorigin", {dest.get("origin")});
-			}, scheduler::pipeline::server);
+			});
 		}
 
-		void teleport_to_reverse(unsigned int id)
+		void teleport_to_reverse(data_t& data, unsigned int id)
 		{
-			scheduler::once([id]()
+			data.tasks.push_back([id]()
 			{
 				if (!verify_entity(id))
 				{
@@ -494,12 +517,12 @@ namespace entity_list
 
 				const auto player = value.as<scripting::entity>();
 				dest.set("origin", player.get("origin"));
-			}, scheduler::pipeline::server);
+			});
 		}
 
-		void delete_entity(unsigned int id)
+		void delete_entity(data_t& data, unsigned int id)
 		{
-			scheduler::once([id]()
+			data.tasks.push_back([id]()
 			{
 				if (!verify_entity(id))
 				{
@@ -508,7 +531,294 @@ namespace entity_list
 
 				const auto target = scripting::entity{id};
 				target.call("delete");
-			}, scheduler::pipeline::server);
+			});
+		}
+
+		void set_entity_field(data_t& data, unsigned int id, 
+			const std::string& name, const std::string& string_value, int type)
+		{
+			data.tasks.push_back([id, name, type, string_value, &data]()
+			{
+				if (!verify_entity(id))
+				{
+					return;
+				}
+
+				scripting::script_value value{};
+
+				if (type == game::SCRIPT_INTEGER)
+				{
+					value = atoi(string_value.data());
+				}
+
+				if (type == game::SCRIPT_FLOAT)
+				{
+					value = atof(string_value.data());
+				}
+
+				if (type == game::SCRIPT_STRING)
+				{
+					value = string_value;
+				}
+
+				try
+				{
+					scripting::set_entity_field(id, name, value);
+					data.force_update = true;
+				}
+				catch (...)
+				{
+				}
+			});
+		}
+
+		void set_entity_field_vector(data_t& data, unsigned int id, 
+			const std::string& name, const scripting::vector& value)
+		{
+			data.tasks.push_back([id, name, value, &data]()
+			{
+				if (!verify_entity(id))
+				{
+					return;
+				}
+
+				try
+				{
+					scripting::set_entity_field(id, name, value);
+					data.force_update = true;
+				}
+				catch (...)
+				{
+				}
+			});
+		}
+
+		void show_set_field_window(data_t& data)
+		{
+			static char name[0x100]{};
+			static char value[0x100]{};
+
+			static char x[0x100]{};
+			static char y[0x100]{};
+			static char z[0x100]{};
+
+			ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(300, 300));
+			ImGui::Begin("Set entity field", &set_field_window);
+			ImGui::SetWindowSize(ImVec2(300, 300));
+			ImGui::Text(utils::string::va("Entity id %i", selected_entity));
+
+			if (ImGui::TreeNode("Type"))
+			{
+				ImGui::RadioButton("integer", &selected_type, game::SCRIPT_INTEGER);
+				ImGui::RadioButton("float", &selected_type, game::SCRIPT_FLOAT);
+				ImGui::RadioButton("vector", &selected_type, game::SCRIPT_VECTOR);
+				ImGui::RadioButton("string", &selected_type, game::SCRIPT_STRING);
+
+				ImGui::TreePop();
+			}
+
+			ImGui::InputText("name", name, IM_ARRAYSIZE(name));
+			if (selected_type == game::SCRIPT_VECTOR)
+			{
+				ImGui::InputText("x", x, IM_ARRAYSIZE(x));
+				ImGui::InputText("y", y, IM_ARRAYSIZE(y));
+				ImGui::InputText("z", z, IM_ARRAYSIZE(z));
+			}
+			else
+			{
+				ImGui::InputText("value", value, IM_ARRAYSIZE(value));
+			}
+
+			if (ImGui::Button("set", ImVec2(300, 0)))
+			{
+				if (selected_type == game::SCRIPT_VECTOR)
+				{
+					const scripting::vector vector
+					{
+						static_cast<float>(atof(x)),
+						static_cast<float>(atof(y)),
+						static_cast<float>(atof(z))
+					};
+
+					set_entity_field_vector(data, selected_entity, name, vector);
+				}
+				else
+				{
+					set_entity_field(data, selected_entity, name, value, selected_type);
+				}
+			}
+
+			ImGui::End();
+		}
+
+		void show_entity_list_window(data_t& data)
+		{
+			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
+			ImGui::Begin("Entity list", &gui::enabled_menus["entity_list"]);
+
+			if (ImGui::Button("Update list"))
+			{
+				data.force_update = true;
+			}
+
+			ImGui::Checkbox("Auto update", &data.auto_update);
+
+			auto interval = static_cast<int>(data.interval.count());
+			if (data.auto_update && ImGui::SliderInt("Interval", &interval, 0, 1000 * 30))
+			{
+				data.interval = std::chrono::milliseconds(interval);
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::CollapsingHeader("Filters"))
+			{
+				ImGui::Checkbox("Filter by distance", &data.filters.filter_by_range);
+
+				if (data.filters.filter_by_range)
+				{
+					if (ImGui::SliderFloat("range", &data.filters.range, 0.f, 10000.f))
+					{
+						data.force_update = true;
+					}
+				}
+
+				if (ImGui::TreeNode("Entity type"))
+				{
+					auto result = 0;
+
+					result += ImGui::RadioButton("any", reinterpret_cast<int*>(&data.filters.type), entity_type::type_any);
+					result += ImGui::RadioButton("actor", reinterpret_cast<int*>(&data.filters.type), entity_type::actor);
+					result += ImGui::RadioButton("spawner", reinterpret_cast<int*>(&data.filters.type), entity_type::spawner);
+					result += ImGui::RadioButton("weapon", reinterpret_cast<int*>(&data.filters.type), entity_type::weapon);
+					result += ImGui::RadioButton("node", reinterpret_cast<int*>(&data.filters.type), entity_type::node);
+
+					if (result)
+					{
+						data.force_update = true;
+					}
+
+					ImGui::TreePop();
+				}
+
+				if (ImGui::TreeNode("Entity team"))
+				{
+					auto result = 0;
+
+					result += ImGui::RadioButton("any", reinterpret_cast<int*>(&data.filters.team), entity_team::team_any);
+					result += ImGui::RadioButton("neutral", reinterpret_cast<int*>(&data.filters.team), entity_team::neutral);
+					result += ImGui::RadioButton("allies", reinterpret_cast<int*>(&data.filters.team), entity_team::allies);
+					result += ImGui::RadioButton("axis", reinterpret_cast<int*>(&data.filters.team), entity_team::axis);
+					result += ImGui::RadioButton("team3", reinterpret_cast<int*>(&data.filters.team), entity_team::team3);
+
+					if (result)
+					{
+						data.force_update = true;
+					}
+
+					ImGui::TreePop();
+				}
+
+				ImGui::Text("Fields");
+
+				auto index = 0;
+				for (auto i = data.filters.fields.begin(); i != data.filters.fields.end(); ++i)
+				{
+					if (ImGui::TreeNode(utils::string::va("Filter #%i", index++)))
+					{
+						ImGui::InputText("name", &i->first);
+						ImGui::InputText("value", &i->second);
+
+						if (ImGui::Button("Erase"))
+						{
+							data.filters.fields.erase(i);
+							--i;
+						}
+
+						ImGui::TreePop();
+					}
+				}
+
+				if (ImGui::Button("Add field filter"))
+				{
+					data.filters.fields.push_back({});
+				}
+			}
+
+			ImGui::Separator();
+
+			for (const auto& info : data.entity_info)
+			{
+				if (ImGui::TreeNode(utils::string::va("Entity num %i id %i", info.num, info.id)))
+				{
+					ImGui::Text("Commands");
+
+					if (ImGui::Button("Set field"))
+					{
+						set_field_window = true;
+						selected_entity = info.id;
+					}
+
+					if (ImGui::Button("Teleport to"))
+					{
+						teleport_to(data, info.id);
+						data.force_update = true;
+					}
+
+					if (ImGui::Button("Teleport to you"))
+					{
+						teleport_to_reverse(data, info.id);
+						data.force_update = true;
+					}
+
+					if (info.num != 0 && ImGui::Button("Delete"))
+					{
+						delete_entity(data, info.id);
+						data.force_update = true;
+					}
+
+					ImGui::Text("Fields");
+
+					for (const auto& field : info.fields)
+					{
+						if (field.second.empty())
+						{
+							continue;
+						}
+
+						if (ImGui::Button(field.first.data()))
+						{
+							utils::string::set_clipboard_data(field.first);
+						}
+
+						ImGui::SameLine();
+
+						if (ImGui::Button(field.second.data()))
+						{
+							utils::string::set_clipboard_data(field.second);
+						}
+					}
+
+					ImGui::TreePop();
+				}
+			}
+
+			ImGui::End();
+
+			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
+			ImGui::Begin("Selected fields");
+
+			static char field_filter[0x100]{};
+			ImGui::InputText("field name", field_filter, IM_ARRAYSIZE(field_filter));
+			for (auto& field : data.selected_fields)
+			{
+				if (strstr(field.first.data(), field_filter) && ImGui::Checkbox(field.first.data(), &field.second))
+				{
+					data.force_update = true;
+				}
+			}
+
+			ImGui::End();
 		}
 
 		void on_frame()
@@ -520,165 +830,18 @@ namespace entity_list
 
 			data_.access([](data_t& data)
 			{
-				ImGui::Begin("Entity list", &gui::enabled_menus["entity_list"]);
-
-				if (ImGui::Button("Update list"))
+				if (!is_sv_running())
 				{
-					data.force_update = true;
+					selected_entity = 0;
+					data.entity_info = {};
+					data.tasks = {};
 				}
 
-				ImGui::Checkbox("Auto update", &data.auto_update);
-
-				auto interval = static_cast<int>(data.interval.count());
-				if (data.auto_update && ImGui::SliderInt("Interval", &interval, 0, 1000 * 30))
+				show_entity_list_window(data);
+				if (selected_entity && set_field_window)
 				{
-					data.interval = std::chrono::milliseconds(interval);
+					show_set_field_window(data);
 				}
-
-				ImGui::Separator();
-
-				if (ImGui::CollapsingHeader("Filters"))
-				{
-					ImGui::Checkbox("Filter by distance", &data.filters.filter_by_range);
-
-					if (data.filters.filter_by_range)
-					{
-						if (ImGui::SliderFloat("range", &data.filters.range, 0.f, 10000.f))
-						{
-							data.force_update = true;
-						}
-					}
-
-					if (ImGui::TreeNode("Entity type"))
-					{
-						auto result = 0;
-
-						result += ImGui::RadioButton("any", reinterpret_cast<int*>(&data.filters.type), entity_type::type_any);
-						result += ImGui::RadioButton("actor", reinterpret_cast<int*>(&data.filters.type), entity_type::actor);
-						result += ImGui::RadioButton("spawner", reinterpret_cast<int*>(&data.filters.type), entity_type::spawner);
-						result += ImGui::RadioButton("weapon", reinterpret_cast<int*>(&data.filters.type), entity_type::weapon);
-						result += ImGui::RadioButton("node", reinterpret_cast<int*>(&data.filters.type), entity_type::node);
-
-						if (result)
-						{
-							data.force_update = true;
-						}
-
-						ImGui::TreePop();
-					}
-
-					if (ImGui::TreeNode("Entity team"))
-					{
-						auto result = 0;
-
-						result += ImGui::RadioButton("any", reinterpret_cast<int*>(&data.filters.team), entity_team::team_any);
-						result += ImGui::RadioButton("neutral", reinterpret_cast<int*>(&data.filters.team), entity_team::neutral);
-						result += ImGui::RadioButton("allies", reinterpret_cast<int*>(&data.filters.team), entity_team::allies);
-						result += ImGui::RadioButton("axis", reinterpret_cast<int*>(&data.filters.team), entity_team::axis);
-						result += ImGui::RadioButton("team3", reinterpret_cast<int*>(&data.filters.team), entity_team::team3);
-
-						if (result)
-						{
-							data.force_update = true;
-						}
-
-						ImGui::TreePop();
-					}
-
-					ImGui::Text("Fields");
-
-					auto index = 0;
-					for (auto i = data.filters.fields.begin(); i != data.filters.fields.end(); ++i)
-					{
-						if (ImGui::TreeNode(utils::string::va("Filter #%i", index++)))
-						{
-							ImGui::InputText("name", &i->first);
-							ImGui::InputText("value", &i->second);
-
-							if (ImGui::Button("Erase"))
-							{
-								data.filters.fields.erase(i);
-								--i;
-							}
-
-							ImGui::TreePop();
-						}
-					}
-
-					if (ImGui::Button("Add field filter"))
-					{
-						data.filters.fields.push_back({});
-					}
-				}
-
-				ImGui::Separator();
-
-				for (const auto& info : data.entity_info)
-				{
-					if (ImGui::TreeNode(utils::string::va("Entity num %i id %i", info.num, info.id)))
-					{
-						ImGui::Text("Commands");
-
-						if (ImGui::Button("Teleport to"))
-						{
-							teleport_to(info.id);
-							data.force_update = true;
-						}
-
-						if (ImGui::Button("Teleport to you"))
-						{
-							teleport_to_reverse(info.id);
-							data.force_update = true;
-						}
-
-						if (info.num != 0 && ImGui::Button("Delete"))
-						{
-							delete_entity(info.id);
-							data.force_update = true;
-						}
-
-						ImGui::Text("Fields");
-
-						for (const auto& field : info.fields)
-						{
-							if (field.second.empty())
-							{
-								continue;
-							}
-
-							if (ImGui::Button(field.first.data()))
-							{
-								utils::string::set_clipboard_data(field.first);
-							}
-
-							ImGui::SameLine();
-
-							if (ImGui::Button(field.second.data()))
-							{
-								utils::string::set_clipboard_data(field.second);
-							}
-						}
-
-						ImGui::TreePop();
-					}
-				}
-
-				ImGui::End();
-
-				ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
-				ImGui::Begin("Selected fields");
-
-				static char field_filter[0x100]{};
-				ImGui::InputText("field name", field_filter, IM_ARRAYSIZE(field_filter));
-				for (auto& field : data.selected_fields)
-				{
-					if (strstr(field.first.data(), field_filter) && ImGui::Checkbox(field.first.data(), &field.second))
-					{
-						data.force_update = true;
-					}
-				}
-
-				ImGui::End();
 			});
 		}
 	}
@@ -688,6 +851,11 @@ namespace entity_list
 	public:
 		void post_unpack() override
 		{
+			scheduler::on_game_initialized([]()
+			{
+				sv_running = game::Dvar_FindVar("sv_running");
+			});
+
 			gui::on_frame(on_frame);
 			scheduler::loop(update_entity_list, scheduler::pipeline::server, 0ms);
 		}
