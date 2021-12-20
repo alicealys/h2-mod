@@ -466,7 +466,6 @@ namespace entity_list
 						}
 						catch (...)
 						{
-
 						}
 					}
 
@@ -568,6 +567,7 @@ namespace entity_list
 				}
 				catch (...)
 				{
+					gui::notification("Error", utils::string::va("^1error setting field '%s'!", name.data()));
 				}
 			});
 		}
@@ -589,6 +589,7 @@ namespace entity_list
 				}
 				catch (...)
 				{
+					gui::notification("Error", utils::string::va("^1error setting field '%s'!", name.data()));
 				}
 			});
 		}
