@@ -40,3 +40,6 @@
 [submodule "deps/zlib"]
 	path = deps/zlib
 	url = https://github.com/madler/zlib.git
+[submodule "deps/imgui"]
+	path = deps/imgui
+	url = https://github.com/fedddddd/imgui.git
