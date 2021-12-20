@@ -20,6 +20,7 @@ namespace gui
 	namespace
 	{
 		utils::concurrency::container<std::vector<std::function<void()>>> on_frame_callbacks;
+		utils::concurrency::container<std::vector<notification_t>> notifications;
 
 		ID3D11Device* device;
 		ID3D11DeviceContext* device_context;
@@ -58,8 +59,52 @@ namespace gui
 			enabled_menus[name] = !enabled_menus[name];
 		}
 
+		void show_notifications()
+		{
+			static auto window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | 
+									   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
+									   ImGuiWindowFlags_NoMove;
+
+			notifications.access([](std::vector<notification_t>& notifications_)
+			{
+				auto index = 0;
+				for (auto i = notifications_.begin(); i != notifications_.end(); ++i)
+				{
+					const auto now = std::chrono::high_resolution_clock::now();
+					if (now - i->creation_time >= i->duration)
+					{
+						notifications_.erase(i--);
+						continue;
+					}
+
+					const auto title = i->title.size() <= 34
+						? i->title
+						: i->title.substr(0, 31) + "...";
+
+					const auto text = i->text.size() <= 34
+						? i->text
+						: i->text.substr(0, 31) + "...";
+
+					ImGui::SetNextWindowSizeConstraints(ImVec2(250, 50), ImVec2(250, 50));
+					ImGui::SetNextWindowBgAlpha(0.6f);
+					ImGui::Begin(utils::string::va("Notification #%i", index), nullptr, window_flags);
+
+					ImGui::SetWindowPos(ImVec2(10, 30.f + static_cast<float>(index) * 60.f));
+					ImGui::SetWindowSize(ImVec2(250, 0));
+					ImGui::Text(title.data());
+					ImGui::Text(text.data());
+
+					ImGui::End();
+
+					index++;
+				}
+			});
+		}
+
 		void gui_draw()
 		{
+			show_notifications();
+
 			on_frame_callbacks.access([](std::vector<std::function<void()>>& callbacks)
 			{
 				for (const auto& callback : callbacks)
@@ -178,6 +223,20 @@ namespace gui
 	bool is_menu_open(const std::string& name)
 	{
 		return enabled_menus[name];
+	}
+
+	void notification(const std::string& title, const std::string& text, const std::chrono::milliseconds duration)
+	{
+		notification_t notification{};
+		notification.title = title;
+		notification.text = text;
+		notification.duration = duration;
+		notification.creation_time = std::chrono::high_resolution_clock::now();
+
+		notifications.access([notification](std::vector<notification_t>& notifications_)
+		{
+			notifications_.insert(notifications_.begin(), notification);
+		});
 	}
 
 	class component final : public component_interface
