@@ -41,7 +41,7 @@ namespace gui_console
 					game_console::find_matches(text, matches, false);
 				}
 
-				if (matches.size() == 1)
+				if (matches.size() < 24)
 				{
 					const auto match = matches[0].data();
 					data->DeleteChars(0, data->BufTextLen);
