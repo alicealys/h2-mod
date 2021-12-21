@@ -113,12 +113,15 @@ namespace gui
 				}
 			});
 
+			ImGui::ShowDemoWindow();
+
 			if (ImGui::BeginMainMenuBar())
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
 					ImGui::Checkbox("Asset list", &enabled_menus["asset_list"]);
 					ImGui::Checkbox("Entity list", &enabled_menus["entity_list"]);
+					ImGui::Checkbox("Console", &enabled_menus["console"]);
 
 					ImGui::EndMenu();
 				}
