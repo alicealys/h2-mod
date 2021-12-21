@@ -58,7 +58,7 @@ namespace command
 					const auto current = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
 					const auto reset = game::Dvar_ValueToString(dvar, nullptr, &dvar->reset);
 
-					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: %i",
+					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX",
 						args[0], current, reset, dvar->name);
 
 					game_console::print(game_console::con_type_info, "   %s\n",

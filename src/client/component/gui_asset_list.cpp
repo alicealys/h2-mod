@@ -15,6 +15,9 @@ namespace asset_list
 {
 	namespace
 	{
+		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
+		std::string filter_buffer{};
+
 		void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
 		{
 			game::DB_EnumXAssets_Internal(type, static_cast<void(*)(game::XAssetHeader, void*)>([](game::XAssetHeader header, void* data)
@@ -31,19 +34,16 @@ namespace asset_list
 				return;
 			}
 
-			static bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
-
 			{
 				ImGui::Begin("Asset list", &gui::enabled_menus["asset_list"]);
 
-				static char filter[0x200]{};
-				ImGui::InputText("asset type", filter, IM_ARRAYSIZE(filter));
+				ImGui::InputText("asset type", &filter_buffer);
 				for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 				{
 					const auto name = game::g_assetNames[i];
 					const auto type = static_cast<game::XAssetType>(i);
 
-					if (strstr(name, filter))
+					if (utils::string::find_lower(name, filter_buffer))
 					{
 						ImGui::Checkbox(name, &shown_assets[type]);
 					}
@@ -73,15 +73,14 @@ namespace asset_list
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
 
-					if (!strstr(asset_name, filter))
+					if (!utils::string::find_lower(asset_name, filter))
 					{
 						return;
 					}
 
 					if (ImGui::Button(asset_name))
 					{
-						utils::string::set_clipboard_data(asset_name);
-						gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", asset_name));
+						gui::copy_to_clipboard(asset_name);
 					}
 				}, true);
 

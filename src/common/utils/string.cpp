@@ -192,4 +192,9 @@ namespace utils::string
 
 		return str;
 	}
+
+	bool find_lower(const std::string& a, const std::string& b)
+	{
+		return to_lower(a).find(to_lower(b)) != std::string::npos;
+	}
 }

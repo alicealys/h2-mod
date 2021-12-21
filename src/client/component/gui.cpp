@@ -119,6 +119,7 @@ namespace gui
 				{
 					ImGui::Checkbox("Asset list", &enabled_menus["asset_list"]);
 					ImGui::Checkbox("Entity list", &enabled_menus["entity_list"]);
+					ImGui::Checkbox("Console", &enabled_menus["console"]);
 
 					ImGui::EndMenu();
 				}
@@ -237,6 +238,12 @@ namespace gui
 		{
 			notifications_.insert(notifications_.begin(), notification);
 		});
+	}
+
+	void copy_to_clipboard(const std::string& text)
+	{
+		utils::string::set_clipboard_data(text);
+		gui::notification("Text copied to clipboard", utils::string::va("\"%s\"", text.data()));
 	}
 
 	class component final : public component_interface

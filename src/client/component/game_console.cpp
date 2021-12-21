@@ -69,7 +69,7 @@ namespace game_console
 			matches.clear();
 		}
 
-		void print(const std::string& data)
+		void print(const std::string& data, bool print_ = true)
 		{
 			if (con.visible_line_count > 0 && con.display_line_offset == (con.output.size() - con.visible_line_count))
 			{
@@ -78,7 +78,10 @@ namespace game_console
 
 			con.output.push_back(data);
 
-			printf("%s\n", data.data());
+			if (print_)
+			{
+				printf("%s\n", data.data());
+			}
 
 			if (con.output.size() > 1024)
 			{
@@ -180,50 +183,6 @@ namespace game_console
 			if (exact && text == input) return true;
 			if (!exact && text.find(input) != std::string::npos) return true;
 			return false;
-		}
-
-		void find_matches(std::string input, std::vector<std::string>& suggestions, const bool exact)
-		{
-			input = utils::string::to_lower(input);
-
-			for (const auto& dvar : dvars::dvar_list)
-			{
-				auto name = utils::string::to_lower(dvar);
-				if (match_compare(input, name, exact))
-				{
-					suggestions.push_back(dvar);
-				}
-
-				if (exact && suggestions.size() > 1)
-				{
-					return;
-				}
-			}
-
-			if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
-			{
-				suggestions.push_back(input.data());
-			}
-
-			game::cmd_function_s* cmd = (*game::cmd_functions);
-			while (cmd)
-			{
-				if (cmd->name)
-				{
-					std::string name = utils::string::to_lower(cmd->name);
-
-					if (match_compare(input, name, exact))
-					{
-						suggestions.push_back(cmd->name);
-					}
-
-					if (exact && suggestions.size() > 1)
-					{
-						return;
-					}
-				}
-				cmd = cmd->next;
-			}
 		}
 
 		void draw_input()
@@ -534,19 +493,20 @@ namespace game_console
 
 	void execute(const char* cmd)
 	{
-		const auto sv_running = game::Dvar_FindVar("sv_running")->current.enabled;
+		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
+	}
 
-		if (sv_running)
+	void add(const std::string& cmd, bool print_)
+	{
+		execute(cmd.data());
+
+		history.push_front(cmd);
+		if (history.size() > 10)
 		{
-			std::string command = cmd;
-
-			scheduler::once([command]()
-			{
-				scripting::notify(*game::levelEntityId, "console_command", {command});
-			}, scheduler::pipeline::server);
+			history.erase(history.begin() + 10);
 		}
 
-		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
+		print(cmd, print_);
 	}
 
 	bool console_key_event(const int localClientNum, const int key, const int down)
@@ -678,6 +638,69 @@ namespace game_console
 		return true;
 	}
 
+	void find_matches(std::string input, std::vector<std::string>& suggestions, const bool exact)
+	{
+		input = utils::string::to_lower(input);
+
+		for (const auto& dvar : dvars::dvar_list)
+		{
+			auto name = utils::string::to_lower(dvar);
+			if (match_compare(input, name, exact))
+			{
+				suggestions.push_back(dvar);
+			}
+
+			if (exact && suggestions.size() > 1)
+			{
+				return;
+			}
+		}
+
+		if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
+		{
+			suggestions.push_back(input.data());
+		}
+
+		game::cmd_function_s* cmd = (*game::cmd_functions);
+		while (cmd)
+		{
+			if (cmd->name)
+			{
+				std::string name = utils::string::to_lower(cmd->name);
+
+				if (match_compare(input, name, exact))
+				{
+					suggestions.push_back(cmd->name);
+				}
+
+				if (exact && suggestions.size() > 1)
+				{
+					return;
+				}
+			}
+			cmd = cmd->next;
+		}
+	}
+
+	std::deque<std::string>& get_output()
+	{
+		return con.output;
+	}
+
+	std::deque<std::string>& get_history()
+	{
+		return history;
+	}
+
+	void clear_console()
+	{
+		clear();
+		con.line_count = 0;
+		con.output.clear();
+		history_index = -1;
+		history.clear();
+	}
+
 	class component final : public component_interface
 	{
 	public:
@@ -699,14 +722,7 @@ namespace game_console
 			strncpy_s(con.globals.auto_complete_choice, "", 64);
 
 			// add clear command
-			command::add("clear", [&]()
-			{
-				clear();
-				con.line_count = 0;
-				con.output.clear();
-				history_index = -1;
-				history.clear();
-			});
+			command::add("clear", clear_console);
 
 			// add our dvars
 			dvars::con_inputBoxColor = dvars::register_vec4(

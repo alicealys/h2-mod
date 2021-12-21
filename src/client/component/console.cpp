@@ -31,7 +31,7 @@ namespace console
 				while (true)
 				{
 					std::getline(std::cin, cmd);
-					command::execute(cmd.data(), false);
+					game_console::add(cmd.data(), false);
 				}
 			});
 		}

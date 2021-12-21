@@ -19,4 +19,5 @@ namespace gui
 	void on_frame(const std::function<void()>& callback);
 	bool is_menu_open(const std::string& name);
 	void notification(const std::string& title, const std::string& text, const std::chrono::milliseconds duration = 3s);
+	void copy_to_clipboard(const std::string& text);
 }
