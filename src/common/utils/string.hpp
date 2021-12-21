@@ -98,4 +98,6 @@ namespace utils::string
 	std::wstring convert(const std::string& str);
 
 	std::string replace(std::string str, const std::string& from, const std::string& to);
+
+	bool find_lower(const std::string& a, const std::string& b);
 }

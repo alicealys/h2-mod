@@ -43,7 +43,7 @@ namespace asset_list
 					const auto name = game::g_assetNames[i];
 					const auto type = static_cast<game::XAssetType>(i);
 
-					if (strstr(name, filter_buffer.data()))
+					if (utils::string::find_lower(name, filter_buffer))
 					{
 						ImGui::Checkbox(name, &shown_assets[type]);
 					}
@@ -73,15 +73,14 @@ namespace asset_list
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
 
-					if (!strstr(asset_name, filter))
+					if (!utils::string::find_lower(asset_name, filter))
 					{
 						return;
 					}
 
 					if (ImGui::Button(asset_name))
 					{
-						utils::string::set_clipboard_data(asset_name);
-						gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", asset_name));
+						gui::copy_to_clipboard(asset_name);
 					}
 				}, true);
 

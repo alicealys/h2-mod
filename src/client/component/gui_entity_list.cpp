@@ -348,7 +348,8 @@ namespace entity_list
 
 					const auto classname = classname_value.as<std::string>();
 					const auto team_ = team_value.as<std::string>();
-					if (strstr(classname.data(), "actor_") && (team == entity_team::team_any || team_ == team_names[team]))
+					if (utils::string::find_lower(classname, "actor_") && 
+					    (team == entity_team::team_any || team_ == team_names[team]))
 					{
 						result.push(entity);
 					}
@@ -457,8 +458,8 @@ namespace entity_list
 							for (const auto& filter : data.filters.fields)
 							{
 								if (field_value.is<std::string>() && 
-									strstr(field.first.data(), utils::string::to_lower(filter.first).data()) &&
-									strstr(value_string.data(), filter.second.data()))
+									utils::string::find_lower(field.first, filter.first) &&
+									utils::string::find_lower(value_string, filter.second))
 								{
 									match_count++;
 								}
@@ -789,16 +790,14 @@ namespace entity_list
 
 						if (ImGui::Button(field.first.data()))
 						{
-							utils::string::set_clipboard_data(field.first);
-							gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", field.first.data()));
+							gui::copy_to_clipboard(field.first);
 						}
 
 						ImGui::SameLine();
 
 						if (ImGui::Button(field.second.data()))
 						{
-							utils::string::set_clipboard_data(field.second);
-							gui::notification("Text copied to clipboard!", utils::string::va("\"%s\"", field.second.data()));
+							gui::copy_to_clipboard(field.second);
 						}
 					}
 
@@ -815,7 +814,8 @@ namespace entity_list
 			ImGui::InputText("field name", field_filter, IM_ARRAYSIZE(field_filter));
 			for (auto& field : data.selected_fields)
 			{
-				if (strstr(field.first.data(), field_filter) && ImGui::Checkbox(field.first.data(), &field.second))
+				if (utils::string::find_lower(field.first, field_filter) && 
+					ImGui::Checkbox(field.first.data(), &field.second))
 				{
 					data.force_update = true;
 				}
