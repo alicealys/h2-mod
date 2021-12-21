@@ -498,9 +498,15 @@ namespace game_console
 
 	void add(const std::string& cmd, bool print_)
 	{
-		print(cmd, print_);
+		execute(cmd.data());
+
 		history.push_front(cmd);
-		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd.data()));
+		if (history.size() > 10)
+		{
+			history.erase(history.begin() + 10);
+		}
+
+		print(cmd, print_);
 	}
 
 	bool console_key_event(const int localClientNum, const int key, const int down)

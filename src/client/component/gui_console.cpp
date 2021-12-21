@@ -99,7 +99,7 @@ namespace gui_console
 			const auto history = game_console::get_output();
 			for (const auto& line : history)
 			{
-				if (strstr(line.data(), filter.data()))
+				if (utils::string::find_lower(line, filter))
 				{
 					text.append(line.data());
 					text.append("\n");
@@ -144,6 +144,7 @@ namespace gui_console
 			if (ImGui::Button("Copy"))
 			{
 				utils::string::set_clipboard_data(filtered_text);
+				gui::notification("Console", "Text copied to clipboard");
 			}
 
 			ImGui::Separator();
@@ -170,7 +171,20 @@ namespace gui_console
 			
 			if (ImGui::InputText("Input", &input, input_text_flags, input_text_edit))
 			{
+				auto history = game_console::get_history();
+
+				if (history_index != -1)
+				{
+					const auto itr = history.begin() + history_index;
+
+					if (*itr == input)
+					{
+						history.erase(history.begin() + history_index);
+					}
+				}
+
 				game_console::add(input.data());
+
 				input.clear();
 				ImGui::SetKeyboardFocusHere(-1);
 			}

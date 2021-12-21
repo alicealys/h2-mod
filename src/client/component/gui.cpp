@@ -113,8 +113,6 @@ namespace gui
 				}
 			});
 
-			ImGui::ShowDemoWindow();
-
 			if (ImGui::BeginMainMenuBar())
 			{
 				if (ImGui::BeginMenu("Windows"))
@@ -240,6 +238,12 @@ namespace gui
 		{
 			notifications_.insert(notifications_.begin(), notification);
 		});
+	}
+
+	void copy_to_clipboard(const std::string& text)
+	{
+		utils::string::set_clipboard_data(text);
+		gui::notification("Text copied to clipboard", utils::string::va("\"%s\"", text.data()));
 	}
 
 	class component final : public component_interface
