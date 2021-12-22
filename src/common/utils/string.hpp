@@ -101,5 +101,5 @@ namespace utils::string
 
 	bool find_lower(const std::string& a, const std::string& b);
 
-	std::string truncate(const std::string& text, int length, const std::string& end);
+	std::string truncate(const std::string& text, const size_t length, const std::string& end);
 }
