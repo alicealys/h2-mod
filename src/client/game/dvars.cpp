@@ -21,6 +21,8 @@ namespace dvars
 
 	game::dvar_t* cg_legacyCrashHandling;
 
+	game::dvar_t* g_enableElevators = nullptr;
+
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)

@@ -22,6 +22,8 @@ namespace dvars
 
 	extern game::dvar_t* cg_legacyCrashHandling;
 
+	extern game::dvar_t* g_enableElevators;
+
 	extern std::vector<std::string> dvar_list;
 
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain);
