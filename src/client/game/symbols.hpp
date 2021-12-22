@@ -45,7 +45,8 @@ namespace game
 		Dvar_RegisterString{0x618170};
 	WEAK symbol<dvar_t*(int dvarName, const char* a2, float x, float y, float z, float w, float min, float max,
 		unsigned int flags)> Dvar_RegisterVec4{0x6185F0};
-	WEAK symbol<const char* (dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x61B8F0};
+	WEAK symbol<const char*(const dvar_t* dvar)> Dvar_DisplayableValue{0x618EA0};
+	WEAK symbol<const char*(dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x61B8F0};
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x61A5C0};
 	WEAK symbol<void(const char* dvarName, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x61A910};
 
@@ -121,6 +122,11 @@ namespace game
 
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x5A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x606080};
+
+	WEAK symbol<void(pmove_t* move, trace_t*, const float*, const float*,
+		const Bounds*, int, int)> PM_playerTrace{0x68F0A0};
+	WEAK symbol<void(pmove_t*, trace_t*, const float*, const float*,
+		const Bounds*, int, int)> PM_trace{0x68F1D0};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x89EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x8EC2E0};
