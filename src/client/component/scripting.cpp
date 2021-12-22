@@ -97,6 +97,31 @@ namespace scripting
 			script_function_table[current_file][function_name] = codePos;
 			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
 		}
+
+		void sv_initgame_stub(utils::hook::assembler& a)
+		{
+			const auto loc_6B3170 = a.newLabel();
+			const auto loc_6B3151 = a.newLabel();
+
+			a.test(ebp, ebp);
+			a.jz(loc_6B3151);
+			a.cmp(qword_ptr(rsi), 0);
+			a.jnz(loc_6B3170);
+
+			a.bind(loc_6B3151);
+			a.call(0x76D750_b);
+			a.call(0x6B4A00_b);
+			a.call(0x4C8F00_b);
+			a.jmp(0x6B3160_b);
+
+			a.bind(loc_6B3170);
+
+			a.pushad64();
+			a.call_aligned(lua::engine::start);
+			a.popad64();
+
+			a.jmp(0x6B3170_b);
+		}
 	}
 
 	class component final : public component_interface
@@ -112,6 +137,9 @@ namespace scripting
 			scr_add_class_field_hook.create(0x5C2C30_b, scr_add_class_field_stub);
 			scr_set_thread_position_hook.create(0x5BC7E0_b, scr_set_thread_position_stub);
 			process_script_hook.create(0x5C6160_b, process_script_stub);
+
+			// Loading last checkpoint doesn't call spawn player again
+			utils::hook::jump(0x6B3147_b, utils::hook::assemble(sv_initgame_stub), true);
 
 			scheduler::loop([]()
 			{
