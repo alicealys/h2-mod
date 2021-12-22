@@ -197,4 +197,11 @@ namespace utils::string
 	{
 		return to_lower(a).find(to_lower(b)) != std::string::npos;
 	}
+
+	std::string truncate(const std::string& text, const size_t length, const std::string& end)
+	{
+		return text.size() <= length
+			? text
+			: text.substr(0, length - end.size()) + end;
+	}
 }

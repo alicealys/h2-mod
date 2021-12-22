@@ -96,8 +96,8 @@ namespace gui_console
 		{
 			std::string text{};
 
-			const auto history = game_console::get_output();
-			for (const auto& line : history)
+			const auto output = game_console::get_output();
+			for (const auto& line : output)
 			{
 				if (utils::string::find_lower(line, filter))
 				{
@@ -116,17 +116,17 @@ namespace gui_console
 
 		void on_frame()
 		{
-			auto* open = &gui::enabled_menus["console"];
-			if (!*open)
+			if (!gui::enabled_menus["console"])
 			{
 				return;
 			}
 
-			auto filtered_text = get_filtered_text();
-			static auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | 
-										   ImGuiInputTextFlags_CallbackHistory;
+			const auto filtered_text = get_filtered_text();
+			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+			static const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | 
+												 ImGuiInputTextFlags_CallbackHistory;
 			
-			ImGui::Begin("Console", open);
+			ImGui::Begin("Console", &gui::enabled_menus["console"]);
 
 			if (ImGui::BeginPopup("Options"))
 			{
@@ -157,7 +157,6 @@ namespace gui_console
 			ImGui::SameLine();
 			ImGui::InputText("Filter", &filter);
 
-			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 			ImGui::BeginChild("console_scroll", ImVec2(0, -footer_height_to_reserve), false);
 
 			ImGui::Text(filtered_text.data(), ImVec2(-1, -1));

@@ -100,4 +100,6 @@ namespace utils::string
 	std::string replace(std::string str, const std::string& from, const std::string& to);
 
 	bool find_lower(const std::string& a, const std::string& b);
+
+	std::string truncate(const std::string& text, int length, const std::string& end);
 }

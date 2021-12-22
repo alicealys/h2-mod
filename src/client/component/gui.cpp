@@ -61,9 +61,9 @@ namespace gui
 
 		void show_notifications()
 		{
-			static auto window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | 
-									   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
-									   ImGuiWindowFlags_NoMove;
+			static const auto window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | 
+											 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
+											 ImGuiWindowFlags_NoMove;
 
 			notifications.access([](std::vector<notification_t>& notifications_)
 			{
@@ -77,13 +77,8 @@ namespace gui
 						continue;
 					}
 
-					const auto title = i->title.size() <= 34
-						? i->title
-						: i->title.substr(0, 31) + "...";
-
-					const auto text = i->text.size() <= 34
-						? i->text
-						: i->text.substr(0, 31) + "...";
+					const auto title = utils::string::truncate(i->title, 34, "...");
+					const auto text = utils::string::truncate(i->text, 34, "...");
 
 					ImGui::SetNextWindowSizeConstraints(ImVec2(250, 50), ImVec2(250, 50));
 					ImGui::SetNextWindowBgAlpha(0.6f);
@@ -99,6 +94,11 @@ namespace gui
 					index++;
 				}
 			});
+		}
+
+		void menu_checkbox(const std::string& name, const std::string& menu)
+		{
+			ImGui::Checkbox(name.data(), &enabled_menus[menu]);
 		}
 
 		void gui_draw()
@@ -117,9 +117,9 @@ namespace gui
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
-					ImGui::Checkbox("Asset list", &enabled_menus["asset_list"]);
-					ImGui::Checkbox("Entity list", &enabled_menus["entity_list"]);
-					ImGui::Checkbox("Console", &enabled_menus["console"]);
+					menu_checkbox("Asset list", "asset_list");
+					menu_checkbox("Entity list", "entity_list");
+					menu_checkbox("Console", "console");
 
 					ImGui::EndMenu();
 				}
@@ -177,7 +177,7 @@ namespace gui
 		utils::hook::detour wnd_proc_hook;
 		LRESULT wnd_proc_stub(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
-			if (toggled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+			if (wParam != VK_ESCAPE && toggled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 			{
 				return TRUE;
 			}

@@ -16,7 +16,8 @@ namespace asset_list
 	namespace
 	{
 		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
-		std::string filter_buffer{};
+		std::string asset_type_filter{};
+		std::string assets_name_filter{};
 
 		void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
 		{
@@ -37,18 +38,21 @@ namespace asset_list
 			{
 				ImGui::Begin("Asset list", &gui::enabled_menus["asset_list"]);
 
-				ImGui::InputText("asset type", &filter_buffer);
+				ImGui::InputText("asset type", &asset_type_filter);
+				ImGui::BeginChild("asset type list");
+
 				for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 				{
 					const auto name = game::g_assetNames[i];
 					const auto type = static_cast<game::XAssetType>(i);
 
-					if (utils::string::find_lower(name, filter_buffer))
+					if (utils::string::find_lower(name, asset_type_filter))
 					{
 						ImGui::Checkbox(name, &shown_assets[type]);
 					}
 				}
 
+				ImGui::EndChild();
 				ImGui::End();
 			}
 
@@ -65,25 +69,21 @@ namespace asset_list
 				ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
 				ImGui::Begin(name, &shown_assets[type]);
 
-				static char filter[0x200]{};
-				ImGui::InputText("asset name", filter, IM_ARRAYSIZE(filter));
+				ImGui::InputText("asset name", &assets_name_filter);
+				ImGui::BeginChild("assets list");
 
 				enum_assets(type, [type](const game::XAssetHeader header)
 				{
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
 
-					if (!utils::string::find_lower(asset_name, filter))
-					{
-						return;
-					}
-
-					if (ImGui::Button(asset_name))
+					if (utils::string::find_lower(asset_name, assets_name_filter) && ImGui::Button(asset_name))
 					{
 						gui::copy_to_clipboard(asset_name);
 					}
 				}, true);
 
+				ImGui::EndChild();
 				ImGui::End();
 			}
 		}
