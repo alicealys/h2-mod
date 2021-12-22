@@ -19,8 +19,6 @@ namespace entity_list
 {
 	namespace
 	{
-		game::dvar_t* sv_running = nullptr;
-
 		enum entity_type
 		{
 			type_any,
@@ -282,17 +280,13 @@ namespace entity_list
 		utils::concurrency::container<data_t> data_;
 		unsigned int selected_entity{};
 		bool set_field_window{};
+		bool selected_fields_window{};
 		int selected_type = game::SCRIPT_INTEGER;
 
-		bool is_sv_running()
-		{
-			if (!sv_running)
-			{
-				return false;
-			}
-
-			return sv_running->current.enabled;
-		}
+		std::string field_filter{};
+		std::string field_name_buffer{};
+		std::string field_value_buffer{};
+		std::string vector_input[3]{};
 
 		bool verify_entity(unsigned int id)
 		{
@@ -597,13 +591,6 @@ namespace entity_list
 
 		void show_set_field_window(data_t& data)
 		{
-			static char name[0x100]{};
-			static char value[0x100]{};
-
-			static char x[0x100]{};
-			static char y[0x100]{};
-			static char z[0x100]{};
-
 			ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(300, 300));
 			ImGui::Begin("Set entity field", &set_field_window);
 			ImGui::SetWindowSize(ImVec2(300, 300));
@@ -619,16 +606,16 @@ namespace entity_list
 				ImGui::TreePop();
 			}
 
-			ImGui::InputText("name", name, IM_ARRAYSIZE(name));
+			ImGui::InputText("name", &field_name_buffer);
 			if (selected_type == game::SCRIPT_VECTOR)
 			{
-				ImGui::InputText("x", x, IM_ARRAYSIZE(x));
-				ImGui::InputText("y", y, IM_ARRAYSIZE(y));
-				ImGui::InputText("z", z, IM_ARRAYSIZE(z));
+				ImGui::InputText("x", &vector_input[0]);
+				ImGui::InputText("y", &vector_input[1]);
+				ImGui::InputText("z", &vector_input[2]);
 			}
 			else
 			{
-				ImGui::InputText("value", value, IM_ARRAYSIZE(value));
+				ImGui::InputText("value", &field_value_buffer);
 			}
 
 			if (ImGui::Button("set", ImVec2(300, 0)))
@@ -637,16 +624,18 @@ namespace entity_list
 				{
 					const scripting::vector vector
 					{
-						static_cast<float>(atof(x)),
-						static_cast<float>(atof(y)),
-						static_cast<float>(atof(z))
+						static_cast<float>(atof(vector_input[0].data())),
+						static_cast<float>(atof(vector_input[1].data())),
+						static_cast<float>(atof(vector_input[2].data()))
 					};
 
-					set_entity_field_vector(data, selected_entity, name, vector);
+					set_entity_field_vector(data, selected_entity, 
+						field_name_buffer, vector);
 				}
 				else
 				{
-					set_entity_field(data, selected_entity, name, value, selected_type);
+					set_entity_field(data, selected_entity, field_name_buffer, 
+						field_value_buffer, selected_type);
 				}
 			}
 
@@ -664,6 +653,7 @@ namespace entity_list
 			}
 
 			ImGui::Checkbox("Auto update", &data.auto_update);
+			ImGui::Checkbox("Field list", &selected_fields_window);
 
 			auto interval = static_cast<int>(data.interval.count());
 			if (data.auto_update && ImGui::SliderInt("Interval", &interval, 0, 1000 * 30))
@@ -748,11 +738,23 @@ namespace entity_list
 			}
 
 			ImGui::Separator();
+			ImGui::BeginChild("entity list");
 
 			for (const auto& info : data.entity_info)
 			{
 				if (ImGui::TreeNode(utils::string::va("Entity num %i id %i", info.num, info.id)))
 				{
+					ImGui::Text("Info");
+
+					const auto num_str = utils::string::va("%i", info.num);
+
+					ImGui::Text("Entity num");
+					ImGui::SameLine();
+					if (ImGui::Button(num_str))
+					{
+						gui::copy_to_clipboard(num_str);
+					}
+
 					ImGui::Text("Commands");
 
 					if (ImGui::Button("Set field"))
@@ -805,22 +807,28 @@ namespace entity_list
 				}
 			}
 
+			ImGui::EndChild();
 			ImGui::End();
+		}
 
+		void show_selected_fields_window(data_t& data)
+		{
 			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
-			ImGui::Begin("Selected fields");
+			ImGui::Begin("Selected fields", &selected_fields_window);
 
-			static char field_filter[0x100]{};
-			ImGui::InputText("field name", field_filter, IM_ARRAYSIZE(field_filter));
+			ImGui::InputText("field name", &field_filter);
+			ImGui::BeginChild("field list");
+
 			for (auto& field : data.selected_fields)
 			{
-				if (utils::string::find_lower(field.first, field_filter) && 
+				if (utils::string::find_lower(field.first, field_filter) &&
 					ImGui::Checkbox(field.first.data(), &field.second))
 				{
 					data.force_update = true;
 				}
 			}
 
+			ImGui::EndChild();
 			ImGui::End();
 		}
 
@@ -833,7 +841,7 @@ namespace entity_list
 
 			data_.access([](data_t& data)
 			{
-				if (!is_sv_running())
+				if (!game::CL_IsCgameInitialized())
 				{
 					selected_entity = 0;
 					data.entity_info = {};
@@ -841,6 +849,12 @@ namespace entity_list
 				}
 
 				show_entity_list_window(data);
+
+				if (selected_fields_window)
+				{
+					show_selected_fields_window(data);
+				}
+
 				if (selected_entity && set_field_window)
 				{
 					show_set_field_window(data);
@@ -854,11 +868,6 @@ namespace entity_list
 	public:
 		void post_unpack() override
 		{
-			scheduler::on_game_initialized([]()
-			{
-				sv_running = game::Dvar_FindVar("sv_running");
-			});
-
 			gui::on_frame(on_frame);
 			scheduler::loop(update_entity_list, scheduler::pipeline::server, 0ms);
 		}
