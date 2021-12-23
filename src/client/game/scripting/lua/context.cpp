@@ -539,6 +539,53 @@ namespace scripting::lua
 		this->load_script("__init__");
 	}
 
+	context::context()
+		: folder_({})
+		  , scheduler_(state_)
+		  , event_handler_(state_)
+
+	{
+		this->state_.open_libraries(sol::lib::base,
+		                            sol::lib::package,
+		                            sol::lib::io,
+		                            sol::lib::string,
+		                            sol::lib::os,
+		                            sol::lib::math,
+		                            sol::lib::table);
+
+		this->state_["include"] = []()
+		{
+		};
+
+		this->state_["require"] = []()
+		{
+		};
+
+		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
+	}
+
+	std::string context::load(const std::string& code)
+	{
+		try
+		{
+			const auto result = this->state_.safe_script(code, &sol::script_pass_on_error);
+			if (result.valid())
+			{
+				const auto object = result.get<sol::object>();
+				return this->state_["tostring"](object).get<std::string>();
+			}
+			else
+			{
+				const sol::error error = result;
+				return error.what();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			return e.what();
+		}
+	}
+
 	context::~context()
 	{
 		this->state_.collect_garbage();

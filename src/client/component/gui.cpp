@@ -120,6 +120,7 @@ namespace gui
 					menu_checkbox("Asset list", "asset_list");
 					menu_checkbox("Entity list", "entity_list");
 					menu_checkbox("Console", "console");
+					menu_checkbox("Script console", "script_console");
 
 					ImGui::EndMenu();
 				}

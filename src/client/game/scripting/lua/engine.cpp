@@ -19,6 +19,8 @@ namespace scripting::lua::engine
 
 		void load_scripts()
 		{
+			get_scripts().push_back(std::make_unique<context>());
+
 			const auto script_dir = "scripts/"s;
 
 			if (!utils::io::directory_exists(script_dir))
@@ -65,5 +67,16 @@ namespace scripting::lua::engine
 		{
 			script->run_frame();
 		}
+	}
+
+	std::optional<std::string> load(const std::string& code)
+	{
+		if (get_scripts().size() == 0)
+		{
+			return {};
+		}
+
+		const auto& script = get_scripts()[0];
+		return {script->load(code)};
 	}
 }
