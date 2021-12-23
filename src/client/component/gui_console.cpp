@@ -182,10 +182,10 @@ namespace gui_console
 					}
 				}
 
-				game_console::add(input.data());
-
-				input.clear();
 				ImGui::SetKeyboardFocusHere(-1);
+				game_console::add(input.data());
+				history_index = -1;
+				input.clear();
 			}
 
 			ImGui::End();

@@ -17,6 +17,7 @@ namespace scripting::lua
 	class context
 	{
 	public:
+		context();
 		context(std::string folder);
 		~context();
 
@@ -28,6 +29,8 @@ namespace scripting::lua
 
 		void run_frame();
 		void notify(const event& e);
+
+		std::string load(const std::string& code);
 
 	private:
 		sol::state state_{};
