@@ -16,7 +16,7 @@ namespace game_console
 	bool console_char_event(int local_client_num, int key);
 	bool console_key_event(int local_client_num, int key, int down);
 
-	void find_matches(std::string input, std::vector<std::string>& suggestions, const bool exact);
+	void find_matches(std::string input, std::unordered_set<std::string>& suggestions, const bool exact);
 	void execute(const char* cmd);
 	void clear_console();
 	void add(const std::string& cmd, bool print_ = true);

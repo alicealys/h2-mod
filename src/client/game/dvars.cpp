@@ -125,7 +125,7 @@ namespace dvars
 		}
 	}
 
-	std::vector<std::string> dvar_list = 
+	std::unordered_set<std::string> dvar_list = 
 	{
 		"ai_corpseLimit",
 		"band_12players",
@@ -1163,54 +1163,34 @@ namespace dvars
 	};
 
 	game::dvar_t* register_int(const std::string& name, int value, int min, int max, 
-		game::DvarFlags flags, bool add_to_list)
+		game::DvarFlags flags)
 	{
+		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
-
-		if (add_to_list)
-		{
-			dvar_list.push_back(name);
-		}
-
 		return game::Dvar_RegisterInt(hash, "", value, min, max, flags);
 	}
 
 	game::dvar_t* register_bool(const std::string& name, bool value, 
-		game::DvarFlags flags, bool add_to_list)
+		game::DvarFlags flags)
 	{
+		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
-
-		if (add_to_list)
-		{
-			dvar_list.push_back(name);
-		}
-
 		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
 
 	game::dvar_t* register_float(const std::string& name, float value, float min, 
-		float max, game::DvarFlags flags, bool add_to_list)
+		float max, game::DvarFlags flags)
 	{
+		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
-
-		if (add_to_list)
-		{
-			dvar_list.push_back(name);
-		}
-
 		return game::Dvar_RegisterFloat(hash, "", value, min, max, flags);
 	}
 
 	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z, 
-		float w, float min, float max, game::DvarFlags flags, bool add_to_list)
+		float w, float min, float max, game::DvarFlags flags)
 	{
+		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
-
-		if (add_to_list)
-		{
-			dvar_list.push_back(name);
-		}
-
 		return game::Dvar_RegisterVec4(hash, "", x, y, z, w, min, max, flags);
 	}
 }
