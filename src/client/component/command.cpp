@@ -154,7 +154,7 @@ namespace command
 		{
 			utils::hook::jump(0x5A74F0_b, dvar_command_stub, true);
 
-			add("quit", game::Com_Quit_f);
+			add("quit", game::Quit);
 
 			add("startmap", [](const params& params)
 			{
