@@ -26,6 +26,7 @@ namespace game
 
 	WEAK symbol<void(errorParm code, const char* message, ...)> Com_Error{0x5A2D80};
 	WEAK symbol<void()> Com_Quit_f{0x5A50D0};
+	WEAK symbol<void()> Quit{0x5A52A0};
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
 		DB_EnumXAssets_Internal{0x4129F0};

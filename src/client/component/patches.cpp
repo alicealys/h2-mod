@@ -20,11 +20,16 @@ namespace patches
 			}
 		}
 
-		uint64_t off_11C52460;
 		void* sub_46148()
 		{
-			off_11C52460 = 0xAD0C58_b;
+			static uint64_t off_11C52460 = 0xAD0C58_b;
 			return &off_11C52460;
+		}
+
+		DECLSPEC_NORETURN void quit_stub(const int code)
+		{
+			component_loader::pre_destroy();
+			exit(0);
 		}
 	}
 
@@ -37,6 +42,8 @@ namespace patches
 			utils::hook::set(0x633080_b, 0xC301B0);
 			utils::hook::set(0x272F70_b, 0xC301B0);
 			utils::hook::jump(0x46148_b, sub_46148, true);
+
+			utils::hook::jump(0x64EF10_b, quit_stub, true);
 
 			// Unlock fps in main menu
 			utils::hook::set<BYTE>(0x3D8E1B_b, 0xEB);

@@ -268,7 +268,6 @@ namespace gui
 
 		void pre_destroy() override
 		{
-			ImGui_ImplDX11_Shutdown();
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
 		}
