@@ -64,7 +64,7 @@ namespace scripting
 
 			if (index < 0x320)
 			{
-				return reinterpret_cast<script_function*>(game::base_address + function_table)[index - 1];
+				return reinterpret_cast<script_function*>(game::base_address + function_table)[index];
 			}
 
 			return reinterpret_cast<script_function*>(game::base_address + method_table)[index - 0x8000];

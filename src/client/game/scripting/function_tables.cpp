@@ -7,1767 +7,1771 @@ namespace scripting
 {
     std::unordered_map<std::string, unsigned> function_map =
     {
-        {"precacheturret", 0x1},
-        {"getweaponarray", 0x2},
-        {"nullsub_428", 0x3},
-        {"sub_502950", 0x4},
-        {"sub_504f40", 0x5},
-        {"setphysicsgravitydir", 0x6},
-        {"gettimescale", 0x7},
-        {"settimescale", 0x8},
-        {"setslowmotionview", 0x9},
-        {"sub_5086c0", 0xA},
-        {"sub_5085a0", 0xB},
-        {"sub_504fd0", 0xC},
-        {"sub_505000", 0xD},
-        {"sub_505060", 0xE},
-        {"nullsub_429", 0xF},
-        {"allowscriptmenuresponse", 0x10},
-        {"allowscriptmenuresponse", 0x11},
-        {"notifyoncommand", 0x12},
-        {"setprintchannel", 0x13},
-        {"print", 0x14},
-        {"println", 0x15},
-        {"print3d", 0x16},
-        {"line", 0x17},
-        {"spawnturret", 0x18},
-        {"canspawnturret", 0x19},
-        {"assert", 0x1A},
-        {"sub_502660", 0x1B},
-        {"sub_502690", 0x1C},
-        {"sub_5021c0", 0x1D},
-        {"sub_5023e0", 0x1E},
-        {"runbadplaces", 0x1F},
-        {"sub_4e7120", 0x20},
-        {"sub_4e76d0", 0x21},
-        {"sub_4e7f10", 0x22},
-        {"sub_503f20", 0x23},
-        {"sub_525640", 0x24},
-        {"sub_5256e0", 0x25},
-        {"sub_525560", 0x26},
-        {"sub_525420", 0x27},
-        {"nullsub_477", 0x2A},
-        {"nullsub_478", 0x2B},
-        {"sub_5046b0", 0x2C},
-        {"sub_4ec920", 0x2D},
-        {"errorinternal", 0x2E},
-        {"isdefined", 0x2F},
-        {"issentient", 0x30},
-        {"isstring", 0x31},
-        {"sub_4ee990", 0x32},
-        {"sub_4eec00", 0x33},
-        {"setclientdvar", 0x34},
-        {"sub_4efa60", 0x36},
-        {"setdvar", 0x37},
-        {"sub_4efca0", 0x38},
-        {"getdvar", 0x39},
-        {"getdvarint", 0x3A},
-        {"getdvarfloat", 0x3B},
-        {"getdvarvector", 0x3C},
-        {"sub_4f2180", 0x3D},
-        {"gettime", 0x3E},
-        {"sub_4f2330", 0x3F},
-        {"getentbynum", 0x40},
-        {"getscreenwidth", 0x41},
-        {"getscreenheight", 0x42},
-        {"getweaponmodel", 0x43},
-        {"setgameendtime", 0x44},
-        {"sub_502c50", 0x45},
-        {"sub_502c90", 0x46},
-        {"sub_502cf0", 0x47},
-        {"sub_502d80", 0x48},
-        {"sub_502db0", 0x49},
-        {"sub_502e40", 0x4A},
-        {"sub_502e70", 0x4B},
-        {"sub_502ea0", 0x4C},
-        {"sub_502fd0", 0x4D},
-        {"setwhizbyradii", 0x4E},
-        {"sub_503380", 0x4F},
-        {"sub_5036e0", 0x50},
-        {"sub_4f9110", 0x50},
-        {"sub_503740", 0x51},
-        {"sub_503760", 0x52},
-        {"sub_5037b0", 0x53},
-        {"sub_5037d0", 0x54},
-        {"sub_5038f0", 0x55},
-        {"position", 0x56},
-        {"sub_501a80", 0x57},
-        {"spawntestclient", 0x58},
-        {"sub_501c70", 0x59},
-        {"sub_501cd0", 0x5A},
-        {"sub_501eb0", 0x5B},
-        {"sub_501f50", 0x5C},
-        {"sub_5020c0", 0x5D},
-        {"sub_502140", 0x5E},
-        {"sub_502390", 0x5F},
-        {"sub_502640", 0x60},
-        {"getweapondisplayname", 0x61},
-        {"getweaponbasename", 0x62},
-        {"getweaponattachments", 0x63},
-        {"getweaponattachmentdisplaynames", 0x64},
-        {"getweaponcamoname", 0x65},
-        {"sub_4f55d0", 0x66},
-        {"getanimlength", 0x67},
-        {"animhasnotetrack", 0x68},
-        {"getnotetracktimes", 0x69},
-        {"spawn", 0x6A},
-        {"sub_4eedd0", 0x6B},
-        {"spawnloopingsound", 0x6C},
-        {"bullettrace", 0x6D},
-        {"sub_5140b0", 0x6E},
-        {"sub_513bc0", 0x6F},
-        {"sub_513d50", 0x70},
-        {"sub_4af5f0", 0x71},
-        {"sub_4af4e0", 0x72},
-        {"sub_4af180", 0x73},
-        {"sub_501db0", 0x74},
-        {"sub_4f0130", 0x75},
-        {"setblur", 0x76},
-        {"musicplay", 0x77},
-        {"musicstop", 0x78},
-        {"soundfade", 0x79},
-        {"soundsettimescalefactor", 0x7A},
-        {"soundresettimescale", 0x7B},
-        {"setocclusionpreset", 0x7C},
-        {"levelsoundfade", 0x7D},
-        {"sub_4f6da0", 0x7E},
-        {"sub_4f6dd0", 0x7F},
-        {"sub_507a70", 0x80},
-        {"sub_4ff720", 0x81},
-        {"sub_507960", 0x82},
-        {"sub_5019a0", 0x83},
-        {"sub_5019c0", 0x85},
-        {"sub_501a60", 0x86},
-        {"sub_4ff7b0", 0x87},
-        {"sub_500380", 0x88},
-        {"getglowalpha", 0x89},
-        {"sub_500210", 0x8A},
-        {"sub_5003c0", 0x8B},
-        {"sub_500b40", 0x8C},
-        {"sub_5026b0", 0x8D},
-        {"sub_502ae0", 0x8E},
-        {"bullettracepassed", 0x8F},
-        {"sighttracepassed", 0x90},
-        {"physicstrace", 0x91},
-        {"playerphysicstrace", 0x92},
-        {"getgroundposition", 0x93},
-        {"getangledelta", 0x94},
-        {"getmovedelta", 0x95},
-        {"getnorthyaw", 0x96},
-        {"getcommandfromkey", 0x97},
-        {"getsticksconfig", 0x98},
-        {"sub_507060", 0x99},
-        {"botautoconnectenabled", 0x9A},
-        {"sub_507140", 0x9B},
-        {"sub_500bf0", 0x9C},
-        {"sub_500c40", 0x9D},
-        {"botgetteamdifficulty", 0x9E},
-        {"getstarttime", 0x9F},
-        {"sub_513350", 0xA0},
-        {"sub_513780", 0xA1},
-        {"sub_513a60", 0xA2},
-        {"sub_513a20", 0xA3},
-        {"sub_514750", 0xA4},
-        {"sub_514380", 0xA5},
-        {"sub_513900", 0xA6},
-        {"sub_513890", 0xA7},
-        {"sub_5148a0", 0xA8},
-        {"sub_513370", 0xA9},
-        {"sub_513810", 0xAA},
-        {"missilecreaterepulsororigin", 0xAB},
-        {"sub_513a80", 0xAC},
-        {"sub_513f60", 0xAD},
-        {"sub_514890", 0xAF},
-        {"sub_514600", 0xB0},
-        {"sub_5133a0", 0xB1},
-        {"sub_513610", 0xB2},
-        {"sub_5134f0", 0xB3},
-        {"sub_5141f0", 0xB4},
-        {"setnorthyaw", 0xB5},
-        {"setslowmotion", 0xB6},
-        {"randomint", 0xB7},
-        {"randomfloat", 0xB8},
-        {"randomintrange", 0xB9},
-        {"randomfloatrange", 0xBA},
-        {"sin", 0xBB},
-        {"cos", 0xBC},
-        {"tan", 0xBD},
-        {"asin", 0xBE},
-        {"acos", 0xBF},
-        {"atan", 0xC0},
-        {"int", 0xC1},
-        {"float", 0xC2},
-        {"abs", 0xC3},
-        {"min", 0xC4},
-        {"objective_additionalcurrent", 0xC5},
-        {"objective_ring", 0xC6},
-        {"objective_setpointertextoverride", 0xC7},
-        {"getnode", 0xC8},
-        {"getnodearray", 0xC9},
-        {"getallnodes", 0xCA},
-        {"getnodesinradius", 0xCB},
-        {"getnodesinradiussorted", 0xCD},
-        {"nullsub_473", 0xCE},
-        {"nullsub_474", 0xCF},
-        {"getvehicletracksegment", 0xD0},
-        {"getvehicletracksegmentarray", 0xD1},
-        {"getallvehicletracksegments", 0xD2},
-        {"isarray", 0xD3},
-        {"isbot", 0xD4},
-        {"loadluifile", 0xD5},
-        {"isplayer", 0xD6},
-        {"isspawner", 0xD7},
-        {"sub_504aa0", 0xD8},
-        {"sub_504b20", 0xD9},
-        {"sub_504c30", 0xDA},
-        {"sub_504c60", 0xDB},
-        {"sub_505030", 0xDC},
-        {"sub_5050a0", 0xDD},
-        {"getaiarray", 0xDE},
-        {"getaispeciesarray", 0xDF},
-        {"getspawnerarray", 0xE0},
-        {"getcorpsearray", 0xE1},
-        {"getspawnerteamarray", 0xE2},
-        {"getweaponclipmodel", 0xE3},
-        {"getbrushmodelcenter", 0xE4},
-        {"getkeybinding", 0xE5},
-        {"max", 0xE6},
-        {"floor", 0xE7},
-        {"log", 0xE8},
-        {"angleclamp360", 0xE9},
-        {"exp", 0xEA},
-        {"sub_4f75f0", 0xEB},
-        {"sqrt", 0xEC},
-        {"squared", 0xED},
-        {"clamp", 0xEE},
-        {"angleclamp", 0xEF},
-        {"angleclamp180", 0xF0},
-        {"vectorfromlinetopoint", 0xF1},
-        {"pointonsegmentnearesttopoint", 0xF2},
-        {"distance", 0xF3},
-        {"distance2d", 0xF4},
-        {"distancesquared", 0xF5},
-        {"length", 0xF6},
-        {"lengthsquared", 0xF7},
-        {"sub_4e3590", 0xF8},
-        {"sub_4e36e0", 0xF9},
-        {"sub_4e3730", 0xFA},
-        {"sub_4e3900", 0xFB},
-        {"sub_4e3a10", 0xFC},
-        {"axistoangles", 0xFD},
-        {"sub_502a40", 0xFE},
-        {"sub_502a50", 0xFF},
-        {"incrementcounter", 0x104},
-        {"getcountertotal", 0x105},
-        {"sub_4f2380", 0x106},
-        {"stricmp", 0x107},
-        {"transforminputcamrelative", 0x108},
-        {"nullsub_304", 0x109},
-        {"sub_4e4760", 0x10B},
-        {"createthreatbiasgroup", 0x10C},
-        {"threatbiasgroupexists", 0x10D},
-        {"getthreatbias", 0x10E},
-        {"setthreatbias", 0x10F},
-        {"setthreatbiasagainstall", 0x110},
-        {"setignoremegroup", 0x111},
-        {"sub_531060", 0x112},
-        {"snaptotarget", 0x113},
-        {"sub_50efe0", 0x114},
-        {"sub_50eff0", 0x115},
-        {"sub_50f000", 0x116},
-        {"sub_50f200", 0x117},
-        {"sub_50f280", 0x118},
-        {"vectornormalize", 0x119},
-        {"vectortoangles", 0x11A},
-        {"vectortoyaw", 0x11B},
-        {"vectorlerp", 0x11C},
-        {"anglestoup", 0x11D},
-        {"anglestoright", 0x11E},
-        {"anglestoforward", 0x11F},
-        {"anglesdelta", 0x120},
-        {"sub_4e5940", 0x121},
-        {"sub_4e5c10", 0x122},
-        {"sub_4e7c20", 0x123},
-        {"rotatepointaroundvector", 0x124},
-        {"issubstr", 0x125},
-        {"isendstr", 0x126},
-        {"getsubstr", 0x127},
-        {"tolower", 0x128},
-        {"sub_4ea2d0", 0x129},
-        {"getactiveclientcount", 0x12A},
-        {"sub_4f2e00", 0x12B},
-        {"worldentnumber", 0x145},
-        {"sub_502940", 0x148},
-        {"visionsetnight", 0x149},
-        {"visionsetmissilecam", 0x14A},
-        {"ambientstop", 0x14B},
-        {"precachemodel", 0x14C},
-        {"precacheshellshock", 0x14D},
-        {"precacheitem", 0x14E},
-        {"precacheshader", 0x14F},
-        {"precachestring", 0x150},
-        {"precachemenu", 0x151},
-        {"precacherumble", 0x152},
-        {"precachelocationselector", 0x153},
-        {"precacheleaderboards", 0x154},
-        {"loadfx", 0x155},
-        {"playfx", 0x156},
-        {"sub_4e5db0", 0x157},
-        {"sub_4e7a60", 0x158},
-        {"sub_4e8220", 0x159},
-        {"playloopedfx", 0x15A},
-        {"sub_6e9130", 0x15B},
-        {"sub_6e9390", 0x15C},
-        {"sub_4e6360", 0x15D},
-        {"sub_6e90c0", 0x15E},
-        {"sub_4e7420", 0x15F},
-        {"errorinternal", 0x160},
-        {"sub_4f2350", 0x170},
-        {"sub_4e8920", 0x184},
-        {"physicsexplosionsphere", 0x185},
-        {"physicsradiusjolt", 0x186},
-        {"sub_4e9c60", 0x187},
-        {"sub_4ecc20", 0x188},
-        {"sub_4ecde0", 0x189},
-        {"sub_4ed510", 0x18A},
-        {"sub_4ed580", 0x18B},
-        {"sub_4ed760", 0x18C},
-        {"sub_4edaa0", 0x18D},
-        {"isexplosivedamagemod", 0x18E},
-        {"radiusdamage", 0x18F},
-        {"sub_4f8550", 0x190},
-        {"sub_4f7620", 0x191},
-        {"sub_4ed2f0", 0x192},
-        {"getnumparts", 0x193},
-        {"sub_50eea0", 0x194},
-        {"iprintln", 0x19E},
-        {"iprintlnbold", 0x19F},
-        {"logstring", 0x1A0},
-        {"getent", 0x1A1},
-        {"getentarray", 0x1A2},
-        {"spawnstruct", 0x1A5},
-        {"isalive", 0x1A7},
-        {"isspawner", 0x1A8},
-        {"missile_createattractororigin", 0x1A9},
-        {"missile_createrepulsorent", 0x1AA},
-        {"missile_createrepulsororigin", 0x1AB},
-        {"missile_deleteattractor", 0x1AD},
-        {"newhudelem", 0x1AF},
-        {"newclienthudelem", 0x1B0},
-        {"sub_5c8350", 0x1B2},
-        {"isvalidmissile", 0x1B3},
-        {"getpartname", 0x1B5},
-        {"sub_4ef400", 0x1B6},
-        {"ceil", 0x1B7},
-        {"botmemoryflags", 0x1B8},
-        {"getactivecount", 0x1B9},
-        {"getsquadassaultenemyprestige", 0x1BA},
-        {"getteamscore", 0x1BB},
-        {"sub_4edbc0", 0x1BC},
-        {"sub_4ee190", 0x1BD},
-        {"sub_4ee450", 0x1BE},
-        {"sub_4f73a0", 0x1BF},
-        {"sub_4f7d90", 0x1C0},
-        {"sub_4efd40", 0x1C1},
-        {"tablelookupistringbyrow", 0x1C2},
-        {"sub_4f0940", 0x1C3},
-        {"tablelookuprownum", 0x1C4},
-        {"sub_4f1590", 0x1C5},
-        {"tableexists", 0x1C6},
-        {"getmissileowner", 0x1C7},
-        {"magicbullet", 0x1C8},
-        {"getweaponflashtagname", 0x1C9},
-        {"summarizearraypoints", 0x1CA},
-        {"buildhudoutlineclientmaskfromentarray", 0x1CB},
-        {"sub_6da010", 0x1CC},
-        {"sub_4ec020", 0x1CD},
-        {"sub_4ec050", 0x1CE},
-        {"sub_4ec0f0", 0x1CF},
-        {"sub_4f8dc0", 0x1D0},
-        {"nullsub_441", 0x1D1},
-        {"nullsub_442", 0x1D2},
-        {"nullsub_443", 0x1D3},
-        {"nullsub_444", 0x1D4},
-        {"nullsub_445", 0x1D5},
-        {"nullsub_446", 0x1D6},
-        {"sub_4f6a70", 0x1D7},
-        {"setthermalbodymaterial", 0x1D8},
-        {"getarraykeys", 0x1D9},
-        {"getfirstarraykey", 0x1DA},
-        {"getglass", 0x1DB},
-        {"getglassarray", 0x1DC},
-        {"getglassorigin", 0x1DD},
-        {"isglassdestroyed", 0x1DE},
-        {"destroyglass", 0x1DF},
-        {"deletepiece", 0x1E0},
-        {"getalpha", 0x1E1},
-        {"sub_4f4760", 0x1E2},
-        {"sub_50f580", 0x1E3},
-        {"sub_50fa30", 0x1E4},
-        {"sub_50efd0", 0x1E5},
-        {"icon", 0x1E6},
-        {"sub_50f110", 0x1E7},
-        {"sub_50f1b0", 0x1E8},
-        {"sub_50f270", 0x1E9},
-        {"sub_4ee760", 0x1EA},
-        {"sub_4ee920", 0x1EB},
-        {"sub_4eeb40", 0x1EC},
-        {"sub_4eef70", 0x1ED},
-        {"sub_4ef9e0", 0x1EE},
-        {"sub_4efb10", 0x1EF},
-        {"sub_4f0080", 0x1F0},
-        {"sub_4f0550", 0x1F1},
-        {"getent", 0x1F2},
-        {"getnodearray", 0x1F3},
-        {"getallnodes", 0x1F4},
-        {"sub_6d9d40", 0x1F5},
-        {"sub_6da090", 0x1F6},
-        {"spawnvehicle", 0x1F7},
-        {"vehicle_getarray", 0x1F8},
-        {"pow", 0x1F9},
-        {"sub_4f6950", 0x1FA},
-        {"getsquadassaultelo", 0x1FB},
-        {"sub_501c90", 0x1FC},
-        {"sub_525490", 0x20C},
-        {"sub_5250a0", 0x20D},
-        {"soundexists", 0x216},
-        {"sub_524da0", 0x21D},
-        {"disconnectnodepair", 0x21E},
-        {"connectnodepair", 0x21F},
-        {"sub_505420", 0x220},
-        {"nullsub_476", 0x223},
-        {"sub_5cd370", 0x225},
-        {"sub_5cd5b0", 0x226},
-        {"sub_5cd4f0", 0x227},
-        {"sub_5cd490", 0x228},
-        {"sub_5cd0f0", 0x22A},
-        {"sub_5cd0a0", 0x22B},
-        {"sub_5cd130", 0x22C},
-        {"distance2dsquared", 0x22D},
-        {"getangledelta3d", 0x22E},
-        {"sub_4e8a30", 0x22F},
-        {"stoploopsound", 0x230},
-        {"sub_4e9240", 0x231},
-        {"trajectorycalculateexitangle", 0x232},
-        {"sub_4e97c0", 0x233},
-        {"trajectorycomputedeltaheightattime", 0x234},
-        {"getteamradar", 0x235},
-        {"nullsub_436", 0x236},
-        {"ispointinvolume", 0x237},
-        {"getplaylistversion", 0x238},
-        {"getbuildnumber", 0x239},
-        {"isusingmatchrulesdata", 0x23A},
-        {"nullsub_450", 0x23C},
-        {"sub_4ebe50", 0x23E},
-        {"sub_4eb140", 0x23F},
-        {"sub_508500", 0x240},
-        {"sub_500c90", 0x241},
-        {"isteamradarblocked", 0x242},
-        {"issquadsmode", 0x243},
-        {"sub_4f3620", 0x245},
-        {"sub_4f3920", 0x246},
-        {"sub_4f14e0", 0x247},
-        {"sub_4f14f0", 0x248},
-        {"sub_4f1580", 0x249},
-        {"sub_4f1640", 0x24A},
-        {"sub_4f1820", 0x24B},
-        {"sub_4eb420", 0x24D},
-        {"sub_4ff230", 0x252},
-        {"sub_4ff350", 0x253},
-        {"sub_4e6b60", 0x254},
-        {"sub_4f97c0", 0x255},
-        {"sub_4e48a0", 0x256},
-        {"sub_502ad0", 0x257},
-        {"nullsub_447", 0x258},
-        {"nullsub_510", 0x259},
-        {"nullsub_449", 0x25A},
-        {"sub_4e60e0", 0x25B},
-        {"sub_4e6250", 0x25C},
-        {"sub_4e6800", 0x25D},
-        {"sub_504a20", 0x25F},
-        {"sub_4f2990", 0x260},
-        {"addbot", 0x261},
-        {"getcsplinecount", 0x262},
-        {"getcsplinepointcount", 0x263},
-        {"getcsplinelength", 0x264},
-        {"getcsplinepointid", 0x265},
-        {"getcsplinepointlabel", 0x266},
-        {"getcsplinepointtension", 0x267},
-        {"getcsplinepointcorridordims", 0x268},
-        {"getcsplinepointtangent", 0x269},
-        {"sub_4edee0", 0x26A},
-        {"getcsplinepointdisttonextpoint", 0x26B},
-        {"calccsplinetangent", 0x26C},
-        {"calccsplinecorridor", 0x26D},
-        {"sub_4eecb0", 0x26E},
-        {"sub_4eef30", 0x26F},
-        {"assertexcmd", 0x270},
-        {"nullsub_452", 0x272},
-        {"nullsub_525", 0x273},
-        {"nullsub_454", 0x274},
-        {"nullsub_455", 0x275},
-        {"nullsub_456", 0x276},
-        {"nullsub_457", 0x277},
-        {"nullsub_479", 0x279},
-        {"nullsub_480", 0x27A},
-        {"nullsub_458", 0x27B},
-        {"nullsub_733", 0x27C},
-        {"nullsub_460", 0x27D},
-        {"nullsub_461", 0x27E},
-        {"nullsub_433", 0x284},
-        {"errorinternal", 0x285},
-        {"nullsub_462", 0x286},
-        {"nullsub_762", 0x287},
-        {"nullsub_451", 0x288},
-        {"nullsub_511", 0x289},
-        {"playsoundasmaster", 0x28A},
-        {"nullsub_388_0", 0x290},
-        {"sub_4f08c0", 0x293},
-        {"sub_4e82e0", 0x294},
-        {"sub_4e8a60", 0x295},
-        {"sub_4f6e70", 0x29A},
-        {"sub_4f6ec0", 0x29B},
-        {"sub_5051e0", 0x29C},
-        {"sub_4f0d80", 0x29D},
-        {"sub_4f49c0", 0x29E},
-        {"sub_4eea20", 0x29F},
-        {"sub_4ef270", 0x2A0},
-        {"sub_4ef680", 0x2A1},
-        {"sub_502500", 0x2A2},
-        {"nullsub_296", 0x2A3},
-        {"sub_4e2730", 0x2A4},
-        {"isvalidgametype", 0x2A5},
-        {"sub_4f2440", 0x2A6},
-        {"sub_4f27b0", 0x2A7},
-        {"sub_4f03b0", 0x2AA},
-        {"sub_502710", 0x2AB},
-        {"sub_4f3a00", 0x2AC},
-        {"sub_4e8c40", 0x2AD},
-        {"sub_4f67c0", 0x2AE},
-        {"nullsub_465", 0x2AF},
-        {"nullsub_464", 0x2B0},
-        {"sub_505bd0", 0x2B2},
-        {"sub_4ee110", 0x2B3},
-        {"nullsub_467", 0x2B4},
-        {"getuavstrengthlevelshowenemyfastsweep", 0x2B5},
-        {"nullsub_468", 0x2B6},
-        {"nullsub_469", 0x2B7},
-        {"nullsub_187_0", 0x2B8},
-        {"nullsub_437", 0x2BD},
-        {"nullsub_399_0", 0x2BE},
-        {"getteamradarstrength", 0x2BF},
-        {"sub_508310", 0x2C0},
-        {"sub_4f5c30", 0x2C5},
-        {"sub_508340", 0x2C6},
-        {"sub_4eb9e0", 0x2C7},
-        {"nullsub_471", 0x2C9},
-        {"nullsub_483_0", 0x2CA},
-        {"abs", 0x2CB},
-        {"sub_4f2000", 0x2CC},
-        {"sub_4f2160", 0x2CD},
-        {"setleveldopplerpreset", 0x2CE},
-        {"sub_5070c0", 0x2D7},
-        {"sub_507b60", 0x2DD},
-        {"sub_4f6ca0", 0x2DE},
-        {"nullsub_466", 0x2E0},
-        {"sub_502a60", 0x2E1},
-        {"nullsub_481", 0x2E3},
-        {"isdedicatedserver", 0x2E8},
-        {"sub_4eac20", 0x2E9},
-        {"nullsub_439", 0x2EB},
-        {"nullsub_440", 0x2EC},
-        {"nullsub_289", 0x2ED},
-        {"getarchivetime", 0x2EE},
-        {"sub_4e9010", 0x2EF},
-        {"sub_4e92d0", 0x2F0},
-        {"sub_503950", 0x2F1},
-        {"nullsub_482", 0x2F2},
-        {"sub_4f1fb0", 0x2F3},
-        {"getpsoffsettime", 0x2F7},
-        {"sub_4f6020", 0x2F8},
-        {"sub_4f60c0", 0x2F9},
-        {"gettime", 0x2FA},
-        {"ishairrunning", 0x2FB},
-        {"getentchannelname", 0x2FC},
-        {"sub_4f6400", 0x2FD},
-        {"getuavstrengthmin", 0x2FE},
-        {"getbuildversion", 0x2FF},
-        {"sub_4f6810", 0x300},
-        {"getuavstrengthmax", 0x301},
-        {"sub_4f48a0", 0x302},
-        {"errorinternal", 0x303},
-        {"errorinternal", 0x304},
-        {"sub_4f08d0", 0x305},
-        {"sub_4ecc50", 0x306},
-        {"sub_4ece10", 0x307},
-        {"sub_4ecfc0", 0x308},
-        {"sub_4f8160", 0x30A},
-        {"nullsub_301", 0x30C},
-        {"sub_4f02e0", 0x30E},
-        {"tablelookup", 0x30F},
-        {"errorinternal", 0x313},
-        {"lookupsoundlength", 0x314},
-        {"sub_4af3f0", 0x315},
-        {"startservermigration", 0x316},
-        {"sub_4af2d0", 0x317},
-        {"sub_4f4300", 0x319},
-        {"sub_4ea930", 0x31A},
-        {"sub_503c50", 0x31B},
-        {"sub_503d60", 0x31C},
-        {"sub_503e40", 0x31D},
-        {"sub_503f00", 0x31E},
-        {"getmaxagents", 0x31F},
-        {"sub_4f9110", 0x320},
+        {"precacheturret", 0x0}, // 0x4EF520
+        {"getweaponarray", 0x1}, // 0x4E2AF0
+        {"_func_002", 0x2}, // 0x4EB6E0
+        {"_func_003", 0x3}, // 0x502950
+        {"_func_004", 0x4}, // 0x504F40
+        {"setphysicsgravitydir", 0x5}, // 0x4FF120
+        {"gettimescale", 0x6}, // 0x508680
+        {"settimescale", 0x7}, // 0x5086A0
+        {"setslowmotionview", 0x8}, // 0x5087A0
+        {"_func_009", 0x9}, // 0x5086C0
+        {"_func_00A", 0xA}, // 0x5085A0
+        {"_func_00B", 0xB}, // 0x504FD0
+        {"_func_00C", 0xC}, // 0x505000
+        {"_func_00D", 0xD}, // 0x505060
+        {"_func_00E", 0xE}, // 0x4EB750
+        {"allowscriptmenuresponse", 0xF}, // 0x4EB820
+        {"allowscriptmenuresponse", 0x10}, // 0x4EB9C0
+        {"notifyoncommand", 0x11}, // 0x4EC560
+        {"setprintchannel", 0x12}, // 0x4EC570
+        {"print", 0x13}, // 0x4EC640
+        {"println", 0x14}, // 0x4EC860
+        {"print3d", 0x15}, // 0x4EC870
+        {"line", 0x16}, // 0x4EC880
+        {"spawnturret", 0x17}, // 0x4EF180
+        {"canspawnturret", 0x18}, // 0x4EF3D0
+        {"assert", 0x19}, // 0x4EC890
+        {"_func_01A", 0x1A}, // 0x502660
+        {"_func_01B", 0x1B}, // 0x502690
+        {"_func_01C", 0x1C}, // 0x5021C0
+        {"_func_01D", 0x1D}, // 0x5023E0
+        {"runbadplaces", 0x1E}, // 0x4E6F00
+        {"_func_01F", 0x1F}, // 0x4E7120
+        {"_func_020", 0x20}, // 0x4E76D0
+        {"_func_021", 0x21}, // 0x4E7F10
+        {"_func_022", 0x22}, // 0x503F20
+        {"_func_023", 0x23}, // 0x525640
+        {"_func_024", 0x24}, // 0x5256E0
+        {"_func_025", 0x25}, // 0x525560
+        {"_func_026", 0x26}, // 0x525420
+        {"_func_029", 0x29}, // 0x504630
+        {"_func_02A", 0x2A}, // 0x504640
+        {"_func_02B", 0x2B}, // 0x5046B0
+        {"_func_02C", 0x2C}, // 0x4EC920
+        {"_func_02D", 0x2D}, // 0x4EC980
+        {"isdefined", 0x2E}, // 0x4ED1F0
+        {"issentient", 0x2F}, // 0x4ED5F0
+        {"isstring", 0x30}, // 0x4ED850
+        {"_func_031", 0x31}, // 0x4EE990
+        {"_func_032", 0x32}, // 0x4EEC00
+        {"setclientdvar", 0x33}, // 0x4EF040
+        {"_func_035", 0x35}, // 0x4EFA60
+        {"setdvar", 0x36}, // 0x4EF560
+        {"_func_037", 0x37}, // 0x4EFCA0
+        {"getdvar", 0x38}, // 0x4F0260
+        {"getdvarint", 0x39}, // 0x4F0730
+        {"getdvarfloat", 0x3A}, // 0x4F1500
+        {"getdvarvector", 0x3B}, // 0x4F1A20
+        {"_func_03C", 0x3C}, // 0x4F2180
+        {"gettime", 0x3D}, // 0x4F21C0
+        {"_func_03E", 0x3E}, // 0x4F2330
+        {"getentbynum", 0x3F}, // 0x4F2400
+        {"getscreenwidth", 0x40}, // 0x4F2620
+        {"getscreenheight", 0x41}, // 0x4F27A0
+        {"getweaponmodel", 0x42}, // 0x4F28B0
+        {"setgameendtime", 0x43}, // 0x502BF0
+        {"_func_044", 0x44}, // 0x502C50
+        {"_func_045", 0x45}, // 0x502C90
+        {"_func_046", 0x46}, // 0x502CF0
+        {"_func_047", 0x47}, // 0x502D80
+        {"_func_048", 0x48}, // 0x502DB0
+        {"_func_049", 0x49}, // 0x502E40
+        {"_func_04A", 0x4A}, // 0x502E70
+        {"_func_04B", 0x4B}, // 0x502EA0
+        {"_func_04C", 0x4C}, // 0x502FD0
+        {"setwhizbyradii", 0x4D}, // 0x5030E0
+        {"_func_04E", 0x4E}, // 0x503380
+        {"_func_04F", 0x4F}, // 0x5036E0
+        {"_func_050", 0x50}, // 0x503740
+        {"_func_051", 0x51}, // 0x503760
+        {"_func_052", 0x52}, // 0x5037B0
+        {"_func_053", 0x53}, // 0x5037D0
+        {"_func_054", 0x54}, // 0x5038F0
+        {"position", 0x55}, // 0x504B50
+        {"_func_056", 0x56}, // 0x501A80
+        {"spawntestclient", 0x57}, // 0x501C40
+        {"_func_058", 0x58}, // 0x501C70
+        {"_func_059", 0x59}, // 0x501CD0
+        {"_func_05A", 0x5A}, // 0x501EB0
+        {"_func_05B", 0x5B}, // 0x501F50
+        {"_func_05C", 0x5C}, // 0x5020C0
+        {"_func_05D", 0x5D}, // 0x502140
+        {"_func_05E", 0x5E}, // 0x502390
+        {"_func_05F", 0x5F}, // 0x502640
+        {"getweapondisplayname", 0x60}, // 0x4F32A0
+        {"getweaponbasename", 0x61}, // 0x4F36D0
+        {"getweaponattachments", 0x62}, // 0x4F3D20
+        {"getweaponattachmentdisplaynames", 0x63}, // 0x4F4440
+        {"getweaponcamoname", 0x64}, // 0x4F51C0
+        {"_func_065", 0x65}, // 0x4F55D0
+        {"getanimlength", 0x66}, // 0x4F7960
+        {"animhasnotetrack", 0x67}, // 0x4F7B90
+        {"getnotetracktimes", 0x68}, // 0x4F8020
+        {"spawn", 0x69}, // 0x4EEDD0
+        {"_func_06A", 0x6A}, // 0x4EEDD0
+        {"spawnloopingsound", 0x6B}, // 0x6B56B0
+        {"bullettrace", 0x6C}, // 0x4F1BD0
+        {"_func_06D", 0x6D}, // 0x5140B0
+        {"_func_06E", 0x6E}, // 0x513BC0
+        {"_func_06F", 0x6F}, // 0x513D50
+        {"_func_070", 0x70}, // 0x4AF5F0
+        {"_func_071", 0x71}, // 0x4AF4E0
+        {"_func_072", 0x72}, // 0x4AF180
+        {"_func_073", 0x73}, // 0x501DB0
+        {"_func_074", 0x74}, // 0x4F0130
+        {"setblur", 0x75}, // 0x507470
+        {"musicplay", 0x76}, // 0x507570
+        {"musicstop", 0x77}, // 0x507770
+        {"soundfade", 0x78}, // 0x507890
+        {"soundsettimescalefactor", 0x79}, // 0x4F6940
+        {"soundresettimescale", 0x7A}, // 0x4F6990
+        {"setocclusionpreset", 0x7B}, // 0x4F6A20
+        {"levelsoundfade", 0x7C}, // 0x4F6C90
+        {"_func_07D", 0x7D}, // 0x4F6DA0
+        {"_func_07E", 0x7E}, // 0x4F6DD0
+        {"_func_07F", 0x7F}, // 0x507A70
+        {"_func_080", 0x80}, // 0x4FF720
+        {"_func_081", 0x81}, // 0x507960
+        {"_func_082", 0x82}, // 0x5019A0
+        {"_func_084", 0x84}, // 0x5019C0
+        {"_func_085", 0x85}, // 0x501A60
+        {"_func_086", 0x86}, // 0x4FF7B0
+        {"_func_087", 0x87}, // 0x500380
+        {"getglowalpha", 0x88}, // 0x5003A0
+        {"_func_089", 0x89}, // 0x500210
+        {"_func_08A", 0x8A}, // 0x5003C0
+        {"_func_08B", 0x8B}, // 0x500B40
+        {"_func_08C", 0x8C}, // 0x5026B0
+        {"_func_08D", 0x8D}, // 0x502AE0
+        {"bullettracepassed", 0x8E}, // 0x4F2260
+        {"sighttracepassed", 0x8F}, // 0x4F2480
+        {"physicstrace", 0x90}, // 0x4F2C80
+        {"playerphysicstrace", 0x91}, // 0x4F3190
+        {"getgroundposition", 0x92}, // 0x4F5780
+        {"getangledelta", 0x93}, // 0x4F9570
+        {"getmovedelta", 0x94}, // 0x4F9E10
+        {"getnorthyaw", 0x95}, // 0x4E2840
+        {"getcommandfromkey", 0x96}, // 0x506E40
+        {"getsticksconfig", 0x97}, // 0x506F60
+        {"_func_098", 0x98}, // 0x507060
+        {"botautoconnectenabled", 0x99}, // 0x5070A0
+        {"_func_09A", 0x9A}, // 0x507140
+        {"_func_09B", 0x9B}, // 0x500BF0
+        {"_func_09C", 0x9C}, // 0x500C40
+        {"botgetteamdifficulty", 0x9D}, // 0x500BB0
+        {"getstarttime", 0x9E}, // 0x506DA0
+        {"_func_09F", 0x9F}, // 0x513350
+        {"_func_0A0", 0xA0}, // 0x513780
+        {"_func_0A1", 0xA1}, // 0x513A60
+        {"_func_0A2", 0xA2}, // 0x513A20
+        {"_func_0A3", 0xA3}, // 0x514750
+        {"_func_0A4", 0xA4}, // 0x514380
+        {"_func_0A5", 0xA5}, // 0x513900
+        {"_func_0A6", 0xA6}, // 0x513890
+        {"_func_0A7", 0xA7}, // 0x5148A0
+        {"_func_0A8", 0xA8}, // 0x513370
+        {"_func_0A9", 0xA9}, // 0x513810
+        {"missilecreaterepulsororigin", 0xAA}, // 0x5139A0
+        {"_func_0AB", 0xAB}, // 0x513A80
+        {"_func_0AC", 0xAC}, // 0x513F60
+        {"_func_AD", 0xAD}, // 0x513880
+        {"_func_0AE", 0xAE}, // 0x514890
+        {"_func_0AF", 0xAF}, // 0x514600
+        {"_func_0B0", 0xB0}, // 0x5133A0
+        {"_func_0B1", 0xB1}, // 0x513610
+        {"_func_0B2", 0xB2}, // 0x5134F0
+        {"_func_0B3", 0xB3}, // 0x5141F0
+        {"setnorthyaw", 0xB4}, // 0x4E2B60
+        {"setslowmotion", 0xB5}, // 0x4F4320
+        {"randomint", 0xB6}, // 0x4F5A60
+        {"randomfloat", 0xB7}, // 0x4F5BE0
+        {"randomintrange", 0xB8}, // 0x4F5E40
+        {"randomfloatrange", 0xB9}, // 0x4F5ED0
+        {"sin", 0xBA}, // 0x4F5FE0
+        {"cos", 0xBB}, // 0x4F6030
+        {"tan", 0xBC}, // 0x4F6130
+        {"asin", 0xBD}, // 0x4F6390
+        {"acos", 0xBE}, // 0x4F6470
+        {"atan", 0xBF}, // 0x4F6880
+        {"int", 0xC0}, // 0x4F69B0
+        {"float", 0xC1}, // 0x4F6E00
+        {"abs", 0xC2}, // 0x4F7000
+        {"min", 0xC3}, // 0x4F7200
+        {"objective_additionalcurrent", 0xC4}, // 0x50F290
+        {"objective_ring", 0xC5}, // 0x50F3D0
+        {"objective_setpointertextoverride", 0xC6}, // 0x50F490
+        {"getnode", 0xC7}, // 0x524E60
+        {"getnodearray", 0xC8}, // 0x524F70
+        {"getallnodes", 0xC9}, // 0x524C40
+        {"getnodesinradius", 0xCA}, // 0x525080
+        {"_func_CB", 0xCB}, // 0x525090
+        {"getnodesinradiussorted", 0xCC}, // 0x524C90
+        {"_func_0CD", 0xCD}, // 0x504F60
+        {"_func_0CE", 0xCE}, // 0x504F70
+        {"getvehicletracksegment", 0xCF}, // 0x6DC180
+        {"getvehicletracksegmentarray", 0xD0}, // 0x6DC260
+        {"getallvehicletracksegments", 0xD1}, // 0x6DC130
+        {"isarray", 0xD2}, // 0x4EA580
+        {"isbot", 0xD3}, // 0x504740
+        {"loadluifile", 0xD4}, // 0x4EE030
+        {"isplayer", 0xD5}, // 0x4ED980
+        {"isspawner", 0xD6}, // 0x504790
+        {"_func_0D7", 0xD7}, // 0x504AA0
+        {"_func_0D8", 0xD8}, // 0x504B20
+        {"_func_0D9", 0xD9}, // 0x504C30
+        {"_func_0DA", 0xDA}, // 0x504C60
+        {"_func_0DB", 0xDB}, // 0x505030
+        {"_func_0DC", 0xDC}, // 0x5050A0
+        {"getaiarray", 0xDD}, // 0x505360
+        {"getaispeciesarray", 0xDE}, // 0x505520
+        {"getspawnerarray", 0xDF}, // 0x505840
+        {"getcorpsearray", 0xE0}, // 0x505730
+        {"getspawnerteamarray", 0xE1}, // 0x505A40
+        {"getweaponclipmodel", 0xE2}, // 0x505B40
+        {"getbrushmodelcenter", 0xE3}, // 0x506D90
+        {"getkeybinding", 0xE4}, // 0x506DB0
+        {"max", 0xE5}, // 0x4F7270
+        {"floor", 0xE6}, // 0x4F7300
+        {"log", 0xE7}, // 0x4F7430
+        {"angleclamp360", 0xE8}, // 0x4F7470
+        {"exp", 0xE9}, // 0x4F7570
+        {"_func_0EA", 0xEA}, // 0x4F75F0
+        {"sqrt", 0xEB}, // 0x4F7750
+        {"squared", 0xEC}, // 0x4F78D0
+        {"clamp", 0xED}, // 0x4F7A80
+        {"angleclamp", 0xEE}, // 0x4F7AD0
+        {"angleclamp180", 0xEF}, // 0x4F7BF0
+        {"vectorfromlinetopoint", 0xF0}, // 0x4FA300
+        {"pointonsegmentnearesttopoint", 0xF1}, // 0x4E20E0
+        {"distance", 0xF2}, // 0x4E2C00
+        {"distance2d", 0xF3}, // 0x4E2E70
+        {"distancesquared", 0xF4}, // 0x4E2FA0
+        {"length", 0xF5}, // 0x4E3330
+        {"lengthsquared", 0xF6}, // 0x4E3530
+        {"_func_0F7", 0xF7}, // 0x4E3590
+        {"_func_0F8", 0xF8}, // 0x4E36E0
+        {"_func_0F9", 0xF9}, // 0x4E3730
+        {"_func_0FA", 0xFA}, // 0x4E3900
+        {"_func_0FB", 0xFB}, // 0x4E3A10
+        {"axistoangles", 0xFC}, // 0x4E4680
+        {"_func_0FD", 0xFD}, // 0x502A40
+        {"_func_0FE", 0xFE}, // 0x502A50
+        {"incrementcounter", 0x103}, // 0x5056E0
+        {"getcountertotal", 0x104}, // 0x5057A0
+        {"_func_105", 0x105}, // 0x4F2380
+        {"stricmp", 0x106}, // 0x4F7D00
+        {"transforminputcamrelative", 0x107}, // 0x4F81C0
+        {"_func_108", 0x108}, // 0x7C1910
+        {"_func_109", 0x109}, // 0x7C1920
+        {"_func_10A", 0x10A}, // 0x4E4760
+        {"createthreatbiasgroup", 0x10B}, // 0x531770
+        {"threatbiasgroupexists", 0x10C}, // 0x5317A0
+        {"getthreatbias", 0x10D}, // 0x5317E0
+        {"setthreatbias", 0x10E}, // 0x531840
+        {"setthreatbiasagainstall", 0x10F}, // 0x5318C0
+        {"setignoremegroup", 0x110}, // 0x531910
+        {"_func_111", 0x111}, // 0x531060
+        {"snaptotarget", 0x112}, // 0x50FA70
+        {"_func_113", 0x113}, // 0x50EFE0
+        {"_func_114", 0x114}, // 0x50EFF0
+        {"_func_115", 0x115}, // 0x50F000
+        {"_func_116", 0x116}, // 0x50F200
+        {"_func_117", 0x117}, // 0x50F280
+        {"vectornormalize", 0x118}, // 0x4E3E90
+        {"vectortoangles", 0x119}, // 0x4E40A0
+        {"vectortoyaw", 0x11A}, // 0x4E42A0
+        {"vectorlerp", 0x11B}, // 0x4E4430
+        {"anglestoup", 0x11C}, // 0x4E4AD0
+        {"anglestoright", 0x11D}, // 0x4E4C70
+        {"anglestoforward", 0x11E}, // 0x4E4DD0
+        {"anglesdelta", 0x11F}, // 0x4E4F80
+        {"_func_120", 0x120}, // 0x4E5940
+        {"_func_121", 0x121}, // 0x4E5C10
+        {"_func_122", 0x122}, // 0x4E7C20
+        {"rotatepointaroundvector", 0x123}, // 0x4E7FC0
+        {"issubstr", 0x124}, // 0x4E9170
+        {"isendstr", 0x125}, // 0x4E91B0
+        {"getsubstr", 0x126}, // 0x4E9440
+        {"tolower", 0x127}, // 0x4E9E20
+        {"_func_128", 0x128}, // 0x4EA2D0
+        {"getactiveclientcount", 0x129}, // 0x4EA980
+        {"_func_12A", 0x12A}, // 0x4F2E00
+        {"worldentnumber", 0x144}, // 0x5046A0
+        {"_func_147", 0x147}, // 0x502940
+        {"visionsetnight", 0x148}, // 0x502A20
+        {"visionsetmissilecam", 0x149}, // 0x502A30
+        {"ambientstop", 0x14A}, // 0x4F52C0
+        {"precachemodel", 0x14B}, // 0x4EB430
+        {"precacheshellshock", 0x14C}, // 0x4EB670
+        {"precacheitem", 0x14D}, // 0x4F1FC0
+        {"precacheshader", 0x14E}, // 0x4F2120
+        {"precachestring", 0x14F}, // 0x4F2390
+        {"precachemenu", 0x150}, // 0x4F25F0
+        {"precacherumble", 0x151}, // 0x4F2770
+        {"precachelocationselector", 0x152}, // 0x4EB550
+        {"precacheleaderboards", 0x153}, // 0x4F2190
+        {"loadfx", 0x154}, // 0x4E3480
+        {"playfx", 0x155}, // 0x4E44F0
+        {"_func_156", 0x156}, // 0x4E5DB0
+        {"_func_157", 0x157}, // 0x4E7A60
+        {"_func_158", 0x158}, // 0x4E8220
+        {"playloopedfx", 0x159}, // 0x6E8E00
+        {"_func_15A", 0x15A}, // 0x6E9130
+        {"_func_15B", 0x15B}, // 0x6E9390
+        {"_func_15C", 0x15C}, // 0x4E6360
+        {"_func_15D", 0x15D}, // 0x6E90C0
+        {"_func_15E", 0x15E}, // 0x4E7420
+        {"_func_15F", 0x15F}, // 0x4E61E0
+        {"_func_16F", 0x16F}, // 0x4F2350
+        {"_func_183", 0x183}, // 0x4E8920
+        {"physicsexplosionsphere", 0x184}, // 0x4EA120
+        {"physicsradiusjolt", 0x185}, // 0x4E9610
+        {"_func_186", 0x186}, // 0x4E9C60
+        {"_func_187", 0x187}, // 0x4ECC20
+        {"_func_188", 0x188}, // 0x4ECDE0
+        {"_func_189", 0x189}, // 0x4ED510
+        {"_func_18A", 0x18A}, // 0x4ED580
+        {"_func_18B", 0x18B}, // 0x4ED760
+        {"_func_18C", 0x18C}, // 0x4EDAA0
+        {"isexplosivedamagemod", 0x18D}, // 0x4F6330
+        {"radiusdamage", 0x18E}, // 0x4F7460
+        {"_func_18F", 0x18F}, // 0x4F8550
+        {"_func_190", 0x190}, // 0x4F7620
+        {"_func_191", 0x191}, // 0x4ED2F0
+        {"getnumparts", 0x192}, // 0x4EDDA0
+        {"_func_193", 0x193}, // 0x50EEA0
+        {"iprintln", 0x19D}, // 0x504120
+        {"iprintlnbold", 0x19E}, // 0x5041A0
+        {"logstring", 0x19F}, // 0x5071B0
+        {"getent", 0x1A0}, // 0x511680
+        {"getentarray", 0x1A1}, // 0x5116F0
+        {"spawnstruct", 0x1A4}, // 0x5C6B00
+        {"isalive", 0x1A6}, // 0x5042F0
+        {"isspawner", 0x1A7}, // 0x504380
+        {"missile_createattractororigin", 0x1A8}, // 0x4D73E0
+        {"missile_createrepulsorent", 0x1A9}, // 0x4D73F0
+        {"missile_createrepulsororigin", 0x1AA}, // 0x4D7710
+        {"_func_1AB", 0x1AB}, // 0x4D7720
+        {"missile_deleteattractor", 0x1AC}, // 0x4D7730
+        {"newhudelem", 0x1AE}, // 0x4C2570
+        {"newclienthudelem", 0x1AF}, // 0x4C2510
+        {"_func_1B1", 0x1B1}, // 0x5C8350
+        {"isvalidmissile", 0x1B2}, // 0x504650
+        {"getpartname", 0x1B4}, // 0x4EDE60
+        {"_func_1B5", 0x1B5}, // 0x4EF400
+        {"ceil", 0x1B6}, // 0x4EC650
+        {"botmemoryflags", 0x1B7}, // 0x4ED640
+        {"getactivecount", 0x1B8}, // 0x4ED8F0
+        {"getsquadassaultenemyprestige", 0x1B9}, // 0x4EDDE0
+        {"getteamscore", 0x1BA}, // 0x4EDFA0
+        {"_func_1BB", 0x1BB}, // 0x4EDBC0
+        {"_func_1BC", 0x1BC}, // 0x4EE190
+        {"_func_1BD", 0x1BD}, // 0x4EE450
+        {"_func_1BE", 0x1BE}, // 0x4F73A0
+        {"_func_1BF", 0x1BF}, // 0x4F7D90
+        {"_func_1C0", 0x1C0}, // 0x4EFD40
+        {"tablelookupistringbyrow", 0x1C1}, // 0x4F2020
+        {"_func_1C2", 0x1C2}, // 0x4F0940
+        {"tablelookuprownum", 0x1C3}, // 0x4F21E0
+        {"_func_1C4", 0x1C4}, // 0x4F1590
+        {"tableexists", 0x1C5}, // 0x4F1DC0
+        {"getmissileowner", 0x1C6}, // 0x4ECBC0
+        {"magicbullet", 0x1C7}, // 0x4E98D0
+        {"getweaponflashtagname", 0x1C8}, // 0x4EA890
+        {"summarizearraypoints", 0x1C9}, // 0x4F2630
+        {"buildhudoutlineclientmaskfromentarray", 0x1CA}, // 0x4F2A50
+        {"_func_1CB", 0x1CB}, // 0x6DA010
+        {"_func_1CC", 0x1CC}, // 0x4EC020
+        {"_func_1CD", 0x1CD}, // 0x4EC050
+        {"_func_1CE", 0x1CE}, // 0x4EC0F0
+        {"_func_1CF", 0x1CF}, // 0x4F8DC0
+        {"_func_1D0", 0x1D0}, // 0x4F5E20
+        {"_func_1D1", 0x1D1}, // 0x4F5E30
+        {"_func_1D2", 0x1D2}, // 0x4F5EC0
+        {"_func_1D3", 0x1D3}, // 0x4F5F20
+        {"_func_1D4", 0x1D4}, // 0x4F5F70
+        {"_func_1D5", 0x1D5}, // 0x4F5F80
+        {"_func_1D6", 0x1D6}, // 0x4F6A70
+        {"setthermalbodymaterial", 0x1D7}, // 0x4F6EE0
+        {"getarraykeys", 0x1D8}, // 0x4F7090
+        {"getfirstarraykey", 0x1D9}, // 0x4F7240
+        {"getglass", 0x1DA}, // 0x4F2C30
+        {"getglassarray", 0x1DB}, // 0x4F30B0
+        {"getglassorigin", 0x1DC}, // 0x4F35B0
+        {"isglassdestroyed", 0x1DD}, // 0x4F37E0
+        {"destroyglass", 0x1DE}, // 0x4F3A90
+        {"deletepiece", 0x1DF}, // 0x4F3E00
+        {"getalpha", 0x1E0}, // 0x4F46B0
+        {"_func_1E1", 0x1E1}, // 0x4F4760
+        {"_func_1E2", 0x1E2}, // 0x50F580
+        {"_func_1E3", 0x1E3}, // 0x50FA30
+        {"_func_1E4", 0x1E4}, // 0x50EFD0
+        {"icon", 0x1E5}, // 0x50F010
+        {"_func_1E6", 0x1E6}, // 0x50F110
+        {"_func_1E7", 0x1E7}, // 0x50F1B0
+        {"_func_1E8", 0x1E8}, // 0x50F270
+        {"_func_1E9", 0x1E9}, // 0x4EE760
+        {"_func_1EA", 0x1EA}, // 0x4EE920
+        {"_func_1EB", 0x1EB}, // 0x4EEB40
+        {"_func_1EC", 0x1EC}, // 0x4EEF70
+        {"_func_1ED", 0x1ED}, // 0x4EF9E0
+        {"_func_1EE", 0x1EE}, // 0x4EFB10
+        {"_func_1EF", 0x1EF}, // 0x4F0080
+        {"_func_1F0", 0x1F0}, // 0x4F0550
+        {"getent", 0x1F1}, // 0x6CFCC0
+        {"getnodearray", 0x1F2}, // 0x6CFDB0
+        {"getallnodes", 0x1F3}, // 0x6CFC50
+        {"_func_1F4", 0x1F4}, // 0x6D9D40
+        {"_func_1F5", 0x1F5}, // 0x6DA090
+        {"spawnvehicle", 0x1F6}, // 0x6DA130
+        {"vehicle_getarray", 0x1F7}, // 0x6D9D80
+        {"pow", 0x1F8}, // 0x4F79C0
+        {"_func_1F9", 0x1F9}, // 0x4F6950
+        {"getsquadassaultelo", 0x1FA}, // 0x501980
+        {"_func_1FB", 0x1FB}, // 0x501C90
+        {"_func_20B", 0x20B}, // 0x525490
+        {"_func_20C", 0x20C}, // 0x5250A0
+        {"soundexists", 0x215}, // 0x506D20
+        {"_func_21C", 0x21C}, // 0x524DA0
+        {"disconnectnodepair", 0x21D}, // 0x4E5D30
+        {"connectnodepair", 0x21E}, // 0x4E6160
+        {"_func_21F", 0x21F}, // 0x505420
+        {"_func_222", 0x222}, // 0x5035C0
+        {"_func_224", 0x224}, // 0x5CD370
+        {"_func_225", 0x225}, // 0x5CD5B0
+        {"_func_226", 0x226}, // 0x5CD4F0
+        {"_func_227", 0x227}, // 0x5CD490
+        {"_func_228", 0x228}, // 0x5CD070
+        {"_func_229", 0x229}, // 0x5CD0F0
+        {"_func_22A", 0x22A}, // 0x5CD0A0
+        {"_func_22B", 0x22B}, // 0x5CD130
+        {"distance2dsquared", 0x22C}, // 0x4E2F40
+        {"getangledelta3d", 0x22D}, // 0x4E1EB0
+        {"_func_22E", 0x22E}, // 0x4E8A30
+        {"stoploopsound", 0x22F}, // 0x4E8D40
+        {"_func_230", 0x230}, // 0x4E9240
+        {"trajectorycalculateexitangle", 0x231}, // 0x4E9570
+        {"_func_232", 0x232}, // 0x4E97C0
+        {"trajectorycomputedeltaheightattime", 0x233}, // 0x4E9F80
+        {"getteamradar", 0x234}, // 0x4EA100
+        {"_func_235", 0x235}, // 0x4ECA00
+        {"ispointinvolume", 0x236}, // 0x4E2A30
+        {"getplaylistversion", 0x237}, // 0x5024C0
+        {"getbuildnumber", 0x238}, // 0x5024A0
+        {"isusingmatchrulesdata", 0x239}, // 0x5023C0
+        {"_func_23B", 0x23B}, // 0x4EBC50
+        {"_func_23D", 0x23D}, // 0x4EBE50
+        {"_func_23E", 0x23E}, // 0x4EB140
+        {"_func_23F", 0x23F}, // 0x508500
+        {"_func_240", 0x240}, // 0x500C90
+        {"isteamradarblocked", 0x241}, // 0x4EA700
+        {"issquadsmode", 0x242}, // 0x4EAAD0
+        {"_func_244", 0x244}, // 0x4F3620
+        {"_func_245", 0x245}, // 0x4F3920
+        {"_func_246", 0x246}, // 0x4F14E0
+        {"_func_247", 0x247}, // 0x4F14F0
+        {"_func_248", 0x248}, // 0x4F1580
+        {"_func_249", 0x249}, // 0x4F1640
+        {"_func_24A", 0x24A}, // 0x4F1820
+        {"_func_24C", 0x24C}, // 0x4EB420
+        {"_func_251", 0x251}, // 0x4FF230
+        {"_func_252", 0x252}, // 0x4FF350
+        {"_func_253", 0x253}, // 0x4E6B60
+        {"_func_254", 0x254}, // 0x4F97C0
+        {"_func_255", 0x255}, // 0x4E48A0
+        {"_func_256", 0x256}, // 0x502AD0
+        {"_func_257", 0x257}, // 0x4EBBA0
+        {"_func_258", 0x258}, // 0x4EBBB0
+        {"_func_259", 0x259}, // 0x4EBC20
+        {"_func_25A", 0x25A}, // 0x4E60E0
+        {"_func_25B", 0x25B}, // 0x4E6250
+        {"_func_25C", 0x25C}, // 0x4E6800
+        {"_func_25E", 0x25E}, // 0x504A20
+        {"_func_25F", 0x25F}, // 0x4F2990
+        {"addbot", 0x260}, // 0x4F29C0
+        {"getcsplinecount", 0x261}, // 0x4EC960
+        {"getcsplinepointcount", 0x262}, // 0x4ECA10
+        {"getcsplinelength", 0x263}, // 0x4ECD80
+        {"getcsplinepointid", 0x264}, // 0x4ECF30
+        {"getcsplinepointlabel", 0x265}, // 0x4ED440
+        {"getcsplinepointtension", 0x266}, // 0x4ED6D0
+        {"getcsplinepointcorridordims", 0x267}, // 0x4ED9E0
+        {"getcsplinepointtangent", 0x268}, // 0x4EDCE0
+        {"_func_269", 0x269}, // 0x4EDEE0
+        {"getcsplinepointdisttonextpoint", 0x26A}, // 0x4EE210
+        {"calccsplinetangent", 0x26B}, // 0x4EE530
+        {"calccsplinecorridor", 0x26C}, // 0x4EE850
+        {"_func_26D", 0x26D}, // 0x4EECB0
+        {"_func_26E", 0x26E}, // 0x4EEF30
+        {"assertexcmd", 0x26F}, // 0x4EEF50
+        {"_func_271", 0x271}, // 0x4EF3C0
+        {"_func_272", 0x272}, // 0x4EF3F0
+        {"_func_273", 0x273}, // 0x4EF550
+        {"_func_274", 0x274}, // 0x4EF670
+        {"_func_275", 0x275}, // 0x4EF780
+        {"_func_276", 0x276}, // 0x4EFA50
+        {"_func_278", 0x278}, // 0x505B30
+        {"_func_279", 0x279}, // 0x505BC0
+        {"_func_27A", 0x27A}, // 0x4EFAF0
+        {"_func_27B", 0x27B}, // 0x4EFB00
+        {"_func_27C", 0x27C}, // 0x4EFC90
+        {"_func_27D", 0x27D}, // 0x4EFD30
+        {"_func_283", 0x283}, // 0x4EC710
+        {"_func_284", 0x284}, // 0x4C2560
+        {"_func_285", 0x285}, // 0x4EDF90
+        {"_func_286", 0x286}, // 0x4EE020
+        {"_func_287", 0x287}, // 0x4EE0A0
+        {"_func_288", 0x288}, // 0x4EBC80
+        {"playsoundasmaster", 0x289}, // 0x4EE0B0
+        {"_func_28F", 0x28F}, // 0x4EBCE0
+        {"_func_292", 0x292}, // 0x4F08C0
+        {"_func_293", 0x293}, // 0x4E82E0
+        {"_func_294", 0x294}, // 0x4E8A60
+        {"_func_299", 0x299}, // 0x4F6E70
+        {"_func_29A", 0x29A}, // 0x4F6EC0
+        {"_func_29B", 0x29B}, // 0x5051E0
+        {"_func_29C", 0x29C}, // 0x4F0D80
+        {"_func_29D", 0x29D}, // 0x4F49C0
+        {"_func_29E", 0x29E}, // 0x4EEA20
+        {"_func_29F", 0x29F}, // 0x4EF270
+        {"_func_2A0", 0x2A0}, // 0x4EF680
+        {"_func_2A1", 0x2A1}, // 0x502500
+        {"_func_2A2", 0x2A2}, // 0x4E8D30
+        {"_func_2A3", 0x2A3}, // 0x4E2730
+        {"isvalidgametype", 0x2A4}, // 0x4ED4D0
+        {"_func_2A5", 0x2A5}, // 0x4F2440
+        {"_func_2A6", 0x2A6}, // 0x4F27B0
+        {"_func_2A9", 0x2A9}, // 0x4F03B0
+        {"_func_2AA", 0x2AA}, // 0x502710
+        {"_func_2AB", 0x2AB}, // 0x4F3A00
+        {"_func_2AC", 0x2AC}, // 0x4E8C40
+        {"_func_2AD", 0x2AD}, // 0x4F67C0
+        {"_func_2AE", 0x2AE}, // 0x4F6F00
+        {"_func_2AF", 0x2AF}, // 0x4F6EB0
+        {"_func_2B1", 0x2B1}, // 0x505BD0
+        {"_func_2B2", 0x2B2}, // 0x4EE110
+        {"_func_2B3", 0x2B3}, // 0x4F7450
+        {"getuavstrengthlevelshowenemyfastsweep", 0x2B4}, // 0x4F6FF0
+        {"_func_2B5", 0x2B5}, // 0x4F72A0
+        {"_func_2B6", 0x2B6}, // 0x4F7390
+        {"_func_2B7", 0x2B7}, // 0x4F7490
+        {"_func_2BC", 0x2BC}, // 0x4E8130
+        {"_func_2BD", 0x2BD}, // 0x4E87E0
+        {"getteamradarstrength", 0x2BE}, // 0x4EA560
+        {"_func_2BF", 0x2BF}, // 0x508310
+        {"_func_2C4", 0x2C4}, // 0x4F5C30
+        {"_func_2C5", 0x2C5}, // 0x508340
+        {"_func_2C6", 0x2C6}, // 0x4EB9E0
+        {"_func_2C8", 0x2C8}, // 0x4F7590
+        {"_func_2C9", 0x2C9}, // 0x4F7610
+        {"abs", 0x2CA}, // 0x4EA680
+        {"_func_2CB", 0x2CB}, // 0x4F2000
+        {"_func_2CC", 0x2CC}, // 0x4F2160
+        {"setleveldopplerpreset", 0x2CD}, // 0x508550
+        {"_func_2D6", 0x2D6}, // 0x5070C0
+        {"_func_2DC", 0x2DC}, // 0x507B60
+        {"_func_2DD", 0x2DD}, // 0x4F6CA0
+        {"_func_2DF", 0x2DF}, // 0x4F6F70
+        {"_func_2E0", 0x2E0}, // 0x502A60
+        {"_func_2E2", 0x2E2}, // 0x5085B0
+        {"isdedicatedserver", 0x2E7}, // 0x4F8070
+        {"_func_2E8", 0x2E8}, // 0x4EAC20
+        {"_func_2EA", 0x2EA}, // 0x4E6980
+        {"_func_2EB", 0x2EB}, // 0x4E8150
+        {"_func_2EC", 0x2EC}, // 0x4E8880
+        {"getarchivetime", 0x2ED}, // 0x508430
+        {"_func_2EE", 0x2EE}, // 0x4E9010
+        {"_func_2EF", 0x2EF}, // 0x4E92D0
+        {"_func_2F0", 0x2F0}, // 0x503950
+        {"_func_2F1", 0x2F1}, // 0x503C40
+        {"_func_2F2", 0x2F2}, // 0x4F1FB0
+        {"getpsoffsettime", 0x2F6}, // 0x4F6010
+        {"_func_2F7", 0x2F7}, // 0x4F6020
+        {"_func_2F8", 0x2F8}, // 0x4F60C0
+        {"gettime", 0x2F9}, // 0x4F6190
+        {"ishairrunning", 0x2FA}, // 0x4F6320
+        {"getentchannelname", 0x2FB}, // 0x4F63E0
+        {"_func_2FC", 0x2FC}, // 0x4F6400
+        {"getuavstrengthmin", 0x2FD}, // 0x4F64D0
+        {"getbuildversion", 0x2FE}, // 0x4F67B0
+        {"_func_2FF", 0x2FF}, // 0x4F6810
+        {"getuavstrengthmax", 0x300}, // 0x4F69A0
+        {"_func_301", 0x301}, // 0x4F48A0
+        {"_func_302", 0x302}, // 0x4E3AD0
+        {"_func_303", 0x303}, // 0x4E3B30
+        {"_func_304", 0x304}, // 0x4F08D0
+        {"_func_305", 0x305}, // 0x4ECC50
+        {"_func_306", 0x306}, // 0x4ECE10
+        {"_func_307", 0x307}, // 0x4ECFC0
+        {"_func_309", 0x309}, // 0x4F8160
+        {"_func_30B", 0x30B}, // 0x4EF3B0
+        {"_func_30D", 0x30D}, // 0x4F02E0
+        {"tablelookup", 0x30E}, // 0x4F1970
+        {"_func_312", 0x312}, // 0x4E3E80
+        {"lookupsoundlength", 0x313}, // 0x4ED7A0
+        {"_func_314", 0x314}, // 0x4AF3F0
+        {"startservermigration", 0x315}, // 0x4ECC10
+        {"_func_316", 0x316}, // 0x4AF2D0
+        {"_func_318", 0x318}, // 0x4F4300
+        {"_func_319", 0x319}, // 0x4EA930
+        {"_func_31A", 0x31A}, // 0x503C50
+        {"_func_31B", 0x31B}, // 0x503D60
+        {"_func_31C", 0x31C}, // 0x503E40
+        {"_func_31D", 0x31D}, // 0x503F00
+        {"getmaxagents", 0x31E}, // 0x5024E0
+        {"_func_31F", 0x31F}, // 0x4F9110
     };
 
     std::unordered_map<std::string, unsigned> method_map =
     {
-        {"thermaldrawenable", 0x8000},
-        {"playerforcedeathanim", 0x8001},
-        {"sub_4e2590", 0x801A},
-        {"attach", 0x801D},
-        {"sub_504220", 0x801E},
-        {"sub_504350", 0x801F},
-        {"sub_5044c0", 0x8020},
-        {"sub_504a80", 0x8021},
-        {"sub_504ae0", 0x8022},
-        {"sub_504e00", 0x8023},
-        {"sub_504e40", 0x8024},
-        {"nullsub_346", 0x8025},
-        {"nullsub_368", 0x8026},
-        {"setcoopplayerdatareservedint", 0x8028},
-        {"entitywillneverchange", 0x8029},
-        {"detach", 0x802A},
-        {"detachall", 0x802B},
-        {"getattachsize", 0x802C},
-        {"getattachmodelname", 0x802D},
-        {"getattachtagname", 0x802E},
-        {"getrestedtime", 0x802F},
-        {"sub_505940", 0x8030},
-        {"botgetclosestnavigablepoint", 0x8031},
-        {"sub_506e70", 0x8032},
-        {"sub_506fa0", 0x8033},
-        {"sub_524b80", 0x8034},
-        {"gethighestnodestance", 0x8035},
-        {"doesnodeallowstance", 0x8036},
-        {"sub_524a90", 0x8037},
-        {"sub_5019e0", 0x8038},
-        {"sub_501b20", 0x8039},
-        {"sub_501fd0", 0x803A},
-        {"sub_503f30", 0x803B},
-        {"sub_503f50", 0x803C},
-        {"setminimap", 0x803D},
-        {"sub_507170", 0x803E},
-        {"sub_5071d0", 0x803F},
-        {"playsoundtoplayer", 0x8040},
-        {"sub_507380", 0x8041},
-        {"sub_507410", 0x8042},
-        {"sub_508710", 0x8043},
-        {"sub_508750", 0x8044},
-        {"sub_4f9b00", 0x8045},
-        {"sub_4f9cc0", 0x8046},
-        {"sub_4f9f60", 0x8047},
-        {"enablemissileboosting", 0x8048},
-        {"setplayerdatainternal", 0x8049},
-        {"sub_4e2050", 0x804A},
-        {"sub_503b60", 0x804B},
-        {"sub_503b80", 0x804C},
-        {"getattachignorecollision", 0x804D},
-        {"hidepart", 0x804E},
-        {"hidepartallinstances", 0x804F},
-        {"hideallparts", 0x8050},
-        {"showpart", 0x8051},
-        {"showallparts", 0x8052},
-        {"linkto", 0x8053},
-        {"linktoblendtotag", 0x8054},
-        {"unlink", 0x8055},
-        {"setnormalhealth", 0x8056},
-        {"dodamage", 0x8057},
-        {"kill", 0x8058},
-        {"show", 0x8059},
-        {"hide", 0x805A},
-        {"sub_504dd0", 0x805B},
-        {"sub_504ef0", 0x805C},
-        {"sub_504f80", 0x805D},
-        {"disconnectpaths", 0x805E},
-        {"connectpaths", 0x805F},
-        {"disconnectnode", 0x8060},
-        {"connectnode", 0x8061},
-        {"sub_507450", 0x8062},
-        {"sub_507510", 0x8063},
-        {"sub_507530", 0x8064},
-        {"sub_507550", 0x8065},
-        {"sub_4ff730", 0x8066},
-        {"sub_4ff9a0", 0x8067},
-        {"sub_500460", 0x8068},
-        {"sub_5012b0", 0x8069},
-        {"sub_501320", 0x806A},
-        {"sub_505270", 0x806C},
-        {"sub_505620", 0x806D},
-        {"sub_5057f0", 0x806E},
-        {"islinked", 0x806F},
-        {"enablelinkto", 0x8070},
-        {"disableforcethirdpersonwhenfollowing", 0x8071},
-        {"sub_4e4870", 0x8073},
-        {"sub_4e4730", 0x8074},
-        {"sub_4e4c40", 0x8075},
-        {"sub_4e4aa0", 0x8076},
-        {"sub_4ea790", 0x8077},
-        {"nullsub_302", 0x8078},
-        {"nullsub_367", 0x8079},
-        {"nullsub_533", 0x807A},
-        {"sub_503ad0", 0x807B},
-        {"playloopsound", 0x807C},
-        {"sub_503c10", 0x807D},
-        {"sub_503c90", 0x807E},
-        {"sub_503d20", 0x807F},
-        {"sub_503da0", 0x8080},
-        {"botsetflag", 0x8081},
-        {"sub_5040a0", 0x8082},
-        {"playerlinkto", 0x8083},
-        {"playerlinktodelta", 0x8084},
-        {"playerlinkweaponviewtodelta", 0x8085},
-        {"playerlinktoabsolute", 0x8086},
-        {"playerlinktoblend", 0x8087},
-        {"playerlinkedoffsetenable", 0x8088},
-        {"setwaypointedgestyle_secondaryarrow", 0x8089},
-        {"setwaypointiconoffscreenonly", 0x808A},
-        {"fadeovertime", 0x808B},
-        {"scaleovertime", 0x808C},
-        {"moveovertime", 0x808D},
-        {"reset", 0x808E},
-        {"destroy", 0x808F},
-        {"setpulsefx", 0x8090},
-        {"setplayernamestring", 0x8091},
-        {"changefontscaleovertime", 0x8092},
-        {"startignoringspotlight", 0x8093},
-        {"stopignoringspotlight", 0x8094},
-        {"dontcastshadows", 0x8095},
-        {"castshadows", 0x8096},
-        {"setstablemissile", 0x8097},
-        {"playersetgroundreferenceent", 0x8098},
-        {"dontinterpolate", 0x8099},
-        {"dospawn", 0x809A},
-        {"stalingradspawn", 0x809B},
-        {"getorigin", 0x809C},
-        {"getcentroid", 0x809D},
-        {"getshootatpos", 0x809E},
-        {"getdebugeye", 0x809F},
-        {"useby", 0x80A0},
-        {"playsound", 0x80A1},
-        {"playerlinkedoffsetdisable", 0x80A6},
-        {"playerlinkedsetviewznear", 0x80A7},
-        {"playerlinkedsetusebaseangleforviewclamp", 0x80A8},
-        {"sub_4e6410", 0x80A9},
-        {"sub_4e6fa0", 0x80AA},
-        {"sub_4e7db0", 0x80AB},
-        {"sub_4e8760", 0x80AC},
-        {"setplayernamestring", 0x80AD},
-        {"sub_4ea8d0", 0x80AE},
-        {"geteye", 0x80AF},
-        {"istouching", 0x80B0},
-        {"stoploopsound", 0x80B1},
-        {"stopsounds", 0x80B2},
-        {"playrumbleonentity", 0x80B3},
-        {"playrumblelooponentity", 0x80B4},
-        {"sub_4ebc60", 0x80B5},
-        {"sub_4ec140", 0x80B6},
-        {"delete", 0x80B7},
-        {"setmodel", 0x80B8},
-        {"laseraltviewon", 0x80B9},
-        {"laseraltviewoff", 0x80BA},
-        {"thermalvisionon", 0x80BD},
-        {"thermalvisionoff", 0x80BE},
-        {"laseraltviewon", 0x80BF},
-        {"laseraltviewoff", 0x80C0},
-        {"setcontents", 0x80C5},
-        {"makeusable", 0x80C6},
-        {"makeunusable", 0x80C7},
-        {"sub_4e3270", 0x80C8},
-        {"sub_4e3800", 0x80C9},
-        {"sub_4b9f70", 0x80CA},
-        {"sub_4b7190", 0x80CB},
-        {"sub_6d74c0", 0x80CC},
-        {"sub_6d4df0", 0x80CD},
-        {"sub_6d7320", 0x80CE},
-        {"sub_6d73b0", 0x80CF},
-        {"triggerfx", 0x80D0},
-        {"settext", 0x80D1},
-        {"clearalltextafterhudelem", 0x80D2},
-        {"setshader", 0x80D3},
-        {"settargetent", 0x80D4},
-        {"cleartargetent", 0x80D5},
-        {"settimer", 0x80D6},
-        {"settimerup", 0x80D7},
-        {"settimerstatic", 0x80D8},
-        {"settenthstimer", 0x80D9},
-        {"settenthstimerup", 0x80DA},
-        {"settenthstimerstatic", 0x80DB},
-        {"setclock", 0x80DC},
-        {"setclockup", 0x80DD},
-        {"setvalue", 0x80DE},
-        {"setwaypoint", 0x80DF},
-        {"setwaypointedgestyle_rotatingicon", 0x80E0},
-        {"setcursorhint", 0x80E1},
-        {"sethintstring", 0x80E2},
-        {"forceusehinton", 0x80E4},
-        {"forceusehintoff", 0x80E5},
-        {"makesoft", 0x80E6},
-        {"makehard", 0x80E7},
-        {"nullsub_297", 0x80E8},
-        {"startfiring", 0x80E9},
-        {"stopfiring", 0x80EA},
-        {"isfiringturret", 0x80EB},
-        {"startbarrelspin", 0x80EC},
-        {"stopbarrelspin", 0x80ED},
-        {"getbarrelspinrate", 0x80EE},
-        {"shootturret", 0x80F1},
-        {"getturretowner", 0x80F2},
-        {"doanimrelative", 0x80F3},
-        {"sub_4bbdc0", 0x80F4},
-        {"setclipmode", 0x80F5},
-        {"setgoalradius", 0x80F6},
-        {"setmaxturnspeed", 0x80F7},
-        {"hasloadedcustomizationplayerview", 0x80F8},
-        {"sub_4bbfb0", 0x80F9},
-        {"sub_4bc320", 0x80FA},
-        {"sub_4bc560", 0x80FB},
-        {"sub_4bc5c0", 0x80FC},
-        {"sub_4bc620", 0x80FD},
-        {"sub_4bc6b0", 0x80FE},
-        {"sub_4bc760", 0x80FF},
-        {"nullsub_294", 0x8100},
-        {"sub_4bc0c0", 0x8101},
-        {"sub_4bc110", 0x8102},
-        {"sub_4bc1e0", 0x8103},
-        {"sub_4bc270", 0x8104},
-        {"sub_4b4880", 0x8105},
-        {"sub_4b4ac0", 0x8106},
-        {"sub_4bc160", 0x8107},
-        {"getxuid", 0x8108},
-        {"sub_4b3be0", 0x8109},
-        {"jumpbuttonpressed", 0x810A},
-        {"sub_4b9ef0", 0x810B},
-        {"sub_4e42f0", 0x810C},
-        {"sub_4e47e0", 0x810D},
-        {"isfiringvehicleturret", 0x810E},
-        {"sub_4e4e20", 0x810F},
-        {"snaptotargetentity", 0x8110},
-        {"sub_4e5b60", 0x8111},
-        {"getturrettarget", 0x8112},
-        {"sub_4e69a0", 0x8113},
-        {"sub_4e6f40", 0x8114},
-        {"sub_4e7220", 0x8115},
-        {"sub_4df260", 0x8116},
-        {"sub_4df280", 0x8117},
-        {"sub_4df2a0", 0x8118},
-        {"sub_4df2c0", 0x8119},
-        {"sub_4df2e0", 0x811A},
-        {"sub_4df300", 0x811B},
-        {"sub_4df310", 0x811C},
-        {"sub_4df330", 0x811D},
-        {"sub_4df350", 0x811E},
-        {"sub_4df430", 0x811F},
-        {"sub_4df4b0", 0x8120},
-        {"allowstand", 0x8121},
-        {"allowcrouch", 0x8122},
-        {"allowprone", 0x8123},
-        {"allowlean", 0x8124},
-        {"allowswim", 0x8125},
-        {"setocclusion", 0x8126},
-        {"deactivateocclusion", 0x8128},
-        {"deactivateallocclusion", 0x8129},
-        {"isocclusionenabled", 0x812A},
-        {"setreverbfromtable", 0x812F},
-        {"setvolmodfromtable", 0x8130},
-        {"sub_4bb7d0", 0x8131},
-        {"sub_4bb930", 0x8132},
-        {"sub_4bb240", 0x8133},
-        {"sub_4bb9e0", 0x8134},
-        {"sub_4ba2c0", 0x8135},
-        {"sub_4b20c0", 0x8136},
-        {"sub_4b6af0", 0x8137},
-        {"sub_4bbc20", 0x8138},
-        {"thermalvisionoff", 0x8139},
-        {"sub_4b3fc0", 0x813A},
-        {"sub_4bbc90", 0x813B},
-        {"setconvergencetime", 0x813C},
-        {"setconvergenceheightpercent", 0x813D},
-        {"sub_4e8160", 0x813E},
-        {"sub_4e8710", 0x813F},
-        {"sub_4e87f0", 0x8140},
-        {"sub_4e8bf0", 0x8141},
-        {"sub_4e8ce0", 0x8142},
-        {"makeentitysentient", 0x8143},
-        {"sub_531290", 0x8144},
-        {"sub_5313c0", 0x8145},
-        {"sub_531420", 0x8146},
-        {"sub_531500", 0x8147},
-        {"sub_4dfa90", 0x8148},
-        {"setdvarifuninitialized", 0x814A},
-        {"sub_4df9c0", 0x814B},
-        {"clearanimatedtrajectory", 0x814C},
-        {"sub_4dfb90", 0x814D},
-        {"sub_4dfbb0", 0x814E},
-        {"sub_4dfbc0", 0x814F},
-        {"sub_4dfbe0", 0x8150},
-        {"sub_4dfc00", 0x8151},
-        {"sub_4dfc20", 0x8152},
-        {"sub_4dfc30", 0x8153},
-        {"sub_4dfc50", 0x8154},
-        {"sub_4df0c0", 0x8155},
-        {"sub_4df0e0", 0x8156},
-        {"sightconetrace", 0x8157},
-        {"sub_4df110", 0x8158},
-        {"getclanwarsbonusforcurrentplaylist", 0x8159},
-        {"sub_4df1a0", 0x815A},
-        {"isusingonlinedataoffline", 0x815B},
-        {"sub_4df230", 0x815C},
-        {"sub_4df250", 0x815D},
-        {"nullsub_742", 0x815E},
-        {"settoparc", 0x815F},
-        {"sub_4e9f20", 0x8160},
-        {"setrightarc", 0x8161},
-        {"sub_4ea6a0", 0x8162},
-        {"setautorotationdelay", 0x8163},
-        {"linkwaypointtotargetwithoffset", 0x8164},
-        {"restoredefaultdroppitch", 0x8165},
-        {"sub_4eb280", 0x8166},
-        {"sub_49aa00", 0x8167},
-        {"setentityowner", 0x8168},
-        {"sub_49ab00", 0x8169},
-        {"sub_49ac00", 0x816A},
-        {"sub_49ad20", 0x816B},
-        {"_enableweapons", 0x816C},
-        {"_playerrecoilscaleoff", 0x816D},
-        {"sub_49af30", 0x816E},
-        {"_disableweaponpickup", 0x816F},
-        {"isthrowinggrenade", 0x8170},
-        {"getenemyinfo", 0x8171},
-        {"sub_49b190", 0x8172},
-        {"sub_49b2f0", 0x8173},
-        {"sub_49b520", 0x8174},
-        {"_freezecontrols", 0x8175},
-        {"sub_49b700", 0x8176},
-        {"sub_49b7c0", 0x8177},
-        {"setrank", 0x8178},
-        {"sub_49b980", 0x8179},
-        {"sub_49bb70", 0x817A},
-        {"sub_49bc00", 0x817B},
-        {"sub_49bc70", 0x817C},
-        {"sub_49be50", 0x817D},
-        {"iclientprintln", 0x817E},
-        {"sub_49bfb0", 0x817F},
-        {"sub_49c0d0", 0x8180},
-        {"getenemysqdist", 0x8181},
-        {"getclosestenemysqdist", 0x8182},
-        {"setthreatbiasgroup", 0x8183},
-        {"getthreatbiasgroup", 0x8184},
-        {"turretfireenable", 0x8185},
-        {"setturretmodechangewait", 0x8186},
-        {"usetriggerrequirelookat", 0x8187},
-        {"getstance", 0x8188},
-        {"setstance", 0x8189},
-        {"itemweaponsetammo", 0x818A},
-        {"getammocount", 0x818B},
-        {"gettagorigin", 0x818C},
-        {"gettagangles", 0x818D},
-        {"shellshock", 0x818E},
-        {"stunplayer", 0x818F},
-        {"stopshellshock", 0x8190},
-        {"fadeoutshellshock", 0x8191},
-        {"setdepthoffield", 0x8192},
-        {"setviewmodeldepthoffield", 0x8193},
-        {"setmotionblurmovescale", 0x8194},
-        {"sub_498f10", 0x8195},
-        {"sub_498f60", 0x8196},
-        {"sub_498fd0", 0x8197},
-        {"sub_499010", 0x8198},
-        {"setphysicsmode", 0x8199},
-        {"sub_499110", 0x819A},
-        {"sub_4992e0", 0x819B},
-        {"sub_499640", 0x819C},
-        {"sub_499740", 0x819D},
-        {"sub_499790", 0x819E},
-        {"sub_4997e0", 0x819F},
-        {"sub_499840", 0x81A0},
-        {"sub_499890", 0x81A1},
-        {"sub_499960", 0x81A6},
-        {"sub_499a10", 0x81A7},
-        {"sub_499a60", 0x81A8},
-        {"sub_499b70", 0x81A9},
-        {"sub_499be0", 0x81AA},
-        {"getnegotiationnextnode", 0x81AB},
-        {"sub_499cd0", 0x81AC},
-        {"sub_499d70", 0x81AD},
-        {"sub_499e60", 0x81AE},
-        {"sub_49a050", 0x81AF},
-        {"sub_498850", 0x81B0},
-        {"sub_49a1b0", 0x81B1},
-        {"setgoalpos", 0x81B2},
-        {"setgoalentity", 0x81B3},
-        {"setgoalvolume", 0x81B4},
-        {"setgoalvolumeauto", 0x81B5},
-        {"getgoalvolume", 0x81B6},
-        {"cleargoalvolume", 0x81B7},
-        {"setfixednodesafevolume", 0x81B8},
-        {"setmotionblurturnscale", 0x81B9},
-        {"setmotionblurzoomscale", 0x81BA},
-        {"viewkick", 0x81BB},
-        {"sub_4ecfe0", 0x81BC},
-        {"getentitynumber", 0x81BD},
-        {"sub_4ebbc0", 0x81BE},
-        {"enablegrenadetouchdamage", 0x81BF},
-        {"disablegrenadetouchdamage", 0x81C0},
-        {"disableaimassist", 0x81C1},
-        {"sub_49c1a0", 0x81C2},
-        {"sub_49c220", 0x81C3},
-        {"sub_49c6e0", 0x81C4},
-        {"sub_49c7d0", 0x81C5},
-        {"sub_49c930", 0x81C6},
-        {"sub_49cce0", 0x81C7},
-        {"sub_49ce30", 0x81C8},
-        {"sub_49cf20", 0x81C9},
-        {"sub_49cfa0", 0x81CA},
-        {"sub_49d060", 0x81CB},
-        {"setcorpsefalling", 0x81CC},
-        {"sub_531340", 0x81CD},
-        {"dropweapon", 0x81CE},
-        {"sub_497fe0", 0x81CF},
-        {"sub_498150", 0x81D0},
-        {"sub_498270", 0x81D1},
-        {"sub_498280", 0x81D2},
-        {"sub_4982a0", 0x81D3},
-        {"sub_4982c0", 0x81D4},
-        {"sub_498320", 0x81D5},
-        {"sub_498390", 0x81D6},
-        {"sub_498460", 0x81D7},
-        {"sub_498550", 0x81D8},
-        {"sub_498590", 0x81D9},
-        {"_isreloading", 0x81DA},
-        {"sub_498610", 0x81DB},
-        {"sub_4986c0", 0x81DC},
-        {"sub_498d40", 0x81DD},
-        {"sub_498e40", 0x81DE},
-        {"sub_498a50", 0x81DF},
-        {"sub_4eced0", 0x81E0},
-        {"sub_4f7530", 0x81E1},
-        {"sub_4f8080", 0x81E2},
-        {"makeportableradar", 0x81E3},
-        {"sub_4f8af0", 0x81E4},
-        {"sub_4ec260", 0x81E5},
-        {"sub_4ec580", 0x81E6},
-        {"sub_4ec7b0", 0x81E7},
-        {"missile_setflightmodedirect", 0x81E8},
-        {"missile_setflightmodetop", 0x81E9},
-        {"sub_4f8df0", 0x81EA},
-        {"sub_4f9020", 0x81EB},
-        {"getlightintensity", 0x81EC},
-        {"sub_4f9260", 0x81ED},
-        {"startfiring", 0x81EE},
-        {"stopshellshock", 0x81EF},
-        {"isragdoll", 0x81F0},
-        {"setmovespeedscale", 0x81F1},
-        {"cameralinkto", 0x81F2},
-        {"cameraunlink", 0x81F3},
-        {"sub_49a010", 0x81F4},
-        {"sub_49a240", 0x81F5},
-        {"sub_49a280", 0x81F6},
-        {"sub_49a300", 0x81F7},
-        {"sub_49a5e0", 0x81F8},
-        {"sub_49a730", 0x81F9},
-        {"sub_49a980", 0x81FA},
-        {"sub_49aab0", 0x81FB},
-        {"botgetscriptgoalnode", 0x81FC},
-        {"sub_49ace0", 0x81FD},
-        {"sub_49ad80", 0x81FE},
-        {"sub_49ae10", 0x81FF},
-        {"sub_49aea0", 0x8200},
-        {"sub_49afb0", 0x8201},
-        {"sub_49b070", 0x8202},
-        {"sub_49b120", 0x8203},
-        {"sub_49b420", 0x8204},
-        {"sub_49b480", 0x8205},
-        {"sub_49b280", 0x8206},
-        {"sub_49b4e0", 0x8207},
-        {"sub_49b5d0", 0x8208},
-        {"sub_49b760", 0x8209},
-        {"sub_49b810", 0x820A},
-        {"sub_49b9f0", 0x820B},
-        {"sub_49bd40", 0x820C},
-        {"sub_49beb0", 0x820D},
-        {"sub_49c020", 0x820E},
-        {"sub_49c2f0", 0x820F},
-        {"sub_49c660", 0x8210},
-        {"sub_4e3ff0", 0x8211},
-        {"sub_4e4380", 0x8212},
-        {"sub_501020", 0x8214},
-        {"sub_4e6720", 0x821C},
-        {"sub_4e6aa0", 0x821D},
-        {"sub_4e7320", 0x821E},
-        {"getlocalplayerprofiledata", 0x821F},
-        {"setlocalplayerprofiledata", 0x8220},
-        {"sub_4eaae0", 0x8221},
-        {"sub_4eabd0", 0x8222},
-        {"sub_4ead70", 0x8223},
-        {"sub_4eaf90", 0x8224},
-        {"sub_4f05c0", 0x8225},
-        {"sub_4f1650", 0x8226},
-        {"sub_4f1b20", 0x8227},
-        {"transfermarkstonewscriptmodel", 0x8228},
-        {"setwatersheeting", 0x8229},
-        {"setweaponhudiconoverride", 0x822C},
-        {"getweaponhudiconoverride", 0x822D},
-        {"setempjammed", 0x822E},
-        {"playersetexpfog", 0x822F},
-        {"sub_4ece50", 0x8230},
-        {"sub_4ed7c0", 0x8231},
-        {"isitemunlocked", 0x8232},
-        {"getplayerdata", 0x8233},
-        {"vehicleturretcontroloff", 0x8234},
-        {"isturretready", 0x8235},
-        {"vehicledriveto", 0x8236},
-        {"vehicle_dospawn", 0x8237},
-        {"isphysveh", 0x8238},
-        {"phys_crash", 0x8239},
-        {"sub_6d5f30", 0x823A},
-        {"phys_launch", 0x823B},
-        {"phys_disablecrashing", 0x823C},
-        {"phys_enablecrashing", 0x823D},
-        {"phys_setspeed", 0x823E},
-        {"phys_setconveyerbelt", 0x823F},
-        {"sub_4f9db0", 0x8241},
-        {"sub_4fa490", 0x8242},
-        {"sub_4e25e0", 0x8243},
-        {"sub_4e2a80", 0x8244},
-        {"sub_4e3020", 0x8245},
-        {"getclanidhigh", 0x8246},
-        {"sub_4ee9d0", 0x8247},
-        {"sub_4eed80", 0x8248},
-        {"sub_4eeee0", 0x8249},
-        {"sub_4ef360", 0x824A},
-        {"sub_4e7b30", 0x824B},
-        {"sub_4e8050", 0x824C},
-        {"sub_4e41b0", 0x824E},
-        {"_setwhizbyspreads", 0x824F},
-        {"_switchtoweaponimmediate", 0x8250},
-        {"sub_4fa070", 0x8251},
-        {"sub_4e22f0", 0x8252},
-        {"sub_4e2890", 0x8253},
-        {"trackerupdate", 0x8254},
-        {"botisrandomized", 0x8256},
-        {"sub_4b7a30", 0x825A},
-        {"setjitterparams", 0x825C},
-        {"sethoverparams", 0x825D},
-        {"joltbody", 0x825E},
-        {"freevehicle", 0x825F},
-        {"getwheelsurface", 0x8260},
-        {"getvehicleowner", 0x8261},
-        {"setvehiclelookattext", 0x8262},
-        {"setvehicleteam", 0x8263},
-        {"neargoalnotifydist", 0x8264},
-        {"setgoalpos", 0x8265},
-        {"setgoalyaw", 0x8266},
-        {"cleargoalyaw", 0x8267},
-        {"settargetyaw", 0x8268},
-        {"cleartargetyaw", 0x8269},
-        {"vehicle_helisetai", 0x826A},
-        {"setturrettargetvec", 0x826B},
-        {"setturrettargetent", 0x826C},
-        {"clearturrettargetent", 0x826D},
-        {"vehicle_canturrettargetpoint", 0x826E},
-        {"setlookatent", 0x826F},
-        {"clearlookatent", 0x8270},
-        {"setvehweapon", 0x8271},
-        {"fireweapon", 0x8272},
-        {"vehicleturretcontrolon", 0x8273},
-        {"physicslaunchserver", 0x8280},
-        {"physicslaunchserveritem", 0x8281},
-        {"clonebrushmodeltoscriptmodel", 0x8282},
-        {"vehicle_teleport", 0x8286},
-        {"attachpath", 0x8287},
-        {"getattachpos", 0x8288},
-        {"startpath", 0x8289},
-        {"setswitchnode", 0x828A},
-        {"setwaitspeed", 0x828B},
-        {"vehicle_setspeed", 0x828D},
-        {"vehicle_setspeedimmediate", 0x828E},
-        {"vehicle_rotateyaw", 0x828F},
-        {"vehicle_getspeed", 0x8290},
-        {"vehicle_getvelocity", 0x8291},
-        {"vehicle_getbodyvelocity", 0x8292},
-        {"vehicle_getsteering", 0x8293},
-        {"vehicle_getthrottle", 0x8294},
-        {"vehicle_turnengineoff", 0x8295},
-        {"vehicle_turnengineon", 0x8296},
-        {"_vehicledriveto", 0x8297},
-        {"getgoalspeedmph", 0x8298},
-        {"setacceleration", 0x8299},
-        {"setdeceleration", 0x829A},
-        {"resumespeed", 0x829B},
-        {"setyawspeed", 0x829C},
-        {"setyawspeedbyname", 0x829D},
-        {"setmaxpitchroll", 0x829E},
-        {"setairresitance", 0x829F},
-        {"setturningability", 0x82A0},
-        {"sub_4b45f0", 0x82A1},
-        {"weaponlocknoclearance", 0x82AD},
-        {"showhudsplash", 0x82AF},
-        {"setperk", 0x82B0},
-        {"hasperk", 0x82B1},
-        {"clearperks", 0x82B2},
-        {"unsetperk", 0x82B3},
-        {"noclip", 0x82B6},
-        {"ufo", 0x82B7},
-        {"moveto", 0x82B8},
-        {"movex", 0x82B9},
-        {"movey", 0x82BA},
-        {"movez", 0x82BB},
-        {"movegravity", 0x82BC},
-        {"moveslide", 0x82BD},
-        {"stopmoveslide", 0x82BE},
-        {"rotateto", 0x82BF},
-        {"rotatepitch", 0x82C0},
-        {"rotateyaw", 0x82C1},
-        {"rotateroll", 0x82C2},
-        {"addpitch", 0x82C3},
-        {"addyaw", 0x82C4},
-        {"addroll", 0x82C5},
-        {"vibrate", 0x82C6},
-        {"rotatevelocity", 0x82C7},
-        {"solid", 0x82C8},
-        {"notsolid", 0x82C9},
-        {"setcandamage", 0x82CA},
-        {"setcanradiusdamage", 0x82CB},
-        {"physicslaunchclient", 0x82CC},
-        {"disableweaponpickup", 0x82D5},
-        {"enableweaponpickup", 0x82D6},
-        {"issplitscreenplayer", 0x82D7},
-        {"getweaponslistoffhands", 0x82D9},
-        {"getweaponslistitems", 0x82DA},
-        {"getweaponslistexclusives", 0x82DB},
-        {"getweaponslist", 0x82DC},
-        {"canplayerplacesentry", 0x82DD},
-        {"canplayerplacetank", 0x82DE},
-        {"sub_4b6ff0", 0x82DF},
-        {"visionsetnakedforplayer", 0x82E0},
-        {"visionsetnightforplayer", 0x82E1},
-        {"visionsetmissilecamforplayer", 0x82E2},
-        {"visionsetthermalforplayer", 0x82E3},
-        {"setblurforplayer", 0x82E4},
-        {"getplayerweaponmodel", 0x82E5},
-        {"getplayerknifemodel", 0x82E6},
-        {"updateplayermodelwithweapons", 0x82E7},
-        {"notifyonplayercommand", 0x82E8},
-        {"canmantle", 0x82E9},
-        {"forcemantle", 0x82EA},
-        {"ismantling", 0x82EB},
-        {"playfx", 0x82EC},
-        {"player_recoilscaleon", 0x82ED},
-        {"player_recoilscaleoff", 0x82EE},
-        {"weaponlockstart", 0x82EF},
-        {"weaponlockfinalize", 0x82F0},
-        {"weaponlockfree", 0x82F1},
-        {"weaponlocktargettooclose", 0x82F2},
-        {"getviewmodel", 0x82F8},
-        {"fragbuttonpressed", 0x82F9},
-        {"secondaryoffhandbuttonpressed", 0x82FA},
-        {"getcurrentweaponclipammo", 0x82FB},
-        {"setvelocity", 0x82FC},
-        {"getplayerviewheight", 0x82FD},
-        {"getnormalizedmovement", 0x82FE},
-        {"playlocalsound", 0x82FF},
-        {"stoplocalsound", 0x8300},
-        {"setweaponammoclip", 0x8301},
-        {"setweaponammostock", 0x8302},
-        {"getweaponammoclip", 0x8303},
-        {"getweaponammostock", 0x8304},
-        {"hasreloadmultipleanim", 0x8305},
-        {"regweaponforfxremoval", 0x8306},
-        {"setclientdvar", 0x8307},
-        {"setclientdvars", 0x8308},
-        {"allowads", 0x830B},
-        {"allowjump", 0x830C},
-        {"sub_4b4a60", 0x830D},
-        {"seteyesonuplinkenabled", 0x830E},
-        {"allowsprint", 0x830F},
-        {"setspreadoverride", 0x8310},
-        {"resetspreadoverride", 0x8311},
-        {"setaimspreadmovementscale", 0x8312},
-        {"setactionslot", 0x8313},
-        {"setviewkickscale", 0x8314},
-        {"getviewkickscale", 0x8315},
-        {"getweaponslistall", 0x8316},
-        {"getweaponslistprimaries", 0x8317},
-        {"getnormalizedcameramovement", 0x8318},
-        {"giveweapon", 0x8319},
-        {"takeweapon", 0x831A},
-        {"takeallweapons", 0x831B},
-        {"getcurrentweapon", 0x831C},
-        {"getcurrentprimaryweapon", 0x831D},
-        {"getcurrentoffhand", 0x831E},
-        {"hasweapon", 0x831F},
-        {"switchtoweapon", 0x8320},
-        {"switchtoweaponimmediate", 0x8321},
-        {"sub_4b8580", 0x8322},
-        {"switchtooffhand", 0x8323},
-        {"setoffhandsecondaryclass", 0x8324},
-        {"getoffhandsecondaryclass", 0x8325},
-        {"beginlocationselection", 0x8326},
-        {"endlocationselection", 0x8327},
-        {"disableweapons", 0x8328},
-        {"enableweapons", 0x8329},
-        {"disableoffhandweapons", 0x832A},
-        {"enableoffhandweapons", 0x832B},
-        {"disableweaponswitch", 0x832C},
-        {"enableweaponswitch", 0x832D},
-        {"openpopupmenu", 0x832E},
-        {"openpopupmenunomouse", 0x832F},
-        {"closepopupmenu", 0x8330},
-        {"openmenu", 0x8331},
-        {"closemenu", 0x8332},
-        {"freezecontrols", 0x8334},
-        {"disableusability", 0x8335},
-        {"enableusability", 0x8336},
-        {"setwhizbyspreads", 0x8337},
-        {"setwhizbyradii", 0x8338},
-        {"setreverb", 0x8339},
-        {"deactivatereverb", 0x833A},
-        {"setvolmod", 0x833B},
-        {"givestartammo", 0x833C},
-        {"givemaxammo", 0x833D},
-        {"getfractionstartammo", 0x833E},
-        {"getfractionmaxammo", 0x833F},
-        {"isdualwielding", 0x8340},
-        {"isreloading", 0x8341},
-        {"isswitchingweapon", 0x8342},
-        {"setorigin", 0x8343},
-        {"getvelocity", 0x8344},
-        {"setplayerangles", 0x8345},
-        {"getplayerangles", 0x8346},
-        {"usebuttonpressed", 0x8347},
-        {"attackbuttonpressed", 0x8348},
-        {"adsbuttonpressed", 0x8349},
-        {"meleebuttonpressed", 0x834A},
-        {"playerads", 0x834B},
-        {"isonground", 0x834C},
-        {"isusingturret", 0x834D},
-        {"setviewmodel", 0x834E},
-        {"setoffhandprimaryclass", 0x834F},
-        {"getoffhandprimaryclass", 0x8350},
-        {"sub_4b2960", 0x8351},
-        {"sub_4b2c00", 0x8352},
-        {"sub_4b2e80", 0x8353},
-        {"sub_4b3060", 0x8354},
-        {"sub_4c1fb0", 0x8355},
-        {"nullsub_743", 0x8356},
-        {"sub_4b2cf0", 0x8359},
-        {"sub_4b4800", 0x835B},
-        {"sub_4e6990", 0x8391},
-        {"sub_4b53f0", 0x8394},
-        {"sub_4c0b00", 0x83B0},
-        {"sub_4c0bb0", 0x83B1},
-        {"sub_4c0c20", 0x83B2},
-        {"sub_4c0c90", 0x83B3},
-        {"sub_507660", 0x83B4},
-        {"sub_4b42c0", 0x83B5},
-        {"sub_4b4450", 0x83B6},
-        {"sub_4bbbd0", 0x83B7},
-        {"sub_5079e0", 0x83B8},
-        {"sub_507b10", 0x83B9},
-        {"sub_4bba80", 0x83BA},
-        {"sub_4bbb60", 0x83BB},
-        {"sub_4bbaf0", 0x83BC},
-        {"nullsub_325", 0x83BF},
-        {"sub_4b2d70", 0x83C0},
-        {"sub_4b2f50", 0x83C1},
-        {"sub_6d6e70", 0x83C2},
-        {"sub_6d6e80", 0x83C3},
-        {"sub_4ee040", 0x83C5},
-        {"sub_4eb9a0", 0x83C6},
-        {"sub_4eb9d0", 0x83C7},
-        {"sub_4b4780", 0x83C8},
-        {"sub_6d9360", 0x83C9},
-        {"sub_6d9410", 0x83CA},
-        {"sub_6d9490", 0x83CB},
-        {"sub_4df6b0", 0x83CC},
-        {"sub_4b7bc0", 0x83CD},
-        {"sub_4b7cb0", 0x83CE},
-        {"sub_4b84d0", 0x83CF},
-        {"sub_50a5a0", 0x83D0},
-        {"sub_531100", 0x83D1},
-        {"sub_6d8a10", 0x83D2},
-        {"nullsub_485_0", 0x83D3},
-        {"sub_4df640", 0x83D4},
-        {"sub_49c410", 0x83D5},
-        {"sub_49c4a0", 0x83D6},
-        {"sub_49c760", 0x83D7},
-        {"sub_49c860", 0x83D8},
-        {"sub_49caa0", 0x83D9},
-        {"sub_49ca30", 0x83DA},
-        {"sub_49cb10", 0x83DB},
-        {"sub_49cb70", 0x83DC},
-        {"sub_505440", 0x83E4},
-        {"sub_4b32f0", 0x83E5},
-        {"sub_4e1fd0", 0x83E6},
-        {"sub_49a5a0", 0x83E7},
-        {"setclothtype", 0x83E8},
-        {"sub_4ff2d0", 0x83E9},
-        {"sub_4ff3f0", 0x83EA},
-        {"ismlgspectator", 0x83EB},
-        {"sub_50bd60", 0x83EC},
-        {"sub_4f93f0", 0x83EF},
-        {"sub_4f9bc0", 0x83F1},
-        {"sub_4f3f60", 0x83F2},
-        {"aiphysicstracepassed", 0x83F3},
-        {"nullsub_342", 0x83F4},
-        {"sub_507230", 0x83F5},
-        {"sub_507360", 0x83F6},
-        {"visionsetstage", 0x83F7},
-        {"hudoutlineenableforclients", 0x83F8},
-        {"sub_4f6060", 0x83F9},
-        {"sub_4f6be0", 0x83FA},
-        {"sub_5053e0", 0x83FC},
-        {"sub_4f8f20", 0x83FE},
-        {"sub_4f7c60", 0x83FF},
-        {"makevehiclenotcollidewithplayers", 0x8400},
-        {"dotrajectory", 0x8401},
-        {"setwallruncost", 0x8402},
-        {"setscriptablepartstate", 0x8403},
-        {"nullsub_347", 0x8404},
-        {"sub_4f9560", 0x8405},
-        {"sub_6d8d50", 0x8406},
-        {"nullsub_495", 0x8407},
-        {"nullsub_353", 0x8408},
-        {"thermaldrawdisable", 0x8409},
-        {"motionblurhqenable", 0x840A},
-        {"sub_5014d0", 0x840B},
-        {"enableautoreload", 0x840C},
-        {"sub_49bdd0", 0x840D},
-        {"sub_4ec370", 0x840E},
-        {"sub_4ea200", 0x840F},
-        {"sub_49a860", 0x8410},
-        {"visionsetpostapplyforplayer", 0x8412},
-        {"sub_4bc7b0", 0x8413},
-        {"sub_4ea600", 0x8414},
-        {"sub_4ea710", 0x8415},
-        {"sub_4edc50", 0x8416},
-        {"sub_4bc020", 0x8418},
-        {"sub_4bc070", 0x8419},
-        {"sub_5070f0", 0x841A},
-        {"sub_505900", 0x841B},
-        {"tablelookupistring", 0x841C},
-        {"sub_50ab00", 0x841D},
-        {"sub_50abb0", 0x841E},
-        {"sub_50ac60", 0x841F},
-        {"physicsgetlinvel", 0x8420},
-        {"physicsgetangvel", 0x8421},
-        {"sub_50aec0", 0x8422},
-        {"nullsub_348", 0x842A},
-        {"nullsub_735", 0x842B},
-        {"nullsub_350", 0x842C},
-        {"nullsub_351", 0x842D},
-        {"turretsetbarrelspinenabled", 0x842E},
-        {"sub_4f8470", 0x8431},
-        {"sub_4f8680", 0x8432},
-        {"sub_50bc10", 0x8434},
-        {"sub_50bde0", 0x8435},
-        {"sub_50be80", 0x8436},
-        {"sub_502800", 0x8438},
-        {"sub_4b6730", 0x843E},
-        {"sub_4b6820", 0x843F},
-        {"sub_4b6970", 0x8440},
-        {"nullsub_340", 0x8441},
-        {"getlinkedchildren", 0x8442},
-        {"sub_4b2bb0", 0x8445},
-        {"setscriptabledamageowner", 0x8448},
-        {"sub_4e27e0", 0x8449},
-        {"sub_49cbe0", 0x844B},
-        {"sub_49cc80", 0x844C},
-        {"sub_4b8480", 0x844D},
-        {"sub_49d100", 0x844E},
-        {"getlinkedparent", 0x844F},
-        {"nullsub_335", 0x8450},
-        {"sub_6d4d80", 0x8451},
-        {"sub_6d9550", 0x8452},
-        {"sub_4f5c10", 0x8453},
-        {"sub_4b96f0", 0x8454},
-        {"sub_508600", 0x8455},
-        {"sub_508640", 0x8456},
-        {"sub_4e30a0", 0x8457},
-        {"nullsub_354", 0x8458},
-        {"nullsub_744", 0x8459},
-        {"sub_4b3200", 0x845A},
-        {"turretfiredisable", 0x845B},
-        {"sub_4e6920", 0x845C},
-        {"sub_6d96d0", 0x845D},
-        {"sub_6d96f0", 0x845E},
-        {"sub_6d9710", 0x845F},
-        {"sub_6d9730", 0x8460},
-        {"sub_5035d0", 0x8461},
-        {"sub_503910", 0x8462},
-        {"sub_6d9610", 0x8463},
-        {"sub_4b4e00", 0x8464},
-        {"sub_4b3990", 0x8465},
-        {"sub_504050", 0x8466},
-        {"_geteye", 0x8469},
-        {"sub_500080", 0x846A},
-        {"sub_500150", 0x846B},
-        {"sub_4b8ad0", 0x846C},
-        {"sub_4ff640", 0x846F},
-        {"sub_4f6f80", 0x8470},
-        {"sub_4ba6e0", 0x8474},
-        {"sub_4b3510", 0x8475},
-        {"makecollidewithitemclip", 0x8476},
-        {"issplitscreenplayerprimary", 0x8477},
-        {"sub_50b340", 0x8479},
-        {"hasfemalecustomizationmodel", 0x847A},
-        {"sub_4e4cc0", 0x847B},
-        {"sub_4e5750", 0x847C},
-        {"sub_4e5ab0", 0x847D},
-        {"sub_4e5fd0", 0x847E},
-        {"sub_4e6a00", 0x847F},
-        {"sub_4b41f0", 0x8480},
-        {"sub_5076f0", 0x8481},
-        {"sub_6d97b0", 0x8482},
-        {"sub_6d97f0", 0x8483},
-        {"sub_6d9850", 0x8484},
-        {"sub_6d98a0", 0x8485},
-        {"sub_6d98c0", 0x8486},
-        {"sub_4e1d10", 0x8487},
-        {"sub_4e2270", 0x8488},
-        {"sub_4b7920", 0x8489},
-        {"sub_507810", 0x848A},
-        {"sub_507910", 0x848B},
-        {"nullsub_332", 0x848C},
-        {"nullsub_333", 0x848D},
-        {"sub_6d8ac0", 0x848E},
-        {"sub_6d8b40", 0x848F},
-        {"sub_4b54b0", 0x8490},
-        {"sub_4b57f0", 0x8491},
-        {"sub_4ee600", 0x8492},
-        {"sub_4e2ed0", 0x8493},
-        {"nullsub_327", 0x8494},
-        {"nullsub_328", 0x8495},
-        {"sub_6d6640", 0x8497},
-        {"sub_6d9760", 0x8498},
-        {"sub_50bcb0", 0x849B},
-        {"nullsub_326", 0x849C},
-        {"sub_6d66c0", 0x849D},
-        {"sub_6d66b0", 0x849E},
-        {"sub_4b85d0", 0x849F},
-        {"sub_4b88c0", 0x84A0},
-        {"sub_4b8b80", 0x84A1},
-        {"sub_4bb520", 0x84A2},
-        {"nullsub_356", 0x84A3},
-        {"sub_503cc0", 0x84A6},
-        {"sub_503dc0", 0x84A7},
-        {"sub_4bc4a0", 0x84A8},
-        {"sub_4b2500", 0x84AB},
-        {"sub_4b27e0", 0x84AC},
-        {"nullsub_293", 0x84AD},
-        {"setturretteam", 0x84B8},
-        {"sub_4f4950", 0x84B9},
-        {"sub_4f5050", 0x84BA},
-        {"sub_4f5900", 0x84BB},
-        {"sub_6d7960", 0x84BC},
-        {"sub_4ea0a0", 0x84BD},
-        {"turretfireenable", 0x84BE},
-        {"sub_4b4ae0", 0x84BF},
-        {"sub_6d8170", 0x84C0},
-        {"sub_6d8270", 0x84C1},
-        {"nullsub_343", 0x84C3},
-        {"sub_4e2650", 0x84C4},
-        {"sub_4e33a0", 0x84C5},
-        {"sub_4e3890", 0x84C6},
-        {"sub_4e3ae0", 0x84C7},
-        {"nullsub_766", 0x84C8},
-        {"nullsub_357", 0x84C9},
-        {"sub_6d72b0", 0x84CA},
-        {"sub_4f56b0", 0x84CB},
-        {"sub_4b7650", 0x84CE},
-        {"sub_4b76c0", 0x84CF},
-        {"sub_4b7d90", 0x84D2},
-        {"sub_4b8120", 0x84D3},
-        {"sub_4f0a60", 0x84D5},
-        {"sub_6d45f0", 0x84D6},
-        {"usinggamepad", 0x84D9},
-        {"sub_4b25d0", 0x84DA},
-        {"sub_4b2620", 0x84DB},
-        {"getgoalpos", 0x84DC},
-        {"sub_6d6450", 0x84DD},
-        {"sub_6d4610", 0x84DF},
-        {"sub_4f92d0", 0x84E0},
-        {"sub_4f9670", 0x84E1},
-        {"maketurretsolid", 0x84E2},
-        {"sub_4f73e0", 0x84E3},
-        {"sub_4f74a0", 0x84E4},
-        {"stopfiring", 0x84E5},
-        {"sub_4f7770", 0x84E6},
-        {"sub_4f78f0", 0x84E7},
-        {"sub_4f7a00", 0x84E8},
-        {"sub_4f7b30", 0x84E9},
-        {"sub_4ba420", 0x84EB},
-        {"sub_50afa0", 0x84EC},
-        {"sub_499910", 0x84EE},
-        {"sub_6d8640", 0x84EF},
-        {"sub_4e7290", 0x84F2},
-        {"sub_4c1060", 0x84F3},
-        {"sub_6d4650", 0x84F4},
-        {"sub_4b91d0", 0x84F6},
-        {"nullsub_307", 0x84F7},
-        {"sub_508450", 0x84F8},
-        {"nullsub_358", 0x84F9},
-        {"getjointype", 0x84FA},
-        {"sub_4b7b60", 0x84FB},
-        {"sub_4b7c50", 0x84FC},
-        {"clientsetentunusable", 0x84FD},
-        {"sub_4ee3a0", 0x84FE},
-        {"sub_4e2d70", 0x84FF},
-        {"corpsetomovingplatformtrace", 0x8500},
-        {"sub_4efdf0", 0x8501},
-        {"sub_4eded0", 0x8502},
-        {"sub_6d57f0", 0x8503},
-        {"sub_6d5900", 0x8504},
-        {"nullsub_361", 0x8505},
-        {"nullsub_750", 0x8506},
-        {"sub_4e76b0", 0x8507},
-        {"sub_4e7910", 0x8508},
-        {"nullsub_761", 0x8509},
-        {"sub_4e7b20", 0x850A},
-        {"sub_4e7c10", 0x850B},
-        {"sub_4e7f00", 0x850C},
-        {"nullsub_364", 0x850D},
-        {"sub_4f77e0", 0x850E},
-        {"sub_4e4a00", 0x850F},
-        {"sub_4e4bc0", 0x8510},
-        {"sub_4f70c0", 0x8514},
-        {"sub_4f5980", 0x8515},
-        {"sub_4e8c70", 0x8517},
-        {"sub_503580", 0x851D},
-        {"sub_4b8e00", 0x851E},
-        {"sub_4c0a20", 0x851F},
-        {"sub_4f6f10", 0x8521},
-        {"sub_4f7030", 0x8522},
-        {"sub_4ecca0", 0x8523},
-        {"sub_4b2690", 0x8524},
-        {"isplayernumber", 0x8525},
-        {"sub_6d4680", 0x8526},
-        {"sub_6d46a0", 0x8527},
-        {"rangecheckfailure", 0x8528},
-        {"sub_4b3050", 0x8529},
-        {"sub_4ec1d0", 0x852A},
-        {"sub_4c23f0", 0x852C},
-        {"sub_4b3260", 0x852E},
-        {"sub_4f7c40", 0x852F},
-        {"sub_4f7230", 0x8530},
-        {"sub_50b020", 0x8531},
-        {"sub_4df400", 0x8532},
-        {"visionsetpainforplayer", 0x8535},
-        {"nullsub_365", 0x8537},
-        {"sub_4f61a0", 0x8538},
-        {"sub_4c0a90", 0x853B},
-        {"sub_4e9090", 0x853D},
-        {"sub_4eaff0", 0x853E},
-        {"sub_4e8210", 0x8541},
-        {"sub_4e8680", 0x8550},
-        {"sub_4b3cb0", 0x8551},
-        {"sub_4f1e10", 0x8554},
-        {"sub_4e8890", 0x8555},
-        {"sub_4b50c0", 0x855C},
-        {"sub_4f8e40", 0x8561},
-        {"sub_50b2c0", 0x8564},
-        {"sub_4eb8d0", 0x8565},
-        {"nullsub_337", 0x856D},
-        {"nullsub_338", 0x856E},
-        {"nullsub_339", 0x856F},
-        {"sub_4fa2b0", 0x8571},
-        {"sub_4e50f0", 0x8572},
-        {"sub_4f8180", 0x8573},
-        {"sub_4f8570", 0x8574},
-        {"sub_4eb4f0", 0x8575},
-        {"setplayerspread", 0x8576},
-        {"sub_50bb10", 0x8577},
-        {"sub_524ad0", 0x8578},
-        {"sub_498a00", 0x8579},
-        {"sub_4ff940", 0x857A},
-        {"sub_49a0b0", 0x857B},
-        {"sub_4e3fd0", 0x857C},
-        {"setdefaultdroppitch", 0x857D},
-        {"sub_4eab80", 0x857E},
-        {"sub_4e9100", 0x857F},
-        {"drivevehicleandcontrolturret", 0x8580},
-        {"sub_4e9750", 0x8581},
-        {"sub_4df820", 0x8582},
-        {"sub_4df840", 0x8583},
-        {"sub_4df8c0", 0x8584},
-        {"sub_49a0f0", 0x8585},
-        {"closeingamemenu", 0x8586},
-        {"removecomworld", 0x8587},
-        {"sub_4b8f80", 0x8588},
-        {"sub_4b9270", 0x8589},
-        {"sub_4eab30", 0x858C},
-        {"cleartargetentity", 0x858D},
-        {"nullsub_359", 0x8590},
-        {"sub_4b3f60", 0x8595},
-        {"sub_4bbd50", 0x8596},
-        {"getmaxturnspeed", 0x8597},
-        {"sub_4df9e0", 0x8598},
-        {"loadcustomizationplayerview", 0x8599},
-        {"sub_4b46e0", 0x859A},
-        {"getclanidlow", 0x859B},
-        {"sub_4b4e40", 0x859C},
-        {"sub_49c600", 0x859D},
-        {"sub_6d66f0", 0x859E},
-        {"sub_503610", 0x859F},
-        {"sub_503710", 0x85A0},
-        {"sub_6d5b10", 0x85A1},
-        {"sub_6d6760", 0x85A2},
-        {"sub_4b5040", 0x85A3},
-        {"sub_4b4f70", 0x85A4},
-        {"sub_6d6b80", 0x85A5},
-        {"sub_5082b0", 0x85A6},
-        {"sub_5083e0", 0x85A7},
-        {"sub_4e2ca0", 0x85A8},
-        {"sub_503780", 0x85A9},
-        {"setmlgcameradefaults", 0x85AA},
-        {"sub_4df920", 0x85AB},
-        {"sub_4e4a50", 0x85AC},
-        {"sub_4e4100", 0x85B0},
-        {"sub_4f20a0", 0x85B1},
-        {"sub_4eaee0", 0x85B2},
-        {"sub_4f6200", 0x85B3},
-        {"sub_4f6cf0", 0x85B4},
-        {"playersetgroundreferenceent", 0x85B5},
-        {"sub_4b8070", 0x85B6},
-        {"sub_4b8230", 0x85B7},
-        {"sub_4b73f0", 0x85B8},
-        {"sub_4b7510", 0x85B9},
-        {"sub_4b75e0", 0x85BA},
-        {"sub_4b5740", 0x85BB},
-        {"cleartargetent", 0x85BC},
-        {"sub_6d6870", 0x85BD},
-        {"sub_5038b0", 0x85BE},
-        {"sub_6d67e0", 0x85BF},
-        {"sub_6d6c00", 0x85C0},
-        {"sub_6d6920", 0x85C1},
-        {"sub_4df7a0", 0x85C2},
-        {"sub_6d6df0", 0x85C3},
-        {"sub_4f8ed0", 0x85C4},
-        {"sub_6d69a0", 0x85C5},
-        {"sub_6d6a10", 0x85C6},
-        {"sub_6d6a90", 0x85C7},
-        {"sub_6d6b00", 0x85C8},
-        {"sub_4df7e0", 0x85C9},
-        {"sub_4df890", 0x85CA},
-        {"sub_4df980", 0x85CB},
-        {"nullsub_488_0", 0x85CC},
-        {"sub_4e9350", 0x85CD},
-        {"gethybridscopestate", 0x85CE},
-        {"setagentattacker", 0x85CF},
-        {"usebuttonpressed", 0x85D0},
-        {"begin", 0x85D1},
-        {"nullsub_727", 0x85D2},
+        {"thermaldrawenable", 0x8000}, // 0x4ED5B0
+        {"playerforcedeathanim", 0x8001}, // 0x4FF0A0
+        {"_meth_801A", 0x801A}, // 0x4E2590
+        {"attach", 0x801D}, // 0x4EFBC0
+        {"_meth_801E", 0x801E}, // 0x504220
+        {"_meth_801F", 0x801F}, // 0x504350
+        {"_meth_8020", 0x8020}, // 0x5044C0
+        {"_meth_8021", 0x8021}, // 0x504A80
+        {"_meth_8022", 0x8022}, // 0x504AE0
+        {"_meth_8023", 0x8023}, // 0x504E00
+        {"_meth_8024", 0x8024}, // 0x504E40
+        {"_meth_8025", 0x8025}, // 0x4E7A50
+        {"_meth_8026", 0x8026}, // 0x5071C0
+        {"setcoopplayerdatareservedint", 0x8028}, // 0x505220
+        {"entitywillneverchange", 0x8029}, // 0x4ED540
+        {"detach", 0x802A}, // 0x4F0510
+        {"detachall", 0x802B}, // 0x4F07B0
+        {"getattachsize", 0x802C}, // 0x4F27F0
+        {"getattachmodelname", 0x802D}, // 0x4F2D90
+        {"getattachtagname", 0x802E}, // 0x4F3120
+        {"getrestedtime", 0x802F}, // 0x5058C0
+        {"_meth_8030", 0x8030}, // 0x505940
+        {"botgetclosestnavigablepoint", 0x8031}, // 0x506CA0
+        {"_meth_8032", 0x8032}, // 0x506E70
+        {"_meth_8033", 0x8033}, // 0x506FA0
+        {"_meth_8034", 0x8034}, // 0x524B80
+        {"gethighestnodestance", 0x8035}, // 0x524B10
+        {"doesnodeallowstance", 0x8036}, // 0x5249E0
+        {"_meth_8037", 0x8037}, // 0x524A90
+        {"_meth_8038", 0x8038}, // 0x5019E0
+        {"_meth_8039", 0x8039}, // 0x501B20
+        {"_meth_803A", 0x803A}, // 0x501FD0
+        {"_meth_803B", 0x803B}, // 0x503F30
+        {"_meth_803C", 0x803C}, // 0x503F50
+        {"setminimap", 0x803D}, // 0x504250
+        {"_meth_803E", 0x803E}, // 0x507170
+        {"_meth_803F", 0x803F}, // 0x5071D0
+        {"playsoundtoplayer", 0x8040}, // 0x507320
+        {"_meth_8041", 0x8041}, // 0x507380
+        {"_meth_8042", 0x8042}, // 0x507410
+        {"_meth_8043", 0x8043}, // 0x508710
+        {"_meth_8044", 0x8044}, // 0x508750
+        {"_meth_8045", 0x8045}, // 0x4F9B00
+        {"_meth_8046", 0x8046}, // 0x4F9CC0
+        {"_meth_8047", 0x8047}, // 0x4F9F60
+        {"enablemissileboosting", 0x8048}, // 0x4FA1D0
+        {"setplayerdatainternal", 0x8049}, // 0x4E1D90
+        {"_meth_804A", 0x804A}, // 0x4E2050
+        {"_meth_804B", 0x804B}, // 0x503B60
+        {"_meth_804C", 0x804C}, // 0x503B80
+        {"getattachignorecollision", 0x804D}, // 0x4F3530
+        {"hidepart", 0x804E}, // 0x4F3830
+        {"hidepartallinstances", 0x804F}, // 0x4F3E40
+        {"hideallparts", 0x8050}, // 0x4F4610
+        {"showpart", 0x8051}, // 0x4F47B0
+        {"showallparts", 0x8052}, // 0x4F4FC0
+        {"linkto", 0x8053}, // 0x4F5BC0
+        {"linktoblendtotag", 0x8054}, // 0x4F5EA0
+        {"unlink", 0x8055}, // 0x4F5F30
+        {"setnormalhealth", 0x8056}, // 0x5043D0
+        {"dodamage", 0x8057}, // 0x4F64E0
+        {"kill", 0x8058}, // 0x5047E0
+        {"show", 0x8059}, // 0x504DB0
+        {"hide", 0x805A}, // 0x504E20
+        {"_meth_805B", 0x805B}, // 0x504DD0
+        {"_meth_805C", 0x805C}, // 0x504EF0
+        {"_meth_805D", 0x805D}, // 0x504F80
+        {"disconnectpaths", 0x805E}, // 0x4E5070
+        {"connectpaths", 0x805F}, // 0x4E58C0
+        {"disconnectnode", 0x8060}, // 0x4E5A90
+        {"connectnode", 0x8061}, // 0x4E5BF0
+        {"_meth_8062", 0x8062}, // 0x507450
+        {"_meth_8063", 0x8063}, // 0x507510
+        {"_meth_8064", 0x8064}, // 0x507530
+        {"_meth_8065", 0x8065}, // 0x507550
+        {"_meth_8066", 0x8066}, // 0x4FF730
+        {"_meth_8067", 0x8067}, // 0x4FF9A0
+        {"_meth_8068", 0x8068}, // 0x500460
+        {"_meth_8069", 0x8069}, // 0x5012B0
+        {"_meth_806A", 0x806A}, // 0x501320
+        {"_meth_806C", 0x806C}, // 0x505270
+        {"_meth_806D", 0x806D}, // 0x505620
+        {"_meth_806E", 0x806E}, // 0x5057F0
+        {"islinked", 0x806F}, // 0x4F5F90
+        {"enablelinkto", 0x8070}, // 0x4F7320
+        {"disableforcethirdpersonwhenfollowing", 0x8071}, // 0x503A90
+        {"_meth_8073", 0x8073}, // 0x4E4870
+        {"_meth_8074", 0x8074}, // 0x4E4730
+        {"_meth_8075", 0x8075}, // 0x4E4C40
+        {"_meth_8076", 0x8076}, // 0x4E4AA0
+        {"_meth_8077", 0x8077}, // 0x4EA790
+        {"_meth_8078", 0x8078}, // 0x503360
+        {"_meth_8079", 0x8079}, // 0x503370
+        {"_meth_807A", 0x807A}, // 0x503570
+        {"_meth_807B", 0x807B}, // 0x503AD0
+        {"playloopsound", 0x807C}, // 0x503AF0
+        {"_meth_807D", 0x807D}, // 0x503C10
+        {"_meth_807E", 0x807E}, // 0x503C90
+        {"_meth_807F", 0x807F}, // 0x503D20
+        {"_meth_8080", 0x8080}, // 0x503DA0
+        {"botsetflag", 0x8081}, // 0x503E50
+        {"_meth_8082", 0x8082}, // 0x5040A0
+        {"playerlinkto", 0x8083}, // 0x4F8600
+        {"playerlinktodelta", 0x8084}, // 0x4F8610
+        {"playerlinkweaponviewtodelta", 0x8085}, // 0x4F87E0
+        {"playerlinktoabsolute", 0x8086}, // 0x4F8820
+        {"playerlinktoblend", 0x8087}, // 0x4E3B40
+        {"playerlinkedoffsetenable", 0x8088}, // 0x4F8D50
+        {"setwaypointedgestyle_secondaryarrow", 0x8089}, // 0x4C0980
+        {"setwaypointiconoffscreenonly", 0x808A}, // 0x4C09D0
+        {"fadeovertime", 0x808B}, // 0x4C0D90
+        {"scaleovertime", 0x808C}, // 0x4C0ED0
+        {"moveovertime", 0x808D}, // 0x4C0FB0
+        {"reset", 0x808E}, // 0x4C10F0
+        {"destroy", 0x808F}, // 0x4C1130
+        {"setpulsefx", 0x8090}, // 0x4C1270
+        {"setplayernamestring", 0x8091}, // 0x4C11B0
+        {"changefontscaleovertime", 0x8092}, // 0x4C0E30
+        {"startignoringspotlight", 0x8093}, // 0x5073D0
+        {"stopignoringspotlight", 0x8094}, // 0x5073F0
+        {"dontcastshadows", 0x8095}, // 0x5085C0
+        {"castshadows", 0x8096}, // 0x5085E0
+        {"setstablemissile", 0x8097}, // 0x505180
+        {"playersetgroundreferenceent", 0x8098}, // 0x4FF530
+        {"dontinterpolate", 0x8099}, // 0x4F9F10
+        {"dospawn", 0x809A}, // 0x501390
+        {"stalingradspawn", 0x809B}, // 0x501430
+        {"getorigin", 0x809C}, // 0x501800
+        {"getcentroid", 0x809D}, // 0x501880
+        {"getshootatpos", 0x809E}, // 0x5018D0
+        {"getdebugeye", 0x809F}, // 0x502A70
+        {"useby", 0x80A0}, // 0x502B30
+        {"playsound", 0x80A1}, // 0x5035A0
+        {"playerlinkedoffsetdisable", 0x80A6}, // 0x4F90A0
+        {"playerlinkedsetviewznear", 0x80A7}, // 0x4F9360
+        {"playerlinkedsetusebaseangleforviewclamp", 0x80A8}, // 0x4F9940
+        {"_meth_80A9", 0x80A9}, // 0x4E6410
+        {"_meth_80AA", 0x80AA}, // 0x4E6FA0
+        {"_meth_80AB", 0x80AB}, // 0x4E7DB0
+        {"_meth_80AC", 0x80AC}, // 0x4E8760
+        {"setplayernamestring", 0x80AD}, // 0x4EA000
+        {"_meth_80AE", 0x80AE}, // 0x4EA8D0
+        {"geteye", 0x80AF}, // 0x4F0840
+        {"istouching", 0x80B0}, // 0x4F8630
+        {"stoploopsound", 0x80B1}, // 0x4F89A0
+        {"stopsounds", 0x80B2}, // 0x4EB760
+        {"playrumbleonentity", 0x80B3}, // 0x4F9200
+        {"playrumblelooponentity", 0x80B4}, // 0x4EBC30
+        {"_meth_80B5", 0x80B5}, // 0x4EBC60
+        {"_meth_80B6", 0x80B6}, // 0x4EC140
+        {"delete", 0x80B7}, // 0x4F0460
+        {"setmodel", 0x80B8}, // 0x4EE2A0
+        {"laseraltviewon", 0x80B9}, // 0x4EC720
+        {"laseraltviewoff", 0x80BA}, // 0x4EC8B0
+        {"thermalvisionon", 0x80BD}, // 0x4EC9A0
+        {"thermalvisionoff", 0x80BE}, // 0x4ED190
+        {"laseraltviewon", 0x80BF}, // 0x4EE4D0
+        {"laseraltviewoff", 0x80C0}, // 0x4EE7F0
+        {"setcontents", 0x80C5}, // 0x4EAA70
+        {"makeusable", 0x80C6}, // 0x4EAC90
+        {"makeunusable", 0x80C7}, // 0x4EAE90
+        {"_meth_80C8", 0x80C8}, // 0x4E3270
+        {"_meth_80C9", 0x80C9}, // 0x4E3800
+        {"_meth_80CA", 0x80CA}, // 0x4B9F70
+        {"_meth_80CB", 0x80CB}, // 0x4B7190
+        {"_meth_80CC", 0x80CC}, // 0x6D74C0
+        {"_meth_80CD", 0x80CD}, // 0x6D4DF0
+        {"_meth_80CE", 0x80CE}, // 0x6D7320
+        {"_meth_80CF", 0x80CF}, // 0x6D73B0
+        {"triggerfx", 0x80D0}, // 0x6D65E0
+        {"settext", 0x80D1}, // 0x4C1D90
+        {"clearalltextafterhudelem", 0x80D2}, // 0x4C1E80
+        {"setshader", 0x80D3}, // 0x4C1E90
+        {"settargetent", 0x80D4}, // 0x4C2200
+        {"cleartargetent", 0x80D5}, // 0x4C23A0
+        {"settimer", 0x80D6}, // 0x4C0200
+        {"settimerup", 0x80D7}, // 0x4C02D0
+        {"settimerstatic", 0x80D8}, // 0x4C03A0
+        {"settenthstimer", 0x80D9}, // 0x4C0470
+        {"settenthstimerup", 0x80DA}, // 0x4C0540
+        {"settenthstimerstatic", 0x80DB}, // 0x4C0610
+        {"setclock", 0x80DC}, // 0x4C06E0
+        {"setclockup", 0x80DD}, // 0x4C0700
+        {"setvalue", 0x80DE}, // 0x4C0720
+        {"setwaypoint", 0x80DF}, // 0x4C07C0
+        {"setwaypointedgestyle_rotatingicon", 0x80E0}, // 0x4C0930
+        {"setcursorhint", 0x80E1}, // 0x4EB300
+        {"sethintstring", 0x80E2}, // 0x4EBA30
+        {"forceusehinton", 0x80E4}, // 0x4EBF10
+        {"forceusehintoff", 0x80E5}, // 0x4EC080
+        {"makesoft", 0x80E6}, // 0x4EAF40
+        {"makehard", 0x80E7}, // 0x4EB0F0
+        {"_meth_80E8", 0x80E8}, // 0x4EB190
+        {"startfiring", 0x80E9}, // 0x4F9400
+        {"stopfiring", 0x80EA}, // 0x4F9740
+        {"isfiringturret", 0x80EB}, // 0x4F9C60
+        {"startbarrelspin", 0x80EC}, // 0x4F9D60
+        {"stopbarrelspin", 0x80ED}, // 0x4FA020
+        {"getbarrelspinrate", 0x80EE}, // 0x4FA260
+        {"shootturret", 0x80F1}, // 0x4E3F80
+        {"getturretowner", 0x80F2}, // 0x4E4120
+        {"doanimrelative", 0x80F3}, // 0x4BBCF0
+        {"_meth_80F4", 0x80F4}, // 0x4BBDC0
+        {"setclipmode", 0x80F5}, // 0x4BBE10
+        {"setgoalradius", 0x80F6}, // 0x4BBE60
+        {"setmaxturnspeed", 0x80F7}, // 0x4BBEC0
+        {"hasloadedcustomizationplayerview", 0x80F8}, // 0x4BBF20
+        {"_meth_80F9", 0x80F9}, // 0x4BBFB0
+        {"_meth_80FA", 0x80FA}, // 0x4BC320
+        {"_meth_80FB", 0x80FB}, // 0x4BC560
+        {"_meth_80FC", 0x80FC}, // 0x4BC5C0
+        {"_meth_80FD", 0x80FD}, // 0x4BC620
+        {"_meth_80FE", 0x80FE}, // 0x4BC6B0
+        {"_meth_80FF", 0x80FF}, // 0x4BC760
+        {"_meth_8100", 0x8100}, // 0x4B6240
+        {"_meth_8101", 0x8101}, // 0x4BC0C0
+        {"_meth_8102", 0x8102}, // 0x4BC110
+        {"_meth_8103", 0x8103}, // 0x4BC1E0
+        {"_meth_8104", 0x8104}, // 0x4BC270
+        {"_meth_8105", 0x8105}, // 0x4B4880
+        {"_meth_8106", 0x8106}, // 0x4B4AC0
+        {"_meth_8107", 0x8107}, // 0x4BC160
+        {"getxuid", 0x8108}, // 0x4B3AF0
+        {"_meth_8109", 0x8109}, // 0x4B3BE0
+        {"jumpbuttonpressed", 0x810A}, // 0x4B3CF0
+        {"_meth_810B", 0x810B}, // 0x4B9EF0
+        {"_meth_810C", 0x810C}, // 0x4E42F0
+        {"_meth_810D", 0x810D}, // 0x4E47E0
+        {"isfiringvehicleturret", 0x810E}, // 0x4E4B30
+        {"_meth_810F", 0x810F}, // 0x4E4E20
+        {"snaptotargetentity", 0x8110}, // 0x4E57B0
+        {"_meth_8111", 0x8111}, // 0x4E5B60
+        {"getturrettarget", 0x8112}, // 0x4E5EA0
+        {"_meth_8113", 0x8113}, // 0x4E69A0
+        {"_meth_8114", 0x8114}, // 0x4E6F40
+        {"_meth_8115", 0x8115}, // 0x4E7220
+        {"_meth_8116", 0x8116}, // 0x4DF260
+        {"_meth_8117", 0x8117}, // 0x4DF280
+        {"_meth_8118", 0x8118}, // 0x4DF2A0
+        {"_meth_8119", 0x8119}, // 0x4DF2C0
+        {"_meth_811A", 0x811A}, // 0x4DF2E0
+        {"_meth_811B", 0x811B}, // 0x4DF300
+        {"_meth_811C", 0x811C}, // 0x4DF310
+        {"_meth_811D", 0x811D}, // 0x4DF330
+        {"_meth_811E", 0x811E}, // 0x4DF350
+        {"_meth_811F", 0x811F}, // 0x4DF430
+        {"_meth_8120", 0x8120}, // 0x4DF4B0
+        {"allowstand", 0x8121}, // 0x4B4100
+        {"allowcrouch", 0x8122}, // 0x4B4370
+        {"allowprone", 0x8123}, // 0x4B4510
+        {"allowlean", 0x8124}, // 0x4B4980
+        {"allowswim", 0x8125}, // 0x4BB0E0
+        {"setocclusion", 0x8126}, // 0x4BB590
+        {"deactivateocclusion", 0x8128}, // 0x4BB320
+        {"deactivateallocclusion", 0x8129}, // 0x4BB3A0
+        {"isocclusionenabled", 0x812A}, // 0x4BB730
+        {"setreverbfromtable", 0x812F}, // 0x4BB780
+        {"setvolmodfromtable", 0x8130}, // 0x4BB3C0
+        {"_meth_8131", 0x8131}, // 0x4BB7D0
+        {"_meth_8132", 0x8132}, // 0x4BB930
+        {"_meth_8133", 0x8133}, // 0x4BB240
+        {"_meth_8134", 0x8134}, // 0x4BB9E0
+        {"_meth_8135", 0x8135}, // 0x4BA2C0
+        {"_meth_8136", 0x8136}, // 0x4B20C0
+        {"_meth_8137", 0x8137}, // 0x4B6AF0
+        {"_meth_8138", 0x8138}, // 0x4BBC20
+        {"thermalvisionoff", 0x8139}, // 0x4B3DD0
+        {"_meth_813A", 0x813A}, // 0x4B3FC0
+        {"_meth_813B", 0x813B}, // 0x4BBC90
+        {"setconvergencetime", 0x813C}, // 0x4E75E0
+        {"setconvergenceheightpercent", 0x813D}, // 0x4E7D20
+        {"_meth_813E", 0x813E}, // 0x4E8160
+        {"_meth_813F", 0x813F}, // 0x4E8710
+        {"_meth_8140", 0x8140}, // 0x4E87F0
+        {"_meth_8141", 0x8141}, // 0x4E8BF0
+        {"_meth_8142", 0x8142}, // 0x4E8CE0
+        {"makeentitysentient", 0x8143}, // 0x531180
+        {"_meth_8144", 0x8144}, // 0x531290
+        {"_meth_8145", 0x8145}, // 0x5313C0
+        {"_meth_8146", 0x8146}, // 0x531420
+        {"_meth_8147", 0x8147}, // 0x531500
+        {"_meth_8148", 0x8148}, // 0x4DFA90
+        {"setdvarifuninitialized", 0x814A}, // 0x4DFAD0
+        {"_meth_814B", 0x814B}, // 0x4DF9C0
+        {"clearanimatedtrajectory", 0x814C}, // 0x4DFB10
+        {"_meth_814D", 0x814D}, // 0x4DFB90
+        {"_meth_814E", 0x814E}, // 0x4DFBB0
+        {"_meth_814F", 0x814F}, // 0x4DFBC0
+        {"_meth_8150", 0x8150}, // 0x4DFBE0
+        {"_meth_8151", 0x8151}, // 0x4DFC00
+        {"_meth_8152", 0x8152}, // 0x4DFC20
+        {"_meth_8153", 0x8153}, // 0x4DFC30
+        {"_meth_8154", 0x8154}, // 0x4DFC50
+        {"_meth_8155", 0x8155}, // 0x4DF0C0
+        {"_meth_8156", 0x8156}, // 0x4DF0E0
+        {"sightconetrace", 0x8157}, // 0x4DF0F0
+        {"_meth_8158", 0x8158}, // 0x4DF110
+        {"getclanwarsbonusforcurrentplaylist", 0x8159}, // 0x4DF130
+        {"_meth_815A", 0x815A}, // 0x4DF1A0
+        {"isusingonlinedataoffline", 0x815B}, // 0x4DF1E0
+        {"_meth_815C", 0x815C}, // 0x4DF230
+        {"_meth_815D", 0x815D}, // 0x4DF250
+        {"_meth_815E", 0x815E}, // 0x4E9000
+        {"settoparc", 0x815F}, // 0x4E9860
+        {"_meth_8160", 0x8160}, // 0x4E9F20
+        {"setrightarc", 0x8161}, // 0x4EA4F0
+        {"_meth_8162", 0x8162}, // 0x4EA6A0
+        {"setautorotationdelay", 0x8163}, // 0x4EA800
+        {"linkwaypointtotargetwithoffset", 0x8164}, // 0x4EACF0
+        {"restoredefaultdroppitch", 0x8165}, // 0x4EB090
+        {"_meth_8166", 0x8166}, // 0x4EB280
+        {"_meth_8167", 0x8167}, // 0x49AA00
+        {"setentityowner", 0x8168}, // 0x49AA60
+        {"_meth_8169", 0x8169}, // 0x49AB00
+        {"_meth_816A", 0x816A}, // 0x49AC00
+        {"_meth_816B", 0x816B}, // 0x49AD20
+        {"_meth_816C", 0x816C}, // 0x49ADD0
+        {"_meth_816D", 0x816D}, // 0x49AE60
+        {"_meth_816E", 0x816E}, // 0x49AF30
+        {"_meth_816F", 0x816F}, // 0x49B020
+        {"isthrowinggrenade", 0x8170}, // 0x49B0D0
+        {"getenemyinfo", 0x8171}, // 0x4B52F0
+        {"_meth_8172", 0x8172}, // 0x49B190
+        {"_meth_8173", 0x8173}, // 0x49B2F0
+        {"_meth_8174", 0x8174}, // 0x49B520
+        {"_meth_8175", 0x8175}, // 0x49B6A0
+        {"_meth_8176", 0x8176}, // 0x49B700
+        {"_meth_8177", 0x8177}, // 0x49B7C0
+        {"setrank", 0x8178}, // 0x49B910
+        {"_meth_8179", 0x8179}, // 0x49B980
+        {"_meth_817A", 0x817A}, // 0x49BB70
+        {"_meth_817B", 0x817B}, // 0x49BC00
+        {"_meth_817C", 0x817C}, // 0x49BC70
+        {"_meth_817D", 0x817D}, // 0x49BE50
+        {"iclientprintln", 0x817E}, // 0x49BF50
+        {"_meth_817F", 0x817F}, // 0x49BFB0
+        {"_meth_8180", 0x8180}, // 0x49C0D0
+        {"getenemysqdist", 0x8181}, // 0x531560
+        {"getclosestenemysqdist", 0x8182}, // 0x5315A0
+        {"setthreatbiasgroup", 0x8183}, // 0x531970
+        {"getthreatbiasgroup", 0x8184}, // 0x5319E0
+        {"turretfireenable", 0x8185}, // 0x4EB470
+        {"setturretmodechangewait", 0x8186}, // 0x4EB7B0
+        {"usetriggerrequirelookat", 0x8187}, // 0x4EADE0
+        {"getstance", 0x8188}, // 0x4EF4A0
+        {"setstance", 0x8189}, // 0x4EF790
+        {"itemweaponsetammo", 0x818A}, // 0x4ECA70
+        {"getammocount", 0x818B}, // 0x4ED240
+        {"gettagorigin", 0x818C}, // 0x4F3370
+        {"gettagangles", 0x818D}, // 0x4F3440
+        {"shellshock", 0x818E}, // 0x4F8BC0
+        {"stunplayer", 0x818F}, // 0x4F9120
+        {"stopshellshock", 0x8190}, // 0x4ED870
+        {"fadeoutshellshock", 0x8191}, // 0x4EDAD0
+        {"setdepthoffield", 0x8192}, // 0x4F3B40
+        {"setviewmodeldepthoffield", 0x8193}, // 0x4F4550
+        {"setmotionblurmovescale", 0x8194}, // 0x4F5A30
+        {"_meth_8195", 0x8195}, // 0x498F10
+        {"_meth_8196", 0x8196}, // 0x498F60
+        {"_meth_8197", 0x8197}, // 0x498FD0
+        {"_meth_8198", 0x8198}, // 0x499010
+        {"setphysicsmode", 0x8199}, // 0x499080
+        {"_meth_819A", 0x819A}, // 0x499110
+        {"_meth_819B", 0x819B}, // 0x4992E0
+        {"_meth_819C", 0x819C}, // 0x499640
+        {"_meth_819D", 0x819D}, // 0x499740
+        {"_meth_819E", 0x819E}, // 0x499790
+        {"_meth_819F", 0x819F}, // 0x4997E0
+        {"_meth_81A0", 0x81A0}, // 0x499840
+        {"_meth_81A1", 0x81A1}, // 0x499890
+        {"_meth_81A6", 0x81A6}, // 0x499960
+        {"_meth_81A7", 0x81A7}, // 0x499A10
+        {"_meth_81A8", 0x81A8}, // 0x499A60
+        {"_meth_81A9", 0x81A9}, // 0x499B70
+        {"_meth_81AA", 0x81AA}, // 0x499BE0
+        {"getnegotiationnextnode", 0x81AB}, // 0x499C50
+        {"_meth_81AC", 0x81AC}, // 0x499CD0
+        {"_meth_81AD", 0x81AD}, // 0x499D70
+        {"_meth_81AE", 0x81AE}, // 0x499E60
+        {"_meth_81AF", 0x81AF}, // 0x49A050
+        {"_meth_81B0", 0x81B0}, // 0x498850
+        {"_meth_81B1", 0x81B1}, // 0x49A1B0
+        {"setgoalpos", 0x81B2}, // 0x49A410
+        {"setgoalentity", 0x81B3}, // 0x49A480
+        {"setgoalvolume", 0x81B4}, // 0x49A520
+        {"setgoalvolumeauto", 0x81B5}, // 0x49A650
+        {"getgoalvolume", 0x81B6}, // 0x49A7C0
+        {"cleargoalvolume", 0x81B7}, // 0x49A810
+        {"setfixednodesafevolume", 0x81B8}, // 0x49A8D0
+        {"setmotionblurturnscale", 0x81B9}, // 0x4F5A40
+        {"setmotionblurzoomscale", 0x81BA}, // 0x4F5A50
+        {"viewkick", 0x81BB}, // 0x4F5AB0
+        {"_meth_81BC", 0x81BC}, // 0x4ECFE0
+        {"getentitynumber", 0x81BD}, // 0x4EBB50
+        {"_meth_81BE", 0x81BE}, // 0x4EBBC0
+        {"enablegrenadetouchdamage", 0x81BF}, // 0x4EBC90
+        {"disablegrenadetouchdamage", 0x81C0}, // 0x4EBFD0
+        {"disableaimassist", 0x81C1}, // 0x4ECD20
+        {"_meth_81C2", 0x81C2}, // 0x49C1A0
+        {"_meth_81C3", 0x81C3}, // 0x49C220
+        {"_meth_81C4", 0x81C4}, // 0x49C6E0
+        {"_meth_81C5", 0x81C5}, // 0x49C7D0
+        {"_meth_81C6", 0x81C6}, // 0x49C930
+        {"_meth_81C7", 0x81C7}, // 0x49CCE0
+        {"_meth_81C8", 0x81C8}, // 0x49CE30
+        {"_meth_81C9", 0x81C9}, // 0x49CF20
+        {"_meth_81CA", 0x81CA}, // 0x49CFA0
+        {"_meth_81CB", 0x81CB}, // 0x49D060
+        {"setcorpsefalling", 0x81CC}, // 0x5312E0
+        {"_meth_81CD", 0x81CD}, // 0x531340
+        {"dropweapon", 0x81CE}, // 0x49D1B0
+        {"_meth_81CF", 0x81CF}, // 0x497FE0
+        {"_meth_81D0", 0x81D0}, // 0x498150
+        {"_meth_81D1", 0x81D1}, // 0x498270
+        {"_meth_81D2", 0x81D2}, // 0x498280
+        {"_meth_81D3", 0x81D3}, // 0x4982A0
+        {"_meth_81D4", 0x81D4}, // 0x4982C0
+        {"_meth_81D5", 0x81D5}, // 0x498320
+        {"_meth_81D6", 0x81D6}, // 0x498390
+        {"_meth_81D7", 0x81D7}, // 0x498460
+        {"_meth_81D8", 0x81D8}, // 0x498550
+        {"_meth_81D9", 0x81D9}, // 0x498590
+        {"_meth_81DA", 0x81DA}, // 0x4985D0
+        {"_meth_81DB", 0x81DB}, // 0x498610
+        {"_meth_81DC", 0x81DC}, // 0x4986C0
+        {"_meth_81DD", 0x81DD}, // 0x498D40
+        {"_meth_81DE", 0x81DE}, // 0x498E40
+        {"_meth_81DF", 0x81DF}, // 0x498A50
+        {"_meth_81E0", 0x81E0}, // 0x4ECED0
+        {"_meth_81E1", 0x81E1}, // 0x4F7530
+        {"_meth_81E2", 0x81E2}, // 0x4F8080
+        {"makeportableradar", 0x81E3}, // 0x4F8800
+        {"_meth_81E4", 0x81E4}, // 0x4F8AF0
+        {"_meth_81E5", 0x81E5}, // 0x4EC260
+        {"_meth_81E6", 0x81E6}, // 0x4EC580
+        {"_meth_81E7", 0x81E7}, // 0x4EC7B0
+        {"missile_setflightmodedirect", 0x81E8}, // 0x4EC940
+        {"missile_setflightmodetop", 0x81E9}, // 0x4EC990
+        {"_meth_81EA", 0x81EA}, // 0x4F8DF0
+        {"_meth_81EB", 0x81EB}, // 0x4F9020
+        {"getlightintensity", 0x81EC}, // 0x4F91B0
+        {"_meth_81ED", 0x81ED}, // 0x4F9260
+        {"startfiring", 0x81EE}, // 0x4F9510
+        {"stopshellshock", 0x81EF}, // 0x4F96D0
+        {"isragdoll", 0x81F0}, // 0x4E2530
+        {"setmovespeedscale", 0x81F1}, // 0x4F5260
+        {"cameralinkto", 0x81F2}, // 0x4E3650
+        {"cameraunlink", 0x81F3}, // 0x4E3840
+        {"_meth_81F4", 0x81F4}, // 0x49A010
+        {"_meth_81F5", 0x81F5}, // 0x49A240
+        {"_meth_81F6", 0x81F6}, // 0x49A280
+        {"_meth_81F7", 0x81F7}, // 0x49A300
+        {"_meth_81F8", 0x81F8}, // 0x49A5E0
+        {"_meth_81F9", 0x81F9}, // 0x49A730
+        {"_meth_81FA", 0x81FA}, // 0x49A980
+        {"_meth_81FB", 0x81FB}, // 0x49AAB0
+        {"botgetscriptgoalnode", 0x81FC}, // 0x49ABA0
+        {"_meth_81FD", 0x81FD}, // 0x49ACE0
+        {"_meth_81FE", 0x81FE}, // 0x49AD80
+        {"_meth_81FF", 0x81FF}, // 0x49AE10
+        {"_meth_8200", 0x8200}, // 0x49AEA0
+        {"_meth_8201", 0x8201}, // 0x49AFB0
+        {"_meth_8202", 0x8202}, // 0x49B070
+        {"_meth_8203", 0x8203}, // 0x49B120
+        {"_meth_8204", 0x8204}, // 0x49B420
+        {"_meth_8205", 0x8205}, // 0x49B480
+        {"_meth_8206", 0x8206}, // 0x49B280
+        {"_meth_8207", 0x8207}, // 0x49B4E0
+        {"_meth_8208", 0x8208}, // 0x49B5D0
+        {"_meth_8209", 0x8209}, // 0x49B760
+        {"_meth_820A", 0x820A}, // 0x49B810
+        {"_meth_820B", 0x820B}, // 0x49B9F0
+        {"_meth_820C", 0x820C}, // 0x49BD40
+        {"_meth_820D", 0x820D}, // 0x49BEB0
+        {"_meth_820E", 0x820E}, // 0x49C020
+        {"_meth_820F", 0x820F}, // 0x49C2F0
+        {"_meth_8210", 0x8210}, // 0x49C660
+        {"_meth_8211", 0x8211}, // 0x4E3FF0
+        {"_meth_8212", 0x8212}, // 0x4E4380
+        {"_meth_8214", 0x8214}, // 0x501020
+        {"_meth_821C", 0x821C}, // 0x4E6720
+        {"_meth_821D", 0x821D}, // 0x4E6AA0
+        {"_meth_821E", 0x821E}, // 0x4E7320
+        {"getlocalplayerprofiledata", 0x821F}, // 0x4E84A0
+        {"setlocalplayerprofiledata", 0x8220}, // 0x4E8DF0
+        {"_meth_8221", 0x8221}, // 0x4EAAE0
+        {"_meth_8222", 0x8222}, // 0x4EABD0
+        {"_meth_8223", 0x8223}, // 0x4EAD70
+        {"_meth_8224", 0x8224}, // 0x4EAF90
+        {"_meth_8225", 0x8225}, // 0x4F05C0
+        {"_meth_8226", 0x8226}, // 0x4F1650
+        {"_meth_8227", 0x8227}, // 0x4F1B20
+        {"transfermarkstonewscriptmodel", 0x8228}, // 0x4F20B0
+        {"setwatersheeting", 0x8229}, // 0x4E3980
+        {"setweaponhudiconoverride", 0x822C}, // 0x4EB1A0
+        {"getweaponhudiconoverride", 0x822D}, // 0x4EB8E0
+        {"setempjammed", 0x822E}, // 0x4EBCF0
+        {"playersetexpfog", 0x822F}, // 0x4ED110
+        {"_meth_8230", 0x8230}, // 0x4ECE50
+        {"_meth_8231", 0x8231}, // 0x4ED7C0
+        {"isitemunlocked", 0x8232}, // 0x4F1830
+        {"getplayerdata", 0x8233}, // 0x4F99C0
+        {"vehicleturretcontroloff", 0x8234}, // 0x6D56D0
+        {"isturretready", 0x8235}, // 0x6D5740
+        {"vehicledriveto", 0x8236}, // 0x6D5990
+        {"vehicle_dospawn", 0x8237}, // 0x6D5C20
+        {"isphysveh", 0x8238}, // 0x6D5D50
+        {"phys_crash", 0x8239}, // 0x6D5DC0
+        {"_meth_823A", 0x823A}, // 0x6D5F30
+        {"phys_launch", 0x823B}, // 0x6D60A0
+        {"phys_disablecrashing", 0x823C}, // 0x6D61E0
+        {"phys_enablecrashing", 0x823D}, // 0x6D6290
+        {"phys_setspeed", 0x823E}, // 0x6D6310
+        {"phys_setconveyerbelt", 0x823F}, // 0x6D64E0
+        {"_meth_8241", 0x8241}, // 0x4F9DB0
+        {"_meth_8242", 0x8242}, // 0x4FA490
+        {"_meth_8243", 0x8243}, // 0x4E25E0
+        {"_meth_8244", 0x8244}, // 0x4E2A80
+        {"_meth_8245", 0x8245}, // 0x4E3020
+        {"getclanidhigh", 0x8246}, // 0x4E35F0
+        {"_meth_8247", 0x8247}, // 0x4EE9D0
+        {"_meth_8248", 0x8248}, // 0x4EED80
+        {"_meth_8249", 0x8249}, // 0x4EEEE0
+        {"_meth_824A", 0x824A}, // 0x4EF360
+        {"_meth_824B", 0x824B}, // 0x4E7B30
+        {"_meth_824C", 0x824C}, // 0x4E8050
+        {"_meth_824E", 0x824E}, // 0x4E41B0
+        {"_meth_824F", 0x824F}, // 0x499B10
+        {"_meth_8250", 0x8250}, // 0x499F80
+        {"_meth_8251", 0x8251}, // 0x4FA070
+        {"_meth_8252", 0x8252}, // 0x4E22F0
+        {"_meth_8253", 0x8253}, // 0x4E2890
+        {"trackerupdate", 0x8254}, // 0x4E4960
+        {"botisrandomized", 0x8256}, // 0x4BB030
+        {"_meth_825A", 0x825A}, // 0x4B7A30
+        {"setjitterparams", 0x825C}, // 0x6D84D0
+        {"sethoverparams", 0x825D}, // 0x6D85A0
+        {"joltbody", 0x825E}, // 0x6D86C0
+        {"freevehicle", 0x825F}, // 0x6D88C0
+        {"getwheelsurface", 0x8260}, // 0x6D8970
+        {"getvehicleowner", 0x8261}, // 0x6D8BC0
+        {"setvehiclelookattext", 0x8262}, // 0x6D8C40
+        {"setvehicleteam", 0x8263}, // 0x6D8CD0
+        {"neargoalnotifydist", 0x8264}, // 0x6D8D60
+        {"setgoalpos", 0x8265}, // 0x6D8DD0
+        {"setgoalyaw", 0x8266}, // 0x6D8EE0
+        {"cleargoalyaw", 0x8267}, // 0x6D8F70
+        {"settargetyaw", 0x8268}, // 0x6D8FF0
+        {"cleartargetyaw", 0x8269}, // 0x6D9080
+        {"vehicle_helisetai", 0x826A}, // 0x6D9100
+        {"setturrettargetvec", 0x826B}, // 0x6D46C0
+        {"setturrettargetent", 0x826C}, // 0x6D47C0
+        {"clearturrettargetent", 0x826D}, // 0x6D48C0
+        {"vehicle_canturrettargetpoint", 0x826E}, // 0x6D4950
+        {"setlookatent", 0x826F}, // 0x6D4C60
+        {"clearlookatent", 0x8270}, // 0x6D4D10
+        {"setvehweapon", 0x8271}, // 0x6D4E70
+        {"fireweapon", 0x8272}, // 0x6D4EE0
+        {"vehicleturretcontrolon", 0x8273}, // 0x6D55F0
+        {"physicslaunchserver", 0x8280}, // 0x50A760
+        {"physicslaunchserveritem", 0x8281}, // 0x50A990
+        {"clonebrushmodeltoscriptmodel", 0x8282}, // 0x50B0A0
+        {"vehicle_teleport", 0x8286}, // 0x6D6C80
+        {"attachpath", 0x8287}, // 0x6D6EA0
+        {"getattachpos", 0x8288}, // 0x6D6FC0
+        {"startpath", 0x8289}, // 0x6D7190
+        {"setswitchnode", 0x828A}, // 0x6D7430
+        {"setwaitspeed", 0x828B}, // 0x6D7530
+        {"vehicle_setspeed", 0x828D}, // 0x6D75B0
+        {"vehicle_setspeedimmediate", 0x828E}, // 0x6D7620
+        {"vehicle_rotateyaw", 0x828F}, // 0x6D77D0
+        {"vehicle_getspeed", 0x8290}, // 0x6D78F0
+        {"vehicle_getvelocity", 0x8291}, // 0x6D79E0
+        {"vehicle_getbodyvelocity", 0x8292}, // 0x6D7A50
+        {"vehicle_getsteering", 0x8293}, // 0x6D7AC0
+        {"vehicle_getthrottle", 0x8294}, // 0x6D7BB0
+        {"vehicle_turnengineoff", 0x8295}, // 0x6D7C20
+        {"vehicle_turnengineon", 0x8296}, // 0x6D7C80
+        {"_meth_8297", 0x8297}, // 0x6D7CE0
+        {"getgoalspeedmph", 0x8298}, // 0x6D7DC0
+        {"setacceleration", 0x8299}, // 0x6D7E30
+        {"setdeceleration", 0x829A}, // 0x6D7EA0
+        {"resumespeed", 0x829B}, // 0x6D7F10
+        {"setyawspeed", 0x829C}, // 0x6D7FA0
+        {"setyawspeedbyname", 0x829D}, // 0x6D8100
+        {"setmaxpitchroll", 0x829E}, // 0x6D8310
+        {"setairresitance", 0x829F}, // 0x6D83D0
+        {"setturningability", 0x82A0}, // 0x6D8460
+        {"_meth_82A1", 0x82A1}, // 0x4B45F0
+        {"weaponlocknoclearance", 0x82AD}, // 0x4B3D60
+        {"showhudsplash", 0x82AF}, // 0x4B6B50
+        {"setperk", 0x82B0}, // 0x4B9D40
+        {"hasperk", 0x82B1}, // 0x4BA190
+        {"clearperks", 0x82B2}, // 0x4B2220
+        {"unsetperk", 0x82B3}, // 0x4BA5B0
+        {"noclip", 0x82B6}, // 0x4B2310
+        {"ufo", 0x82B7}, // 0x4B2320
+        {"moveto", 0x82B8}, // 0x50B590
+        {"movex", 0x82B9}, // 0x50BAC0
+        {"movey", 0x82BA}, // 0x50BAD0
+        {"movez", 0x82BB}, // 0x50BAF0
+        {"movegravity", 0x82BC}, // 0x50B730
+        {"moveslide", 0x82BD}, // 0x50B8B0
+        {"stopmoveslide", 0x82BE}, // 0x50BA40
+        {"rotateto", 0x82BF}, // 0x50BB90
+        {"rotatepitch", 0x82C0}, // 0x50C010
+        {"rotateyaw", 0x82C1}, // 0x50C020
+        {"rotateroll", 0x82C2}, // 0x50C040
+        {"addpitch", 0x82C3}, // 0x50BF80
+        {"addyaw", 0x82C4}, // 0x50BFD0
+        {"addroll", 0x82C5}, // 0x50BFF0
+        {"vibrate", 0x82C6}, // 0x50C060
+        {"rotatevelocity", 0x82C7}, // 0x50C2C0
+        {"solid", 0x82C8}, // 0x50B180
+        {"notsolid", 0x82C9}, // 0x50B230
+        {"setcandamage", 0x82CA}, // 0x50C460
+        {"setcanradiusdamage", 0x82CB}, // 0x50C4C0
+        {"physicslaunchclient", 0x82CC}, // 0x50A3E0
+        {"disableweaponpickup", 0x82D5}, // 0x4B6300
+        {"enableweaponpickup", 0x82D6}, // 0x4B6470
+        {"issplitscreenplayer", 0x82D7}, // 0x4B6560
+        {"getweaponslistoffhands", 0x82D9}, // 0x4B5AC0
+        {"getweaponslistitems", 0x82DA}, // 0x4B5BD0
+        {"getweaponslistexclusives", 0x82DB}, // 0x4B5D70
+        {"getweaponslist", 0x82DC}, // 0x4B5E80
+        {"canplayerplacesentry", 0x82DD}, // 0x4B9550
+        {"canplayerplacetank", 0x82DE}, // 0x4B9A10
+        {"_meth_82DF", 0x82DF}, // 0x4B6FF0
+        {"visionsetnakedforplayer", 0x82E0}, // 0x4B76A0
+        {"visionsetnightforplayer", 0x82E1}, // 0x4B7710
+        {"visionsetmissilecamforplayer", 0x82E2}, // 0x4B77C0
+        {"visionsetthermalforplayer", 0x82E3}, // 0x4B77E0
+        {"setblurforplayer", 0x82E4}, // 0x4B8EA0
+        {"getplayerweaponmodel", 0x82E5}, // 0x4B9500
+        {"getplayerknifemodel", 0x82E6}, // 0x4B9520
+        {"updateplayermodelwithweapons", 0x82E7}, // 0x502840
+        {"notifyonplayercommand", 0x82E8}, // 0x4B23C0
+        {"canmantle", 0x82E9}, // 0x4B2700
+        {"forcemantle", 0x82EA}, // 0x4B2B20
+        {"ismantling", 0x82EB}, // 0x4B2CA0
+        {"playfx", 0x82EC}, // 0x4B3100
+        {"player_recoilscaleon", 0x82ED}, // 0x4B34A0
+        {"player_recoilscaleoff", 0x82EE}, // 0x4B3570
+        {"weaponlockstart", 0x82EF}, // 0x4B3630
+        {"weaponlockfinalize", 0x82F0}, // 0x4B3870
+        {"weaponlockfree", 0x82F1}, // 0x4B3B80
+        {"weaponlocktargettooclose", 0x82F2}, // 0x4B3C50
+        {"getviewmodel", 0x82F8}, // 0x4B5450
+        {"fragbuttonpressed", 0x82F9}, // 0x4B4170
+        {"secondaryoffhandbuttonpressed", 0x82FA}, // 0x4B4240
+        {"getcurrentweaponclipammo", 0x82FB}, // 0x4B6870
+        {"setvelocity", 0x82FC}, // 0x4B2330
+        {"getplayerviewheight", 0x82FD}, // 0x4B2B60
+        {"getnormalizedmovement", 0x82FE}, // 0x4B2DD0
+        {"playlocalsound", 0x82FF}, // 0x4B2670
+        {"stoplocalsound", 0x8300}, // 0x4B2750
+        {"setweaponammoclip", 0x8301}, // 0x4B7EC0
+        {"setweaponammostock", 0x8302}, // 0x4B82B0
+        {"getweaponammoclip", 0x8303}, // 0x4B87B0
+        {"getweaponammostock", 0x8304}, // 0x4B8990
+        {"hasreloadmultipleanim", 0x8305}, // 0x4B8C30
+        {"regweaponforfxremoval", 0x8306}, // 0x4B9480
+        {"setclientdvar", 0x8307}, // 0x4B9AD0
+        {"setclientdvars", 0x8308}, // 0x4B9BD0
+        {"allowads", 0x830B}, // 0x4B3770
+        {"allowjump", 0x830C}, // 0x4B3A90
+        {"_meth_830D", 0x830D}, // 0x4B4A60
+        {"seteyesonuplinkenabled", 0x830E}, // 0x4B4BC0
+        {"allowsprint", 0x830F}, // 0x4B4D50
+        {"setspreadoverride", 0x8310}, // 0x4B5CE0
+        {"resetspreadoverride", 0x8311}, // 0x4B6020
+        {"setaimspreadmovementscale", 0x8312}, // 0x4B6130
+        {"setactionslot", 0x8313}, // 0x4B5130
+        {"setviewkickscale", 0x8314}, // 0x4B3EE0
+        {"getviewkickscale", 0x8315}, // 0x4B40B0
+        {"getweaponslistall", 0x8316}, // 0x4B58B0
+        {"getweaponslistprimaries", 0x8317}, // 0x4B59B0
+        {"getnormalizedcameramovement", 0x8318}, // 0x4B2F90
+        {"giveweapon", 0x8319}, // 0x4B5500
+        {"takeweapon", 0x831A}, // 0x4B60A0
+        {"takeallweapons", 0x831B}, // 0x4B61C0
+        {"getcurrentweapon", 0x831C}, // 0x4B6350
+        {"getcurrentprimaryweapon", 0x831D}, // 0x4B6600
+        {"getcurrentoffhand", 0x831E}, // 0x4B6A50
+        {"hasweapon", 0x831F}, // 0x4B7290
+        {"switchtoweapon", 0x8320}, // 0x4B7730
+        {"switchtoweaponimmediate", 0x8321}, // 0x4B7890
+        {"_meth_8322", 0x8322}, // 0x4B8580
+        {"switchtooffhand", 0x8323}, // 0x4B86A0
+        {"setoffhandsecondaryclass", 0x8324}, // 0x4B6EE0
+        {"getoffhandsecondaryclass", 0x8325}, // 0x4B7110
+        {"beginlocationselection", 0x8326}, // 0x4B3350
+        {"endlocationselection", 0x8327}, // 0x4B35C0
+        {"disableweapons", 0x8328}, // 0x4B7010
+        {"enableweapons", 0x8329}, // 0x4B7380
+        {"disableoffhandweapons", 0x832A}, // 0x4B74C0
+        {"enableoffhandweapons", 0x832B}, // 0x4B7590
+        {"disableweaponswitch", 0x832C}, // 0x4B7820
+        {"enableweaponswitch", 0x832D}, // 0x4B79E0
+        {"openpopupmenu", 0x832E}, // 0x4B6260
+        {"openpopupmenunomouse", 0x832F}, // 0x4B64C0
+        {"closepopupmenu", 0x8330}, // 0x4B65B0
+        {"openmenu", 0x8331}, // 0x4B6780
+        {"closemenu", 0x8332}, // 0x4B69B0
+        {"freezecontrols", 0x8334}, // 0x4B6DA0
+        {"disableusability", 0x8335}, // 0x4B6E90
+        {"enableusability", 0x8336}, // 0x4B6FA0
+        {"setwhizbyspreads", 0x8337}, // 0x4BA0C0
+        {"setwhizbyradii", 0x8338}, // 0x4BA360
+        {"setreverb", 0x8339}, // 0x4BA470
+        {"deactivatereverb", 0x833A}, // 0x4B2150
+        {"setvolmod", 0x833B}, // 0x4B2430
+        {"givestartammo", 0x833C}, // 0x4B8D10
+        {"givemaxammo", 0x833D}, // 0x4B9030
+        {"getfractionstartammo", 0x833E}, // 0x4B9320
+        {"getfractionmaxammo", 0x833F}, // 0x4B9810
+        {"isdualwielding", 0x8340}, // 0x4B9CB0
+        {"isreloading", 0x8341}, // 0x4B9E80
+        {"isswitchingweapon", 0x8342}, // 0x4BA040
+        {"setorigin", 0x8343}, // 0x4B2270
+        {"getvelocity", 0x8344}, // 0x4B2560
+        {"setplayerangles", 0x8345}, // 0x4B28E0
+        {"getplayerangles", 0x8346}, // 0x4B2AD0
+        {"usebuttonpressed", 0x8347}, // 0x4B36F0
+        {"attackbuttonpressed", 0x8348}, // 0x4B3A10
+        {"adsbuttonpressed", 0x8349}, // 0x4B3E40
+        {"meleebuttonpressed", 0x834A}, // 0x4B4030
+        {"playerads", 0x834B}, // 0x4B4DB0
+        {"isonground", 0x834C}, // 0x4B4FD0
+        {"isusingturret", 0x834D}, // 0x4B5290
+        {"setviewmodel", 0x834E}, // 0x4B5370
+        {"setoffhandprimaryclass", 0x834F}, // 0x4B6C30
+        {"getoffhandprimaryclass", 0x8350}, // 0x4B6E10
+        {"_meth_8351", 0x8351}, // 0x4B2960
+        {"_meth_8352", 0x8352}, // 0x4B2C00
+        {"_meth_8353", 0x8353}, // 0x4B2E80
+        {"_meth_8354", 0x8354}, // 0x4B3060
+        {"_meth_8355", 0x8355}, // 0x4C1FB0
+        {"_meth_8356", 0x8356}, // 0x4B9540
+        {"_meth_8359", 0x8359}, // 0x4B2CF0
+        {"_meth_835B", 0x835B}, // 0x4B4800
+        {"_meth_8391", 0x8391}, // 0x4E6990
+        {"_meth_8394", 0x8394}, // 0x4B53F0
+        {"_meth_83B0", 0x83B0}, // 0x4C0B00
+        {"_meth_83B1", 0x83B1}, // 0x4C0BB0
+        {"_meth_83B2", 0x83B2}, // 0x4C0C20
+        {"_meth_83B3", 0x83B3}, // 0x4C0C90
+        {"_meth_83B4", 0x83B4}, // 0x507660
+        {"_meth_83B5", 0x83B5}, // 0x4B42C0
+        {"_meth_83B6", 0x83B6}, // 0x4B4450
+        {"_meth_83B7", 0x83B7}, // 0x4BBBD0
+        {"_meth_83B8", 0x83B8}, // 0x5079E0
+        {"_meth_83B9", 0x83B9}, // 0x507B10
+        {"_meth_83BA", 0x83BA}, // 0x4BBA80
+        {"_meth_83BB", 0x83BB}, // 0x4BBB60
+        {"_meth_83BC", 0x83BC}, // 0x4BBAF0
+        {"_meth_83BF", 0x83BF}, // 0x4B3BD0
+        {"_meth_83C0", 0x83C0}, // 0x4B2D70
+        {"_meth_83C1", 0x83C1}, // 0x4B2F50
+        {"_meth_83C2", 0x83C2}, // 0x6D6E70
+        {"_meth_83C3", 0x83C3}, // 0x6D6E80
+        {"_meth_83C5", 0x83C5}, // 0x4EE040
+        {"_meth_83C6", 0x83C6}, // 0x4EB9A0
+        {"_meth_83C7", 0x83C7}, // 0x4EB9D0
+        {"_meth_83C8", 0x83C8}, // 0x4B4780
+        {"_meth_83C9", 0x83C9}, // 0x6D9360
+        {"_meth_83CA", 0x83CA}, // 0x6D9410
+        {"_meth_83CB", 0x83CB}, // 0x6D9490
+        {"_meth_83CC", 0x83CC}, // 0x4DF6B0
+        {"_meth_83CD", 0x83CD}, // 0x4B7BC0
+        {"_meth_83CE", 0x83CE}, // 0x4B7CB0
+        {"_meth_83CF", 0x83CF}, // 0x4B84D0
+        {"_meth_83D0", 0x83D0}, // 0x50A5A0
+        {"_meth_83D1", 0x83D1}, // 0x531100
+        {"_meth_83D2", 0x83D2}, // 0x6D8A10
+        {"_meth_83D3", 0x83D3}, // 0x4B4BA0
+        {"_meth_83D4", 0x83D4}, // 0x4DF640
+        {"_meth_83D5", 0x83D5}, // 0x49C410
+        {"_meth_83D6", 0x83D6}, // 0x49C4A0
+        {"_meth_83D7", 0x83D7}, // 0x49C760
+        {"_meth_83D8", 0x83D8}, // 0x49C860
+        {"_meth_83D9", 0x83D9}, // 0x49CAA0
+        {"_meth_83DA", 0x83DA}, // 0x49CA30
+        {"_meth_83DB", 0x83DB}, // 0x49CB10
+        {"_meth_83DC", 0x83DC}, // 0x49CB70
+        {"_meth_83E4", 0x83E4}, // 0x505440
+        {"_meth_83E5", 0x83E5}, // 0x4B32F0
+        {"_meth_83E6", 0x83E6}, // 0x4E1FD0
+        {"_meth_83E7", 0x83E7}, // 0x49A5A0
+        {"setclothtype", 0x83E8}, // 0x4F9480
+        {"_meth_83E9", 0x83E9}, // 0x4FF2D0
+        {"_meth_83EA", 0x83EA}, // 0x4FF3F0
+        {"ismlgspectator", 0x83EB}, // 0x4B43D0
+        {"_meth_83EC", 0x83EC}, // 0x50BD60
+        {"_meth_83EF", 0x83EF}, // 0x4F93F0
+        {"_meth_83F1", 0x83F1}, // 0x4F9BC0
+        {"_meth_83F2", 0x83F2}, // 0x4F3F60
+        {"aiphysicstracepassed", 0x83F3}, // 0x4F5490
+        {"_meth_83F4", 0x83F4}, // 0x4C1E70
+        {"_meth_83F5", 0x83F5}, // 0x507230
+        {"_meth_83F6", 0x83F6}, // 0x507360
+        {"visionsetstage", 0x83F7}, // 0x4B6CF0
+        {"hudoutlineenableforclients", 0x83F8}, // 0x4C22B0
+        {"_meth_83F9", 0x83F9}, // 0x4F6060
+        {"_meth_83FA", 0x83FA}, // 0x4F6BE0
+        {"_meth_83FC", 0x83FC}, // 0x5053E0
+        {"_meth_83FE", 0x83FE}, // 0x4F8F20
+        {"_meth_83FF", 0x83FF}, // 0x4F7C60
+        {"makevehiclenotcollidewithplayers", 0x8400}, // 0x4E59E0
+        {"dotrajectory", 0x8401}, // 0x4BB180
+        {"setwallruncost", 0x8402}, // 0x4BB1E0
+        {"setscriptablepartstate", 0x8403}, // 0x4E2480
+        {"_meth_8404", 0x8404}, // 0x4E2C90
+        {"_meth_8405", 0x8405}, // 0x4F9560
+        {"_meth_8406", 0x8406}, // 0x6D8D50
+        {"_meth_8407", 0x8407}, // 0x4EDC40
+        {"_meth_8408", 0x8408}, // 0x4EDCD0
+        {"thermaldrawdisable", 0x8409}, // 0x4EE150
+        {"motionblurhqenable", 0x840A}, // 0x4EE360
+        {"_meth_840B", 0x840B}, // 0x5014D0
+        {"enableautoreload", 0x840C}, // 0x49BD90
+        {"_meth_840D", 0x840D}, // 0x49BDD0
+        {"_meth_840E", 0x840E}, // 0x4EC370
+        {"_meth_840F", 0x840F}, // 0x4EA200
+        {"_meth_8410", 0x8410}, // 0x49A860
+        {"visionsetpostapplyforplayer", 0x8412}, // 0x4B7870
+        {"_meth_8413", 0x8413}, // 0x4BC7B0
+        {"_meth_8414", 0x8414}, // 0x4EA600
+        {"_meth_8415", 0x8415}, // 0x4EA710
+        {"_meth_8416", 0x8416}, // 0x4EDC50
+        {"_meth_8418", 0x8418}, // 0x4BC020
+        {"_meth_8419", 0x8419}, // 0x4BC070
+        {"_meth_841A", 0x841A}, // 0x5070F0
+        {"_meth_841B", 0x841B}, // 0x505900
+        {"tablelookupistring", 0x841C}, // 0x505AE0
+        {"_meth_841D", 0x841D}, // 0x50AB00
+        {"_meth_841E", 0x841E}, // 0x50ABB0
+        {"_meth_841F", 0x841F}, // 0x50AC60
+        {"physicsgetlinvel", 0x8420}, // 0x50AD20
+        {"physicsgetangvel", 0x8421}, // 0x50AE00
+        {"_meth_8422", 0x8422}, // 0x50AEC0
+        {"_meth_842A", 0x842A}, // 0x4ED790
+        {"_meth_842B", 0x842B}, // 0x4ED840
+        {"_meth_842C", 0x842C}, // 0x4ED9D0
+        {"_meth_842D", 0x842D}, // 0x4EDA90
+        {"turretsetbarrelspinenabled", 0x842E}, // 0x4EB580
+        {"_meth_8431", 0x8431}, // 0x4F8470
+        {"_meth_8432", 0x8432}, // 0x4F8680
+        {"_meth_8434", 0x8434}, // 0x50BC10
+        {"_meth_8435", 0x8435}, // 0x50BDE0
+        {"_meth_8436", 0x8436}, // 0x50BE80
+        {"_meth_8438", 0x8438}, // 0x502800
+        {"_meth_843E", 0x843E}, // 0x4B6730
+        {"_meth_843F", 0x843F}, // 0x4B6820
+        {"_meth_8440", 0x8440}, // 0x4B6970
+        {"_meth_8441", 0x8441}, // 0x4BBC10
+        {"getlinkedchildren", 0x8442}, // 0x4F68B0
+        {"_meth_8445", 0x8445}, // 0x4B2BB0
+        {"setscriptabledamageowner", 0x8448}, // 0x4E1E50
+        {"_meth_8449", 0x8449}, // 0x4E27E0
+        {"_meth_844B", 0x844B}, // 0x49CBE0
+        {"_meth_844C", 0x844C}, // 0x49CC80
+        {"_meth_844D", 0x844D}, // 0x4B8480
+        {"_meth_844E", 0x844E}, // 0x49D100
+        {"getlinkedparent", 0x844F}, // 0x4F3760
+        {"_meth_8450", 0x8450}, // 0x4B4BB0
+        {"_meth_8451", 0x8451}, // 0x6D4D80
+        {"_meth_8452", 0x8452}, // 0x6D9550
+        {"_meth_8453", 0x8453}, // 0x4F5C10
+        {"_meth_8454", 0x8454}, // 0x4B96F0
+        {"_meth_8455", 0x8455}, // 0x508600
+        {"_meth_8456", 0x8456}, // 0x508640
+        {"_meth_8457", 0x8457}, // 0x4E30A0
+        {"_meth_8458", 0x8458}, // 0x4EDD90
+        {"_meth_8459", 0x8459}, // 0x4EDE50
+        {"_meth_845A", 0x845A}, // 0x4B3200
+        {"turretfiredisable", 0x845B}, // 0x4E61F0
+        {"_meth_845C", 0x845C}, // 0x4E6920
+        {"_meth_845D", 0x845D}, // 0x6D96D0
+        {"_meth_845E", 0x845E}, // 0x6D96F0
+        {"_meth_845F", 0x845F}, // 0x6D9710
+        {"_meth_8460", 0x8460}, // 0x6D9730
+        {"_meth_8461", 0x8461}, // 0x5035D0
+        {"_meth_8462", 0x8462}, // 0x503910
+        {"_meth_8463", 0x8463}, // 0x6D9610
+        {"_meth_8464", 0x8464}, // 0x4B4E00
+        {"_meth_8465", 0x8465}, // 0x4B3990
+        {"_meth_8466", 0x8466}, // 0x504050
+        {"_meth_8469", 0x8469}, // 0x4F09F0
+        {"_meth_846A", 0x846A}, // 0x500080
+        {"_meth_846B", 0x846B}, // 0x500150
+        {"_meth_846C", 0x846C}, // 0x4B8AD0
+        {"_meth_846F", 0x846F}, // 0x4FF640
+        {"_meth_8470", 0x8470}, // 0x4F6F80
+        {"_meth_8474", 0x8474}, // 0x4BA6E0
+        {"_meth_8475", 0x8475}, // 0x4B3510
+        {"makecollidewithitemclip", 0x8476}, // 0x4E5F30
+        {"issplitscreenplayerprimary", 0x8477}, // 0x4B49F0
+        {"_meth_8479", 0x8479}, // 0x50B340
+        {"hasfemalecustomizationmodel", 0x847A}, // 0x50B510
+        {"_meth_847B", 0x847B}, // 0x4E4CC0
+        {"_meth_847C", 0x847C}, // 0x4E5750
+        {"_meth_847D", 0x847D}, // 0x4E5AB0
+        {"_meth_847E", 0x847E}, // 0x4E5FD0
+        {"_meth_847F", 0x847F}, // 0x4E6A00
+        {"_meth_8480", 0x8480}, // 0x4B41F0
+        {"_meth_8481", 0x8481}, // 0x5076F0
+        {"_meth_8482", 0x8482}, // 0x6D97B0
+        {"_meth_8483", 0x8483}, // 0x6D97F0
+        {"_meth_8484", 0x8484}, // 0x6D9850
+        {"_meth_8485", 0x8485}, // 0x6D98A0
+        {"_meth_8486", 0x8486}, // 0x6D98C0
+        {"_meth_8487", 0x8487}, // 0x4E1D10
+        {"_meth_8488", 0x8488}, // 0x4E2270
+        {"_meth_8489", 0x8489}, // 0x4B7920
+        {"_meth_848A", 0x848A}, // 0x507810
+        {"_meth_848B", 0x848B}, // 0x507910
+        {"_meth_848C", 0x848C}, // 0x4B32D0
+        {"_meth_848D", 0x848D}, // 0x4B32E0
+        {"_meth_848E", 0x848E}, // 0x6D8AC0
+        {"_meth_848F", 0x848F}, // 0x6D8B40
+        {"_meth_8490", 0x8490}, // 0x4B54B0
+        {"_meth_8491", 0x8491}, // 0x4B57F0
+        {"_meth_8492", 0x8492}, // 0x4EE600
+        {"_meth_8493", 0x8493}, // 0x4E2ED0
+        {"_meth_8494", 0x8494}, // 0x4B3DC0
+        {"_meth_8495", 0x8495}, // 0x4B3CE0
+        {"_meth_8497", 0x8497}, // 0x6D6640
+        {"_meth_8498", 0x8498}, // 0x6D9760
+        {"_meth_849B", 0x849B}, // 0x50BCB0
+        {"_meth_849C", 0x849C}, // 0x4B3CD0
+        {"_meth_849D", 0x849D}, // 0x6D66C0
+        {"_meth_849E", 0x849E}, // 0x6D66B0
+        {"_meth_849F", 0x849F}, // 0x4B85D0
+        {"_meth_84A0", 0x84A0}, // 0x4B88C0
+        {"_meth_84A1", 0x84A1}, // 0x4B8B80
+        {"_meth_84A2", 0x84A2}, // 0x4BB520
+        {"_meth_84A3", 0x84A3}, // 0x4E2580
+        {"_meth_84A6", 0x84A6}, // 0x503CC0
+        {"_meth_84A7", 0x84A7}, // 0x503DC0
+        {"_meth_84A8", 0x84A8}, // 0x4BC4A0
+        {"_meth_84AB", 0x84AB}, // 0x4B2500
+        {"_meth_84AC", 0x84AC}, // 0x4B27E0
+        {"_meth_84AD", 0x84AD}, // 0x4B3CC0
+        {"setturretteam", 0x84B8}, // 0x4F46D0
+        {"_meth_84B9", 0x84B9}, // 0x4F4950
+        {"_meth_84BA", 0x84BA}, // 0x4F5050
+        {"_meth_84BB", 0x84BB}, // 0x4F5900
+        {"_meth_84BC", 0x84BC}, // 0x6D7960
+        {"_meth_84BD", 0x84BD}, // 0x4EA0A0
+        {"turretfireenable", 0x84BE}, // 0x4EA5B0
+        {"_meth_84BF", 0x84BF}, // 0x4B4AE0
+        {"_meth_84C0", 0x84C0}, // 0x6D8170
+        {"_meth_84C1", 0x84C1}, // 0x6D8270
+        {"_meth_84C3", 0x84C3}, // 0x4EF770
+        {"_meth_84C4", 0x84C4}, // 0x4E2650
+        {"_meth_84C5", 0x84C5}, // 0x4E33A0
+        {"_meth_84C6", 0x84C6}, // 0x4E3890
+        {"_meth_84C7", 0x84C7}, // 0x4E3AE0
+        {"_meth_84C8", 0x84C8}, // 0x4F0070
+        {"_meth_84C9", 0x84C9}, // 0x4F63F0
+        {"_meth_84CA", 0x84CA}, // 0x6D72B0
+        {"_meth_84CB", 0x84CB}, // 0x4F56B0
+        {"_meth_84CE", 0x84CE}, // 0x4B7650
+        {"_meth_84CF", 0x84CF}, // 0x4B76C0
+        {"_meth_84D2", 0x84D2}, // 0x4B7D90
+        {"_meth_84D3", 0x84D3}, // 0x4B8120
+        {"_meth_84D5", 0x84D5}, // 0x4F0A60
+        {"_meth_84D6", 0x84D6}, // 0x6D45F0
+        {"usinggamepad", 0x84D9}, // 0x4B26B0
+        {"_meth_84DA", 0x84DA}, // 0x4B25D0
+        {"_meth_84DB", 0x84DB}, // 0x4B2620
+        {"getgoalpos", 0x84DC}, // 0x6D63B0
+        {"_meth_84DD", 0x84DD}, // 0x6D6450
+        {"_meth_84DF", 0x84DF}, // 0x6D4610
+        {"_meth_84E0", 0x84E0}, // 0x4F92D0
+        {"_meth_84E1", 0x84E1}, // 0x4F9670
+        {"maketurretsolid", 0x84E2}, // 0x4F72B0
+        {"_meth_84E3", 0x84E3}, // 0x4F73E0
+        {"_meth_84E4", 0x84E4}, // 0x4F74A0
+        {"stopfiring", 0x84E5}, // 0x4F75A0
+        {"_meth_84E6", 0x84E6}, // 0x4F7770
+        {"_meth_84E7", 0x84E7}, // 0x4F78F0
+        {"_meth_84E8", 0x84E8}, // 0x4F7A00
+        {"_meth_84E9", 0x84E9}, // 0x4F7B30
+        {"_meth_84EB", 0x84EB}, // 0x4BA420
+        {"_meth_84EC", 0x84EC}, // 0x50AFA0
+        {"_meth_84EE", 0x84EE}, // 0x499910
+        {"_meth_84EF", 0x84EF}, // 0x6D8640
+        {"_meth_84F2", 0x84F2}, // 0x4E7290
+        {"_meth_84F3", 0x84F3}, // 0x4C1060
+        {"_meth_84F4", 0x84F4}, // 0x6D4650
+        {"_meth_84F6", 0x84F6}, // 0x4B91D0
+        {"_meth_84F7", 0x84F7}, // 0x4E67F0
+        {"_meth_84F8", 0x84F8}, // 0x508450
+        {"_meth_84F9", 0x84F9}, // 0x4F64C0
+        {"getjointype", 0x84FA}, // 0x4B4570
+        {"_meth_84FB", 0x84FB}, // 0x4B7B60
+        {"_meth_84FC", 0x84FC}, // 0x4B7C50
+        {"clientsetentunusable", 0x84FD}, // 0x4DF760
+        {"_meth_84FE", 0x84FE}, // 0x4EE3A0
+        {"_meth_84FF", 0x84FF}, // 0x4E2D70
+        {"corpsetomovingplatformtrace", 0x8500}, // 0x4EB830
+        {"_meth_8501", 0x8501}, // 0x4EFDF0
+        {"_meth_8502", 0x8502}, // 0x4EDED0
+        {"_meth_8503", 0x8503}, // 0x6D57F0
+        {"_meth_8504", 0x8504}, // 0x6D5900
+        {"_meth_8505", 0x8505}, // 0x4E8490
+        {"_meth_8506", 0x8506}, // 0x4E8670
+        {"_meth_8507", 0x8507}, // 0x4E76B0
+        {"_meth_8508", 0x8508}, // 0x4E7910
+        {"_meth_8509", 0x8509}, // 0x4E7A40
+        {"_meth_850A", 0x850A}, // 0x4E7B20
+        {"_meth_850B", 0x850B}, // 0x4E7C10
+        {"_meth_850C", 0x850C}, // 0x4E7F00
+        {"_meth_850D", 0x850D}, // 0x4E8140
+        {"_meth_850E", 0x850E}, // 0x4F77E0
+        {"_meth_850F", 0x850F}, // 0x4E4A00
+        {"_meth_8510", 0x8510}, // 0x4E4BC0
+        {"_meth_8514", 0x8514}, // 0x4F70C0
+        {"_meth_8515", 0x8515}, // 0x4F5980
+        {"_meth_8517", 0x8517}, // 0x4E8C70
+        {"_meth_851D", 0x851D}, // 0x503580
+        {"_meth_851E", 0x851E}, // 0x4B8E00
+        {"_meth_851F", 0x851F}, // 0x4C0A20
+        {"_meth_8521", 0x8521}, // 0x4F6F10
+        {"_meth_8522", 0x8522}, // 0x4F7030
+        {"_meth_8523", 0x8523}, // 0x4ECCA0
+        {"_meth_8524", 0x8524}, // 0x4B2690
+        {"isplayernumber", 0x8525}, // 0x4E4D60
+        {"_meth_8526", 0x8526}, // 0x6D4680
+        {"_meth_8527", 0x8527}, // 0x6D46A0
+        {"rangecheckfailure", 0x8528}, // 0x4B3040
+        {"_meth_8529", 0x8529}, // 0x4B3050
+        {"_meth_852A", 0x852A}, // 0x4EC1D0
+        {"_meth_852C", 0x852C}, // 0x4C23F0
+        {"_meth_852E", 0x852E}, // 0x4B3260
+        {"_meth_852F", 0x852F}, // 0x4F7C40
+        {"_meth_8530", 0x8530}, // 0x4F7230
+        {"_meth_8531", 0x8531}, // 0x50B020
+        {"_meth_8532", 0x8532}, // 0x4DF400
+        {"visionsetpainforplayer", 0x8535}, // 0x4B7800
+        {"_meth_8537", 0x8537}, // 0x4F5E90
+        {"_meth_8538", 0x8538}, // 0x4F61A0
+        {"_meth_853B", 0x853B}, // 0x4C0A90
+        {"_meth_853D", 0x853D}, // 0x4E9090
+        {"_meth_853E", 0x853E}, // 0x4EAFF0
+        {"_meth_8541", 0x8541}, // 0x4E8210
+        {"_meth_8550", 0x8550}, // 0x4E8680
+        {"_meth_8551", 0x8551}, // 0x4B3CB0
+        {"_meth_8554", 0x8554}, // 0x4F1E10
+        {"_meth_8555", 0x8555}, // 0x4E8890
+        {"_meth_855C", 0x855C}, // 0x4B50C0
+        {"_meth_8561", 0x8561}, // 0x4F8E40
+        {"_meth_8564", 0x8564}, // 0x50B2C0
+        {"_meth_8565", 0x8565}, // 0x4EB8D0
+        {"_meth_856D", 0x856D}, // 0x4B4C20
+        {"_meth_856E", 0x856E}, // 0x4B4C30
+        {"_meth_856F", 0x856F}, // 0x4B4C40
+        {"_meth_8571", 0x8571}, // 0x4FA2B0
+        {"_meth_8572", 0x8572}, // 0x4E50F0
+        {"_meth_8573", 0x8573}, // 0x4F8180
+        {"_meth_8574", 0x8574}, // 0x4F8570
+        {"_meth_8575", 0x8575}, // 0x4EB4F0
+        {"setplayerspread", 0x8576}, // 0x4EB610
+        {"_meth_8577", 0x8577}, // 0x50BB10
+        {"_meth_8578", 0x8578}, // 0x524AD0
+        {"_meth_8579", 0x8579}, // 0x498A00
+        {"_meth_857A", 0x857A}, // 0x4FF940
+        {"_meth_857B", 0x857B}, // 0x49A0B0
+        {"_meth_857C", 0x857C}, // 0x4E3FD0
+        {"setdefaultdroppitch", 0x857D}, // 0x4EA9F0
+        {"_meth_857E", 0x857E}, // 0x4EAB80
+        {"_meth_857F", 0x857F}, // 0x4E9100
+        {"drivevehicleandcontrolturret", 0x8580}, // 0x4E93B0
+        {"_meth_8581", 0x8581}, // 0x4E9750
+        {"_meth_8582", 0x8582}, // 0x4DF820
+        {"_meth_8583", 0x8583}, // 0x4DF840
+        {"_meth_8584", 0x8584}, // 0x4DF8C0
+        {"_meth_8585", 0x8585}, // 0x49A0F0
+        {"closeingamemenu", 0x8586}, // 0x49C290
+        {"removecomworld", 0x8587}, // 0x4B2BF0
+        {"_meth_8588", 0x8588}, // 0x4B8F80
+        {"_meth_8589", 0x8589}, // 0x4B9270
+        {"_meth_858C", 0x858C}, // 0x4EAB30
+        {"cleartargetentity", 0x858D}, // 0x4EB6F0
+        {"_meth_8590", 0x8590}, // 0x4F67A0
+        {"_meth_8595", 0x8595}, // 0x4B3F60
+        {"_meth_8596", 0x8596}, // 0x4BBD50
+        {"getmaxturnspeed", 0x8597}, // 0x6D7B40
+        {"_meth_8598", 0x8598}, // 0x4DF9E0
+        {"loadcustomizationplayerview", 0x8599}, // 0x4FF6C0
+        {"_meth_859A", 0x859A}, // 0x4B46E0
+        {"getclanidlow", 0x859B}, // 0x4BC500
+        {"_meth_859C", 0x859C}, // 0x4B4E40
+        {"_meth_859D", 0x859D}, // 0x49C600
+        {"_meth_859E", 0x859E}, // 0x6D66F0
+        {"_meth_859F", 0x859F}, // 0x503610
+        {"_meth_85A0", 0x85A0}, // 0x503710
+        {"_meth_85A1", 0x85A1}, // 0x6D5B10
+        {"_meth_85A2", 0x85A2}, // 0x6D6760
+        {"_meth_85A3", 0x85A3}, // 0x4B5040
+        {"_meth_85A4", 0x85A4}, // 0x4B4F70
+        {"_meth_85A5", 0x85A5}, // 0x6D6B80
+        {"_meth_85A6", 0x85A6}, // 0x5082B0
+        {"_meth_85A7", 0x85A7}, // 0x5083E0
+        {"_meth_85A8", 0x85A8}, // 0x4E2CA0
+        {"_meth_85A9", 0x85A9}, // 0x503780
+        {"setmlgcameradefaults", 0x85AA}, // 0x4E7930
+        {"_meth_85AB", 0x85AB}, // 0x4DF920
+        {"_meth_85AC", 0x85AC}, // 0x4E4A50
+        {"_meth_85B0", 0x85B0}, // 0x4E4100
+        {"_meth_85B1", 0x85B1}, // 0x4F20A0
+        {"_meth_85B2", 0x85B2}, // 0x4EAEE0
+        {"_meth_85B3", 0x85B3}, // 0x4F6200
+        {"_meth_85B4", 0x85B4}, // 0x4F6CF0
+        {"playersetgroundreferenceent", 0x85B5}, // 0x4FF5C0
+        {"_meth_85B6", 0x85B6}, // 0x4B8070
+        {"_meth_85B7", 0x85B7}, // 0x4B8230
+        {"_meth_85B8", 0x85B8}, // 0x4B73F0
+        {"_meth_85B9", 0x85B9}, // 0x4B7510
+        {"_meth_85BA", 0x85BA}, // 0x4B75E0
+        {"_meth_85BB", 0x85BB}, // 0x4B5740
+        {"cleartargetent", 0x85BC}, // 0x4EB3E0
+        {"_meth_85BD", 0x85BD}, // 0x6D6870
+        {"_meth_85BE", 0x85BE}, // 0x5038B0
+        {"_meth_85BF", 0x85BF}, // 0x6D67E0
+        {"_meth_85C0", 0x85C0}, // 0x6D6C00
+        {"_meth_85C1", 0x85C1}, // 0x6D6920
+        {"_meth_85C2", 0x85C2}, // 0x4DF7A0
+        {"_meth_85C3", 0x85C3}, // 0x6D6DF0
+        {"_meth_85C4", 0x85C4}, // 0x4F8ED0
+        {"_meth_85C5", 0x85C5}, // 0x6D69A0
+        {"_meth_85C6", 0x85C6}, // 0x6D6A10
+        {"_meth_85C7", 0x85C7}, // 0x6D6A90
+        {"_meth_85C8", 0x85C8}, // 0x6D6B00
+        {"_meth_85C9", 0x85C9}, // 0x4DF7E0
+        {"_meth_85CA", 0x85CA}, // 0x4DF890
+        {"_meth_85CB", 0x85CB}, // 0x4DF980
+        {"_meth_85CC", 0x85CC}, // 0x4B6250
+        {"_meth_85CD", 0x85CD}, // 0x4E9350
+        {"gethybridscopestate", 0x85CE}, // 0x4B4C50
+        {"setagentattacker", 0x85CF}, // 0x4B4EA0
+        {"usebuttonpressed", 0x85D0}, // 0x4B37F0
+        {"begin", 0x85D1}, // 0x4F8B30
+        {"_meth_85D2", 0x85D2}, // 0x4E97B0
     };
 
     std::unordered_map<std::string, unsigned> token_map =
