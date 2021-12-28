@@ -159,7 +159,14 @@ namespace gui_console
 
 			ImGui::BeginChild("console_scroll", ImVec2(0, -footer_height_to_reserve), false);
 
-			ImGui::Text(filtered_text.data(), ImVec2(-1, -1));
+			const auto output = game_console::get_output();
+			for (const auto& line : output)
+			{
+				if (utils::string::find_lower(line, filter))
+				{
+					ImGui::Text(line.data(), ImVec2(-1, -1));
+				}
+			}
 
 			if (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 			{
