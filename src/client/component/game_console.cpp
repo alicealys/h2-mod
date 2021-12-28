@@ -55,7 +55,7 @@ namespace game_console
 		std::deque<std::string> history;
 
 		std::string fixed_input;
-		std::vector<std::string> matches;
+		std::unordered_set<std::string> matches;
 
 		float color_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 		float color_h2[4] = {0.9f, 0.9f, 0.5f, 1.0f};
@@ -242,11 +242,12 @@ namespace game_console
 			}
 			else if (matches.size() == 1)
 			{
-				auto* const dvar = game::Dvar_FindVar(matches[0].data());
+				const auto first = *matches.begin();
+				auto* const dvar = game::Dvar_FindVar(first.data());
 				const auto line_count = dvar ? 2 : 1;
 
 				draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
-				draw_hint_text(0, matches[0].data(), 
+				draw_hint_text(0, first.data(),
 							  dvar
 								  ? dvars::con_inputDvarMatchColor->current.vector
 								  : dvars::con_inputCmdMatchColor->current.vector);
@@ -262,7 +263,7 @@ namespace game_console
 						dvars::con_inputDvarInactiveValueColor->current.vector, offset);
 				}
 
-				strncpy_s(con.globals.auto_complete_choice, matches[0].data(), 64);
+				strncpy_s(con.globals.auto_complete_choice, first.data(), 64);
 				con.globals.may_auto_complete = true;
 			}
 			else if (matches.size() > 1)
@@ -271,23 +272,26 @@ namespace game_console
 
 				const auto offset = (con.screen_max[0] - con.globals.x) / 2.5f;
 
-				for (size_t i = 0; i < matches.size(); i++)
+				auto index = 0;
+				for (const auto& match : matches)
 				{
-					auto* const dvar = game::Dvar_FindVar(matches[i].data());
+					auto* const dvar = game::Dvar_FindVar(match.data());
 
-					draw_hint_text(static_cast<int>(i), matches[i].data(),
+					draw_hint_text(static_cast<int>(index), match.data(),
 					               dvar
 						               ? dvars::con_inputDvarMatchColor->current.vector
 						               : dvars::con_inputCmdMatchColor->current.vector);
 
 					if (dvar)
 					{
-						draw_hint_text(static_cast<int>(i), game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
+						draw_hint_text(static_cast<int>(index), game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
 									   dvars::con_inputDvarValueColor->current.vector, offset);
 					}
+
+					index++;
 				}
 
-				strncpy_s(con.globals.auto_complete_choice, matches[0].data(), 64);
+				strncpy_s(con.globals.auto_complete_choice, matches.begin()->data(), 64);
 				con.globals.may_auto_complete = true;
 			}
 		}
@@ -638,7 +642,7 @@ namespace game_console
 		return true;
 	}
 
-	void find_matches(std::string input, std::vector<std::string>& suggestions, const bool exact)
+	void find_matches(std::string input, std::unordered_set<std::string>& suggestions, const bool exact)
 	{
 		input = utils::string::to_lower(input);
 
@@ -647,7 +651,7 @@ namespace game_console
 			auto name = utils::string::to_lower(dvar);
 			if (match_compare(input, name, exact))
 			{
-				suggestions.push_back(dvar);
+				suggestions.insert(dvar);
 			}
 
 			if (exact && suggestions.size() > 1)
@@ -658,7 +662,7 @@ namespace game_console
 
 		if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
 		{
-			suggestions.push_back(input.data());
+			suggestions.insert(input.data());
 		}
 
 		game::cmd_function_s* cmd = (*game::cmd_functions);
@@ -670,7 +674,7 @@ namespace game_console
 
 				if (match_compare(input, name, exact))
 				{
-					suggestions.push_back(cmd->name);
+					suggestions.insert(cmd->name);
 				}
 
 				if (exact && suggestions.size() > 1)

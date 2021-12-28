@@ -19,9 +19,9 @@ namespace gui_console
 	{
 		bool auto_scroll = true;
 		int history_index = -1;
-		std::string input{};
-		std::string filter{};
-		std::vector<std::string> matches{};
+		std::string input;
+		std::string filter;
+		std::unordered_set<std::string> matches;
 
 		int input_text_edit(ImGuiInputTextCallbackData* data)
 		{
@@ -41,9 +41,9 @@ namespace gui_console
 					game_console::find_matches(text, matches, false);
 				}
 
-				if (matches.size() < 24)
+				if (matches.size() < 24 && matches.size() > 0)
 				{
-					const auto match = matches[0].data();
+					const auto match = matches.begin()->data();
 					data->DeleteChars(0, data->BufTextLen);
 					data->InsertChars(0, match, match + strlen(match));
 				}

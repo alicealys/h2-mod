@@ -55,21 +55,21 @@ namespace entity_list
 
 		struct filters_t
 		{
-			bool filter_by_range{};
-			float range{};
-			entity_team team{};
-			entity_type type{};
+			bool filter_by_range;
+			float range;
+			entity_team team;
+			entity_type type;
 			std::vector<std::pair<std::string, std::string>> fields;
 		};
 
 		struct data_t
 		{
-			bool auto_update{};
-			bool force_update{};
+			bool auto_update;
+			bool force_update;
 			filters_t filters;
-			std::chrono::milliseconds interval{};
-			std::chrono::high_resolution_clock::time_point last_call{};
-			std::vector<entity_info_t> entity_info{};
+			std::chrono::milliseconds interval;
+			std::chrono::high_resolution_clock::time_point last_call;
+			std::vector<entity_info_t> entity_info;
 			std::vector<std::function<void()>> tasks;
 			std::unordered_map<std::string, bool> selected_fields = 
 			{
@@ -277,7 +277,7 @@ namespace entity_list
 			};
 		};
 
-		utils::concurrency::container<data_t> data_;
+		utils::concurrency::container<data_t> data_{};
 		unsigned int selected_entity{};
 		bool set_field_window{};
 		bool selected_fields_window{};

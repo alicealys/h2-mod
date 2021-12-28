@@ -16,8 +16,8 @@ namespace asset_list
 	namespace
 	{
 		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
-		std::string asset_type_filter{};
-		std::string assets_name_filter{};
+		std::string asset_type_filter;
+		std::string assets_name_filter;
 
 		void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
 		{
