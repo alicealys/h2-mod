@@ -24,10 +24,10 @@ namespace scripting
         {"refreshhudammocounter", 0xC}, // 0x505000
         {"notifyoncommand", 0xD}, // 0x505060
         {"setprintchannel", 0xE}, // 0x4EB750 empty
-        {"allowscriptmenuresponse", 0xF}, // 0x4EB820
-        {"allowscriptmenuresponse", 0x10}, // 0x4EB9C0
-        {"notifyoncommand", 0x11}, // 0x4EC560
-        {"setprintchannel", 0x12}, // 0x4EC570
+        {"_func_00f", 0xF}, // 0x4EB820, returns param count
+        {"_func_010", 0x10}, // 0x4EB9C0, ^
+        {"_func_011", 0x11}, // 0x4EC560, empty
+        {"_func_012", 0x12}, // 0x4EC570, ^
         {"print", 0x13}, // 0x4EC640 empty
         {"println", 0x14}, // 0x4EC860 empty
         {"print3d", 0x15}, // 0x4EC870 empty
@@ -54,7 +54,7 @@ namespace scripting
         {"assertex", 0x2C}, // 0x4EC920
         {"assertmsg", 0x2D}, // 0x4EC980
         {"isdefined", 0x2E}, // 0x4ED1F0
-        {"issentient", 0x2F}, // 0x4ED5F0
+        {"isvalidmissile", 0x2F}, // 0x4ED5F0
         {"isstring", 0x30}, // 0x4ED850
         {"setomnvar", 0x31}, // 0x4EE990
         {"getomnvar", 0x32}, // 0x4EEC00
@@ -219,7 +219,7 @@ namespace scripting
         {"isai", 0xD3}, // 0x504740
         {"getindexforluincstring", 0xD4}, // 0x4EE030
         {"issentient", 0xD5}, // 0x4ED980
-        {"isspawner", 0xD6}, // 0x504790, unsure
+        {"isgodmode", 0xD6}, // 0x504790
         {"getdebugdvar", 0xD7}, // 0x504AA0
         {"getdebugdvarint", 0xD8}, // 0x504B20
         {"getdebugdvarfloat", 0xD9}, // 0x504C30
@@ -320,30 +320,30 @@ namespace scripting
         {"stopfxontag", 0x157}, // 0x4E7A60
         {"killfxontag", 0x158}, // 0x4E8220
         {"playloopedfx", 0x159}, // 0x6E8E00
-        {"_func_15a", 0x15A}, // 0x6E9130
-        {"_func_15b", 0x15B}, // 0x6E9390
-        {"_func_15c", 0x15C}, // 0x4E6360
-        {"_func_15d", 0x15D}, // 0x6E90C0
-        {"_func_15e", 0x15E}, // 0x4E7420
-        {"_func_15f", 0x15F}, // 0x4E61E0
-        {"_func_16f", 0x16F}, // 0x4F2350
-        {"_func_183", 0x183}, // 0x4E8920
-        {"physicsexplosionsphere", 0x184}, // 0x4EA120
-        {"physicsradiusjolt", 0x185}, // 0x4E9610
-        {"_func_186", 0x186}, // 0x4E9C60
-        {"_func_187", 0x187}, // 0x4ECC20
-        {"_func_188", 0x188}, // 0x4ECDE0
-        {"_func_189", 0x189}, // 0x4ED510
-        {"_func_18a", 0x18A}, // 0x4ED580
-        {"_func_18b", 0x18B}, // 0x4ED760
-        {"_func_18c", 0x18C}, // 0x4EDAA0
+        {"spawnfx", 0x15A}, // 0x6E9130
+        {"triggerfx", 0x15B}, // 0x6E9390
+        {"playfxontagforclients", 0x15C}, // 0x4E6360
+        {"_func_15d", 0x15D}, // 0x6E90C0, sets some entity flag
+        {"_func_15e", 0x15E}, // 0x4E7420, fx related
+        {"_func_15f", 0x15F}, // 0x4E61E0, calls Scr_ErrorInternal
+        {"precacheheadicon", 0x16F}, // 0x4F2350
+        {"physicsexplosionsphere", 0x183}, // 0x4E8920
+        {"physicsexplosioncylinder", 0x184}, // 0x4EA120
+        {"physicsjolt", 0x185}, // 0x4E9610
+        {"physicsjitter", 0x186}, // 0x4E9C60
+        {"setexpfog", 0x187}, // 0x4ECC20
+        {"setexpfogext", 0x188}, // 0x4ECDE0, server command name
+        {"setexpfogdvarsonly", 0x189}, // 0x4ED510, ^
+        {"setexpfogextdvarsonly", 0x18A}, // 0x4ED580, ^
+        {"setatmosfog", 0x18B}, // 0x4ED760, ^
+        {"setatmosfogdvarsonly", 0x18C}, // 0x4EDAA0, ^
         {"isexplosivedamagemod", 0x18D}, // 0x4F6330
         {"radiusdamage", 0x18E}, // 0x4F7460
-        {"_func_18f", 0x18F}, // 0x4F8550
-        {"_func_190", 0x190}, // 0x4F7620
-        {"_func_191", 0x191}, // 0x4ED2F0
+        {"setplayerignoreradiusdamage", 0x18F}, // 0x4F8550
+        {"glassradiusdamage", 0x190}, // 0x4F7620
+        {"earthquake", 0x191}, // 0x4ED2F0
         {"getnumparts", 0x192}, // 0x4EDDA0
-        {"_func_193", 0x193}, // 0x50EEA0
+        {"_func_193", 0x193}, // 0x50EEA0, eartquake func; args: (magnitude, duration, origin, radius)
         {"iprintln", 0x19D}, // 0x504120
         {"iprintlnbold", 0x19E}, // 0x5041A0
         {"logstring", 0x19F}, // 0x5071B0
@@ -352,50 +352,50 @@ namespace scripting
         {"spawnstruct", 0x1A4}, // 0x5C6B00
         {"isalive", 0x1A6}, // 0x5042F0
         {"isspawner", 0x1A7}, // 0x504380
-        {"missile_createattractororigin", 0x1A8}, // 0x4D73E0
-        {"missile_createrepulsorent", 0x1A9}, // 0x4D73F0
-        {"missile_createrepulsororigin", 0x1AA}, // 0x4D7710
-        {"_func_1ab", 0x1AB}, // 0x4D7720
+        {"missile_createattractorent", 0x1A8}, // 0x4D73E0
+        {"missile_createattractororigin", 0x1A9}, // 0x4D73F0
+        {"missile_createrepulsorent", 0x1AA}, // 0x4D7710
+        {"missile_createrepulsororigin", 0x1AB}, // 0x4D7720
         {"missile_deleteattractor", 0x1AC}, // 0x4D7730
         {"newhudelem", 0x1AE}, // 0x4C2570
         {"newclienthudelem", 0x1AF}, // 0x4C2510
-        {"_func_1b1", 0x1B1}, // 0x5C8350
-        {"isvalidmissile", 0x1B2}, // 0x504650
+        {"isplayer", 0x1B1}, // 0x5C8350, time related
+        {"isplayernumber", 0x1B2}, // 0x504650
         {"getpartname", 0x1B4}, // 0x4EDE60
-        {"_func_1b5", 0x1B5}, // 0x4EF400
-        {"ceil", 0x1B6}, // 0x4EC650
-        {"botmemoryflags", 0x1B7}, // 0x4ED640
-        {"getactivecount", 0x1B8}, // 0x4ED8F0
-        {"getsquadassaultenemyprestige", 0x1B9}, // 0x4EDDE0
-        {"getteamscore", 0x1BA}, // 0x4EDFA0
-        {"_func_1bb", 0x1BB}, // 0x4EDBC0
-        {"_func_1bc", 0x1BC}, // 0x4EE190
-        {"_func_1bd", 0x1BD}, // 0x4EE450
-        {"_func_1be", 0x1BE}, // 0x4F73A0
-        {"_func_1bf", 0x1BF}, // 0x4F7D90
-        {"_func_1c0", 0x1C0}, // 0x4EFD40
-        {"tablelookupistringbyrow", 0x1C1}, // 0x4F2020
-        {"_func_1c2", 0x1C2}, // 0x4F0940
-        {"tablelookuprownum", 0x1C3}, // 0x4F21E0
-        {"_func_1c4", 0x1C4}, // 0x4F1590
+        {"weaponfiretime", 0x1B5}, // 0x4EF400
+        {"weaponclipsize", 0x1B6}, // 0x4EC650
+        {"weaponisauto", 0x1B7}, // 0x4ED640
+        {"weaponissemiauto", 0x1B8}, // 0x4ED8F0
+        {"weaponisboltaction", 0x1B9}, // 0x4EDDE0
+        {"weaponinheritsperks", 0x1BA}, // 0x4EDFA0
+        {"weaponburstcount", 0x1BB}, // 0x4EDBC0
+        {"weapontype", 0x1BC}, // 0x4EE190
+        {"weaponclass", 0x1BD}, // 0x4EE450
+        {"getnextarraykey", 0x1BE}, // 0x4F73A0
+        {"sortbydistance", 0x1BF}, // 0x4F7D90
+        {"tablelookup", 0x1C0}, // 0x4EFD40
+        {"tablelookupbyrow", 0x1C1}, // 0x4F2020
+        {"tablelookupistring", 0x1C2}, // 0x4F0940
+        {"tablelookupistringbyrow", 0x1C3}, // 0x4F21E0
+        {"tablelookuprownum", 0x1C4}, // 0x4F1590
         {"tableexists", 0x1C5}, // 0x4F1DC0
         {"getmissileowner", 0x1C6}, // 0x4ECBC0
         {"magicbullet", 0x1C7}, // 0x4E98D0
         {"getweaponflashtagname", 0x1C8}, // 0x4EA890
-        {"summarizearraypoints", 0x1C9}, // 0x4F2630
-        {"buildhudoutlineclientmaskfromentarray", 0x1CA}, // 0x4F2A50
-        {"_func_1cb", 0x1CB}, // 0x6DA010
-        {"_func_1cc", 0x1CC}, // 0x4EC020
-        {"_func_1cd", 0x1CD}, // 0x4EC050
-        {"_func_1ce", 0x1CE}, // 0x4EC0F0
-        {"_func_1cf", 0x1CF}, // 0x4F8DC0
-        {"_func_1d0", 0x1D0}, // 0x4F5E20
-        {"_func_1d1", 0x1D1}, // 0x4F5E30
-        {"_func_1d2", 0x1D2}, // 0x4F5EC0
-        {"_func_1d3", 0x1D3}, // 0x4F5F20
-        {"_func_1d4", 0x1D4}, // 0x4F5F70
-        {"_func_1d5", 0x1D5}, // 0x4F5F80
-        {"_func_1d6", 0x1D6}, // 0x4F6A70
+        {"averagepoint", 0x1C9}, // 0x4F2630
+        {"averagenormal", 0x1CA}, // 0x4F2A50
+        {"vehicle_getspawnerarray", 0x1CB}, // 0x6DA010
+        {"playrumbleonposition", 0x1CC}, // 0x4EC020
+        {"playrumblelooponposition", 0x1CD}, // 0x4EC050
+        {"stopallrumbles", 0x1CE}, // 0x4EC0F0
+        {"soundexists", 0x1CF}, // 0x4F8DC0
+        {"openfile", 0x1D0}, // 0x4F5E20, empty
+        {"closefile", 0x1D1}, // 0x4F5E30, ^
+        {"fprintln", 0x1D2}, // 0x4F5EC0, ^
+        {"fprintfields", 0x1D3}, // 0x4F5F20, ^
+        {"freadln", 0x1D4}, // 0x4F5F70, ^
+        {"fgetarg", 0x1D5}, // 0x4F5F80, ^
+        {"setminimap", 0x1D6}, // 0x4F6A70
         {"setthermalbodymaterial", 0x1D7}, // 0x4F6EE0
         {"getarraykeys", 0x1D8}, // 0x4F7090
         {"getfirstarraykey", 0x1D9}, // 0x4F7240
@@ -404,72 +404,72 @@ namespace scripting
         {"getglassorigin", 0x1DC}, // 0x4F35B0
         {"isglassdestroyed", 0x1DD}, // 0x4F37E0
         {"destroyglass", 0x1DE}, // 0x4F3A90
-        {"deletepiece", 0x1DF}, // 0x4F3E00
-        {"getalpha", 0x1E0}, // 0x4F46B0
-        {"_func_1e1", 0x1E1}, // 0x4F4760
-        {"_func_1e2", 0x1E2}, // 0x50F580
-        {"_func_1e3", 0x1E3}, // 0x50FA30
-        {"_func_1e4", 0x1E4}, // 0x50EFD0
-        {"icon", 0x1E5}, // 0x50F010
-        {"_func_1e6", 0x1E6}, // 0x50F110
-        {"_func_1e7", 0x1E7}, // 0x50F1B0
-        {"_func_1e8", 0x1E8}, // 0x50F270
-        {"_func_1e9", 0x1E9}, // 0x4EE760
-        {"_func_1ea", 0x1EA}, // 0x4EE920
-        {"_func_1eb", 0x1EB}, // 0x4EEB40
-        {"_func_1ec", 0x1EC}, // 0x4EEF70
-        {"_func_1ed", 0x1ED}, // 0x4EF9E0
-        {"_func_1ee", 0x1EE}, // 0x4EFB10
-        {"_func_1ef", 0x1EF}, // 0x4F0080
-        {"_func_1f0", 0x1F0}, // 0x4F0550
-        {"getent", 0x1F1}, // 0x6CFCC0
-        {"getnodearray", 0x1F2}, // 0x6CFDB0
-        {"getallnodes", 0x1F3}, // 0x6CFC50
-        {"_func_1f4", 0x1F4}, // 0x6D9D40
-        {"_func_1f5", 0x1F5}, // 0x6DA090
+        {"deleteglass", 0x1DF}, // 0x4F3E00
+        {"getentchannelscount", 0x1E0}, // 0x4F46B0
+        {"getentchannelname", 0x1E1}, // 0x4F4760
+        {"objective_add", 0x1E2}, // 0x50F580
+        {"objective_delete", 0x1E3}, // 0x50FA30
+        {"objective_state", 0x1E4}, // 0x50EFD0
+        {"objective_icon", 0x1E5}, // 0x50F010
+        {"objective_position", 0x1E6}, // 0x50F110
+        {"objective_current", 0x1E7}, // 0x50F1B0
+        {"_func_1e8", 0x1E8}, // similar to objective_current_nomessage
+        {"weaponinventorytype", 0x1E9}, // 0x4EE760
+        {"weaponstartammo", 0x1EA}, // 0x4EE920
+        {"weaponmaxammo", 0x1EB}, // 0x4EEB40
+        {"weaponaltweaponname", 0x1EC}, // 0x4EEF70
+        {"isweaponcliponly", 0x1ED}, // 0x4EF9E0
+        {"isweapondetonationtimed", 0x1EE}, // 0x4EFB10
+        {"weaponhasthermalscope", 0x1EF}, // 0x4F0080
+        {"weaponhasexplosivedamage", 0x1F0}, // 0x4F0550, made up name
+        {"getvehiclenode", 0x1F1}, // 0x6CFCC0
+        {"getvehiclenodearray", 0x1F2}, // 0x6CFDB0
+        {"getallvehiclenodes", 0x1F3}, // 0x6CFC50
+        {"getnumvehicles", 0x1F4}, // 0x6D9D40
+        {"precachevehicle", 0x1F5}, // 0x6DA090
         {"spawnvehicle", 0x1F6}, // 0x6DA130
         {"vehicle_getarray", 0x1F7}, // 0x6D9D80
         {"pow", 0x1F8}, // 0x4F79C0
         {"_func_1f9", 0x1F9}, // 0x4F6950
-        {"getsquadassaultelo", 0x1FA}, // 0x501980
+        {"_func_1fa", 0x1FA}, // 0x501980
         {"_func_1fb", 0x1FB}, // 0x501C90
         {"_func_20b", 0x20B}, // 0x525490
-        {"_func_20c", 0x20C}, // 0x5250A0
-        {"soundexists", 0x215}, // 0x506D20
-        {"_func_21c", 0x21C}, // 0x524DA0
+        {"_func_20c", 0x20C}, // 0x5250A0, path node related
+        {"_func_215", 0x215}, // 0x506D20, weapon related
+        {"getlinkednodes", 0x21C}, // 0x524DA0
         {"disconnectnodepair", 0x21D}, // 0x4E5D30
         {"connectnodepair", 0x21E}, // 0x4E6160
         {"_func_21f", 0x21F}, // 0x505420
-        {"_func_222", 0x222}, // 0x5035C0
-        {"_func_224", 0x224}, // 0x5CD370
-        {"_func_225", 0x225}, // 0x5CD5B0
-        {"_func_226", 0x226}, // 0x5CD4F0
-        {"_func_227", 0x227}, // 0x5CD490
-        {"_func_228", 0x228}, // 0x5CD070
-        {"_func_229", 0x229}, // 0x5CD0F0
-        {"_func_22a", 0x22A}, // 0x5CD0A0
-        {"_func_22b", 0x22B}, // 0x5CD130
+        {"_func_222", 0x222}, // 0x5035C0, empty
+        {"loadtransient", 0x224}, // 0x5CD370
+        {"unloadtransient", 0x225}, // 0x5CD5B0
+        {"unloadalltransients", 0x226}, // 0x5CD4F0
+        {"synctransients", 0x227}, // 0x5CD490
+        {"istransientqueued", 0x228}, // 0x5CD070
+        {"istransientloaded", 0x229}, // 0x5CD0F0
+        {"loadstartpointtransient", 0x22A}, // 0x5CD0A0
+        {"_func_22b", 0x22B}, // 0x5CD130, transient related
         {"distance2dsquared", 0x22C}, // 0x4E2F40
         {"getangledelta3d", 0x22D}, // 0x4E1EB0
-        {"_func_22e", 0x22E}, // 0x4E8A30
-        {"stoploopsound", 0x22F}, // 0x4E8D40
-        {"_func_230", 0x230}, // 0x4E9240
+        {"_func_22e", 0x22E}, // 0x4E8A30, useless function
+        {"trajectorycalculateinitialvelocity", 0x22F}, // 0x4E8D40
+        {"trajectorycalculateminimumvelocity", 0x230}, // 0x4E9240
         {"trajectorycalculateexitangle", 0x231}, // 0x4E9570
-        {"_func_232", 0x232}, // 0x4E97C0
-        {"trajectorycomputedeltaheightattime", 0x233}, // 0x4E9F80
-        {"getteamradar", 0x234}, // 0x4EA100
-        {"_func_235", 0x235}, // 0x4ECA00
+        {"trajectorycomputedeltaheightattime", 0x232}, // 0x4E97C0
+        {"trajectorycanattemptaccuratejump", 0x233}, // 0x4E9F80
+        {"_func_234", 0x234}, // 0x4EA100, useless function
+        {"_func_235", 0x235}, // 0x4ECA00, empty
         {"ispointinvolume", 0x236}, // 0x4E2A30
-        {"getplaylistversion", 0x237}, // 0x5024C0
-        {"getbuildnumber", 0x238}, // 0x5024A0
-        {"isusingmatchrulesdata", 0x239}, // 0x5023C0
-        {"_func_23b", 0x23B}, // 0x4EBC50
-        {"_func_23d", 0x23D}, // 0x4EBE50
-        {"_func_23e", 0x23E}, // 0x4EB140
-        {"_func_23f", 0x23F}, // 0x508500
-        {"_func_240", 0x240}, // 0x500C90
-        {"isteamradarblocked", 0x241}, // 0x4EA700
-        {"issquadsmode", 0x242}, // 0x4EAAD0
+        {"cinematicgettimeinmsec", 0x237}, // 0x5024C0
+        {"cinematicgetframe", 0x238}, // 0x5024A0
+        {"iscinematicloaded", 0x239}, // 0x5023C0
+        {"bbprint", 0x23B}, // 0x4EBC50, empty
+        {"getscriptablearray", 0x23D}, // 0x4EBE50
+        {"clearfog", 0x23E}, // 0x4EB140
+        {"setleveldopplerpreset", 0x23F}, // 0x508500
+        {"screenshake", 0x240}, // 0x500C90
+        {"_func_241", 0x241}, // 0x4EA700, returns 1
+        {"_func_242", 0x242}, // 0x4EAAD0, returns 1
         {"_func_244", 0x244}, // 0x4F3620
         {"_func_245", 0x245}, // 0x4F3920
         {"_func_246", 0x246}, // 0x4F14E0
@@ -492,7 +492,7 @@ namespace scripting
         {"_func_25c", 0x25C}, // 0x4E6800
         {"_func_25e", 0x25E}, // 0x504A20
         {"_func_25f", 0x25F}, // 0x4F2990
-        {"addbot", 0x260}, // 0x4F29C0
+        {"_func_260", 0x260}, // 0x4F29C0
         {"getcsplinecount", 0x261}, // 0x4EC960
         {"getcsplinepointcount", 0x262}, // 0x4ECA10
         {"getcsplinelength", 0x263}, // 0x4ECD80
@@ -507,7 +507,7 @@ namespace scripting
         {"calccsplinecorridor", 0x26C}, // 0x4EE850
         {"_func_26d", 0x26D}, // 0x4EECB0
         {"_func_26e", 0x26E}, // 0x4EEF30
-        {"assertexcmd", 0x26F}, // 0x4EEF50
+        {"_func_26f", 0x26F}, // 0x4EEF50
         {"_func_271", 0x271}, // 0x4EF3C0
         {"_func_272", 0x272}, // 0x4EF3F0
         {"_func_273", 0x273}, // 0x4EF550
@@ -526,7 +526,7 @@ namespace scripting
         {"_func_286", 0x286}, // 0x4EE020
         {"_func_287", 0x287}, // 0x4EE0A0
         {"_func_288", 0x288}, // 0x4EBC80
-        {"playsoundasmaster", 0x289}, // 0x4EE0B0
+        {"loadluifile", 0x289}, // 0x4EE0B0
         {"_func_28f", 0x28F}, // 0x4EBCE0
         {"_func_292", 0x292}, // 0x4F08C0
         {"_func_293", 0x293}, // 0x4E82E0
@@ -542,7 +542,7 @@ namespace scripting
         {"_func_2a1", 0x2A1}, // 0x502500
         {"_func_2a2", 0x2A2}, // 0x4E8D30
         {"_func_2a3", 0x2A3}, // 0x4E2730
-        {"isvalidgametype", 0x2A4}, // 0x4ED4D0
+        {"_func_2a4", 0x2A4}, // 0x4ED4D0
         {"_func_2a5", 0x2A5}, // 0x4F2440
         {"_func_2a6", 0x2A6}, // 0x4F27B0
         {"_func_2a9", 0x2A9}, // 0x4F03B0
@@ -555,51 +555,51 @@ namespace scripting
         {"_func_2b1", 0x2B1}, // 0x505BD0
         {"_func_2b2", 0x2B2}, // 0x4EE110
         {"_func_2b3", 0x2B3}, // 0x4F7450
-        {"getuavstrengthlevelshowenemyfastsweep", 0x2B4}, // 0x4F6FF0
+        {"_func_2b4", 0x2B4}, // 0x4F6FF0
         {"_func_2b5", 0x2B5}, // 0x4F72A0
         {"_func_2b6", 0x2B6}, // 0x4F7390
         {"_func_2b7", 0x2B7}, // 0x4F7490
         {"_func_2bc", 0x2BC}, // 0x4E8130
         {"_func_2bd", 0x2BD}, // 0x4E87E0
-        {"getteamradarstrength", 0x2BE}, // 0x4EA560
+        {"_func_2be", 0x2BE}, // 0x4EA560
         {"_func_2bf", 0x2BF}, // 0x508310
         {"_func_2c4", 0x2C4}, // 0x4F5C30
         {"_func_2c5", 0x2C5}, // 0x508340
         {"_func_2c6", 0x2C6}, // 0x4EB9E0
         {"_func_2c8", 0x2C8}, // 0x4F7590
         {"_func_2c9", 0x2C9}, // 0x4F7610
-        {"abs", 0x2CA}, // 0x4EA680
+        {"_func_2ca", 0x2CA}, // 0x4EA680
         {"_func_2cb", 0x2CB}, // 0x4F2000
         {"_func_2cc", 0x2CC}, // 0x4F2160
-        {"setleveldopplerpreset", 0x2CD}, // 0x508550
+        {"_func_2cd", 0x2CD}, // 0x508550
         {"_func_2d6", 0x2D6}, // 0x5070C0
         {"_func_2dc", 0x2DC}, // 0x507B60
         {"_func_2dd", 0x2DD}, // 0x4F6CA0
         {"_func_2df", 0x2DF}, // 0x4F6F70
         {"_func_2e0", 0x2E0}, // 0x502A60
         {"_func_2e2", 0x2E2}, // 0x5085B0
-        {"isdedicatedserver", 0x2E7}, // 0x4F8070
+        {"_func_2e7", 0x2E7}, // 0x4F8070
         {"_func_2e8", 0x2E8}, // 0x4EAC20
         {"_func_2ea", 0x2EA}, // 0x4E6980
         {"_func_2eb", 0x2EB}, // 0x4E8150
         {"_func_2ec", 0x2EC}, // 0x4E8880
-        {"getarchivetime", 0x2ED}, // 0x508430
+        {"_func_2ed", 0x2ED}, // 0x508430
         {"_func_2ee", 0x2EE}, // 0x4E9010
         {"_func_2ef", 0x2EF}, // 0x4E92D0
         {"_func_2f0", 0x2F0}, // 0x503950
         {"_func_2f1", 0x2F1}, // 0x503C40
         {"_func_2f2", 0x2F2}, // 0x4F1FB0
-        {"getpsoffsettime", 0x2F6}, // 0x4F6010
+        {"_func_2f6", 0x2F6}, // 0x4F6010
         {"_func_2f7", 0x2F7}, // 0x4F6020
         {"_func_2f8", 0x2F8}, // 0x4F60C0
-        {"gettime", 0x2F9}, // 0x4F6190
-        {"ishairrunning", 0x2FA}, // 0x4F6320
-        {"getentchannelname", 0x2FB}, // 0x4F63E0
+        {"_func_2f9", 0x2F9}, // 0x4F6190
+        {"_func_2fa", 0x2FA}, // 0x4F6320
+        {"_func_2fb", 0x2FB}, // 0x4F63E0
         {"_func_2fc", 0x2FC}, // 0x4F6400
-        {"getuavstrengthmin", 0x2FD}, // 0x4F64D0
-        {"getbuildversion", 0x2FE}, // 0x4F67B0
+        {"_func_2fd", 0x2FD}, // 0x4F64D0
+        {"_func_2fe", 0x2FE}, // 0x4F67B0
         {"_func_2ff", 0x2FF}, // 0x4F6810
-        {"getuavstrengthmax", 0x300}, // 0x4F69A0
+        {"_func_300", 0x300}, // 0x4F69A0
         {"_func_301", 0x301}, // 0x4F48A0
         {"_func_302", 0x302}, // 0x4E3AD0
         {"_func_303", 0x303}, // 0x4E3B30
@@ -610,11 +610,11 @@ namespace scripting
         {"_func_309", 0x309}, // 0x4F8160
         {"_func_30b", 0x30B}, // 0x4EF3B0
         {"_func_30d", 0x30D}, // 0x4F02E0
-        {"tablelookup", 0x30E}, // 0x4F1970
+        {"_func_30e", 0x30E}, // 0x4F1970
         {"_func_312", 0x312}, // 0x4E3E80
-        {"lookupsoundlength", 0x313}, // 0x4ED7A0
+        {"_func_313", 0x313}, // 0x4ED7A0
         {"_func_314", 0x314}, // 0x4AF3F0
-        {"startservermigration", 0x315}, // 0x4ECC10
+        {"_func_315", 0x315}, // 0x4ECC10
         {"_func_316", 0x316}, // 0x4AF2D0
         {"_func_318", 0x318}, // 0x4F4300
         {"_func_319", 0x319}, // 0x4EA930
@@ -622,7 +622,7 @@ namespace scripting
         {"_func_31b", 0x31B}, // 0x503D60
         {"_func_31c", 0x31C}, // 0x503E40
         {"_func_31d", 0x31D}, // 0x503F00
-        {"getmaxagents", 0x31E}, // 0x5024E0
+        {"_func_31e", 0x31E}, // 0x5024E0
         {"_func_31f", 0x31F}, // 0x4F9110
     };
 
@@ -768,7 +768,7 @@ namespace scripting
         {"_meth_80aa", 0x80AA}, // 0x4E6FA0
         {"_meth_80ab", 0x80AB}, // 0x4E7DB0
         {"_meth_80ac", 0x80AC}, // 0x4E8760
-        {"setplayernamestring", 0x80AD}, // 0x4EA000
+        {"_meth_80ad", 0x80AD}, // 0x4EA000
         {"_meth_80ae", 0x80AE}, // 0x4EA8D0
         {"geteye", 0x80AF}, // 0x4F0840
         {"istouching", 0x80B0}, // 0x4F8630
@@ -780,12 +780,12 @@ namespace scripting
         {"_meth_80b6", 0x80B6}, // 0x4EC140
         {"delete", 0x80B7}, // 0x4F0460
         {"setmodel", 0x80B8}, // 0x4EE2A0
-        {"laseraltviewon", 0x80B9}, // 0x4EC720
-        {"laseraltviewoff", 0x80BA}, // 0x4EC8B0
-        {"thermalvisionon", 0x80BD}, // 0x4EC9A0
-        {"thermalvisionoff", 0x80BE}, // 0x4ED190
-        {"laseraltviewon", 0x80BF}, // 0x4EE4D0
-        {"laseraltviewoff", 0x80C0}, // 0x4EE7F0
+        {"laseron", 0x80B9}, // 0x4EC720
+        {"laseroff", 0x80BA}, // 0x4EC8B0
+        {"laseraltviewon", 0x80BD}, // 0x4EC9A0
+        {"laseraltviewoff", 0x80BE}, // 0x4ED190
+        {"thermalvisionon", 0x80BF}, // 0x4EE4D0
+        {"thermalvisiononshadowoff", 0x80C0}, // 0x4EE7F0
         {"setcontents", 0x80C5}, // 0x4EAA70
         {"makeusable", 0x80C6}, // 0x4EAC90
         {"makeunusable", 0x80C7}, // 0x4EAE90
@@ -820,7 +820,7 @@ namespace scripting
         {"forceusehintoff", 0x80E5}, // 0x4EC080
         {"makesoft", 0x80E6}, // 0x4EAF40
         {"makehard", 0x80E7}, // 0x4EB0F0
-        {"_meth_80e8", 0x80E8}, // 0x4EB190
+        {"willneverchange", 0x80E8}, // 0x4EB190
         {"startfiring", 0x80E9}, // 0x4F9400
         {"stopfiring", 0x80EA}, // 0x4F9740
         {"isfiringturret", 0x80EB}, // 0x4F9C60
@@ -1070,8 +1070,8 @@ namespace scripting
         {"_meth_81eb", 0x81EB}, // 0x4F9020
         {"getlightintensity", 0x81EC}, // 0x4F91B0
         {"_meth_81ed", 0x81ED}, // 0x4F9260
-        {"startfiring", 0x81EE}, // 0x4F9510
-        {"stopshellshock", 0x81EF}, // 0x4F96D0
+        {"_meth_81ee", 0x81EE}, // 0x4F9510
+        {"_meth_81ef", 0x81EF}, // 0x4F96D0
         {"isragdoll", 0x81F0}, // 0x4E2530
         {"setmovespeedscale", 0x81F1}, // 0x4F5260
         {"cameralinkto", 0x81F2}, // 0x4E3650
@@ -1172,7 +1172,7 @@ namespace scripting
         {"setvehiclelookattext", 0x8262}, // 0x6D8C40
         {"setvehicleteam", 0x8263}, // 0x6D8CD0
         {"neargoalnotifydist", 0x8264}, // 0x6D8D60
-        {"setgoalpos", 0x8265}, // 0x6D8DD0
+        {"setvehgoalpos", 0x8265}, // 0x6D8DD0
         {"setgoalyaw", 0x8266}, // 0x6D8EE0
         {"cleargoalyaw", 0x8267}, // 0x6D8F70
         {"settargetyaw", 0x8268}, // 0x6D8FF0
@@ -1578,7 +1578,7 @@ namespace scripting
         {"_meth_84bb", 0x84BB}, // 0x4F5900
         {"_meth_84bc", 0x84BC}, // 0x6D7960
         {"_meth_84bd", 0x84BD}, // 0x4EA0A0
-        {"turretfireenable", 0x84BE}, // 0x4EA5B0
+        {"_meth_84be", 0x84BE}, // 0x4EA5B0
         {"_meth_84bf", 0x84BF}, // 0x4B4AE0
         {"_meth_84c0", 0x84C0}, // 0x6D8170
         {"_meth_84c1", 0x84C1}, // 0x6D8270
@@ -1608,7 +1608,7 @@ namespace scripting
         {"maketurretsolid", 0x84E2}, // 0x4F72B0
         {"_meth_84e3", 0x84E3}, // 0x4F73E0
         {"_meth_84e4", 0x84E4}, // 0x4F74A0
-        {"stopfiring", 0x84E5}, // 0x4F75A0
+        {"_meth_84e5", 0x84E5}, // 0x4F75A0
         {"_meth_84e6", 0x84E6}, // 0x4F7770
         {"_meth_84e7", 0x84E7}, // 0x4F78F0
         {"_meth_84e8", 0x84E8}, // 0x4F7A00
@@ -1713,7 +1713,7 @@ namespace scripting
         {"_meth_8588", 0x8588}, // 0x4B8F80
         {"_meth_8589", 0x8589}, // 0x4B9270
         {"_meth_858c", 0x858C}, // 0x4EAB30
-        {"cleartargetentity", 0x858D}, // 0x4EB6F0
+        {"_meth_858d", 0x858D}, // 0x4EB6F0
         {"_meth_8590", 0x8590}, // 0x4F67A0
         {"_meth_8595", 0x8595}, // 0x4B3F60
         {"_meth_8596", 0x8596}, // 0x4BBD50
@@ -1744,14 +1744,14 @@ namespace scripting
         {"_meth_85b2", 0x85B2}, // 0x4EAEE0
         {"_meth_85b3", 0x85B3}, // 0x4F6200
         {"_meth_85b4", 0x85B4}, // 0x4F6CF0
-        {"playersetgroundreferenceent", 0x85B5}, // 0x4FF5C0
+        {"_meth_85b5", 0x85B5}, // 0x4FF5C0
         {"_meth_85b6", 0x85B6}, // 0x4B8070
         {"_meth_85b7", 0x85B7}, // 0x4B8230
         {"_meth_85b8", 0x85B8}, // 0x4B73F0
         {"_meth_85b9", 0x85B9}, // 0x4B7510
         {"_meth_85ba", 0x85BA}, // 0x4B75E0
         {"_meth_85bb", 0x85BB}, // 0x4B5740
-        {"cleartargetent", 0x85BC}, // 0x4EB3E0
+        {"_meth_85bc", 0x85BC}, // 0x4EB3E0
         {"_meth_85bd", 0x85BD}, // 0x6D6870
         {"_meth_85be", 0x85BE}, // 0x5038B0
         {"_meth_85bf", 0x85BF}, // 0x6D67E0
@@ -1771,7 +1771,7 @@ namespace scripting
         {"_meth_85cd", 0x85CD}, // 0x4E9350
         {"gethybridscopestate", 0x85CE}, // 0x4B4C50
         {"setagentattacker", 0x85CF}, // 0x4B4EA0
-        {"usebuttonpressed", 0x85D0}, // 0x4B37F0
+        {"_meth_85d0", 0x85D0}, // 0x4B37F0
         {"begin", 0x85D1}, // 0x4F8B30
         {"_meth_85d2", 0x85D2}, // 0x4E97B0
     };
