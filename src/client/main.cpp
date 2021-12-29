@@ -67,6 +67,12 @@ FARPROC load_binary(const launcher::mode mode, uint64_t* base_address)
 	{
 	case launcher::mode::singleplayer:
 		binary = "MW2CR.exe";
+
+		if (!utils::io::file_exists(binary))
+		{
+			binary = "h2_sp64_bnet_ship.exe";
+		}
+
 		break;
 	case launcher::mode::none:
 	default:
