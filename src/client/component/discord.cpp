@@ -28,7 +28,8 @@ namespace discord
 
 				discord_presence.startTimestamp = 0;
 
-				discord_presence.largeImageKey = "h2";
+				const auto background_index = static_cast<int>(game::Sys_Milliseconds() / 300000) % 10;
+				discord_presence.largeImageKey = utils::string::va("bg_%i", background_index);
 			}
 			else
 			{
