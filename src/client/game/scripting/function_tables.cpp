@@ -470,104 +470,105 @@ namespace scripting
         {"screenshake", 0x240}, // 0x500C90
         {"_func_241", 0x241}, // 0x4EA700, returns 1
         {"_func_242", 0x242}, // 0x4EAAD0, returns 1
-        {"_func_244", 0x244}, // 0x4F3620
-        {"_func_245", 0x245}, // 0x4F3920
-        {"_func_246", 0x246}, // 0x4F14E0
-        {"_func_247", 0x247}, // 0x4F14F0
-        {"_func_248", 0x248}, // 0x4F1580
-        {"_func_249", 0x249}, // 0x4F1640
-        {"_func_24a", 0x24A}, // 0x4F1820
-        {"_func_24c", 0x24C}, // 0x4EB420
-        {"_func_251", 0x251}, // 0x4FF230
-        {"_func_252", 0x252}, // 0x4FF350
+        {"_func_244", 0x244}, // 0x4F3620, capsule trace ?
+        {"_func_245", 0x245}, // 0x4F3920, ^
+        {"_func_246", 0x246}, // 0x4F14E0, return 0.0
+        {"_func_247", 0x247}, // 0x4F14F0, ^
+        {"_func_248", 0x248}, // 0x4F1580, returns 0
+        {"_func_249", 0x249}, // 0x4F1640, ^
+        {"_func_24a", 0x24A}, // 0x4F1820, ^
+        {"luinotifyevent", 0x24C}, // 0x4EB420
+        {"physwakeup", 0x251}, // 0x4FF230, server command name
+        {"ragdollwakeup", 0x252}, // 0x4FF350, ^
         {"_func_253", 0x253}, // 0x4E6B60
         {"_func_254", 0x254}, // 0x4F97C0
-        {"_func_255", 0x255}, // 0x4E48A0
-        {"_func_256", 0x256}, // 0x502AD0
-        {"_func_257", 0x257}, // 0x4EBBA0
-        {"_func_258", 0x258}, // 0x4EBBB0
-        {"_func_259", 0x259}, // 0x4EBC20
-        {"_func_25a", 0x25A}, // 0x4E60E0
-        {"_func_25b", 0x25B}, // 0x4E6250
-        {"_func_25c", 0x25C}, // 0x4E6800
-        {"_func_25e", 0x25E}, // 0x504A20
-        {"_func_25f", 0x25F}, // 0x4F2990
-        {"_func_260", 0x260}, // 0x4F29C0
+        {"anglestoaxis", 0x255}, // 0x4E48A0
+        {"visionsetwater", 0x256}, // 0x502AD0
+        {"sendscriptusageanalysisdata", 0x257}, // 0x4EBBA0, empty
+        {"resetscriptusageanalysisdata", 0x258}, // 0x4EBBB0, ^
+        {"instantlylogusageanalysisdata", 0x259}, // 0x4EBC20, ^
+        {"invertangles", 0x25A}, // 0x4E60E0
+        {"rotatevectorinverted", 0x25B}, // 0x4E6250
+        {"_func_25c", 0x25C}, // 0x4E6800, vector related
+        {"_func_25e", 0x25E}, // 0x504A20, sets some entity flag
+        {"_func_25f", 0x25F}, // 0x4F2990, sets some config string
+        {"_func_260", 0x260}, // 0x4F29C0, string/font related ?
         {"getcsplinecount", 0x261}, // 0x4EC960
         {"getcsplinepointcount", 0x262}, // 0x4ECA10
         {"getcsplinelength", 0x263}, // 0x4ECD80
         {"getcsplinepointid", 0x264}, // 0x4ECF30
         {"getcsplinepointlabel", 0x265}, // 0x4ED440
         {"getcsplinepointtension", 0x266}, // 0x4ED6D0
-        {"getcsplinepointcorridordims", 0x267}, // 0x4ED9E0
-        {"getcsplinepointtangent", 0x268}, // 0x4EDCE0
-        {"_func_269", 0x269}, // 0x4EDEE0
+        {"getcsplinepointposition", 0x267}, // 0x4ED9E0
+        {"getcsplinepointcorridordims", 0x268}, // 0x4EDCE0
+        {"getcsplinepointtangent", 0x269}, // 0x4EDEE0
         {"getcsplinepointdisttonextpoint", 0x26A}, // 0x4EE210
         {"calccsplinetangent", 0x26B}, // 0x4EE530
         {"calccsplinecorridor", 0x26C}, // 0x4EE850
-        {"_func_26d", 0x26D}, // 0x4EECB0
-        {"_func_26e", 0x26E}, // 0x4EEF30
-        {"_func_26f", 0x26F}, // 0x4EEF50
-        {"_func_271", 0x271}, // 0x4EF3C0
-        {"_func_272", 0x272}, // 0x4EF3F0
-        {"_func_273", 0x273}, // 0x4EF550
-        {"_func_274", 0x274}, // 0x4EF670
-        {"_func_275", 0x275}, // 0x4EF780
-        {"_func_276", 0x276}, // 0x4EFA50
-        {"_func_278", 0x278}, // 0x505B30
-        {"_func_279", 0x279}, // 0x505BC0
-        {"_func_27a", 0x27A}, // 0x4EFAF0
-        {"_func_27b", 0x27B}, // 0x4EFB00
-        {"_func_27c", 0x27C}, // 0x4EFC90
-        {"_func_27d", 0x27D}, // 0x4EFD30
-        {"_func_283", 0x283}, // 0x4EC710
-        {"_func_284", 0x284}, // 0x4C2560
-        {"_func_285", 0x285}, // 0x4EDF90
-        {"_func_286", 0x286}, // 0x4EE020
-        {"_func_287", 0x287}, // 0x4EE0A0
-        {"_func_288", 0x288}, // 0x4EBC80
+        {"calccsplinecorridor", 0x26D}, // 0x4EECB0
+        {"setnojipscore", 0x26E}, // 0x4EEF30, useless function
+        {"setnojiptime", 0x26F}, // 0x4EEF50, ^
+        {"getpredictedentityposition", 0x271}, // 0x4EF3C0, empty
+        {"gamedvrprohibitrecording", 0x272}, // 0x4EF3F0, ^
+        {"gamedvrstartrecording", 0x273}, // 0x4EF550, ^
+        {"gamedvrstoprecording", 0x274}, // 0x4EF670, ^
+        {"gamedvrsetvideometadata", 0x275}, // 0x4EF780, ^
+        {"gamedvrprohibitscreenshots", 0x276}, // 0x4EFA50, ^
+        {"gamedvrsetscreenshotmetadata", 0x278}, // 0x505B30, ^
+        {"queuedialog", 0x279}, // 0x505BC0, ^
+        {"speechenablegrammar", 0x27A}, // 0x4EFAF0, ^
+        {"speechenable", 0x27B}, // 0x4EFB00, ^
+        {"livestreamingenable", 0x27C}, // 0x4EFC90, ^
+        {"livestreamingsetbitrate", 0x27D}, // 0x4EFD30, ^
+        {"triggerportableradarping", 0x283}, // 0x4EC710, ^
+        {"setglaregrimematerial", 0x284}, // 0x4C2560, calls Scr_ErrorInternal
+        {"botgetteamlimit", 0x285}, // 0x4EDF90, empty
+        {"spawnfxforclient", 0x286}, // 0x4EE020, ^
+        {"botgetteamdifficulty", 0x287}, // 0x4EE0A0, ^
+        {"getsquadassaultelo", 0x288}, // 0x4EBC80, ^
         {"loadluifile", 0x289}, // 0x4EE0B0
-        {"_func_28f", 0x28F}, // 0x4EBCE0
-        {"_func_292", 0x292}, // 0x4F08C0
+        // Unknown functions
+        {"_func_28f", 0x28F}, // 0x4EBCE0, empty
+        {"_func_292", 0x292}, // 0x4F08C0, returns 0
         {"_func_293", 0x293}, // 0x4E82E0
         {"_func_294", 0x294}, // 0x4E8A60
-        {"_func_299", 0x299}, // 0x4F6E70
-        {"_func_29a", 0x29A}, // 0x4F6EC0
+        {"enablecontext", 0x299}, // 0x4F6E70, server command name
+        {"disablecontext", 0x29A}, // 0x4F6EC0, ^
         {"_func_29b", 0x29B}, // 0x5051E0
-        {"_func_29c", 0x29C}, // 0x4F0D80
-        {"_func_29d", 0x29D}, // 0x4F49C0
+        {"_func_29c", 0x29C}, // 0x4F0D80, sound related
+        {"_func_29d", 0x29D}, // 0x4F49C0, ^
         {"_func_29e", 0x29E}, // 0x4EEA20
         {"_func_29f", 0x29F}, // 0x4EF270
         {"_func_2a0", 0x2A0}, // 0x4EF680
         {"_func_2a1", 0x2A1}, // 0x502500
-        {"_func_2a2", 0x2A2}, // 0x4E8D30
+        {"_func_2a2", 0x2A2}, // 0x4E8D30, empty
         {"_func_2a3", 0x2A3}, // 0x4E2730
         {"_func_2a4", 0x2A4}, // 0x4ED4D0
         {"_func_2a5", 0x2A5}, // 0x4F2440
         {"_func_2a6", 0x2A6}, // 0x4F27B0
-        {"_func_2a9", 0x2A9}, // 0x4F03B0
+        {"_func_2a9", 0x2A9}, // 0x4F03B0, weapon related
         {"_func_2aa", 0x2AA}, // 0x502710
         {"_func_2ab", 0x2AB}, // 0x4F3A00
-        {"_func_2ac", 0x2AC}, // 0x4E8C40
+        {"_func_2ac", 0x2AC}, // 0x4E8C40, useless function
         {"_func_2ad", 0x2AD}, // 0x4F67C0
-        {"_func_2ae", 0x2AE}, // 0x4F6F00
-        {"_func_2af", 0x2AF}, // 0x4F6EB0
-        {"_func_2b1", 0x2B1}, // 0x505BD0
+        {"_func_2ae", 0x2AE}, // 0x4F6F00, empty
+        {"_func_2af", 0x2AF}, // 0x4F6EB0, ^
+        {"_func_2b1", 0x2B1}, // 0x505BD0, useless function
         {"_func_2b2", 0x2B2}, // 0x4EE110
-        {"_func_2b3", 0x2B3}, // 0x4F7450
-        {"_func_2b4", 0x2B4}, // 0x4F6FF0
-        {"_func_2b5", 0x2B5}, // 0x4F72A0
-        {"_func_2b6", 0x2B6}, // 0x4F7390
-        {"_func_2b7", 0x2B7}, // 0x4F7490
-        {"_func_2bc", 0x2BC}, // 0x4E8130
-        {"_func_2bd", 0x2BD}, // 0x4E87E0
+        {"_func_2b3", 0x2B3}, // 0x4F7450, empty
+        {"_func_2b4", 0x2B4}, // 0x4F6FF0, returns 0
+        {"_func_2b5", 0x2B5}, // 0x4F72A0, empty
+        {"_func_2b6", 0x2B6}, // 0x4F7390, ^
+        {"_func_2b7", 0x2B7}, // 0x4F7490, ^
+        {"_func_2bc", 0x2BC}, // 0x4E8130, ^
+        {"_func_2bd", 0x2BD}, // 0x4E87E0, ^
         {"_func_2be", 0x2BE}, // 0x4EA560
-        {"_func_2bf", 0x2BF}, // 0x508310
-        {"_func_2c4", 0x2C4}, // 0x4F5C30
+        {"challengemessage", 0x2BF}, // 0x508310, server command name
+        {"_func_2c4", 0x2C4}, // 0x4F5C30, weapon related
         {"_func_2c5", 0x2C5}, // 0x508340
         {"_func_2c6", 0x2C6}, // 0x4EB9E0
-        {"_func_2c8", 0x2C8}, // 0x4F7590
-        {"_func_2c9", 0x2C9}, // 0x4F7610
+        {"_func_2c8", 0x2C8}, // 0x4F7590, empty
+        {"_func_2c9", 0x2C9}, // 0x4F7610, ^
         {"_func_2ca", 0x2CA}, // 0x4EA680
         {"_func_2cb", 0x2CB}, // 0x4F2000
         {"_func_2cc", 0x2CC}, // 0x4F2160
@@ -575,49 +576,49 @@ namespace scripting
         {"_func_2d6", 0x2D6}, // 0x5070C0
         {"_func_2dc", 0x2DC}, // 0x507B60
         {"_func_2dd", 0x2DD}, // 0x4F6CA0
-        {"_func_2df", 0x2DF}, // 0x4F6F70
+        {"_func_2df", 0x2DF}, // 0x4F6F70, empty
         {"_func_2e0", 0x2E0}, // 0x502A60
-        {"_func_2e2", 0x2E2}, // 0x5085B0
-        {"_func_2e7", 0x2E7}, // 0x4F8070
+        {"_func_2e2", 0x2E2}, // 0x5085B0, empty
+        {"_func_2e7", 0x2E7}, // 0x4F8070, returns 1
         {"_func_2e8", 0x2E8}, // 0x4EAC20
-        {"_func_2ea", 0x2EA}, // 0x4E6980
-        {"_func_2eb", 0x2EB}, // 0x4E8150
-        {"_func_2ec", 0x2EC}, // 0x4E8880
+        {"_func_2ea", 0x2EA}, // 0x4E6980, empty
+        {"_func_2eb", 0x2EB}, // 0x4E8150, ^
+        {"_func_2ec", 0x2EC}, // 0x4E8880, ^
         {"_func_2ed", 0x2ED}, // 0x508430
         {"_func_2ee", 0x2EE}, // 0x4E9010
         {"_func_2ef", 0x2EF}, // 0x4E92D0
         {"_func_2f0", 0x2F0}, // 0x503950
-        {"_func_2f1", 0x2F1}, // 0x503C40
+        {"_func_2f1", 0x2F1}, // 0x503C40, empty
         {"_func_2f2", 0x2F2}, // 0x4F1FB0
-        {"_func_2f6", 0x2F6}, // 0x4F6010
-        {"_func_2f7", 0x2F7}, // 0x4F6020
+        {"_func_2f6", 0x2F6}, // 0x4F6010, returns 0
+        {"_func_2f7", 0x2F7}, // 0x4F6020, returns ""
         {"_func_2f8", 0x2F8}, // 0x4F60C0
-        {"_func_2f9", 0x2F9}, // 0x4F6190
-        {"_func_2fa", 0x2FA}, // 0x4F6320
-        {"_func_2fb", 0x2FB}, // 0x4F63E0
+        {"_func_2f9", 0x2F9}, // 0x4F6190, returns -1
+        {"_func_2fa", 0x2FA}, // 0x4F6320, returns 0
+        {"_func_2fb", 0x2FB}, // 0x4F63E0, returns ""
         {"_func_2fc", 0x2FC}, // 0x4F6400
-        {"_func_2fd", 0x2FD}, // 0x4F64D0
-        {"_func_2fe", 0x2FE}, // 0x4F67B0
+        {"_func_2fd", 0x2FD}, // 0x4F64D0, returns -1
+        {"_func_2fe", 0x2FE}, // 0x4F67B0, returns ""
         {"_func_2ff", 0x2FF}, // 0x4F6810
-        {"_func_300", 0x300}, // 0x4F69A0
-        {"_func_301", 0x301}, // 0x4F48A0
-        {"_func_302", 0x302}, // 0x4E3AD0
-        {"_func_303", 0x303}, // 0x4E3B30
-        {"_func_304", 0x304}, // 0x4F08D0
+        {"_func_300", 0x300}, // 0x4F69A0, returns -1
+        {"_func_301", 0x301}, // 0x4F48A0, weapon related
+        {"_func_302", 0x302}, // 0x4E3AD0, calls Scr_ErrorInternal
+        {"_func_303", 0x303}, // 0x4E3B30, ^
+        {"_func_304", 0x304}, // 0x4F08D0, weapon related
         {"_func_305", 0x305}, // 0x4ECC50
         {"_func_306", 0x306}, // 0x4ECE10
         {"_func_307", 0x307}, // 0x4ECFC0
         {"_func_309", 0x309}, // 0x4F8160
-        {"_func_30b", 0x30B}, // 0x4EF3B0
+        {"_func_30b", 0x30B}, // 0x4EF3B0, empty
         {"_func_30d", 0x30D}, // 0x4F02E0
         {"_func_30e", 0x30E}, // 0x4F1970
-        {"_func_312", 0x312}, // 0x4E3E80
+        {"_func_312", 0x312}, // 0x4E3E80, calls Scr_ErrorInternal
         {"_func_313", 0x313}, // 0x4ED7A0
         {"_func_314", 0x314}, // 0x4AF3F0
-        {"_func_315", 0x315}, // 0x4ECC10
+        {"fast_restart", 0x315}, // 0x4ECC10
         {"_func_316", 0x316}, // 0x4AF2D0
         {"_func_318", 0x318}, // 0x4F4300
-        {"_func_319", 0x319}, // 0x4EA930
+        {"enablepg", 0x319}, // 0x4EA930, server command name
         {"_func_31a", 0x31A}, // 0x503C50
         {"_func_31b", 0x31B}, // 0x503D60
         {"_func_31c", 0x31C}, // 0x503E40
