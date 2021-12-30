@@ -9,622 +9,621 @@ namespace scripting
 {
     std::unordered_map<std::string, unsigned> function_map =
     {
-        {"precacheturret", 0x0}, // 0x4EF520
-        {"getweaponarray", 0x1}, // 0x4E2AF0
-        {"createprintchannel", 0x2}, // 0x4EB6E0 empty
-        {"updategamerprofileall", 0x3}, // 0x502950
-        {"clearlocalizedstrings", 0x4}, // 0x504F40
-        {"setphysicsgravitydir", 0x5}, // 0x4FF120
-        {"gettimescale", 0x6}, // 0x508680
-        {"settimescale", 0x7}, // 0x5086A0
-        {"setslowmotionview", 0x8}, // 0x5087A0
-        {"teleportscene", 0x9}, // 0x5086C0
-        {"forcesharedammo", 0xA}, // 0x5085A0
-        {"refreshhudcompass", 0xB}, // 0x504FD0
-        {"refreshhudammocounter", 0xC}, // 0x505000
-        {"notifyoncommand", 0xD}, // 0x505060
-        {"setprintchannel", 0xE}, // 0x4EB750 empty
-        {"_func_00f", 0xF}, // 0x4EB820, returns param count
-        {"_func_010", 0x10}, // 0x4EB9C0, ^
-        {"_func_011", 0x11}, // 0x4EC560, empty
-        {"_func_012", 0x12}, // 0x4EC570, ^
-        {"print", 0x13}, // 0x4EC640 empty
-        {"println", 0x14}, // 0x4EC860 empty
-        {"print3d", 0x15}, // 0x4EC870 empty
-        {"line", 0x16}, // 0x4EC880 empty
-        {"spawnturret", 0x17}, // 0x4EF180
-        {"canspawnturret", 0x18}, // 0x4EF3D0
-        {"assert", 0x19}, // 0x4EC890
-        {"pausecinematicingame", 0x1A}, // 0x502660
-        {"drawcompassfriendlies", 0x1B}, // 0x502690
-        {"bulletspread", 0x1C}, // 0x5021C0
-        {"bullettracer", 0x1D}, // 0x5023E0
-        {"badplace_delete", 0x1E}, // 0x4E6F00
-        {"badplace_cylinder", 0x1F}, // 0x4E7120
-        {"badplace_arc", 0x20}, // 0x4E76D0
-        {"badplace_brush", 0x21}, // 0x4E7F10
-        {"clearallcorpses", 0x22}, // 0x503F20
-        {"setturretnode", 0x23}, // 0x525640
-        {"unsetturretnode", 0x24}, // 0x5256E0
-        {"setnodepriority", 0x25}, // 0x525560
-        {"isnodeoccupied", 0x26}, // 0x525420
-        {"setdebugorigin", 0x29}, // 0x504630 empty
-        {"setdebugangles", 0x2A}, // 0x504640 empty
-        {"updategamerprofile", 0x2B}, // 0x5046B0
-        {"assertex", 0x2C}, // 0x4EC920
-        {"assertmsg", 0x2D}, // 0x4EC980
-        {"isdefined", 0x2E}, // 0x4ED1F0
-        {"isvalidmissile", 0x2F}, // 0x4ED5F0
-        {"isstring", 0x30}, // 0x4ED850
-        {"setomnvar", 0x31}, // 0x4EE990
-        {"getomnvar", 0x32}, // 0x4EEC00
-        {"setdvar", 0x33}, // 0x4EF040
-        {"setdynamicdvar", 0x35}, // 0x4EFA60
-        {"setdvarifuninitialized", 0x36}, // 0x4EF560
-        {"setdevdvar", 0x37}, // 0x4EFCA0
-        {"getdvar", 0x38}, // 0x4F0260
-        {"getdvarint", 0x39}, // 0x4F0730
-        {"getdvarfloat", 0x3A}, // 0x4F1500
-        {"getdvarvector", 0x3B}, // 0x4F1A20
-        {"gettime", 0x3C}, // 0x4F2180
-        {"gettimeutc", 0x3D}, // 0x4F21C0
-        {"getculldist", 0x3E}, // 0x4F2330
-        {"getentbynum", 0x3F}, // 0x4F2400
-        {"getscreenwidth", 0x40}, // 0x4F2620
-        {"getscreenheight", 0x41}, // 0x4F27A0
-        {"getweaponmodel", 0x42}, // 0x4F28B0
-        {"_func_043", 0x43}, // 0x502BF0, sets config string
-        {"_func_044", 0x44}, // 0x502C50, ^
-        {"_func_045", 0x45}, // 0x502C90, bunch of arrays
-        {"_func_046", 0x46}, // 0x502CF0, sets config string
-        {"_func_047", 0x47}, // 0x502D80, ^
-        {"setsunlight", 0x48}, // 0x502DB0
-        {"resetsunlight", 0x49}, // 0x502E40
-        {"getmapsundirection", 0x4A}, // 0x502E70
-        {"getmapsunangles", 0x4B}, // 0x502EA0
-        {"setsundirection", 0x4C}, // 0x502FD0
-        {"lerpsundirection", 0x4D}, // 0x5030E0
-        {"lerpsunangles", 0x4E}, // 0x503380
-        {"resetsundirection", 0x4F}, // 0x5036E0
-        {"enableforcedsunshadows", 0x50}, // 0x503740
-        {"enableforcednosunshadows", 0x51}, // 0x503760
-        {"disableforcedsunshadows", 0x52}, // 0x5037B0
-        {"enableouterspacemodellighting", 0x53}, // 0x5037D0
-        {"disableouterspacemodellighting", 0x54}, // 0x5038F0
-        {"remapstage", 0x55}, // 0x504B50
-        {"changelevel", 0x56}, // 0x501A80
-        {"missionsuccess", 0x57}, // 0x501C40
-        {"missionfailed", 0x58}, // 0x501C70
-        {"cinematic", 0x59}, // 0x501CD0
-        {"cinematicingame", 0x5A}, // 0x501EB0
-        {"cinematicingamesync", 0x5B}, // 0x501F50
-        {"cinematicingameloop", 0x5C}, // 0x5020C0
-        {"cinematicingameloopresident", 0x5D}, // 0x502140
-        {"iscinematicplaying", 0x5E}, // 0x502390
-        {"stopcinematicingame", 0x5F}, // 0x502640
-        {"getweapondisplayname", 0x60}, // 0x4F32A0
-        {"getweaponbasename", 0x61}, // 0x4F36D0
-        {"getweaponattachments", 0x62}, // 0x4F3D20
-        {"getweaponattachmentdisplaynames", 0x63}, // 0x4F4440
-        {"getweaponcamoname", 0x64}, // 0x4F51C0
-        {"getweaponreticlename", 0x65}, // 0x4F55D0
-        {"getanimlength", 0x66}, // 0x4F7960
-        {"animhasnotetrack", 0x67}, // 0x4F7B90
-        {"getnotetracktimes", 0x68}, // 0x4F8020
-        {"spawn", 0x69}, // 0x4EEDD0
-        {"spawnloopsound", 0x6A}, // 0x4EEDD0
-        {"spawnloopingsound", 0x6B}, // 0x6B56B0
-        {"bullettrace", 0x6C}, // 0x4F1BD0
-        {"target_setmaxsize", 0x6D}, // 0x5140B0
-        {"target_setcolor", 0x6E}, // 0x513BC0
-        {"target_setdelay", 0x6F}, // 0x513D50
-        {"getstartorigin", 0x70}, // 0x4AF5F0
-        {"getstartangles", 0x71}, // 0x4AF4E0
-        {"getcycleoriginoffset", 0x72}, // 0x4AF180
-        {"magicgrenade", 0x73}, // 0x501DB0
-        {"magicgrenademanual", 0x74}, // 0x4F0130
-        {"setblur", 0x75}, // 0x507470
-        {"musicplay", 0x76}, // 0x507570
-        {"musicstop", 0x77}, // 0x507770
-        {"soundfade", 0x78}, // 0x507890
-        {"addsubmix", 0x79}, // 0x4F6940, server command name
-        {"clearsubmix", 0x7A}, // 0x4F6990, ^
-        {"clearallsubmixes", 0x7B}, // 0x4F6A20, ^
-        {"blendsubmix", 0x7C}, // 0x4F6C90, ^
-        {"makestickysubmix", 0x7D}, // 0x4F6DA0, ^
-        {"makeunstickysubmix", 0x7E}, // 0x4F6DD0, ^
-        {"soundtime", 0x7F}, // 0x507A70, ^
-        {"soundtimereset", 0x80}, // 0x4FF720, ^
-        {"levelsoundfade", 0x81}, // 0x507960
-        {"precachenightvisioncodeassets", 0x82}, // 0x5019A0
-        {"precachedigitaldistortcodeassets", 0x84}, // 0x5019C0
-        {"precacheminimapsentrycodeassets", 0x85}, // 0x501A60
-        {"savegame", 0x86}, // 0x4FF7B0
-        {"issavesuccessful", 0x87}, // 0x500380
-        {"issaverecentlyloaded", 0x88}, // 0x5003A0
-        {"savegamenocommit", 0x89}, // 0x500210
-        {"commitsave", 0x8A}, // 0x5003C0
-        {"commitwouldbevalid", 0x8B}, // 0x500B40
-        {"getfxvisibility", 0x8C}, // 0x5026B0
-        {"setculldist", 0x8D}, // 0x502AE0
-        {"bullettracepassed", 0x8E}, // 0x4F2260
-        {"sighttracepassed", 0x8F}, // 0x4F2480
-        {"physicstrace", 0x90}, // 0x4F2C80
-        {"playerphysicstrace", 0x91}, // 0x4F3190
-        {"getgroundposition", 0x92}, // 0x4F5780
-        {"getangledelta", 0x93}, // 0x4F9570
-        {"getmovedelta", 0x94}, // 0x4F9E10
-        {"getnorthyaw", 0x95}, // 0x4E2840
-        {"getcommandfromkey", 0x96}, // 0x506E40
-        {"getsticksconfig", 0x97}, // 0x506F60
-        {"_func_098", 0x98}, // 0x507060, gamepad related
-        {"_func_099", 0x99}, // 0x5070A0, returns 0
-        {"_func_09a", 0x9A}, // 0x507140, gamepad related
-        {"weaponfightdist", 0x9B}, // 0x500BF0
-        {"weaponmaxdist", 0x9C}, // 0x500C40
-        {"isturretactive", 0x9D}, // 0x500BB0
-        {"getstarttime", 0x9E}, // 0x506DA0
-        {"target_alloc", 0x9F}, // 0x513350
-        {"target_flush", 0xA0}, // 0x513780
-        {"target_set", 0xA1}, // 0x513A60
-        {"target_remove", 0xA2}, // 0x513A20
-        {"target_setshader", 0xA3}, // 0x514750
-        {"target_setoffscreenshader", 0xA4}, // 0x514380
-        {"target_isinrect", 0xA5}, // 0x513900
-        {"target_isincircle", 0xA6}, // 0x513890
-        {"target_startreticlelockon", 0xA7}, // 0x5148A0
-        {"target_clearreticlelockon", 0xA8}, // 0x513370
-        {"target_getarray", 0xA9}, // 0x513810
-        {"target_istarget", 0xAA}, // 0x5139A0
-        {"target_setattackmode", 0xAB}, // 0x513A80
-        {"target_setjavelinonly", 0xAC}, // 0x513F60
-        {"target_hidefromplayer", 0xAD}, // 0x513880
-        {"target_showtoplayer", 0xAE}, // 0x514890
-        {"target_setscaledrendermode", 0xAF}, // 0x514600
-        {"target_drawcornersonly", 0xB0}, // 0x5133A0
-        {"target_drawsquare", 0xB1}, // 0x513610
-        {"target_drawsingle", 0xB2}, // 0x5134F0
-        {"target_setminsize", 0xB3}, // 0x5141F0
-        {"setnorthyaw", 0xB4}, // 0x4E2B60
-        {"setslowmotion", 0xB5}, // 0x4F4320
-        {"randomint", 0xB6}, // 0x4F5A60
-        {"randomfloat", 0xB7}, // 0x4F5BE0
-        {"randomintrange", 0xB8}, // 0x4F5E40
-        {"randomfloatrange", 0xB9}, // 0x4F5ED0
-        {"sin", 0xBA}, // 0x4F5FE0
-        {"cos", 0xBB}, // 0x4F6030
-        {"tan", 0xBC}, // 0x4F6130
-        {"asin", 0xBD}, // 0x4F6390
-        {"acos", 0xBE}, // 0x4F6470
-        {"atan", 0xBF}, // 0x4F6880
-        {"int", 0xC0}, // 0x4F69B0
-        {"float", 0xC1}, // 0x4F6E00
-        {"abs", 0xC2}, // 0x4F7000
-        {"min", 0xC3}, // 0x4F7200
-        {"objective_additionalcurrent", 0xC4}, // 0x50F290
-        {"objective_ring", 0xC5}, // 0x50F3D0
-        {"objective_setpointertextoverride", 0xC6}, // 0x50F490
-        {"getnode", 0xC7}, // 0x524E60
-        {"getnodearray", 0xC8}, // 0x524F70
-        {"getallnodes", 0xC9}, // 0x524C40
-        {"getnodesinradius", 0xCA}, // 0x525080
-        {"getnodesinradiussorted", 0xCB}, // 0x525090
-        {"getclosestnodeinsight", 0xCC}, // 0x524C90
-        {"getreflectionlocs", 0xCD}, // 0x504F60
-        {"getreflectionreferencelocs", 0xCE}, // 0x504F70
-        {"getvehicletracksegment", 0xCF}, // 0x6DC180
-        {"getvehicletracksegmentarray", 0xD0}, // 0x6DC260
-        {"getallvehicletracksegments", 0xD1}, // 0x6DC130
-        {"isarray", 0xD2}, // 0x4EA580
-        {"isai", 0xD3}, // 0x504740
-        {"getindexforluincstring", 0xD4}, // 0x4EE030
-        {"issentient", 0xD5}, // 0x4ED980
-        {"isgodmode", 0xD6}, // 0x504790
-        {"getdebugdvar", 0xD7}, // 0x504AA0
-        {"getdebugdvarint", 0xD8}, // 0x504B20
-        {"getdebugdvarfloat", 0xD9}, // 0x504C30
-        {"setsaveddvar", 0xDA}, // 0x504C60
-        {"getfreeaicount", 0xDB}, // 0x505030
-        {"getaicount", 0xDC}, // 0x5050A0
-        {"getaiarray", 0xDD}, // 0x505360
-        {"getaispeciesarray", 0xDE}, // 0x505520
-        {"getspawnerarray", 0xDF}, // 0x505840
-        {"getcorpsearray", 0xE0}, // 0x505730
-        {"getspawnerteamarray", 0xE1}, // 0x505A40
-        {"getweaponclipmodel", 0xE2}, // 0x505B40
-        {"getbrushmodelcenter", 0xE3}, // 0x506D90
-        {"getkeybinding", 0xE4}, // 0x506DB0
-        {"max", 0xE5}, // 0x4F7270
-        {"floor", 0xE6}, // 0x4F7300
-        {"ceil", 0xE7}, // 0x4F7430
-        {"round", 0xE8}, // 0x4F7470
-        {"exp", 0xE9}, // 0x4F7570
-        {"log", 0xEA}, // 0x4F75F0
-        {"sqrt", 0xEB}, // 0x4F7750
-        {"squared", 0xEC}, // 0x4F78D0
-        {"clamp", 0xED}, // 0x4F7A80
-        {"angleclamp", 0xEE}, // 0x4F7AD0
-        {"angleclamp180", 0xEF}, // 0x4F7BF0
-        {"vectorfromlinetopoint", 0xF0}, // 0x4FA300
-        {"pointonsegmentnearesttopoint", 0xF1}, // 0x4E20E0
-        {"distance", 0xF2}, // 0x4E2C00
-        {"distance2d", 0xF3}, // 0x4E2E70
-        {"distancesquared", 0xF4}, // 0x4E2FA0
-        {"length", 0xF5}, // 0x4E3330
-        {"length2d", 0xF6}, // 0x4E3530
-        {"lengthsquared", 0xF7}, // 0x4E3590
-        {"length2dsquared", 0xF8}, // 0x4E36E0
-        {"closer", 0xF9}, // 0x4E3730
-        {"vectordot", 0xFA}, // 0x4E3900
-        {"vectorcross", 0xFB}, // 0x4E3A10
-        {"axistoangles", 0xFC}, // 0x4E4680
-        {"visionsetthermal", 0xFD}, // 0x502A40
-        {"visionsetpain", 0xFE}, // 0x502A50
-        {"incrementcounter", 0x103}, // 0x5056E0
-        {"getcountertotal", 0x104}, // 0x5057A0
-        {"getlevelticks", 0x105}, // 0x4F2380
-        {"perlinnoise2d", 0x106}, // 0x4F7D00
-        {"calcrockingangles", 0x107}, // 0x4F81C0
-        {"reconevent", 0x108}, // 0x7C1910
-        {"reconspatialevent", 0x109}, // 0x7C1920
-        {"setsunflareposition", 0x10A}, // 0x4E4760
-        {"createthreatbiasgroup", 0x10B}, // 0x531770
-        {"threatbiasgroupexists", 0x10C}, // 0x5317A0
-        {"getthreatbias", 0x10D}, // 0x5317E0
-        {"setthreatbias", 0x10E}, // 0x531840
-        {"setthreatbiasagainstall", 0x10F}, // 0x5318C0
-        {"setignoremegroup", 0x110}, // 0x531910
-        {"isenemyteam", 0x111}, // 0x531060
-        {"objective_additionalentity", 0x112}, // 0x50FA70
-        {"objective_state_nomessage", 0x113}, // 0x50EFE0
-        {"objective_string", 0x114}, // 0x50EFF0
-        {"objective_string_nomessage", 0x115}, // 0x50F000
-        {"objective_additionalposition", 0x116}, // 0x50F200
-        {"objective_current_nomessage", 0x117}, // 0x50F280
-        {"vectornormalize", 0x118}, // 0x4E3E90
-        {"vectortoangles", 0x119}, // 0x4E40A0
-        {"vectortoyaw", 0x11A}, // 0x4E42A0
-        {"vectorlerp", 0x11B}, // 0x4E4430
-        {"anglestoup", 0x11C}, // 0x4E4AD0
-        {"anglestoright", 0x11D}, // 0x4E4C70
-        {"anglestoforward", 0x11E}, // 0x4E4DD0
-        {"anglesdelta", 0x11F}, // 0x4E4F80
-        {"combineangles", 0x120}, // 0x4E5940
-        {"transformmove", 0x121}, // 0x4E5C10
-        {"rotatevector", 0x122}, // 0x4E7C20
-        {"rotatepointaroundvector", 0x123}, // 0x4E7FC0
-        {"issubstr", 0x124}, // 0x4E9170
-        {"isendstr", 0x125}, // 0x4E91B0
-        {"getsubstr", 0x126}, // 0x4E9440
-        {"tolower", 0x127}, // 0x4E9E20
-        {"strtok", 0x128}, // 0x4EA2D0
-        {"stricmp", 0x129}, // 0x4EA980
-        {"ambientplay", 0x12A}, // 0x4F2E00
-        {"_func_144", 0x144}, // 0x5046A0
-        {"visionsetnaked", 0x147}, // 0x502940
-        {"visionsetnight", 0x148}, // 0x502A20
-        {"visionsetmissilecam", 0x149}, // 0x502A30
-        {"ambientstop", 0x14A}, // 0x4F52C0
-        {"precachemodel", 0x14B}, // 0x4EB430
-        {"precacheshellshock", 0x14C}, // 0x4EB670
-        {"precacheitem", 0x14D}, // 0x4F1FC0
-        {"precacheshader", 0x14E}, // 0x4F2120
-        {"precachestring", 0x14F}, // 0x4F2390
-        {"precachemenu", 0x150}, // 0x4F25F0
-        {"precacherumble", 0x151}, // 0x4F2770
-        {"precachelocationselector", 0x152}, // 0x4EB550
-        {"precacheleaderboards", 0x153}, // 0x4F2190
-        {"loadfx", 0x154}, // 0x4E3480
-        {"playfx", 0x155}, // 0x4E44F0
-        {"playfxontag", 0x156}, // 0x4E5DB0
-        {"stopfxontag", 0x157}, // 0x4E7A60
-        {"killfxontag", 0x158}, // 0x4E8220
-        {"playloopedfx", 0x159}, // 0x6E8E00
-        {"spawnfx", 0x15A}, // 0x6E9130
-        {"triggerfx", 0x15B}, // 0x6E9390
-        {"playfxontagforclients", 0x15C}, // 0x4E6360
-        {"_func_15d", 0x15D}, // 0x6E90C0, sets some entity flag
-        {"_func_15e", 0x15E}, // 0x4E7420, fx related
-        {"_func_15f", 0x15F}, // 0x4E61E0, calls Scr_ErrorInternal
-        {"precacheheadicon", 0x16F}, // 0x4F2350
-        {"physicsexplosionsphere", 0x183}, // 0x4E8920
-        {"physicsexplosioncylinder", 0x184}, // 0x4EA120
-        {"physicsjolt", 0x185}, // 0x4E9610
-        {"physicsjitter", 0x186}, // 0x4E9C60
-        {"setexpfog", 0x187}, // 0x4ECC20
-        {"setexpfogext", 0x188}, // 0x4ECDE0, server command name
-        {"setexpfogdvarsonly", 0x189}, // 0x4ED510, ^
-        {"setexpfogextdvarsonly", 0x18A}, // 0x4ED580, ^
-        {"setatmosfog", 0x18B}, // 0x4ED760, ^
-        {"setatmosfogdvarsonly", 0x18C}, // 0x4EDAA0, ^
-        {"isexplosivedamagemod", 0x18D}, // 0x4F6330
-        {"radiusdamage", 0x18E}, // 0x4F7460
-        {"setplayerignoreradiusdamage", 0x18F}, // 0x4F8550
-        {"glassradiusdamage", 0x190}, // 0x4F7620
-        {"earthquake", 0x191}, // 0x4ED2F0
-        {"getnumparts", 0x192}, // 0x4EDDA0
-        {"_func_193", 0x193}, // 0x50EEA0, eartquake func; args: (magnitude, duration, origin, radius)
-        {"iprintln", 0x19D}, // 0x504120
-        {"iprintlnbold", 0x19E}, // 0x5041A0
-        {"logstring", 0x19F}, // 0x5071B0
-        {"getent", 0x1A0}, // 0x511680
-        {"getentarray", 0x1A1}, // 0x5116F0
-        {"spawnstruct", 0x1A4}, // 0x5C6B00
-        {"isalive", 0x1A6}, // 0x5042F0
-        {"isspawner", 0x1A7}, // 0x504380
-        {"missile_createattractorent", 0x1A8}, // 0x4D73E0
-        {"missile_createattractororigin", 0x1A9}, // 0x4D73F0
-        {"missile_createrepulsorent", 0x1AA}, // 0x4D7710
-        {"missile_createrepulsororigin", 0x1AB}, // 0x4D7720
-        {"missile_deleteattractor", 0x1AC}, // 0x4D7730
-        {"newhudelem", 0x1AE}, // 0x4C2570
-        {"newclienthudelem", 0x1AF}, // 0x4C2510
-        {"isplayer", 0x1B1}, // 0x5C8350, time related
-        {"isplayernumber", 0x1B2}, // 0x504650
-        {"getpartname", 0x1B4}, // 0x4EDE60
-        {"weaponfiretime", 0x1B5}, // 0x4EF400
-        {"weaponclipsize", 0x1B6}, // 0x4EC650
-        {"weaponisauto", 0x1B7}, // 0x4ED640
-        {"weaponissemiauto", 0x1B8}, // 0x4ED8F0
-        {"weaponisboltaction", 0x1B9}, // 0x4EDDE0
-        {"weaponinheritsperks", 0x1BA}, // 0x4EDFA0
-        {"weaponburstcount", 0x1BB}, // 0x4EDBC0
-        {"weapontype", 0x1BC}, // 0x4EE190
-        {"weaponclass", 0x1BD}, // 0x4EE450
-        {"getnextarraykey", 0x1BE}, // 0x4F73A0
-        {"sortbydistance", 0x1BF}, // 0x4F7D90
-        {"tablelookup", 0x1C0}, // 0x4EFD40
-        {"tablelookupbyrow", 0x1C1}, // 0x4F2020
-        {"tablelookupistring", 0x1C2}, // 0x4F0940
-        {"tablelookupistringbyrow", 0x1C3}, // 0x4F21E0
-        {"tablelookuprownum", 0x1C4}, // 0x4F1590
-        {"tableexists", 0x1C5}, // 0x4F1DC0
-        {"getmissileowner", 0x1C6}, // 0x4ECBC0
-        {"magicbullet", 0x1C7}, // 0x4E98D0
-        {"getweaponflashtagname", 0x1C8}, // 0x4EA890
-        {"averagepoint", 0x1C9}, // 0x4F2630
-        {"averagenormal", 0x1CA}, // 0x4F2A50
-        {"vehicle_getspawnerarray", 0x1CB}, // 0x6DA010
-        {"playrumbleonposition", 0x1CC}, // 0x4EC020
-        {"playrumblelooponposition", 0x1CD}, // 0x4EC050
-        {"stopallrumbles", 0x1CE}, // 0x4EC0F0
-        {"soundexists", 0x1CF}, // 0x4F8DC0
-        {"openfile", 0x1D0}, // 0x4F5E20, empty
-        {"closefile", 0x1D1}, // 0x4F5E30, ^
-        {"fprintln", 0x1D2}, // 0x4F5EC0, ^
-        {"fprintfields", 0x1D3}, // 0x4F5F20, ^
-        {"freadln", 0x1D4}, // 0x4F5F70, ^
-        {"fgetarg", 0x1D5}, // 0x4F5F80, ^
-        {"setminimap", 0x1D6}, // 0x4F6A70
-        {"setthermalbodymaterial", 0x1D7}, // 0x4F6EE0
-        {"getarraykeys", 0x1D8}, // 0x4F7090
-        {"getfirstarraykey", 0x1D9}, // 0x4F7240
-        {"getglass", 0x1DA}, // 0x4F2C30
-        {"getglassarray", 0x1DB}, // 0x4F30B0
-        {"getglassorigin", 0x1DC}, // 0x4F35B0
-        {"isglassdestroyed", 0x1DD}, // 0x4F37E0
-        {"destroyglass", 0x1DE}, // 0x4F3A90
-        {"deleteglass", 0x1DF}, // 0x4F3E00
-        {"getentchannelscount", 0x1E0}, // 0x4F46B0
-        {"getentchannelname", 0x1E1}, // 0x4F4760
-        {"objective_add", 0x1E2}, // 0x50F580
-        {"objective_delete", 0x1E3}, // 0x50FA30
-        {"objective_state", 0x1E4}, // 0x50EFD0
-        {"objective_icon", 0x1E5}, // 0x50F010
-        {"objective_position", 0x1E6}, // 0x50F110
-        {"objective_current", 0x1E7}, // 0x50F1B0
-        {"_func_1e8", 0x1E8}, // similar to objective_current_nomessage
-        {"weaponinventorytype", 0x1E9}, // 0x4EE760
-        {"weaponstartammo", 0x1EA}, // 0x4EE920
-        {"weaponmaxammo", 0x1EB}, // 0x4EEB40
-        {"weaponaltweaponname", 0x1EC}, // 0x4EEF70
-        {"isweaponcliponly", 0x1ED}, // 0x4EF9E0
-        {"isweapondetonationtimed", 0x1EE}, // 0x4EFB10
-        {"weaponhasthermalscope", 0x1EF}, // 0x4F0080
-        {"weaponhasexplosivedamage", 0x1F0}, // 0x4F0550, made up name
-        {"getvehiclenode", 0x1F1}, // 0x6CFCC0
-        {"getvehiclenodearray", 0x1F2}, // 0x6CFDB0
-        {"getallvehiclenodes", 0x1F3}, // 0x6CFC50
-        {"getnumvehicles", 0x1F4}, // 0x6D9D40
-        {"precachevehicle", 0x1F5}, // 0x6DA090
-        {"spawnvehicle", 0x1F6}, // 0x6DA130
-        {"vehicle_getarray", 0x1F7}, // 0x6D9D80
-        {"pow", 0x1F8}, // 0x4F79C0
-        {"_func_1f9", 0x1F9}, // 0x4F6950
-        {"_func_1fa", 0x1FA}, // 0x501980
-        {"_func_1fb", 0x1FB}, // 0x501C90
-        {"_func_20b", 0x20B}, // 0x525490
-        {"_func_20c", 0x20C}, // 0x5250A0, path node related
-        {"_func_215", 0x215}, // 0x506D20, weapon related
-        {"getlinkednodes", 0x21C}, // 0x524DA0
-        {"disconnectnodepair", 0x21D}, // 0x4E5D30
-        {"connectnodepair", 0x21E}, // 0x4E6160
-        {"_func_21f", 0x21F}, // 0x505420
-        {"_func_222", 0x222}, // 0x5035C0, empty
-        {"loadtransient", 0x224}, // 0x5CD370
-        {"unloadtransient", 0x225}, // 0x5CD5B0
-        {"unloadalltransients", 0x226}, // 0x5CD4F0
-        {"synctransients", 0x227}, // 0x5CD490
-        {"istransientqueued", 0x228}, // 0x5CD070
-        {"istransientloaded", 0x229}, // 0x5CD0F0
-        {"loadstartpointtransient", 0x22A}, // 0x5CD0A0
-        {"_func_22b", 0x22B}, // 0x5CD130, transient related
-        {"distance2dsquared", 0x22C}, // 0x4E2F40
-        {"getangledelta3d", 0x22D}, // 0x4E1EB0
-        {"_func_22e", 0x22E}, // 0x4E8A30, useless function
-        {"trajectorycalculateinitialvelocity", 0x22F}, // 0x4E8D40
-        {"trajectorycalculateminimumvelocity", 0x230}, // 0x4E9240
-        {"trajectorycalculateexitangle", 0x231}, // 0x4E9570
-        {"trajectorycomputedeltaheightattime", 0x232}, // 0x4E97C0
-        {"trajectorycanattemptaccuratejump", 0x233}, // 0x4E9F80
-        {"_func_234", 0x234}, // 0x4EA100, useless function
-        {"_func_235", 0x235}, // 0x4ECA00, empty
-        {"ispointinvolume", 0x236}, // 0x4E2A30
-        {"cinematicgettimeinmsec", 0x237}, // 0x5024C0
-        {"cinematicgetframe", 0x238}, // 0x5024A0
-        {"iscinematicloaded", 0x239}, // 0x5023C0
-        {"bbprint", 0x23B}, // 0x4EBC50, empty
-        {"getscriptablearray", 0x23D}, // 0x4EBE50
-        {"clearfog", 0x23E}, // 0x4EB140
-        {"setleveldopplerpreset", 0x23F}, // 0x508500
-        {"screenshake", 0x240}, // 0x500C90
-        {"_func_241", 0x241}, // 0x4EA700, returns 1
-        {"_func_242", 0x242}, // 0x4EAAD0, returns 1
-        {"_func_244", 0x244}, // 0x4F3620, capsule trace ?
-        {"_func_245", 0x245}, // 0x4F3920, ^
-        {"_func_246", 0x246}, // 0x4F14E0, return 0.0
-        {"_func_247", 0x247}, // 0x4F14F0, ^
-        {"_func_248", 0x248}, // 0x4F1580, returns 0
-        {"_func_249", 0x249}, // 0x4F1640, ^
-        {"_func_24a", 0x24A}, // 0x4F1820, ^
-        {"luinotifyevent", 0x24C}, // 0x4EB420
-        {"physwakeup", 0x251}, // 0x4FF230, server command name
-        {"ragdollwakeup", 0x252}, // 0x4FF350, ^
-        {"_func_253", 0x253}, // 0x4E6B60
-        {"_func_254", 0x254}, // 0x4F97C0
-        {"anglestoaxis", 0x255}, // 0x4E48A0
-        {"visionsetwater", 0x256}, // 0x502AD0
-        {"sendscriptusageanalysisdata", 0x257}, // 0x4EBBA0, empty
-        {"resetscriptusageanalysisdata", 0x258}, // 0x4EBBB0, ^
-        {"instantlylogusageanalysisdata", 0x259}, // 0x4EBC20, ^
-        {"invertangles", 0x25A}, // 0x4E60E0
-        {"rotatevectorinverted", 0x25B}, // 0x4E6250
-        {"_func_25c", 0x25C}, // 0x4E6800, vector related
-        {"_func_25e", 0x25E}, // 0x504A20, sets some entity flag
-        {"_func_25f", 0x25F}, // 0x4F2990, sets some config string
-        {"_func_260", 0x260}, // 0x4F29C0, string/font related ?
-        {"getcsplinecount", 0x261}, // 0x4EC960
-        {"getcsplinepointcount", 0x262}, // 0x4ECA10
-        {"getcsplinelength", 0x263}, // 0x4ECD80
-        {"getcsplinepointid", 0x264}, // 0x4ECF30
-        {"getcsplinepointlabel", 0x265}, // 0x4ED440
-        {"getcsplinepointtension", 0x266}, // 0x4ED6D0
-        {"getcsplinepointposition", 0x267}, // 0x4ED9E0
-        {"getcsplinepointcorridordims", 0x268}, // 0x4EDCE0
-        {"getcsplinepointtangent", 0x269}, // 0x4EDEE0
-        {"getcsplinepointdisttonextpoint", 0x26A}, // 0x4EE210
-        {"calccsplinetangent", 0x26B}, // 0x4EE530
-        {"calccsplinecorridor", 0x26C}, // 0x4EE850
-        {"calccsplinecorridor", 0x26D}, // 0x4EECB0
-        {"setnojipscore", 0x26E}, // 0x4EEF30, useless function
-        {"setnojiptime", 0x26F}, // 0x4EEF50, ^
-        {"getpredictedentityposition", 0x271}, // 0x4EF3C0, empty
-        {"gamedvrprohibitrecording", 0x272}, // 0x4EF3F0, ^
-        {"gamedvrstartrecording", 0x273}, // 0x4EF550, ^
-        {"gamedvrstoprecording", 0x274}, // 0x4EF670, ^
-        {"gamedvrsetvideometadata", 0x275}, // 0x4EF780, ^
-        {"gamedvrprohibitscreenshots", 0x276}, // 0x4EFA50, ^
-        {"gamedvrsetscreenshotmetadata", 0x278}, // 0x505B30, ^
-        {"queuedialog", 0x279}, // 0x505BC0, ^
-        {"speechenablegrammar", 0x27A}, // 0x4EFAF0, ^
-        {"speechenable", 0x27B}, // 0x4EFB00, ^
-        {"livestreamingenable", 0x27C}, // 0x4EFC90, ^
-        {"livestreamingsetbitrate", 0x27D}, // 0x4EFD30, ^
-        {"triggerportableradarping", 0x283}, // 0x4EC710, ^
-        {"setglaregrimematerial", 0x284}, // 0x4C2560, calls Scr_ErrorInternal
-        {"botgetteamlimit", 0x285}, // 0x4EDF90, empty
-        {"spawnfxforclient", 0x286}, // 0x4EE020, ^
-        {"botgetteamdifficulty", 0x287}, // 0x4EE0A0, ^
-        {"getsquadassaultelo", 0x288}, // 0x4EBC80, ^
-        {"loadluifile", 0x289}, // 0x4EE0B0
-        // Unknown functions
-        {"_func_28f", 0x28F}, // 0x4EBCE0, empty
-        {"_func_292", 0x292}, // 0x4F08C0, returns 0
-        {"_func_293", 0x293}, // 0x4E82E0
-        {"_func_294", 0x294}, // 0x4E8A60
-        {"enablecontext", 0x299}, // 0x4F6E70, server command name
-        {"disablecontext", 0x29A}, // 0x4F6EC0, ^
-        {"_func_29b", 0x29B}, // 0x5051E0
-        {"_func_29c", 0x29C}, // 0x4F0D80, sound related
-        {"_func_29d", 0x29D}, // 0x4F49C0, ^
-        {"_func_29e", 0x29E}, // 0x4EEA20
-        {"_func_29f", 0x29F}, // 0x4EF270
-        {"_func_2a0", 0x2A0}, // 0x4EF680
-        {"_func_2a1", 0x2A1}, // 0x502500
-        {"_func_2a2", 0x2A2}, // 0x4E8D30, empty
-        {"_func_2a3", 0x2A3}, // 0x4E2730
-        {"_func_2a4", 0x2A4}, // 0x4ED4D0
-        {"_func_2a5", 0x2A5}, // 0x4F2440
-        {"_func_2a6", 0x2A6}, // 0x4F27B0
-        {"_func_2a9", 0x2A9}, // 0x4F03B0, weapon related
-        {"_func_2aa", 0x2AA}, // 0x502710
-        {"_func_2ab", 0x2AB}, // 0x4F3A00
-        {"_func_2ac", 0x2AC}, // 0x4E8C40, useless function
-        {"_func_2ad", 0x2AD}, // 0x4F67C0
-        {"_func_2ae", 0x2AE}, // 0x4F6F00, empty
-        {"_func_2af", 0x2AF}, // 0x4F6EB0, ^
-        {"_func_2b1", 0x2B1}, // 0x505BD0, useless function
-        {"_func_2b2", 0x2B2}, // 0x4EE110
-        {"_func_2b3", 0x2B3}, // 0x4F7450, empty
-        {"_func_2b4", 0x2B4}, // 0x4F6FF0, returns 0
-        {"_func_2b5", 0x2B5}, // 0x4F72A0, empty
-        {"_func_2b6", 0x2B6}, // 0x4F7390, ^
-        {"_func_2b7", 0x2B7}, // 0x4F7490, ^
-        {"_func_2bc", 0x2BC}, // 0x4E8130, ^
-        {"_func_2bd", 0x2BD}, // 0x4E87E0, ^
-        {"_func_2be", 0x2BE}, // 0x4EA560
-        {"challengemessage", 0x2BF}, // 0x508310, server command name
-        {"_func_2c4", 0x2C4}, // 0x4F5C30, weapon related
-        {"_func_2c5", 0x2C5}, // 0x508340
-        {"_func_2c6", 0x2C6}, // 0x4EB9E0
-        {"_func_2c8", 0x2C8}, // 0x4F7590, empty
-        {"_func_2c9", 0x2C9}, // 0x4F7610, ^
-        {"_func_2ca", 0x2CA}, // 0x4EA680
-        {"_func_2cb", 0x2CB}, // 0x4F2000
-        {"_func_2cc", 0x2CC}, // 0x4F2160
-        {"_func_2cd", 0x2CD}, // 0x508550
-        {"_func_2d6", 0x2D6}, // 0x5070C0
-        {"_func_2dc", 0x2DC}, // 0x507B60
-        {"_func_2dd", 0x2DD}, // 0x4F6CA0
-        {"_func_2df", 0x2DF}, // 0x4F6F70, empty
-        {"_func_2e0", 0x2E0}, // 0x502A60
-        {"_func_2e2", 0x2E2}, // 0x5085B0, empty
-        {"_func_2e7", 0x2E7}, // 0x4F8070, returns 1
-        {"_func_2e8", 0x2E8}, // 0x4EAC20
-        {"_func_2ea", 0x2EA}, // 0x4E6980, empty
-        {"_func_2eb", 0x2EB}, // 0x4E8150, ^
-        {"_func_2ec", 0x2EC}, // 0x4E8880, ^
-        {"_func_2ed", 0x2ED}, // 0x508430
-        {"_func_2ee", 0x2EE}, // 0x4E9010
-        {"_func_2ef", 0x2EF}, // 0x4E92D0
-        {"_func_2f0", 0x2F0}, // 0x503950
-        {"_func_2f1", 0x2F1}, // 0x503C40, empty
-        {"_func_2f2", 0x2F2}, // 0x4F1FB0
-        {"_func_2f6", 0x2F6}, // 0x4F6010, returns 0
-        {"_func_2f7", 0x2F7}, // 0x4F6020, returns ""
-        {"_func_2f8", 0x2F8}, // 0x4F60C0
-        {"_func_2f9", 0x2F9}, // 0x4F6190, returns -1
-        {"_func_2fa", 0x2FA}, // 0x4F6320, returns 0
-        {"_func_2fb", 0x2FB}, // 0x4F63E0, returns ""
-        {"_func_2fc", 0x2FC}, // 0x4F6400
-        {"_func_2fd", 0x2FD}, // 0x4F64D0, returns -1
-        {"_func_2fe", 0x2FE}, // 0x4F67B0, returns ""
-        {"_func_2ff", 0x2FF}, // 0x4F6810
-        {"_func_300", 0x300}, // 0x4F69A0, returns -1
-        {"_func_301", 0x301}, // 0x4F48A0, weapon related
-        {"_func_302", 0x302}, // 0x4E3AD0, calls Scr_ErrorInternal
-        {"_func_303", 0x303}, // 0x4E3B30, ^
-        {"_func_304", 0x304}, // 0x4F08D0, weapon related
-        {"_func_305", 0x305}, // 0x4ECC50
-        {"_func_306", 0x306}, // 0x4ECE10
-        {"_func_307", 0x307}, // 0x4ECFC0
-        {"_func_309", 0x309}, // 0x4F8160
-        {"_func_30b", 0x30B}, // 0x4EF3B0, empty
-        {"_func_30d", 0x30D}, // 0x4F02E0
-        {"_func_30e", 0x30E}, // 0x4F1970
-        {"_func_312", 0x312}, // 0x4E3E80, calls Scr_ErrorInternal
-        {"_func_313", 0x313}, // 0x4ED7A0
-        {"_func_314", 0x314}, // 0x4AF3F0
-        {"fast_restart", 0x315}, // 0x4ECC10
-        {"_func_316", 0x316}, // 0x4AF2D0
-        {"_func_318", 0x318}, // 0x4F4300
-        {"enablepg", 0x319}, // 0x4EA930, server command name
-        {"_func_31a", 0x31A}, // 0x503C50
-        {"_func_31b", 0x31B}, // 0x503D60
-        {"_func_31c", 0x31C}, // 0x503E40
-        {"_func_31d", 0x31D}, // 0x503F00
-        {"_func_31e", 0x31E}, // 0x5024E0
-        {"_func_31f", 0x31F}, // 0x4F9110
+        {"precacheturret", 0x001}, // 0x4EF520
+        {"getweaponarray", 0x002}, // 0x4E2AF0
+        {"createprintchannel", 0x003}, // 0x4EB6E0 empty
+        {"updategamerprofileall", 0x004}, // 0x502950
+        {"clearlocalizedstrings", 0x005}, // 0x504F40
+        {"setphysicsgravitydir", 0x006}, // 0x4FF120
+        {"gettimescale", 0x007}, // 0x508680
+        {"settimescale", 0x008}, // 0x5086A0
+        {"setslowmotionview", 0x009}, // 0x5087A0
+        {"teleportscene", 0x00A}, // 0x5086C0
+        {"forcesharedammo", 0x00B}, // 0x5085A0
+        {"refreshhudcompass", 0x00C}, // 0x504FD0
+        {"refreshhudammocounter", 0x00D}, // 0x505000
+        {"notifyoncommand", 0x00E}, // 0x505060
+        {"setprintchannel", 0x00F}, // 0x4EB750 empty
+        {"_func_10", 0x010}, // 0x4EB820, returns param count
+        {"_func_11", 0x011}, // 0x4EB9C0, ^
+        {"_func_12", 0x012}, // 0x4EC560, empty
+        {"_func_13", 0x013}, // 0x4EC570, ^
+        {"print", 0x014}, // 0x4EC640 empty
+        {"println", 0x015}, // 0x4EC860 empty
+        {"print3d", 0x016}, // 0x4EC870 empty
+        {"line", 0x017}, // 0x4EC880 empty
+        {"spawnturret", 0x018}, // 0x4EF180
+        {"canspawnturret", 0x019}, // 0x4EF3D0
+        {"assert", 0x01A}, // 0x4EC890
+        {"pausecinematicingame", 0x01B}, // 0x502660
+        {"drawcompassfriendlies", 0x01C}, // 0x502690
+        {"bulletspread", 0x01D}, // 0x5021C0
+        {"bullettracer", 0x01E}, // 0x5023E0
+        {"badplace_delete", 0x01F}, // 0x4E6F00
+        {"badplace_cylinder", 0x020}, // 0x4E7120
+        {"badplace_arc", 0x021}, // 0x4E76D0
+        {"badplace_brush", 0x022}, // 0x4E7F10
+        {"clearallcorpses", 0x023}, // 0x503F20
+        {"setturretnode", 0x024}, // 0x525640
+        {"unsetturretnode", 0x025}, // 0x5256E0
+        {"setnodepriority", 0x026}, // 0x525560
+        {"isnodeoccupied", 0x027}, // 0x525420
+        {"setdebugorigin", 0x02A}, // 0x504630 empty
+        {"setdebugangles", 0x02B}, // 0x504640 empty
+        {"updategamerprofile", 0x02C}, // 0x5046B0
+        {"assertex", 0x02D}, // 0x4EC920
+        {"assertmsg", 0x02E}, // 0x4EC980
+        {"isdefined", 0x02F}, // 0x4ED1F0
+        {"isvalidmissile", 0x030}, // 0x4ED5F0
+        {"isstring", 0x031}, // 0x4ED850
+        {"setomnvar", 0x032}, // 0x4EE990
+        {"getomnvar", 0x033}, // 0x4EEC00
+        {"setdvar", 0x034}, // 0x4EF040
+        {"setdynamicdvar", 0x036}, // 0x4EFA60
+        {"setdvarifuninitialized", 0x037}, // 0x4EF560
+        {"setdevdvar", 0x038}, // 0x4EFCA0
+        {"getdvar", 0x039}, // 0x4F0260
+        {"getdvarint", 0x03A}, // 0x4F0730
+        {"getdvarfloat", 0x03B}, // 0x4F1500
+        {"getdvarvector", 0x03C}, // 0x4F1A20
+        {"gettime", 0x03D}, // 0x4F2180
+        {"gettimeutc", 0x03E}, // 0x4F21C0
+        {"getculldist", 0x03F}, // 0x4F2330
+        {"getentbynum", 0x040}, // 0x4F2400
+        {"getscreenwidth", 0x041}, // 0x4F2620
+        {"getscreenheight", 0x042}, // 0x4F27A0
+        {"getweaponmodel", 0x043}, // 0x4F28B0
+        {"_func_44", 0x044}, // 0x502BF0, sets config string
+        {"_func_45", 0x045}, // 0x502C50, ^
+        {"_func_46", 0x046}, // 0x502C90, bunch of arrays
+        {"_func_47", 0x047}, // 0x502CF0, sets config string
+        {"_func_48", 0x048}, // 0x502D80, ^
+        {"setsunlight", 0x049}, // 0x502DB0
+        {"resetsunlight", 0x04A}, // 0x502E40
+        {"getmapsundirection", 0x04B}, // 0x502E70
+        {"getmapsunangles", 0x04C}, // 0x502EA0
+        {"setsundirection", 0x04D}, // 0x502FD0
+        {"lerpsundirection", 0x04E}, // 0x5030E0
+        {"lerpsunangles", 0x04F}, // 0x503380
+        {"resetsundirection", 0x050}, // 0x5036E0
+        {"enableforcedsunshadows", 0x051}, // 0x503740
+        {"enableforcednosunshadows", 0x052}, // 0x503760
+        {"disableforcedsunshadows", 0x053}, // 0x5037B0
+        {"enableouterspacemodellighting", 0x054}, // 0x5037D0
+        {"disableouterspacemodellighting", 0x055}, // 0x5038F0
+        {"remapstage", 0x056}, // 0x504B50
+        {"changelevel", 0x057}, // 0x501A80
+        {"missionsuccess", 0x058}, // 0x501C40
+        {"missionfailed", 0x059}, // 0x501C70
+        {"cinematic", 0x05A}, // 0x501CD0
+        {"cinematicingame", 0x05B}, // 0x501EB0
+        {"cinematicingamesync", 0x05C}, // 0x501F50
+        {"cinematicingameloop", 0x05D}, // 0x5020C0
+        {"cinematicingameloopresident", 0x05E}, // 0x502140
+        {"iscinematicplaying", 0x05F}, // 0x502390
+        {"stopcinematicingame", 0x060}, // 0x502640
+        {"getweapondisplayname", 0x061}, // 0x4F32A0
+        {"getweaponbasename", 0x062}, // 0x4F36D0
+        {"getweaponattachments", 0x063}, // 0x4F3D20
+        {"getweaponattachmentdisplaynames", 0x064}, // 0x4F4440
+        {"getweaponcamoname", 0x065}, // 0x4F51C0
+        {"getweaponreticlename", 0x066}, // 0x4F55D0
+        {"getanimlength", 0x067}, // 0x4F7960
+        {"animhasnotetrack", 0x068}, // 0x4F7B90
+        {"getnotetracktimes", 0x069}, // 0x4F8020
+        {"spawn", 0x06A}, // 0x4EEDD0
+        {"spawnloopsound", 0x06B}, // 0x4EEDD0
+        {"spawnloopingsound", 0x06C}, // 0x6B56B0
+        {"bullettrace", 0x06D}, // 0x4F1BD0
+        {"target_setmaxsize", 0x06E}, // 0x5140B0
+        {"target_setcolor", 0x06F}, // 0x513BC0
+        {"target_setdelay", 0x070}, // 0x513D50
+        {"getstartorigin", 0x071}, // 0x4AF5F0
+        {"getstartangles", 0x072}, // 0x4AF4E0
+        {"getcycleoriginoffset", 0x073}, // 0x4AF180
+        {"magicgrenade", 0x074}, // 0x501DB0
+        {"magicgrenademanual", 0x075}, // 0x4F0130
+        {"setblur", 0x076}, // 0x507470
+        {"musicplay", 0x077}, // 0x507570
+        {"musicstop", 0x078}, // 0x507770
+        {"soundfade", 0x079}, // 0x507890
+        {"addsubmix", 0x07A}, // 0x4F6940, server command name
+        {"clearsubmix", 0x07B}, // 0x4F6990, ^
+        {"clearallsubmixes", 0x07C}, // 0x4F6A20, ^
+        {"blendsubmix", 0x07D}, // 0x4F6C90, ^
+        {"makestickysubmix", 0x07E}, // 0x4F6DA0, ^
+        {"makeunstickysubmix", 0x07F}, // 0x4F6DD0, ^
+        {"soundtime", 0x080}, // 0x507A70, ^
+        {"soundtimereset", 0x081}, // 0x4FF720, ^
+        {"levelsoundfade", 0x082}, // 0x507960
+        {"precachenightvisioncodeassets", 0x083}, // 0x5019A0
+        {"precachedigitaldistortcodeassets", 0x085}, // 0x5019C0
+        {"precacheminimapsentrycodeassets", 0x086}, // 0x501A60
+        {"savegame", 0x087}, // 0x4FF7B0
+        {"issavesuccessful", 0x088}, // 0x500380
+        {"issaverecentlyloaded", 0x089}, // 0x5003A0
+        {"savegamenocommit", 0x08A}, // 0x500210
+        {"commitsave", 0x08B}, // 0x5003C0
+        {"commitwouldbevalid", 0x08C}, // 0x500B40
+        {"getfxvisibility", 0x08D}, // 0x5026B0
+        {"setculldist", 0x08E}, // 0x502AE0
+        {"bullettracepassed", 0x08F}, // 0x4F2260
+        {"sighttracepassed", 0x090}, // 0x4F2480
+        {"physicstrace", 0x091}, // 0x4F2C80
+        {"playerphysicstrace", 0x092}, // 0x4F3190
+        {"getgroundposition", 0x093}, // 0x4F5780
+        {"getangledelta", 0x094}, // 0x4F9570
+        {"getmovedelta", 0x095}, // 0x4F9E10
+        {"getnorthyaw", 0x096}, // 0x4E2840
+        {"getcommandfromkey", 0x097}, // 0x506E40
+        {"getsticksconfig", 0x098}, // 0x506F60
+        {"_func_99", 0x099}, // 0x507060, gamepad related
+        {"_func_9a", 0x09A}, // 0x5070A0, returns 0
+        {"_func_9b", 0x09B}, // 0x507140, gamepad related
+        {"weaponfightdist", 0x09C}, // 0x500BF0
+        {"weaponmaxdist", 0x09D}, // 0x500C40
+        {"isturretactive", 0x09E}, // 0x500BB0
+        {"getstarttime", 0x09F}, // 0x506DA0
+        {"target_alloc", 0x0A0}, // 0x513350
+        {"target_flush", 0x0A1}, // 0x513780
+        {"target_set", 0x0A2}, // 0x513A60
+        {"target_remove", 0x0A3}, // 0x513A20
+        {"target_setshader", 0x0A4}, // 0x514750
+        {"target_setoffscreenshader", 0x0A5}, // 0x514380
+        {"target_isinrect", 0x0A6}, // 0x513900
+        {"target_isincircle", 0x0A7}, // 0x513890
+        {"target_startreticlelockon", 0x0A8}, // 0x5148A0
+        {"target_clearreticlelockon", 0x0A9}, // 0x513370
+        {"target_getarray", 0x0AA}, // 0x513810
+        {"target_istarget", 0x0AB}, // 0x5139A0
+        {"target_setattackmode", 0x0AC}, // 0x513A80
+        {"target_setjavelinonly", 0x0AD}, // 0x513F60
+        {"target_hidefromplayer", 0x0AE}, // 0x513880
+        {"target_showtoplayer", 0x0AF}, // 0x514890
+        {"target_setscaledrendermode", 0x0B0}, // 0x514600
+        {"target_drawcornersonly", 0x0B1}, // 0x5133A0
+        {"target_drawsquare", 0x0B2}, // 0x513610
+        {"target_drawsingle", 0x0B3}, // 0x5134F0
+        {"target_setminsize", 0x0B4}, // 0x5141F0
+        {"setnorthyaw", 0x0B5}, // 0x4E2B60
+        {"setslowmotion", 0x0B6}, // 0x4F4320
+        {"randomint", 0x0B7}, // 0x4F5A60
+        {"randomfloat", 0x0B8}, // 0x4F5BE0
+        {"randomintrange", 0x0B9}, // 0x4F5E40
+        {"randomfloatrange", 0x0BA}, // 0x4F5ED0
+        {"sin", 0x0BB}, // 0x4F5FE0
+        {"cos", 0x0BC}, // 0x4F6030
+        {"tan", 0x0BD}, // 0x4F6130
+        {"asin", 0x0BE}, // 0x4F6390
+        {"acos", 0x0BF}, // 0x4F6470
+        {"atan", 0x0C0}, // 0x4F6880
+        {"int", 0x0C1}, // 0x4F69B0
+        {"float", 0x0C2}, // 0x4F6E00
+        {"abs", 0x0C3}, // 0x4F7000
+        {"min", 0x0C4}, // 0x4F7200
+        {"objective_additionalcurrent", 0x0C5}, // 0x50F290
+        {"objective_ring", 0x0C6}, // 0x50F3D0
+        {"objective_setpointertextoverride", 0x0C7}, // 0x50F490
+        {"getnode", 0x0C8}, // 0x524E60
+        {"getnodearray", 0x0C9}, // 0x524F70
+        {"getallnodes", 0x0CA}, // 0x524C40
+        {"getnodesinradius", 0x0CB}, // 0x525080
+        {"getnodesinradiussorted", 0x0CC}, // 0x525090
+        {"getclosestnodeinsight", 0x0CD}, // 0x524C90
+        {"getreflectionlocs", 0x0CE}, // 0x504F60
+        {"getreflectionreferencelocs", 0x0CF}, // 0x504F70
+        {"getvehicletracksegment", 0x0D0}, // 0x6DC180
+        {"getvehicletracksegmentarray", 0x0D1}, // 0x6DC260
+        {"getallvehicletracksegments", 0x0D2}, // 0x6DC130
+        {"isarray", 0x0D3}, // 0x4EA580
+        {"isai", 0x0D4}, // 0x504740
+        {"getindexforluincstring", 0x0D5}, // 0x4EE030
+        {"issentient", 0x0D6}, // 0x4ED980
+        {"isgodmode", 0x0D7}, // 0x504790
+        {"getdebugdvar", 0x0D8}, // 0x504AA0
+        {"getdebugdvarint", 0x0D9}, // 0x504B20
+        {"getdebugdvarfloat", 0x0DA}, // 0x504C30
+        {"setsaveddvar", 0x0DB}, // 0x504C60
+        {"getfreeaicount", 0x0DC}, // 0x505030
+        {"getaicount", 0x0DD}, // 0x5050A0
+        {"getaiarray", 0x0DE}, // 0x505360
+        {"getaispeciesarray", 0x0DF}, // 0x505520
+        {"getspawnerarray", 0x0E0}, // 0x505840
+        {"getcorpsearray", 0x0E1}, // 0x505730
+        {"getspawnerteamarray", 0x0E2}, // 0x505A40
+        {"getweaponclipmodel", 0x0E3}, // 0x505B40
+        {"getbrushmodelcenter", 0x0E4}, // 0x506D90
+        {"getkeybinding", 0x0E5}, // 0x506DB0
+        {"max", 0x0E6}, // 0x4F7270
+        {"floor", 0x0E7}, // 0x4F7300
+        {"ceil", 0x0E8}, // 0x4F7430
+        {"round", 0x0E9}, // 0x4F7470
+        {"exp", 0x0EA}, // 0x4F7570
+        {"log", 0x0EB}, // 0x4F75F0
+        {"sqrt", 0x0EC}, // 0x4F7750
+        {"squared", 0x0ED}, // 0x4F78D0
+        {"clamp", 0x0EE}, // 0x4F7A80
+        {"angleclamp", 0x0EF}, // 0x4F7AD0
+        {"angleclamp180", 0x0F0}, // 0x4F7BF0
+        {"vectorfromlinetopoint", 0x0F1}, // 0x4FA300
+        {"pointonsegmentnearesttopoint", 0x0F2}, // 0x4E20E0
+        {"distance", 0x0F3}, // 0x4E2C00
+        {"distance2d", 0x0F4}, // 0x4E2E70
+        {"distancesquared", 0x0F5}, // 0x4E2FA0
+        {"length", 0x0F6}, // 0x4E3330
+        {"length2d", 0x0F7}, // 0x4E3530
+        {"lengthsquared", 0x0F8}, // 0x4E3590
+        {"length2dsquared", 0x0F9}, // 0x4E36E0
+        {"closer", 0x0FA}, // 0x4E3730
+        {"vectordot", 0x0FB}, // 0x4E3900
+        {"vectorcross", 0x0FC}, // 0x4E3A10
+        {"axistoangles", 0x0FD}, // 0x4E4680
+        {"visionsetthermal", 0x0FE}, // 0x502A40
+        {"visionsetpain", 0x0FF}, // 0x502A50
+        {"incrementcounter", 0x104}, // 0x5056E0
+        {"getcountertotal", 0x105}, // 0x5057A0
+        {"getlevelticks", 0x106}, // 0x4F2380
+        {"perlinnoise2d", 0x107}, // 0x4F7D00
+        {"calcrockingangles", 0x108}, // 0x4F81C0
+        {"reconevent", 0x109}, // 0x7C1910
+        {"reconspatialevent", 0x10A}, // 0x7C1920
+        {"setsunflareposition", 0x10B}, // 0x4E4760
+        {"createthreatbiasgroup", 0x10C}, // 0x531770
+        {"threatbiasgroupexists", 0x10D}, // 0x5317A0
+        {"getthreatbias", 0x10E}, // 0x5317E0
+        {"setthreatbias", 0x10F}, // 0x531840
+        {"setthreatbiasagainstall", 0x110}, // 0x5318C0
+        {"setignoremegroup", 0x111}, // 0x531910
+        {"isenemyteam", 0x112}, // 0x531060
+        {"objective_additionalentity", 0x113}, // 0x50FA70
+        {"objective_state_nomessage", 0x114}, // 0x50EFE0
+        {"objective_string", 0x115}, // 0x50EFF0
+        {"objective_string_nomessage", 0x116}, // 0x50F000
+        {"objective_additionalposition", 0x117}, // 0x50F200
+        {"objective_current_nomessage", 0x118}, // 0x50F280
+        {"vectornormalize", 0x119}, // 0x4E3E90
+        {"vectortoangles", 0x11A}, // 0x4E40A0
+        {"vectortoyaw", 0x11B}, // 0x4E42A0
+        {"vectorlerp", 0x11C}, // 0x4E4430
+        {"anglestoup", 0x11D}, // 0x4E4AD0
+        {"anglestoright", 0x11E}, // 0x4E4C70
+        {"anglestoforward", 0x11F}, // 0x4E4DD0
+        {"anglesdelta", 0x120}, // 0x4E4F80
+        {"combineangles", 0x121}, // 0x4E5940
+        {"transformmove", 0x122}, // 0x4E5C10
+        {"rotatevector", 0x123}, // 0x4E7C20
+        {"rotatepointaroundvector", 0x124}, // 0x4E7FC0
+        {"issubstr", 0x125}, // 0x4E9170
+        {"isendstr", 0x126}, // 0x4E91B0
+        {"getsubstr", 0x127}, // 0x4E9440
+        {"tolower", 0x128}, // 0x4E9E20
+        {"strtok", 0x129}, // 0x4EA2D0
+        {"stricmp", 0x12A}, // 0x4EA980
+        {"ambientplay", 0x12B}, // 0x4F2E00
+        {"_func_145", 0x145}, // 0x5046A0
+        {"visionsetnaked", 0x148}, // 0x502940
+        {"visionsetnight", 0x149}, // 0x502A20
+        {"visionsetmissilecam", 0x14A}, // 0x502A30
+        {"ambientstop", 0x14B}, // 0x4F52C0
+        {"precachemodel", 0x14C}, // 0x4EB430
+        {"precacheshellshock", 0x14D}, // 0x4EB670
+        {"precacheitem", 0x14E}, // 0x4F1FC0
+        {"precacheshader", 0x14F}, // 0x4F2120
+        {"precachestring", 0x150}, // 0x4F2390
+        {"precachemenu", 0x151}, // 0x4F25F0
+        {"precacherumble", 0x152}, // 0x4F2770
+        {"precachelocationselector", 0x153}, // 0x4EB550
+        {"precacheleaderboards", 0x154}, // 0x4F2190
+        {"loadfx", 0x155}, // 0x4E3480
+        {"playfx", 0x156}, // 0x4E44F0
+        {"playfxontag", 0x157}, // 0x4E5DB0
+        {"stopfxontag", 0x158}, // 0x4E7A60
+        {"killfxontag", 0x159}, // 0x4E8220
+        {"playloopedfx", 0x15A}, // 0x6E8E00
+        {"spawnfx", 0x15B}, // 0x6E9130
+        {"triggerfx", 0x15C}, // 0x6E9390
+        {"playfxontagforclients", 0x15D}, // 0x4E6360
+        {"_func_15e", 0x15E}, // 0x6E90C0, sets some entity flag
+        {"_func_15f", 0x15F}, // 0x4E7420, fx related
+        {"_func_160", 0x160}, // 0x4E61E0, calls Scr_ErrorInternal
+        {"precacheheadicon", 0x170}, // 0x4F2350
+        {"physicsexplosionsphere", 0x184}, // 0x4E8920
+        {"physicsexplosioncylinder", 0x185}, // 0x4EA120
+        {"physicsjolt", 0x186}, // 0x4E9610
+        {"physicsjitter", 0x187}, // 0x4E9C60
+        {"setexpfog", 0x188}, // 0x4ECC20
+        {"setexpfogext", 0x189}, // 0x4ECDE0, server command name
+        {"setexpfogdvarsonly", 0x18A}, // 0x4ED510, ^
+        {"setexpfogextdvarsonly", 0x18B}, // 0x4ED580, ^
+        {"setatmosfog", 0x18C}, // 0x4ED760, ^
+        {"setatmosfogdvarsonly", 0x18D}, // 0x4EDAA0, ^
+        {"isexplosivedamagemod", 0x18E}, // 0x4F6330
+        {"radiusdamage", 0x18F}, // 0x4F7460
+        {"setplayerignoreradiusdamage", 0x190}, // 0x4F8550
+        {"glassradiusdamage", 0x191}, // 0x4F7620
+        {"earthquake", 0x192}, // 0x4ED2F0
+        {"getnumparts", 0x193}, // 0x4EDDA0
+        {"_func_194", 0x194}, // 0x50EEA0, eartquake func; args: (magnitude, duration, origin, radius)
+        {"iprintln", 0x19E}, // 0x504120
+        {"iprintlnbold", 0x19F}, // 0x5041A0
+        {"logstring", 0x1A0}, // 0x5071B0
+        {"getent", 0x1A1}, // 0x511680
+        {"getentarray", 0x1A2}, // 0x5116F0
+        {"spawnstruct", 0x1A5}, // 0x5C6B00
+        {"isalive", 0x1A7}, // 0x5042F0
+        {"isspawner", 0x1A8}, // 0x504380
+        {"missile_createattractorent", 0x1A9}, // 0x4D73E0
+        {"missile_createattractororigin", 0x1AA}, // 0x4D73F0
+        {"missile_createrepulsorent", 0x1AB}, // 0x4D7710
+        {"missile_createrepulsororigin", 0x1AC}, // 0x4D7720
+        {"missile_deleteattractor", 0x1AD}, // 0x4D7730
+        {"newhudelem", 0x1AF}, // 0x4C2570
+        {"newclienthudelem", 0x1B0}, // 0x4C2510
+        {"isplayer", 0x1B2}, // 0x5C8350, time related
+        {"isplayernumber", 0x1B3}, // 0x504650
+        {"getpartname", 0x1B5}, // 0x4EDE60
+        {"weaponfiretime", 0x1B6}, // 0x4EF400
+        {"weaponclipsize", 0x1B7}, // 0x4EC650
+        {"weaponisauto", 0x1B8}, // 0x4ED640
+        {"weaponissemiauto", 0x1B9}, // 0x4ED8F0
+        {"weaponisboltaction", 0x1BA}, // 0x4EDDE0
+        {"weaponinheritsperks", 0x1BB}, // 0x4EDFA0
+        {"weaponburstcount", 0x1BC}, // 0x4EDBC0
+        {"weapontype", 0x1BD}, // 0x4EE190
+        {"weaponclass", 0x1BE}, // 0x4EE450
+        {"getnextarraykey", 0x1BF}, // 0x4F73A0
+        {"sortbydistance", 0x1C0}, // 0x4F7D90
+        {"tablelookup", 0x1C1}, // 0x4EFD40
+        {"tablelookupbyrow", 0x1C2}, // 0x4F2020
+        {"tablelookupistring", 0x1C3}, // 0x4F0940
+        {"tablelookupistringbyrow", 0x1C4}, // 0x4F21E0
+        {"tablelookuprownum", 0x1C5}, // 0x4F1590
+        {"tableexists", 0x1C6}, // 0x4F1DC0
+        {"getmissileowner", 0x1C7}, // 0x4ECBC0
+        {"magicbullet", 0x1C8}, // 0x4E98D0
+        {"getweaponflashtagname", 0x1C9}, // 0x4EA890
+        {"averagepoint", 0x1CA}, // 0x4F2630
+        {"averagenormal", 0x1CB}, // 0x4F2A50
+        {"vehicle_getspawnerarray", 0x1CC}, // 0x6DA010
+        {"playrumbleonposition", 0x1CD}, // 0x4EC020
+        {"playrumblelooponposition", 0x1CE}, // 0x4EC050
+        {"stopallrumbles", 0x1CF}, // 0x4EC0F0
+        {"soundexists", 0x1D0}, // 0x4F8DC0
+        {"openfile", 0x1D1}, // 0x4F5E20, empty
+        {"closefile", 0x1D2}, // 0x4F5E30, ^
+        {"fprintln", 0x1D3}, // 0x4F5EC0, ^
+        {"fprintfields", 0x1D4}, // 0x4F5F20, ^
+        {"freadln", 0x1D5}, // 0x4F5F70, ^
+        {"fgetarg", 0x1D6}, // 0x4F5F80, ^
+        {"setminimap", 0x1D7}, // 0x4F6A70
+        {"setthermalbodymaterial", 0x1D8}, // 0x4F6EE0
+        {"getarraykeys", 0x1D9}, // 0x4F7090
+        {"getfirstarraykey", 0x1DA}, // 0x4F7240
+        {"getglass", 0x1DB}, // 0x4F2C30
+        {"getglassarray", 0x1DC}, // 0x4F30B0
+        {"getglassorigin", 0x1DD}, // 0x4F35B0
+        {"isglassdestroyed", 0x1DE}, // 0x4F37E0
+        {"destroyglass", 0x1DF}, // 0x4F3A90
+        {"deleteglass", 0x1E0}, // 0x4F3E00
+        {"getentchannelscount", 0x1E1}, // 0x4F46B0
+        {"getentchannelname", 0x1E2}, // 0x4F4760
+        {"objective_add", 0x1E3}, // 0x50F580
+        {"objective_delete", 0x1E4}, // 0x50FA30
+        {"objective_state", 0x1E5}, // 0x50EFD0
+        {"objective_icon", 0x1E6}, // 0x50F010
+        {"objective_position", 0x1E7}, // 0x50F110
+        {"objective_current", 0x1E8}, // 0x50F1B0
+        {"_func_1e9", 0x1E9}, // similar to objective_current_nomessage
+        {"weaponinventorytype", 0x1EA}, // 0x4EE760
+        {"weaponstartammo", 0x1EB}, // 0x4EE920
+        {"weaponmaxammo", 0x1EC}, // 0x4EEB40
+        {"weaponaltweaponname", 0x1ED}, // 0x4EEF70
+        {"isweaponcliponly", 0x1EE}, // 0x4EF9E0
+        {"isweapondetonationtimed", 0x1EF}, // 0x4EFB10
+        {"weaponhasthermalscope", 0x1F0}, // 0x4F0080
+        {"weaponhasexplosivedamage", 0x1F1}, // 0x4F0550, made up name
+        {"getvehiclenode", 0x1F2}, // 0x6CFCC0
+        {"getvehiclenodearray", 0x1F3}, // 0x6CFDB0
+        {"getallvehiclenodes", 0x1F4}, // 0x6CFC50
+        {"getnumvehicles", 0x1F5}, // 0x6D9D40
+        {"precachevehicle", 0x1F6}, // 0x6DA090
+        {"spawnvehicle", 0x1F7}, // 0x6DA130
+        {"vehicle_getarray", 0x1F8}, // 0x6D9D80
+        {"pow", 0x1F9}, // 0x4F79C0
+        {"_func_1fa", 0x1FA}, // 0x4F6950
+        {"_func_1fb", 0x1FB}, // 0x501980
+        {"_func_1fc", 0x1FC}, // 0x501C90
+        {"_func_20c", 0x20C}, // 0x525490
+        {"_func_20d", 0x20D}, // 0x5250A0, path node related
+        {"_func_216", 0x216}, // 0x506D20, weapon related
+        {"getlinkednodes", 0x21D}, // 0x524DA0
+        {"disconnectnodepair", 0x21E}, // 0x4E5D30
+        {"connectnodepair", 0x21F}, // 0x4E6160
+        {"_func_220", 0x220}, // 0x505420
+        {"_func_223", 0x223}, // 0x5035C0, empty
+        {"loadtransient", 0x225}, // 0x5CD370
+        {"unloadtransient", 0x226}, // 0x5CD5B0
+        {"unloadalltransients", 0x227}, // 0x5CD4F0
+        {"synctransients", 0x228}, // 0x5CD490
+        {"istransientqueued", 0x229}, // 0x5CD070
+        {"istransientloaded", 0x22A}, // 0x5CD0F0
+        {"loadstartpointtransient", 0x22B}, // 0x5CD0A0
+        {"_func_22c", 0x22C}, // 0x5CD130, transient related
+        {"distance2dsquared", 0x22D}, // 0x4E2F40
+        {"getangledelta3d", 0x22E}, // 0x4E1EB0
+        {"_func_22f", 0x22F}, // 0x4E8A30, useless function
+        {"trajectorycalculateinitialvelocity", 0x230}, // 0x4E8D40
+        {"trajectorycalculateminimumvelocity", 0x231}, // 0x4E9240
+        {"trajectorycalculateexitangle", 0x232}, // 0x4E9570
+        {"trajectorycomputedeltaheightattime", 0x233}, // 0x4E97C0
+        {"trajectorycanattemptaccuratejump", 0x234}, // 0x4E9F80
+        {"_func_235", 0x235}, // 0x4EA100, useless function
+        {"_func_236", 0x236}, // 0x4ECA00, empty
+        {"ispointinvolume", 0x237}, // 0x4E2A30
+        {"cinematicgettimeinmsec", 0x238}, // 0x5024C0
+        {"cinematicgetframe", 0x239}, // 0x5024A0
+        {"iscinematicloaded", 0x23A}, // 0x5023C0
+        {"bbprint", 0x23C}, // 0x4EBC50, empty
+        {"getscriptablearray", 0x23E}, // 0x4EBE50
+        {"clearfog", 0x23F}, // 0x4EB140
+        {"setleveldopplerpreset", 0x240}, // 0x508500
+        {"screenshake", 0x241}, // 0x500C90
+        {"_func_242", 0x242}, // 0x4EA700, returns 1
+        {"_func_243", 0x243}, // 0x4EAAD0, returns 1
+        {"_func_245", 0x245}, // 0x4F3620, capsule trace ?
+        {"_func_246", 0x246}, // 0x4F3920, ^
+        {"_func_247", 0x247}, // 0x4F14E0, return 0.0
+        {"_func_248", 0x248}, // 0x4F14F0, ^
+        {"_func_249", 0x249}, // 0x4F1580, returns 0
+        {"_func_24a", 0x24A}, // 0x4F1640, ^
+        {"_func_24b", 0x24B}, // 0x4F1820, ^
+        {"luinotifyevent", 0x24D}, // 0x4EB420
+        {"physwakeup", 0x252}, // 0x4FF230, server command name
+        {"ragdollwakeup", 0x253}, // 0x4FF350, ^
+        {"_func_254", 0x254}, // 0x4E6B60
+        {"_func_255", 0x255}, // 0x4F97C0
+        {"anglestoaxis", 0x256}, // 0x4E48A0
+        {"visionsetwater", 0x257}, // 0x502AD0
+        {"sendscriptusageanalysisdata", 0x258}, // 0x4EBBA0, empty
+        {"resetscriptusageanalysisdata", 0x259}, // 0x4EBBB0, ^
+        {"instantlylogusageanalysisdata", 0x25A}, // 0x4EBC20, ^
+        {"invertangles", 0x25B}, // 0x4E60E0
+        {"rotatevectorinverted", 0x25C}, // 0x4E6250
+        {"_func_25d", 0x25D}, // 0x4E6800, vector related
+        {"_func_25f", 0x25F}, // 0x504A20, sets some entity flag
+        {"_func_260", 0x260}, // 0x4F2990, sets some config string
+        {"_func_261", 0x261}, // 0x4F29C0, string/font related ?
+        {"getcsplinecount", 0x262}, // 0x4EC960
+        {"getcsplinepointcount", 0x263}, // 0x4ECA10
+        {"getcsplinelength", 0x264}, // 0x4ECD80
+        {"getcsplinepointid", 0x265}, // 0x4ECF30
+        {"getcsplinepointlabel", 0x266}, // 0x4ED440
+        {"getcsplinepointtension", 0x267}, // 0x4ED6D0
+        {"getcsplinepointposition", 0x268}, // 0x4ED9E0
+        {"getcsplinepointcorridordims", 0x269}, // 0x4EDCE0
+        {"getcsplinepointtangent", 0x26A}, // 0x4EDEE0
+        {"getcsplinepointdisttonextpoint", 0x26B}, // 0x4EE210
+        {"calccsplinetangent", 0x26C}, // 0x4EE530
+        {"calccsplinecorridor", 0x26D}, // 0x4EE850
+        {"calccsplinecorridor", 0x26E}, // 0x4EECB0
+        {"setnojipscore", 0x26F}, // 0x4EEF30, useless function
+        {"setnojiptime", 0x270}, // 0x4EEF50, ^
+        {"getpredictedentityposition", 0x272}, // 0x4EF3C0, empty
+        {"gamedvrprohibitrecording", 0x273}, // 0x4EF3F0, ^
+        {"gamedvrstartrecording", 0x274}, // 0x4EF550, ^
+        {"gamedvrstoprecording", 0x275}, // 0x4EF670, ^
+        {"gamedvrsetvideometadata", 0x276}, // 0x4EF780, ^
+        {"gamedvrprohibitscreenshots", 0x277}, // 0x4EFA50, ^
+        {"gamedvrsetscreenshotmetadata", 0x279}, // 0x505B30, ^
+        {"queuedialog", 0x27A}, // 0x505BC0, ^
+        {"speechenablegrammar", 0x27B}, // 0x4EFAF0, ^
+        {"speechenable", 0x27C}, // 0x4EFB00, ^
+        {"livestreamingenable", 0x27D}, // 0x4EFC90, ^
+        {"livestreamingsetbitrate", 0x27E}, // 0x4EFD30, ^
+        {"triggerportableradarping", 0x284}, // 0x4EC710, ^
+        {"setglaregrimematerial", 0x285}, // 0x4C2560, calls Scr_ErrorInternal
+        {"botgetteamlimit", 0x286}, // 0x4EDF90, empty
+        {"spawnfxforclient", 0x287}, // 0x4EE020, ^
+        {"botgetteamdifficulty", 0x288}, // 0x4EE0A0, ^
+        {"getsquadassaultelo", 0x289}, // 0x4EBC80, ^
+        {"loadluifile", 0x28A}, // 0x4EE0B0
+        {"_func_290", 0x290}, // 0x4EBCE0, empty
+        {"_func_293", 0x293}, // 0x4F08C0, returns 0
+        {"_func_294", 0x294}, // 0x4E82E0
+        {"_func_295", 0x295}, // 0x4E8A60
+        {"enablecontext", 0x29A}, // 0x4F6E70, server command name
+        {"disablecontext", 0x29B}, // 0x4F6EC0, ^
+        {"_func_29c", 0x29C}, // 0x5051E0
+        {"_func_29d", 0x29D}, // 0x4F0D80, sound related
+        {"_func_29e", 0x29E}, // 0x4F49C0, ^
+        {"_func_29f", 0x29F}, // 0x4EEA20
+        {"_func_2a0", 0x2A0}, // 0x4EF270
+        {"_func_2a1", 0x2A1}, // 0x4EF680
+        {"_func_2a2", 0x2A2}, // 0x502500
+        {"_func_2a3", 0x2A3}, // 0x4E8D30, empty
+        {"_func_2a4", 0x2A4}, // 0x4E2730
+        {"_func_2a5", 0x2A5}, // 0x4ED4D0
+        {"_func_2a6", 0x2A6}, // 0x4F2440
+        {"_func_2a7", 0x2A7}, // 0x4F27B0
+        {"_func_2aa", 0x2AA}, // 0x4F03B0, weapon related
+        {"_func_2ab", 0x2AB}, // 0x502710
+        {"_func_2ac", 0x2AC}, // 0x4F3A00
+        {"_func_2ad", 0x2AD}, // 0x4E8C40, useless function
+        {"_func_2ae", 0x2AE}, // 0x4F67C0
+        {"_func_2af", 0x2AF}, // 0x4F6F00, empty
+        {"_func_2b0", 0x2B0}, // 0x4F6EB0, ^
+        {"_func_2b2", 0x2B2}, // 0x505BD0, useless function
+        {"_func_2b3", 0x2B3}, // 0x4EE110
+        {"_func_2b4", 0x2B4}, // 0x4F7450, empty
+        {"_func_2b5", 0x2B5}, // 0x4F6FF0, returns 0
+        {"_func_2b6", 0x2B6}, // 0x4F72A0, empty
+        {"_func_2b7", 0x2B7}, // 0x4F7390, ^
+        {"_func_2b8", 0x2B8}, // 0x4F7490, ^
+        {"_func_2bd", 0x2BD}, // 0x4E8130, ^
+        {"_func_2be", 0x2BE}, // 0x4E87E0, ^
+        {"_func_2bf", 0x2BF}, // 0x4EA560
+        {"challengemessage", 0x2C0}, // 0x508310, server command name
+        {"_func_2c5", 0x2C5}, // 0x4F5C30, weapon related
+        {"_func_2c6", 0x2C6}, // 0x508340
+        {"_func_2c7", 0x2C7}, // 0x4EB9E0
+        {"_func_2c9", 0x2C9}, // 0x4F7590, empty
+        {"_func_2ca", 0x2CA}, // 0x4F7610, ^
+        {"_func_2cb", 0x2CB}, // 0x4EA680
+        {"_func_2cc", 0x2CC}, // 0x4F2000
+        {"_func_2cd", 0x2CD}, // 0x4F2160
+        {"_func_2ce", 0x2CE}, // 0x508550
+        {"_func_2d7", 0x2D7}, // 0x5070C0
+        {"_func_2dd", 0x2DD}, // 0x507B60
+        {"_func_2de", 0x2DE}, // 0x4F6CA0
+        {"_func_2e0", 0x2E0}, // 0x4F6F70, empty
+        {"_func_2e1", 0x2E1}, // 0x502A60
+        {"_func_2e3", 0x2E3}, // 0x5085B0, empty
+        {"_func_2e8", 0x2E8}, // 0x4F8070, returns 1
+        {"_func_2e9", 0x2E9}, // 0x4EAC20
+        {"_func_2eb", 0x2EB}, // 0x4E6980, empty
+        {"_func_2ec", 0x2EC}, // 0x4E8150, ^
+        {"_func_2ed", 0x2ED}, // 0x4E8880, ^
+        {"_func_2ee", 0x2EE}, // 0x508430
+        {"_func_2ef", 0x2EF}, // 0x4E9010
+        {"_func_2f0", 0x2F0}, // 0x4E92D0
+        {"_func_2f1", 0x2F1}, // 0x503950
+        {"_func_2f2", 0x2F2}, // 0x503C40, empty
+        {"_func_2f3", 0x2F3}, // 0x4F1FB0
+        {"_func_2f7", 0x2F7}, // 0x4F6010, returns 0
+        {"_func_2f8", 0x2F8}, // 0x4F6020, returns ""
+        {"_func_2f9", 0x2F9}, // 0x4F60C0
+        {"_func_2fa", 0x2FA}, // 0x4F6190, returns -1
+        {"_func_2fb", 0x2FB}, // 0x4F6320, returns 0
+        {"_func_2fc", 0x2FC}, // 0x4F63E0, returns ""
+        {"_func_2fd", 0x2FD}, // 0x4F6400
+        {"_func_2fe", 0x2FE}, // 0x4F64D0, returns -1
+        {"_func_2ff", 0x2FF}, // 0x4F67B0, returns ""
+        {"_func_300", 0x300}, // 0x4F6810
+        {"_func_301", 0x301}, // 0x4F69A0, returns -1
+        {"_func_302", 0x302}, // 0x4F48A0, weapon related
+        {"_func_303", 0x303}, // 0x4E3AD0, calls Scr_ErrorInternal
+        {"_func_304", 0x304}, // 0x4E3B30, ^
+        {"_func_305", 0x305}, // 0x4F08D0, weapon related
+        {"_func_306", 0x306}, // 0x4ECC50
+        {"_func_307", 0x307}, // 0x4ECE10
+        {"_func_308", 0x308}, // 0x4ECFC0
+        {"_func_30a", 0x30A}, // 0x4F8160
+        {"_func_30c", 0x30C}, // 0x4EF3B0, empty
+        {"_func_30e", 0x30E}, // 0x4F02E0
+        {"_func_30f", 0x30F}, // 0x4F1970
+        {"_func_313", 0x313}, // 0x4E3E80, calls Scr_ErrorInternal
+        {"_func_314", 0x314}, // 0x4ED7A0
+        {"_func_315", 0x315}, // 0x4AF3F0
+        {"fast_restart", 0x316}, // 0x4ECC10
+        {"_func_317", 0x317}, // 0x4AF2D0
+        {"_func_319", 0x319}, // 0x4F4300
+        {"enablepg", 0x31A}, // 0x4EA930, server command name
+        {"_func_31b", 0x31B}, // 0x503C50
+        {"_func_31c", 0x31C}, // 0x503D60
+        {"_func_31d", 0x31D}, // 0x503E40
+        {"_func_31e", 0x31E}, // 0x503F00
+        {"_func_31f", 0x31F}, // 0x5024E0
+        {"_func_320", 0x320}, // 0x4F9110
     };
 
     std::unordered_map<std::string, unsigned> method_map =
