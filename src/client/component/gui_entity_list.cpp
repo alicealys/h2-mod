@@ -842,7 +842,7 @@ namespace entity_list
 					show_selected_fields_window(data);
 				}
 
-				if (selected_entity && set_field_window)
+				if (set_field_window)
 				{
 					show_set_field_window(data);
 				}
