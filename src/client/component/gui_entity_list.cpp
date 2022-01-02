@@ -472,72 +472,61 @@ namespace entity_list
 			});
 		}
 
-		void teleport_to(data_t& data, unsigned int id)
+		void teleport_to(data_t& data, unsigned int num)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([num]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const auto entity = scripting::call("getentbynum", {num}).as<scripting::entity>();
+					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+					player.call("setorigin", {entity.get("origin")});
 				}
-
-				const auto dest = scripting::entity{id};
-				const auto value = scripting::call("getentbynum", {0});
-				if (value.get_raw().type != game::SCRIPT_OBJECT)
+				catch (...)
 				{
-					return;
+					gui::notification("Error", utils::string::va("^1error teleporting player to entity num %i!", num));
 				}
-
-				const auto player = value.as<scripting::entity>();
-				player.call("setorigin", {dest.get("origin")});
 			});
 		}
 
-		void teleport_to_reverse(data_t& data, unsigned int id)
+		void teleport_to_reverse(data_t& data, unsigned int num)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([num]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const auto entity = scripting::call("getentbynum", {num}).as<scripting::entity>();
+					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+					entity.set("origin", player.get("origin"));
 				}
-
-				const auto dest = scripting::entity{id};
-				const auto value = scripting::call("getentbynum", {0});
-				if (value.get_raw().type != game::SCRIPT_OBJECT)
+				catch (...)
 				{
-					return;
+					gui::notification("Error", utils::string::va("^1error teleporting entity num %i to player!", num));
 				}
-
-				const auto player = value.as<scripting::entity>();
-				dest.set("origin", player.get("origin"));
 			});
 		}
 
-		void delete_entity(data_t& data, unsigned int id)
+		void delete_entity(data_t& data, unsigned int num)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([num]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const auto entity = scripting::call("getentbynum", {num}).as<scripting::entity>();
+					entity.call("delete");
 				}
-
-				const auto target = scripting::entity{id};
-				target.call("delete");
+				catch (...)
+				{
+					gui::notification("Error", utils::string::va("^1error deleting entity num %i!", num));
+				}
 			});
 		}
 
-		void set_entity_field(data_t& data, unsigned int id, 
+		void set_entity_field(data_t& data, unsigned int num,
 			const std::string& name, const std::string& string_value, int type)
 		{
-			data.tasks.push_back([id, name, type, string_value, &data]()
+			data.tasks.push_back([num, name, type, string_value, &data]()
 			{
-				if (!verify_entity(id))
-				{
-					return;
-				}
-
 				scripting::script_value value{};
 
 				if (type == game::SCRIPT_INTEGER)
@@ -557,7 +546,8 @@ namespace entity_list
 
 				try
 				{
-					scripting::set_entity_field(id, name, value);
+					const auto entity = scripting::call("getentbynum", {num}).as<scripting::entity>();
+					scripting::set_entity_field(entity, name, value);
 					data.force_update = true;
 				}
 				catch (...)
@@ -567,19 +557,15 @@ namespace entity_list
 			});
 		}
 
-		void set_entity_field_vector(data_t& data, unsigned int id, 
+		void set_entity_field_vector(data_t& data, unsigned int num,
 			const std::string& name, const scripting::vector& value)
 		{
-			data.tasks.push_back([id, name, value, &data]()
+			data.tasks.push_back([num, name, value, &data]()
 			{
-				if (!verify_entity(id))
-				{
-					return;
-				}
-
 				try
 				{
-					scripting::set_entity_field(id, name, value);
+					const auto entity = scripting::call("getentbynum", {num}).as<scripting::entity>();
+					scripting::set_entity_field(entity, name, value);
 					data.force_update = true;
 				}
 				catch (...)
@@ -742,7 +728,7 @@ namespace entity_list
 
 			for (const auto& info : data.entity_info)
 			{
-				if (ImGui::TreeNode(utils::string::va("Entity num %i id %i", info.num, info.id)))
+				if (ImGui::TreeNode(utils::string::va("Entity num %i", info.num)))
 				{
 					ImGui::Text("Info");
 
@@ -760,24 +746,24 @@ namespace entity_list
 					if (ImGui::Button("Set field"))
 					{
 						set_field_window = true;
-						selected_entity = info.id;
+						selected_entity = info.num;
 					}
 
 					if (ImGui::Button("Teleport to"))
 					{
-						teleport_to(data, info.id);
+						teleport_to(data, info.num);
 						data.force_update = true;
 					}
 
 					if (ImGui::Button("Teleport to you"))
 					{
-						teleport_to_reverse(data, info.id);
+						teleport_to_reverse(data, info.num);
 						data.force_update = true;
 					}
 
 					if (info.num != 0 && ImGui::Button("Delete"))
 					{
-						delete_entity(data, info.id);
+						delete_entity(data, info.num);
 						data.force_update = true;
 					}
 
@@ -848,6 +834,7 @@ namespace entity_list
 					data.tasks = {};
 				}
 
+
 				show_entity_list_window(data);
 
 				if (selected_fields_window)
@@ -869,7 +856,16 @@ namespace entity_list
 		void post_unpack() override
 		{
 			gui::on_frame(on_frame);
-			scheduler::loop(update_entity_list, scheduler::pipeline::server, 0ms);
+			scheduler::loop([]()
+			{
+				try
+				{
+					update_entity_list();
+				}
+				catch (...)
+				{
+				}
+			}, scheduler::pipeline::server);
 		}
 	};
 }
