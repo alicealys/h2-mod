@@ -497,6 +497,15 @@ namespace game_console
 
 	void execute(const char* cmd)
 	{
+		if (game::CL_IsCgameInitialized())
+		{
+			std::string cmd_ = cmd;
+			scheduler::once([cmd_]()
+			{
+				scripting::notify(*game::levelEntityId, "console_command", {cmd_});
+			}, scheduler::pipeline::server);
+		}
+
 		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
 	}
 
