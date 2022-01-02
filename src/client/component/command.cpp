@@ -7,6 +7,7 @@
 #include "command.hpp"
 #include "game_console.hpp"
 #include "chat.hpp"
+#include "fastfiles.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -29,15 +30,6 @@ namespace command
 			{
 				handlers[command](params);
 			}
-		}
-
-		void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
-		{
-			game::DB_EnumXAssets_Internal(type, static_cast<void(*)(game::XAssetHeader, void*)>([](game::XAssetHeader header, void* data)
-			{
-				const auto& cb = *static_cast<const std::function<void(game::XAssetHeader)>*>(data);
-				cb(header);
-			}), &callback, includeOverride);
 		}
 
 		game::dvar_t* dvar_command_stub()
@@ -200,7 +192,7 @@ namespace command
 
 					game_console::print(game_console::con_type_info, "Listing assets in pool %s\n", game::g_assetNames[type]);
 
-					enum_assets(type, [type](const game::XAssetHeader header)
+					fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
 					{
 						const auto asset = game::XAsset{type, header};
 						const auto* const asset_name = game::DB_GetXAssetName(&asset);

@@ -10,6 +10,7 @@
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 #include "../../../component/chat.hpp"
+#include "../../../component/fastfiles.hpp"
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -498,6 +499,36 @@ namespace scripting::lua
 			game_type["onentitydamage"] = [](const game&, const sol::protected_function& callback)
 			{
 				notifies::add_entity_damage_callback(callback);
+			};
+
+			game_type["assetlist"] = [](const game&, const sol::this_state s, const std::string& type_string)
+			{
+				auto table = sol::table::create(s.lua_state());
+				auto index = 1;
+				auto type_index = -1;
+
+				for (auto i = 0; i < ::game::XAssetType::ASSET_TYPE_COUNT; i++)
+				{
+					if (type_string == ::game::g_assetNames[i])
+					{
+						type_index = i;
+					}
+				}
+
+				if (type_index == -1)
+				{
+					throw std::runtime_error("Asset type does not exist");
+				}
+
+				const auto type = static_cast<::game::XAssetType>(type_index);
+				fastfiles::enum_assets(type, [type, &table, &index](const ::game::XAssetHeader header)
+				{
+					const auto asset = ::game::XAsset{type, header};
+					const std::string asset_name = ::game::DB_GetXAssetName(&asset);
+					table[index++] = asset_name;
+				}, true);
+
+				return table;
 			};
 		}
 	}

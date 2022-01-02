@@ -7,6 +7,7 @@
 #include "scheduler.hpp"
 #include "command.hpp"
 #include "gui.hpp"
+#include "fastfiles.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -18,15 +19,6 @@ namespace asset_list
 		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
 		std::string asset_type_filter;
 		std::string assets_name_filter;
-
-		void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
-		{
-			game::DB_EnumXAssets_Internal(type, static_cast<void(*)(game::XAssetHeader, void*)>([](game::XAssetHeader header, void* data)
-			{
-				const auto& cb = *static_cast<const std::function<void(game::XAssetHeader)>*>(data);
-				cb(header);
-			}), &callback, includeOverride);
-		}
 
 		void on_frame()
 		{
@@ -72,7 +64,7 @@ namespace asset_list
 				ImGui::InputText("asset name", &assets_name_filter);
 				ImGui::BeginChild("assets list");
 
-				enum_assets(type, [type](const game::XAssetHeader header)
+				fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
 				{
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
