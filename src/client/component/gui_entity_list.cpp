@@ -313,7 +313,7 @@ namespace entity_list
 			{
 				scripting::array result{};
 
-				for (unsigned int i = 0; i < all.size(); i++)
+				for (auto i = 0; i < all.size(); i++)
 				{
 					const auto raw = all[i].get_raw();
 					if (raw.type != game::SCRIPT_OBJECT)
@@ -405,7 +405,7 @@ namespace entity_list
 
 				const auto array = value.value();
 
-				for (unsigned int i = 0; i < array.size(); i++)
+				for (auto i = 0; i < array.size(); i++)
 				{
 					const auto raw = array[i].get_raw();
 					if (raw.type != game::SCRIPT_OBJECT)
