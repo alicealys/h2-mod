@@ -741,6 +741,12 @@ namespace entity_list
 						gui::copy_to_clipboard(num_str);
 					}
 
+					const auto entity_code = utils::string::va("game:getentbynum(%i)", info.num);
+					if (ImGui::Button(entity_code))
+					{
+						gui::copy_to_clipboard(entity_code);
+					}
+
 					ImGui::Text("Commands");
 
 					if (ImGui::Button("Set field"))
