@@ -658,7 +658,7 @@ namespace game_console
 		for (const auto& dvar : dvars::dvar_list)
 		{
 			auto name = utils::string::to_lower(dvar);
-			if (match_compare(input, name, exact))
+			if (game::Dvar_FindVar(name.data()) && match_compare(input, name, exact))
 			{
 				suggestions.insert(dvar);
 			}

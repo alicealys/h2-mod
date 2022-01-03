@@ -395,6 +395,7 @@ namespace game
 		dvar_value latched;
 		dvar_value reset;
 		dvar_limits domain;
+		char __pad0[0xC];
 	};
 
 	struct ScreenPlacement

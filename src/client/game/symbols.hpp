@@ -154,7 +154,7 @@ namespace game
 	WEAK symbol<PlayerKeyState> playerKeys{0x1E8767C};
 
 	WEAK symbol<int> dvarCount{0xBFBB310};
-	WEAK symbol<dvar_t*> sortedDvars{0xBFBB320};
+	WEAK symbol<dvar_t> dvarPool{0xBFBB320};
 
 	WEAK symbol<unsigned int> levelEntityId{0xB5E0B30};
 	WEAK symbol<int> g_script_error_level{0xBA9CC24};
