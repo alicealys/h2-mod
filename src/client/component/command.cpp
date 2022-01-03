@@ -7,6 +7,7 @@
 #include "game/scripting/execution.hpp"
 
 #include "command.hpp"
+#include "scheduler.hpp"
 #include "game_console.hpp"
 #include "chat.hpp"
 #include "fastfiles.hpp"
@@ -425,6 +426,26 @@ namespace command
 				catch (...)
 				{
 				}
+			});
+
+			add("kill", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				scheduler::once([]()
+				{
+					try
+					{
+						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						player.call("kill");
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
 			});
 		}
 	};
