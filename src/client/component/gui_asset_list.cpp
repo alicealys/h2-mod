@@ -18,7 +18,7 @@ namespace asset_list
 	{
 		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
 		std::string asset_type_filter;
-		std::string assets_name_filter;
+		std::string assets_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
 
 		void on_frame()
 		{
@@ -61,7 +61,7 @@ namespace asset_list
 				ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
 				ImGui::Begin(name, &shown_assets[type]);
 
-				ImGui::InputText("asset name", &assets_name_filter);
+				ImGui::InputText("asset name", &assets_name_filter[type]);
 				ImGui::BeginChild("assets list");
 
 				fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
@@ -69,7 +69,7 @@ namespace asset_list
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
 
-					if (utils::string::find_lower(asset_name, assets_name_filter) && ImGui::Button(asset_name))
+					if (utils::string::find_lower(asset_name, assets_name_filter[type]) && ImGui::Button(asset_name))
 					{
 						gui::copy_to_clipboard(asset_name);
 					}
