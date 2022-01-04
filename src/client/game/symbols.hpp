@@ -86,6 +86,7 @@ namespace game
 	WEAK symbol<const float* (const float* v)> Scr_AllocVector{0x5C3220};
 	WEAK symbol<void()> Scr_ClearOutParams{0x5C6E50};
 	WEAK symbol<scr_entref_t(unsigned int entId)> Scr_GetEntityIdRef{0x5C56C0};
+	WEAK symbol<unsigned int(int entnum, unsigned int classnum)> Scr_GetEntityId{0x5C5610};
 	WEAK symbol<int(unsigned int classnum, int entnum, int offset)> Scr_SetObjectField{0x512190};
 	WEAK symbol<void(unsigned int id, scr_string_t stringValue, unsigned int paramcount)> Scr_NotifyId{0x5C8240};
 	WEAK symbol<unsigned int(unsigned int threadId)> Scr_GetSelf{0x5C57C0};

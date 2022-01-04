@@ -27,7 +27,7 @@ namespace scripting
 	}
 
 	entity::entity(game::scr_entref_t entref)
-		: entity(game::FindEntityId(entref.entnum, entref.classnum))
+		: entity(game::Scr_GetEntityId(entref.entnum, entref.classnum))
 	{
 	}
 

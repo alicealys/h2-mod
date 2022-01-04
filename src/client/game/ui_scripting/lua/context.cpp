@@ -7,6 +7,7 @@
 #include "../execution.hpp"
 
 #include "../../../component/ui_scripting.hpp"
+#include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 
 #include "component/game_console.hpp"
@@ -1004,6 +1005,24 @@ namespace ui_scripting::lua
 				}
 
 				return sol::as_returns(returns);
+			};
+
+			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
+			{
+				scripting::shared_table.access([key, value](scripting::shared_table_t& table)
+				{
+					table[key] = value;
+				});
+			};
+
+			game_type["sharedget"] = [](const game&, const std::string& key)
+			{
+				std::string result;
+				scripting::shared_table.access([key, &result](scripting::shared_table_t& table)
+				{
+					result = table[key];
+				});
+				return result;
 			};
 
 			auto userdata_type = state.new_usertype<userdata>("userdata_");

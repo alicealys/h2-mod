@@ -32,7 +32,7 @@ namespace scripting::lua
 
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
-			state["level"] = entity{*game::levelEntityId};
+			state["level"] = entity{*::game::levelEntityId};
 			state["player"] = call("getentbynum", {0}).as<entity>();
 
 			state["io"]["fileexists"] = utils::io::file_exists;
@@ -301,6 +301,13 @@ namespace scripting::lua
 				return result;
 			};
 
+			entity_type["getentref"] = [](const entity& entity)
+			{
+				const auto entref = entity.get_entity_reference();
+				std::vector<unsigned int> returns = {entref.entnum, entref.classnum};
+				return sol::as_returns(returns);
+			};
+
 			struct game
 			{
 			};
@@ -529,6 +536,38 @@ namespace scripting::lua
 				}, true);
 
 				return table;
+			};
+
+			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
+			{
+				scripting::shared_table.access([key, value](scripting::shared_table_t& table)
+				{
+					table[key] = value;
+				});
+			};
+
+			game_type["sharedget"] = [](const game&, const std::string& key)
+			{
+				std::string result;
+				scripting::shared_table.access([key, &result](scripting::shared_table_t& table)
+				{
+					result = table[key];
+				});
+				return result;
+			};
+
+			game_type["getentbyref"] = [](const game&, const sol::this_state s, 
+				const unsigned int entnum, const unsigned int classnum)
+			{
+				const auto id = ::game::Scr_GetEntityId(entnum, classnum);
+				if (id)
+				{
+					return convert(s, scripting::entity{id});
+				}
+				else
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
 			};
 		}
 	}
