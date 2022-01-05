@@ -72,10 +72,6 @@ namespace game
 		G_GivePlayerWeapon{0x51B660};
 	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x4C4110};
 	WEAK symbol<void(int clientNum, const unsigned int weapon)> G_SelectWeapon{0x51C0D0};
-	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x36F310};
-
-	WEAK symbol<void(int* hitNum, const float* start, const float* end, int passEntityNum, 
-		int passEntityNum1, int contentmask)> G_SightTrace{0x4CBCA0};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x620660};
 
@@ -88,8 +84,6 @@ namespace game
 	WEAK symbol<bool(int clientNum, const char* menu)> Menu_IsMenuOpenAndVisible{0x5EE1A0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x759BA0};
-
-	WEAK symbol<void(pathnode_t*, float* out)> PathNode_WorldifyPosFromParent{0x525830};
 
 	WEAK symbol<const float* (const float* v)> Scr_AllocVector{0x5C3220};
 	WEAK symbol<void()> Scr_ClearOutParams{0x5C6E50};
@@ -121,7 +115,6 @@ namespace game
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x775C40};
 
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x3E16A0};
-	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x3E1660};
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x5BFBB0};
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x5C0170};
@@ -155,12 +148,10 @@ namespace game
 	WEAK symbol<int> g_poolSize{0xBF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
-	WEAK symbol<PathData> pathData{0x52CCDA0};
 
 	WEAK symbol<DWORD> threadIds{0xB11DC80};
 
 	WEAK symbol<GfxDrawMethod_s> gfxDrawMethod{0xEDF9E00};
-	WEAK symbol<refdef_t> refdef{0x1BC2500};
 
 	WEAK symbol<int> keyCatchers{0x203F3C0};
 
