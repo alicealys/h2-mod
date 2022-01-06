@@ -69,6 +69,10 @@ namespace patches
 			// Disable battle net popup
 			utils::hook::nop(0x5F4496_b, 5);
 
+			// Allow kbam input when gamepad is enabled
+			utils::hook::nop(0x3D2F8E_b, 2);
+			utils::hook::nop(0x3D0C9C_b, 6);
+
 			// Prevent game from overriding cg_fov and cg_fovscale values
 			gscr_set_save_dvar_hook.create(0x504C60_b, &gscr_set_save_dvar_stub);
 			// Make cg_fov and cg_fovscale saved dvars
