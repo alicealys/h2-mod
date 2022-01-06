@@ -19,8 +19,6 @@ namespace fps
 {
 	namespace
 	{
-		auto lastframe = std::chrono::high_resolution_clock::now();
-
 		game::dvar_t* cg_drawFps;
 		game::dvar_t* cg_drawSpeed;
 
@@ -44,9 +42,78 @@ namespace fps
 
 		float screen_max[2];
 
-		int history_count = 20;
-		int history[20] = { 0 };
-		int index;
+		std::deque<float> speed_history;
+
+		utils::hook::detour sub_7C55D0_hook;
+
+		struct cg_perf_data
+		{
+			std::chrono::time_point<std::chrono::steady_clock> perf_start;
+			std::int32_t current_ms;
+			std::int32_t previous_ms;
+			std::int32_t frame_ms;
+			std::int32_t history[32];
+			std::int32_t count;
+			std::int32_t index;
+			std::int32_t instant;
+			std::int32_t total;
+			float average;
+			float variance;
+			std::int32_t min;
+			std::int32_t max;
+		};
+
+		cg_perf_data cg_perf{};
+
+		void perf_calc_fps(cg_perf_data* data, const std::int32_t value)
+		{
+			data->history[data->index % 32] = value;
+			data->instant = value;
+			data->min = 0x7FFFFFFF;
+			data->max = 0;
+			data->average = 0.0f;
+			data->variance = 0.0f;
+			data->total = 0;
+
+			for (auto i = 0; i < data->count; ++i)
+			{
+				const std::int32_t idx = (data->index - i) % 32;
+
+				if (idx < 0)
+				{
+					break;
+				}
+
+				data->total += data->history[idx];
+
+				if (data->min > data->history[idx])
+				{
+					data->min = data->history[idx];
+				}
+
+				if (data->max < data->history[idx])
+				{
+					data->max = data->history[idx];
+				}
+			}
+
+			data->average = static_cast<float>(data->total) / static_cast<float>(data->count);
+			++data->index;
+		}
+
+		void perf_update()
+		{
+			cg_perf.count = 32;
+
+			cg_perf.current_ms = static_cast<std::int32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+				std::chrono::high_resolution_clock::now() - cg_perf.perf_start).count());
+			cg_perf.frame_ms = cg_perf.current_ms - cg_perf.previous_ms;
+			cg_perf.previous_ms = cg_perf.current_ms;
+
+			perf_calc_fps(&cg_perf, cg_perf.frame_ms);
+
+			sub_7C55D0_hook.invoke<void>();
+		}
 
 		void check_resize()
 		{
@@ -56,22 +123,8 @@ namespace fps
 		
 		float relative(int x)
 		{
-			return ((float)x / 1000) * screen_max[0];
+			return (static_cast<float>(x) / 1000) * screen_max[0];
 		}
-
-		int average_fps()
-		{
-			auto total = 0;
-
-			for (auto i = 0; i < history_count; i++)
-			{
-				total += history[i];
-			}
-
-			return total / history_count;
-		}
-
-		std::deque<float> speed_history;
 
 		void draw_line(float x, float y, float width, float height)
 		{
@@ -83,17 +136,19 @@ namespace fps
 
 		void draw_speed()
 		{
-			if (cg_drawSpeed->current.integer < 1)
+			if (!cg_drawSpeed->current.enabled)
 			{
 				return;
 			}
 
-			const auto speed = (float)sqrt(pow(game::g_entities[0].client->velocity[0], 2) +
-										   pow(game::g_entities[0].client->velocity[1], 2) +
-										   pow(game::g_entities[0].client->velocity[2], 2));
+			const auto speed = static_cast<float>(sqrt(
+				pow(game::g_entities[0].client->velocity[0], 2) +
+				pow(game::g_entities[0].client->velocity[1], 2) +
+				pow(game::g_entities[0].client->velocity[2], 2)
+			));
 
 			const auto font = speed_font;
-			const auto speed_string = utils::string::va("%i\n", (int)speed);
+			const auto speed_string = utils::string::va("%i\n", static_cast<int>(speed));
 
 			const auto width = game::R_TextWidth(speed_string, 0x7FFFFFFF, font);
 
@@ -128,21 +183,22 @@ namespace fps
 
 		void draw_speed_graph()
 		{
-			if (cg_speedGraph->current.integer < 1)
+			if (!cg_speedGraph->current.enabled)
 			{
 				return;
 			}
 
-			const auto speed = (float)sqrt(pow(game::g_entities[0].client->velocity[0], 2) +
-										   pow(game::g_entities[0].client->velocity[1], 2) +
-										   pow(game::g_entities[0].client->velocity[2], 2));
+			const auto speed = static_cast<float>(sqrt(
+				pow(game::g_entities[0].client->velocity[0], 2) +
+				pow(game::g_entities[0].client->velocity[1], 2) +
+				pow(game::g_entities[0].client->velocity[2], 2)
+			));
 
 			const auto base_width = relative(cg_speedGraphWidth->current.integer);
 			const auto base_height = relative(cg_speedGraphHeight->current.integer);
+			const auto max = static_cast<int>(base_width);
 
-			const auto max = (int)base_width;
-
-			if (speed_history.size() > max)
+			if (static_cast<int>(speed_history.size()) > max)
 			{
 				speed_history.pop_front();
 			}
@@ -156,36 +212,28 @@ namespace fps
 
 			const auto base_x = relative(cg_speedGraphX->current.integer);
 			const auto base_y = screen_max[1] - relative(cg_speedGraphY->current.integer);
-
 			const auto width = 1.f;
 
-			draw_box(base_x, base_y - base_height - 4.f, base_width + 4.f, base_height + 4.f, cg_speedGraphBackgroundColor->current.vector);
+			draw_box(base_x, base_y - base_height - 4.f, base_width + 4.f, 
+				base_height + 4.f, cg_speedGraphBackgroundColor->current.vector);
 
-			const auto diff = max - speed_history.size();
+			const auto diff = max - static_cast<int>(speed_history.size());
 
-			const auto start = diff >= 0
-				? 0
-				: diff * - 1;
-
-			const auto offset = diff > 0
-				? diff
-				: 0;
-
-			for (auto i = start; i < speed_history.size(); i++)
+			for (auto i = 0; i < speed_history.size(); i++)
 			{
 				const auto percentage = std::min(speed_history[i] / 1000.f, 1.f);
 				const auto height = percentage * base_height;
 
-				const auto x = base_x + (float)(offset + i) * width + 2.f;
+				const auto x = base_x + static_cast<float>(diff + i) * width + 2.f;
 				const auto y = base_y - height - 2.f;
 
 				draw_line(x, y, width, height);
 			}
 
-			const auto speed_string = utils::string::va("%i\n", (int)speed);
+			const auto speed_string = utils::string::va("%i\n", static_cast<int>(speed));
 
 			const auto font_height = relative(20);
-			const auto font = game::R_RegisterFont("fonts/fira_mono_regular.ttf", (int)font_height);
+			const auto font = game::R_RegisterFont("fonts/fira_mono_regular.ttf", static_cast<int>(font_height));
 
 			const auto text_x = base_x + relative(5);
 			const auto text_y = base_y - (base_height / 2.f) + (font_height / 2.f);
@@ -201,20 +249,11 @@ namespace fps
 				return;
 			}
 
-			const auto now = std::chrono::high_resolution_clock::now();
-			const auto frametime = now - lastframe;
-			lastframe = now;
+			const auto fps = static_cast<std::int32_t>(static_cast<float>(1000.0f / static_cast<float>(cg_perf.
+				average))
+				+ 9.313225746154785e-10);
 
-			const int fps = (int)(1000000000 / (int)frametime.count());
-
-			if (index >= history_count)
-			{
-				index = 0;
-			}
-
-			history[index++] = fps;
-
-			const auto fps_string = utils::string::va("%i", average_fps());
+			const auto fps_string = utils::string::va("%i", fps);
 			const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
 
 			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 35.f, 1.0f, 1.0f, 0.0f,
@@ -262,10 +301,12 @@ namespace fps
 	public:
 		void post_unpack() override
 		{
-			cg_drawSpeed = dvars::register_int("cg_drawSpeed", 0, 0, 2, game::DVAR_FLAG_SAVED);
+			sub_7C55D0_hook.create(0x7C55D0_b, perf_update);
+
+			cg_drawSpeed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED);
 			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED);
 
-			cg_speedGraph = dvars::register_bool("cg_speedGraph", false, game::DVAR_FLAG_SAVED);
+			cg_speedGraph = dvars::register_bool("cg_speedGraph", 0, game::DVAR_FLAG_SAVED);
 
 			cg_speedGraphColor = dvars::register_vec4("cg_speedGraphColor", 1.f, 0.f, 0.f, 1.0f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
 			cg_speedGraphFontColor = dvars::register_vec4("cg_speedGraphFontColor", 1.f, 1.f, 1.f, 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
