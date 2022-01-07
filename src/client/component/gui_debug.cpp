@@ -5,16 +5,9 @@
 #include "game/dvars.hpp"
 
 #include "scheduler.hpp"
-#include "command.hpp"
 #include "gui.hpp"
 
-#include "game/scripting/lua/context.hpp"
-#include "game/scripting/lua/engine.hpp"
-#include "game/scripting/execution.hpp"
-
 #include <utils/string.hpp>
-#include <utils/hook.hpp>
-#include <utils/concurrency.hpp>
 
 namespace gui_debug
 {
@@ -25,6 +18,8 @@ namespace gui_debug
 		enum object_type
 		{
 			square,
+			circle,
+			circle_fill,
 			cube,
 			cube_mesh
 		};
@@ -35,7 +30,6 @@ namespace gui_debug
 		struct draw_settings
 		{
 			bool enabled;
-			bool native_rendering;
 			bool camera_locked;
 			float camera[3] = {};
 			float range = 500.f;
@@ -50,6 +44,14 @@ namespace gui_debug
 			float link_thickness = 1.f;
 			bool draw_linked_nodes;
 		} path_node_settings{};
+
+		struct point
+		{
+			ImVec2 point;
+			bool valid;
+		};
+
+		draw_settings trigger_settings{};
 
 		float vector_dot(float* a, float* b)
 		{
@@ -233,54 +235,184 @@ namespace gui_debug
 			draw_line(p4, p4_top, color, thickness);
 		}
 
-		void draw_square_native(float* origin, float width, float* color)
+		float get_pi()
 		{
-			const auto half = width / 2.f;
+			static const auto pi = static_cast<float>(atan(1)) * 4.f;
+			return pi;
+		}
 
-			float p1[3] = {origin[0] - half, origin[1] + half, origin[2]};
-			float p2[3] = {origin[0] + half, origin[1] + half, origin[2]};
-			float p3[3] = {origin[0] + half, origin[1] - half, origin[2]};
-			float p4[3] = {origin[0] - half, origin[1] - half, origin[2]};
+		void draw_circle(float* center, float radius, float* color, float thickness)
+		{
+			const auto pi = get_pi();
 
-			float p1_screen[2] = {};
-			float p2_screen[2] = {};
-			float p3_screen[2] = {};
-			float p4_screen[2] = {};
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			
+			window->DrawList->PathClear();
 
-			auto result = 1;
-			result *= world_pos_to_screen_pos(p1, p1_screen);
-			result *= world_pos_to_screen_pos(p2, p2_screen);
-			result *= world_pos_to_screen_pos(p3, p3_screen);
-			result *= world_pos_to_screen_pos(p4, p4_screen);
-
-			if (!result)
+			for (auto angle = 0.f; angle < 360; angle += 1.f)
 			{
-				return;
+				const auto x = center[0] + radius * cos(angle * pi / 180.f);
+				const auto y = center[1] + radius * sin(angle * pi / 180.f);
+
+				float point[3] = {x, y, center[2]};
+				float point_screen[2] = {};
+
+				if (!world_pos_to_screen_pos(point, point_screen))
+				{
+					return;
+				}
+
+				const auto point_ = ImVec2(point_screen[0], point_screen[1]);
+				window->DrawList->PathLineTo(point_);
 			}
 
-			game::rectangle rect;
-			rect.p0.x = p1_screen[0];
-			rect.p0.y = p1_screen[1];
-			rect.p0.f2 = 0.f;
-			rect.p0.f3 = 1.f;
+			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
+			window->DrawList->PathStroke(color_, 0, thickness);
+		}
 
-			rect.p1.x = p2_screen[0];
-			rect.p1.y = p2_screen[1];
-			rect.p1.f2 = 0.f;
-			rect.p1.f3 = 1.f;
+		void draw_circle_filled(float* center, float radius, float* color)
+		{
+			const auto pi = get_pi();
 
-			rect.p2.x = p3_screen[0];
-			rect.p2.y = p3_screen[1];
-			rect.p2.f2 = 0.f;
-			rect.p2.f3 = 1.f;
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			
+			window->DrawList->PathClear();
 
-			rect.p3.x = p4_screen[0];
-			rect.p3.y = p4_screen[1];
-			rect.p3.f2 = 0.f;
-			rect.p3.f3 = 1.f;
+			for (auto angle = 0; angle < 360; angle += 12)
+			{
+				const auto x = center[0] + radius * cos(static_cast<float>(angle) * pi / 180.f);
+				const auto y = center[1] + radius * sin(static_cast<float>(angle) * pi / 180.f);
 
-			const auto material = game::Material_RegisterHandle("white");
-			game::R_DrawRectangle(&rect, 0.f, 0.f, 1.f, 1.f, color, material);
+				float point[3] = {x, y, center[2]};
+				float point_screen[2] = {};
+
+				if (!world_pos_to_screen_pos(point, point_screen))
+				{
+					continue;
+				}
+
+				const auto point_ = ImVec2(point_screen[0], point_screen[1]);
+				window->DrawList->PathLineTo(point_);
+			}
+
+			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
+			window->DrawList->PathFillConvex(color_);
+		}
+
+		void draw_cylinder(float* center, float radius, float height, float* color, float thickness)
+		{
+			const auto pi = get_pi();
+
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+
+			float top[3] = {center[0], center[1], center[2] + height};
+
+			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
+
+			const auto max_points = 30;
+			const auto step = 360 / max_points;
+
+			point points_top[max_points];
+			point points_bottom[max_points];
+
+			auto point_index = 0;
+			for (auto angle = 0; angle < 360; angle += step)
+			{
+				const auto x = center[0] + radius * cos(static_cast<float>(angle) * pi / 180.f);
+				const auto y = center[1] + radius * sin(static_cast<float>(angle) * pi / 180.f);
+
+				float point[3] = {x, y, center[2]};
+				float point_top[3] = {x, y, center[2] + height};
+
+				float point_screen[2] = {};
+				float point_top_screen[2] = {};
+
+				const auto index = point_index++;
+
+				auto result = 1;
+				result *= world_pos_to_screen_pos(point, point_screen);
+				result *= world_pos_to_screen_pos(point_top, point_top_screen);
+
+				if (!result)
+				{
+					points_bottom[index] = {{}, false};
+					points_top[index] = {{}, false};
+					continue;
+				}
+				
+				points_bottom[index] = {ImVec2(point_screen[0], point_screen[1]), true};
+				points_top[index] = {ImVec2(point_top_screen[0], point_top_screen[1]), true};
+			}
+
+			window->DrawList->PathClear();
+			for (auto i = 0; i < max_points; i++)
+			{
+				if (!points_bottom[i].valid)
+				{
+					continue;
+				}
+
+				window->DrawList->PathLineTo(points_bottom[i].point);
+			}
+			window->DrawList->PathFillConvex(color_);
+
+			window->DrawList->PathClear();
+			for (auto i = 0; i < max_points; i++)
+			{
+				if (!points_top[i].valid)
+				{
+					continue;
+				}
+
+				window->DrawList->PathLineTo(points_top[i].point);
+			}
+			window->DrawList->PathFillConvex(color_);
+
+			for (auto i = 0; i < max_points - 1; i++)
+			{
+				window->DrawList->PathClear();
+
+				if (!points_bottom[i].valid)
+				{
+					continue;
+				}
+
+				window->DrawList->PathLineTo(points_bottom[i].point);
+
+				if (i == max_points - 1)
+				{
+					window->DrawList->PathLineTo(points_bottom[0].point);
+					window->DrawList->PathLineTo(points_top[0].point);
+				}
+				else
+				{
+					window->DrawList->PathLineTo(points_bottom[i + 1].point);
+					window->DrawList->PathLineTo(points_top[i + 1].point);
+				}
+
+				window->DrawList->PathLineTo(points_top[i].point);
+
+				window->DrawList->PathFillConvex(color_);
+			}
+		}
+
+		void draw_object(float* origin, object_type type)
+		{
+			switch (type)
+			{
+			case object_type::square:
+				draw_square(origin, path_node_settings.size, path_node_settings.color);
+				break;
+			case object_type::circle:
+				break;
+			case object_type::cube:
+				draw_cube(origin, path_node_settings.size, path_node_settings.color);
+				break;
+			case object_type::cube_mesh:
+				draw_cube_mesh(origin, path_node_settings.size, path_node_settings.color,
+					path_node_settings.mesh_thickness);
+				break;
+			}
 		}
 
 		void draw_window()
@@ -295,21 +427,17 @@ namespace gui_debug
 			if (ImGui::TreeNode("Path nodes"))
 			{
 				ImGui::Checkbox("Draw", &path_node_settings.enabled);
-				ImGui::Checkbox("Native rendering", &path_node_settings.native_rendering);
 				ImGui::Checkbox("Lock camera", &path_node_settings.camera_locked);
 
-				if (!path_node_settings.native_rendering)
+				ImGui::Checkbox("Draw linked nodes", &path_node_settings.draw_linked_nodes);
+
+				if (ImGui::TreeNode("Object type"))
 				{
-					ImGui::Checkbox("Draw linked nodes", &path_node_settings.draw_linked_nodes);
+					ImGui::RadioButton("square", reinterpret_cast<int*>(&path_node_settings.type), object_type::square);
+					ImGui::RadioButton("cube", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube);
+					ImGui::RadioButton("cube mesh", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube_mesh);
 
-					if (ImGui::TreeNode("Object type"))
-					{
-						ImGui::RadioButton("square", reinterpret_cast<int*>(&path_node_settings.type), object_type::square);
-						ImGui::RadioButton("cube", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube);
-						ImGui::RadioButton("cube mesh", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube_mesh);
-
-						ImGui::TreePop();
-					}
+					ImGui::TreePop();
 				}
 
 				ImGui::SliderFloat("range", &path_node_settings.range, 0.f, 10000.f);
@@ -328,6 +456,23 @@ namespace gui_debug
 				if (ImGui::TreeNode("Color picker"))
 				{
 					ImGui::ColorPicker4("color", path_node_settings.color);
+					ImGui::TreePop();
+				}
+
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Triggers"))
+			{
+				ImGui::Checkbox("Draw", &trigger_settings.enabled);
+				ImGui::Checkbox("Lock camera", &trigger_settings.camera_locked);
+
+				ImGui::SliderFloat("range", &trigger_settings.range, 0.f, 10000.f);
+				ImGui::SliderFloat("mesh thickness", &trigger_settings.mesh_thickness, 1.f, 20.f);
+
+				if (ImGui::TreeNode("Color picker"))
+				{
+					ImGui::ColorPicker4("color", trigger_settings.color);
 					ImGui::TreePop();
 				}
 
@@ -368,31 +513,8 @@ namespace gui_debug
 			}
 		}
 
-		void draw_node_object(float* origin)
+		void begin_render_window()
 		{
-			switch (path_node_settings.type)
-			{
-			case object_type::square:
-				draw_square(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::cube:
-				draw_cube(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::cube_mesh:
-				draw_cube_mesh(origin, path_node_settings.size, path_node_settings.color, 
-					path_node_settings.mesh_thickness);
-				break;
-			}
-		}
-
-		void draw_nodes()
-		{
-			if (!game::SV_Loaded() || path_node_settings.native_rendering || 
-				!path_node_settings.enabled || cl_paused->current.integer)
-			{
-				return;
-			}
-
 			const auto& io = ImGui::GetIO();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -402,6 +524,24 @@ namespace gui_debug
 
 			ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y), ImGuiCond_Always);
+		}
+
+		void end_render_window()
+		{
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			window->DrawList->PushClipRectFullScreen();
+
+			ImGui::End();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar(2);
+		}
+
+		void draw_nodes()
+		{
+			if (!path_node_settings.enabled)
+			{
+				return;
+			}
 
 			for (unsigned int i = 0; i < game::pathData->nodeCount; i++)
 			{
@@ -414,19 +554,40 @@ namespace gui_debug
 					continue;
 				}
 
-				draw_node_object(origin);
+				draw_object(origin, path_node_settings.type);
 				if (path_node_settings.draw_linked_nodes)
 				{
 					draw_linked_nodes(node, origin);
 				}
 			}
+		}
 
-			ImGuiWindow* window = ImGui::GetCurrentWindow();
-			window->DrawList->PushClipRectFullScreen();
+		void draw_triggers()
+		{
+			if (!trigger_settings.enabled)
+			{
+				return;
+			}
 
-			ImGui::End();
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar(2);
+			const auto trigger_radius = game::SL_GetString("trigger_radius", 0);
+
+			for (auto i = 0; i < 0xF9E; i++)
+			{
+				const auto entity = &game::g_entities[i];
+				const auto origin = entity->origin;
+				const auto radius = entity->halfSize[0];
+				const auto height = entity->halfSize[2] * 2.f;
+
+				const auto distance = distance_2d(trigger_settings.camera, origin);
+
+				if (distance - radius > trigger_settings.range || entity->script_classname != trigger_radius)
+				{
+					continue;
+				}
+
+				float top[3] = {origin[0], origin[1], origin[2] + entity->halfSize[2] * 2.f};
+				draw_cylinder(top, radius, height, trigger_settings.color, trigger_settings.mesh_thickness);
+			}
 		}
 
 		void update_camera()
@@ -453,32 +614,12 @@ namespace gui_debug
 				path_node_settings.camera[1] = camera[1];
 				path_node_settings.camera[2] = camera[2];
 			}
-		}
 
-		void draw_nodes_native()
-		{
-			if (!game::SV_Loaded() || !path_node_settings.enabled || cl_paused->current.integer)
+			if (!trigger_settings.camera_locked)
 			{
-				return;
-			}
-
-			update_camera();
-
-			if (!path_node_settings.native_rendering)
-			{
-				return;
-			}
-
-			for (unsigned int i = 0; i < game::pathData->nodeCount; i++)
-			{
-				float origin[3] = {};
-				const auto node = &game::pathData->nodes[i];
-
-				get_pathnode_origin(node, origin);
-				if (distance_2d(path_node_settings.camera, origin) < path_node_settings.range)
-				{
-					draw_square_native(origin, path_node_settings.size, path_node_settings.color);
-				}
+				trigger_settings.camera[0] = camera[0];
+				trigger_settings.camera[1] = camera[1];
+				trigger_settings.camera[2] = camera[2];
 			}
 		}
 	}
@@ -490,13 +631,33 @@ namespace gui_debug
 		{
 			gui::on_frame(draw_window);
 			gui::on_frame(draw_nodes, true);
+			gui::on_frame([]()
+			{
+				if (!game::SV_Loaded() || cl_paused->current.integer)
+				{
+					return;
+				}
+
+				begin_render_window();
+				draw_nodes();
+				draw_triggers();
+				end_render_window();
+			}, true);
 
 			scheduler::on_game_initialized([]()
 			{
 				cl_paused = game::Dvar_FindVar("cl_paused");
 			});
 
-			scheduler::loop(draw_nodes_native, scheduler::pipeline::renderer);
+			scheduler::loop([]()
+			{
+				if (!game::SV_Loaded() || cl_paused->current.integer)
+				{
+					return;
+				}
+
+				update_camera();
+			}, scheduler::pipeline::renderer);
 		}
 	};
 }

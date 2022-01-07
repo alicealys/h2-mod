@@ -56,17 +56,29 @@ namespace game
 		char entityNum;
 	};
 
+	enum scr_string_t
+	{
+		scr_string_t_dummy = 0x0,
+	};
+
 	struct gentity_s
 	{
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
-		char __pad1[0xF0];
+		char __pad1[152];
+		float midPoint[3]; // entityShared.box
+		float halfSize[3]; // entityShared.box
+		char __pad2[64];
 		gclient_s* client;
-		char __pad2[0x4C];
+		char __pad3[48];
+		scr_string_t script_classname;
+		char __pad4[0x14]; // 416
 		char flags;
-		char __pad3[392];
+		char __pad5[392];
 	}; // size = 760
+
+	static_assert(sizeof(gentity_s) == 760);
 
 	struct pathlink_s
 	{
@@ -432,7 +444,6 @@ namespace game
 		dvar_value latched;
 		dvar_value reset;
 		dvar_limits domain;
-		char __pad0[0xC];
 	};
 
 	struct ScreenPlacement
@@ -451,16 +462,6 @@ namespace game
 		vec2_t realAdjustableMin;
 		vec2_t realAdjustableMax;
 		vec2_t subScreenLeft;
-	};
-
-	struct refdef_t
-	{
-		char __pad0[0x10];
-		float fovX;
-		float fovY;
-		char __pad1[0x8];
-		float org[3];
-		float axis[3][3];
 	};
 
 	struct CmdArgs
@@ -699,11 +700,6 @@ namespace game
 		const char* name;
 		int allocFlags;
 		int freeFlags;
-	};
-
-	enum scr_string_t
-	{
-		scr_string_t_dummy = 0x0,
 	};
 
 	struct scr_entref_t
@@ -963,24 +959,7 @@ namespace game
 		uint64_t streams[4];
 		const char* name;
 	};
-
-	struct Bounds
-	{
-		vec3_t midPoint;
-		vec3_t halfSize;
-	};
-
-	struct pmove_t
-	{
-	};
-
-	struct trace_t
-	{
-		char __pad0[0x29];
-		bool allsolid; // Confirmed in CM_PositionTestCapsuleInTriangle
-		bool startsolid; // Confirmed in PM_JitterPoint
-	};
-
+	
 	namespace hks
 	{
 		struct GenericChunkHeader
