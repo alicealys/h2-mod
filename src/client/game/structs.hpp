@@ -68,6 +68,43 @@ namespace game
 		char __pad3[392];
 	}; // size = 760
 
+	struct pathlink_s
+	{
+		char __pad0[4];
+		unsigned __int16 nodeNum;
+		char __pad[6];
+	};
+
+	static_assert(sizeof(pathlink_s) == 12);
+
+	struct pathnode_t
+	{
+		unsigned __int16 type;
+		unsigned int spawnflags;
+		unsigned int targetname;
+		unsigned int script_linkName;
+		unsigned int script_noteworthy;
+		unsigned int target;
+		unsigned int animscript;
+		int animscriptfunc;
+		float vLocalOrigin[3];
+		char __pad0[28];
+		unsigned __int16 totalLinkCount;
+		char __pad1[2];
+		pathlink_s* Links;
+		char __pad2[104];
+	}; // size = 192
+
+	static_assert(sizeof(pathnode_t) == 192);
+
+	struct PathData
+	{
+		const char* name;
+		unsigned int nodeCount;
+		pathnode_t* nodes;
+		// ... 
+	};
+
 	struct Material
 	{
 		const char* name;
@@ -414,6 +451,16 @@ namespace game
 		vec2_t realAdjustableMin;
 		vec2_t realAdjustableMax;
 		vec2_t subScreenLeft;
+	};
+
+	struct refdef_t
+	{
+		char __pad0[0x10];
+		float fovX;
+		float fovY;
+		char __pad1[0x8];
+		float org[3];
+		float axis[3][3];
 	};
 
 	struct CmdArgs
