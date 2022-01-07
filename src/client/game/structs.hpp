@@ -56,17 +56,66 @@ namespace game
 		char entityNum;
 	};
 
+	enum scr_string_t
+	{
+		scr_string_t_dummy = 0x0,
+	};
+
 	struct gentity_s
 	{
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
-		char __pad1[0xF0];
+		char __pad1[152];
+		float midPoint[3]; // entityShared.box
+		float halfSize[3]; // entityShared.box
+		char __pad2[64];
 		gclient_s* client;
-		char __pad2[0x4C];
+		char __pad3[48];
+		scr_string_t script_classname;
+		char __pad4[0x14]; // 416
 		char flags;
-		char __pad3[392];
+		char __pad5[392];
 	}; // size = 760
+
+	static_assert(sizeof(gentity_s) == 760);
+
+	struct pathlink_s
+	{
+		char __pad0[4];
+		unsigned __int16 nodeNum;
+		char __pad[6];
+	};
+
+	static_assert(sizeof(pathlink_s) == 12);
+
+	struct pathnode_t
+	{
+		unsigned __int16 type;
+		unsigned int spawnflags;
+		unsigned int targetname;
+		unsigned int script_linkName;
+		unsigned int script_noteworthy;
+		unsigned int target;
+		unsigned int animscript;
+		int animscriptfunc;
+		float vLocalOrigin[3];
+		char __pad0[28];
+		unsigned __int16 totalLinkCount;
+		char __pad1[2];
+		pathlink_s* Links;
+		char __pad2[104];
+	}; // size = 192
+
+	static_assert(sizeof(pathnode_t) == 192);
+
+	struct PathData
+	{
+		const char* name;
+		unsigned int nodeCount;
+		pathnode_t* nodes;
+		// ... 
+	};
 
 	struct Material
 	{
@@ -651,11 +700,6 @@ namespace game
 		const char* name;
 		int allocFlags;
 		int freeFlags;
-	};
-
-	enum scr_string_t
-	{
-		scr_string_t_dummy = 0x0,
 	};
 
 	struct scr_entref_t
