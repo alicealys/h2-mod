@@ -32,7 +32,7 @@ namespace scripting
 		array& operator=(array&& other) noexcept;
 
 		std::vector<script_value> get_keys() const;
-		unsigned int size() const;
+		int size() const;
 
 		unsigned int push(script_value) const;
 		void erase(const unsigned int) const;

@@ -19,15 +19,15 @@ namespace entity_list
 {
 	namespace
 	{
-		game::dvar_t* sv_running = nullptr;
-
 		enum entity_type
 		{
-			type_any,
+			entity,
 			actor,
 			spawner,
 			weapon,
+			vehicle,
 			node,
+			vehicle_node,
 			count,
 		};
 
@@ -51,27 +51,27 @@ namespace entity_list
 		struct entity_info_t
 		{
 			unsigned int id;
-			unsigned int num;
+			game::scr_entref_t entref;
 			std::unordered_map<std::string, std::string> fields;
 		};
 
 		struct filters_t
 		{
-			bool filter_by_range{};
-			float range{};
-			entity_team team{};
-			entity_type type{};
+			bool filter_by_range;
+			float range;
+			entity_team team;
+			entity_type type;
 			std::vector<std::pair<std::string, std::string>> fields;
 		};
 
 		struct data_t
 		{
-			bool auto_update{};
-			bool force_update{};
+			bool auto_update;
+			bool force_update;
 			filters_t filters;
-			std::chrono::milliseconds interval{};
-			std::chrono::high_resolution_clock::time_point last_call{};
-			std::vector<entity_info_t> entity_info{};
+			std::chrono::milliseconds interval;
+			std::chrono::high_resolution_clock::time_point last_call;
+			std::vector<entity_info_t> entity_info;
 			std::vector<std::function<void()>> tasks;
 			std::unordered_map<std::string, bool> selected_fields = 
 			{
@@ -279,103 +279,71 @@ namespace entity_list
 			};
 		};
 
-		utils::concurrency::container<data_t> data_;
-		unsigned int selected_entity{};
+		utils::concurrency::container<data_t> data_{};
+		game::scr_entref_t selected_entity{};
 		bool set_field_window{};
+		bool selected_fields_window{};
 		int selected_type = game::SCRIPT_INTEGER;
 
-		bool is_sv_running()
-		{
-			if (!sv_running)
-			{
-				return false;
-			}
-
-			return sv_running->current.enabled;
-		}
-
-		bool verify_entity(unsigned int id)
-		{
-			const auto type = game::scr_VarGlob->objectVariableValue[id].w.type;
-			return type == game::SCRIPT_ENTITY;
-		}
+		std::string field_filter{};
+		std::string field_name_buffer{};
+		std::string field_value_buffer{};
+		std::string vector_input[3]{};
 
 		std::optional<scripting::array> get_entity_array(const entity_type type, const entity_team team)
 		{
-			const auto value = scripting::call("getentarray");
-			if (!value.is<scripting::array>())
+			if (type == entity_type::entity)
 			{
-				return {};
-			}
-
-			const auto all = value.as<scripting::array>();
-
-			if (type == entity_type::type_any)
-			{
-				return {all};
+				return {scripting::call("getentarray").as<scripting::array>()};
 			}
 
 			if (type == entity_type::actor)
 			{
 				scripting::array result{};
 
-				for (unsigned int i = 0; i < all.size(); i++)
+				const auto actors = scripting::call("getaiarray").as<scripting::array>();
+				for (auto i = 0; i < actors.size(); i++)
 				{
-					const auto raw = all[i].get_raw();
-					if (raw.type != game::SCRIPT_OBJECT)
-					{
-						continue;
-					}
+					const auto entity = actors[i].as<scripting::entity>();
+					const auto team_string = entity.get("team").as<std::string>();
 
-					if (!verify_entity(raw.u.uintValue))
-					{
-						continue;
-					}
-
-					const auto entity = all[i].as<scripting::entity>();
-
-					const auto classname_value = entity.get("classname");
-					if (!classname_value.is<std::string>())
-					{
-						continue;
-					}
-
-					const auto team_value = entity.get("team");
-					if (!team_value.is<std::string>())
-					{
-						continue;
-					}
-
-					const auto classname = classname_value.as<std::string>();
-					const auto team_ = team_value.as<std::string>();
-					if (utils::string::find_lower(classname, "actor_") && 
-					    (team == entity_team::team_any || team_ == team_names[team]))
+					if (team == entity_team::team_any || team_string == team_names[team])
 					{
 						result.push(entity);
 					}
 				}
 
-				return result;
+				return {result};
 			}
 
 			if (type == entity_type::spawner && team == entity_team::team_any)
 			{
-				return scripting::call("getspawnerarray").as<scripting::array>();
+				return {scripting::call("getspawnerarray").as<scripting::array>()};
 			}
 
 			if (type == entity_type::spawner)
 			{
-				return scripting::call("getspawnerteamarray", {team_names[team]}).as<scripting::array>();
+				return {scripting::call("getspawnerteamarray", {team_names[team]}).as<scripting::array>()};
 			}
 
 			if (type == entity_type::weapon)
 			{
-				return scripting::call("getweaponarray").as<scripting::array>();
+				return {scripting::call("getweaponarray").as<scripting::array>()};
 			}
 
 			if (type == entity_type::node)
 			{
-				return scripting::call("getnodearray").as<scripting::array>();
+				return {scripting::call("getallnodes").as<scripting::array>()};
+			}
+			
+			if (type == entity_type::vehicle_node)
+			{
+				return {scripting::call("getallvehiclenodes").as<scripting::array>()};
+			}
+
+			if (type == entity_type::vehicle)
+			{
+				return {scripting::call("vehicle_getarray").as<scripting::array>()};
 			}
 
 			return {};
@@ -410,29 +378,18 @@ namespace entity_list
 				data.entity_info.clear();
 
 				const auto array = value.value();
+				const scripting::entity player{{0, 0}};
 
-				for (unsigned int i = 0; i < array.size(); i++)
+				for (auto i = 0; i < array.size(); i++)
 				{
-					const auto raw = array[i].get_raw();
-					if (raw.type != game::SCRIPT_OBJECT)
-					{
-						continue;
-					}
-
-					if (!verify_entity(raw.u.uintValue))
-					{
-						continue;
-					}
-
 					const auto entity = array[i].as<scripting::entity>();
 					entity_info_t info{};
 
-					info.id = raw.u.uintValue;
-					info.num = entity.get_entity_reference().entnum;
+					info.id = entity.get_entity_id();
+					info.entref = entity.get_entity_reference();
 
 					if (data.filters.filter_by_range)
 					{
-						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
 						const auto distance = scripting::call("distance", {player.get("origin"), entity.get("origin")}).as<float>();
 
 						if (distance > data.filters.range)
@@ -478,72 +435,61 @@ namespace entity_list
 			});
 		}
 
-		void teleport_to(data_t& data, unsigned int id)
+		void teleport_to(data_t& data, game::scr_entref_t entref)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([entref]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const scripting::entity entity{entref};
+					const scripting::entity player{{0, 0}};
+					player.call("setorigin", {entity.get("origin")});
 				}
-
-				const auto dest = scripting::entity{id};
-				const auto value = scripting::call("getentbynum", {0});
-				if (value.get_raw().type != game::SCRIPT_OBJECT)
+				catch (...)
 				{
-					return;
+					gui::notification("Error", utils::string::va("^1error teleporting player to entity num %i!", entref.entnum));
 				}
-
-				const auto player = value.as<scripting::entity>();
-				player.call("setorigin", {dest.get("origin")});
 			});
 		}
 
-		void teleport_to_reverse(data_t& data, unsigned int id)
+		void teleport_to_reverse(data_t& data, game::scr_entref_t entref)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([entref]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const scripting::entity entity{entref};
+					const scripting::entity player{{0, 0}};
+					entity.set("origin", player.get("origin"));
 				}
-
-				const auto dest = scripting::entity{id};
-				const auto value = scripting::call("getentbynum", {0});
-				if (value.get_raw().type != game::SCRIPT_OBJECT)
+				catch (...)
 				{
-					return;
+					gui::notification("Error", utils::string::va("^1error teleporting entity num %i to player!", entref.entnum));
 				}
-
-				const auto player = value.as<scripting::entity>();
-				dest.set("origin", player.get("origin"));
 			});
 		}
 
-		void delete_entity(data_t& data, unsigned int id)
+		void delete_entity(data_t& data, game::scr_entref_t entref)
 		{
-			data.tasks.push_back([id]()
+			data.tasks.push_back([entref]()
 			{
-				if (!verify_entity(id))
+				try
 				{
-					return;
+					const scripting::entity entity{entref};
+					entity.call("delete");
 				}
-
-				const auto target = scripting::entity{id};
-				target.call("delete");
+				catch (...)
+				{
+					gui::notification("Error", utils::string::va("^1error deleting entity num %i!", entref.entnum));
+				}
 			});
 		}
 
-		void set_entity_field(data_t& data, unsigned int id, 
+		void set_entity_field(data_t& data, game::scr_entref_t entref,
 			const std::string& name, const std::string& string_value, int type)
 		{
-			data.tasks.push_back([id, name, type, string_value, &data]()
+			data.tasks.push_back([entref, name, type, string_value, &data]()
 			{
-				if (!verify_entity(id))
-				{
-					return;
-				}
-
 				scripting::script_value value{};
 
 				if (type == game::SCRIPT_INTEGER)
@@ -563,7 +509,8 @@ namespace entity_list
 
 				try
 				{
-					scripting::set_entity_field(id, name, value);
+					const scripting::entity entity{entref};
+					scripting::set_entity_field(entity, name, value);
 					data.force_update = true;
 				}
 				catch (...)
@@ -573,19 +520,15 @@ namespace entity_list
 			});
 		}
 
-		void set_entity_field_vector(data_t& data, unsigned int id, 
+		void set_entity_field_vector(data_t& data, game::scr_entref_t entref,
 			const std::string& name, const scripting::vector& value)
 		{
-			data.tasks.push_back([id, name, value, &data]()
+			data.tasks.push_back([entref, name, value, &data]()
 			{
-				if (!verify_entity(id))
-				{
-					return;
-				}
-
 				try
 				{
-					scripting::set_entity_field(id, name, value);
+					const scripting::entity entity{entref};
+					scripting::set_entity_field(entity, name, value);
 					data.force_update = true;
 				}
 				catch (...)
@@ -597,13 +540,6 @@ namespace entity_list
 
 		void show_set_field_window(data_t& data)
 		{
-			static char name[0x100]{};
-			static char value[0x100]{};
-
-			static char x[0x100]{};
-			static char y[0x100]{};
-			static char z[0x100]{};
-
 			ImGui::SetNextWindowSizeConstraints(ImVec2(300, 300), ImVec2(300, 300));
 			ImGui::Begin("Set entity field", &set_field_window);
 			ImGui::SetWindowSize(ImVec2(300, 300));
@@ -619,16 +555,16 @@ namespace entity_list
 				ImGui::TreePop();
 			}
 
-			ImGui::InputText("name", name, IM_ARRAYSIZE(name));
+			ImGui::InputText("name", &field_name_buffer);
 			if (selected_type == game::SCRIPT_VECTOR)
 			{
-				ImGui::InputText("x", x, IM_ARRAYSIZE(x));
-				ImGui::InputText("y", y, IM_ARRAYSIZE(y));
-				ImGui::InputText("z", z, IM_ARRAYSIZE(z));
+				ImGui::InputText("x", &vector_input[0]);
+				ImGui::InputText("y", &vector_input[1]);
+				ImGui::InputText("z", &vector_input[2]);
 			}
 			else
 			{
-				ImGui::InputText("value", value, IM_ARRAYSIZE(value));
+				ImGui::InputText("value", &field_value_buffer);
 			}
 
 			if (ImGui::Button("set", ImVec2(300, 0)))
@@ -637,16 +573,18 @@ namespace entity_list
 				{
 					const scripting::vector vector
 					{
-						static_cast<float>(atof(x)),
-						static_cast<float>(atof(y)),
-						static_cast<float>(atof(z))
+						static_cast<float>(atof(vector_input[0].data())),
+						static_cast<float>(atof(vector_input[1].data())),
+						static_cast<float>(atof(vector_input[2].data()))
 					};
 
-					set_entity_field_vector(data, selected_entity, name, vector);
+					set_entity_field_vector(data, selected_entity, 
+						field_name_buffer, vector);
 				}
 				else
 				{
-					set_entity_field(data, selected_entity, name, value, selected_type);
+					set_entity_field(data, selected_entity, field_name_buffer, 
+						field_value_buffer, selected_type);
 				}
 			}
 
@@ -664,6 +602,7 @@ namespace entity_list
 			}
 
 			ImGui::Checkbox("Auto update", &data.auto_update);
+			ImGui::Checkbox("Field list", &selected_fields_window);
 
 			auto interval = static_cast<int>(data.interval.count());
 			if (data.auto_update && ImGui::SliderInt("Interval", &interval, 0, 1000 * 30))
@@ -689,11 +628,13 @@ namespace entity_list
 				{
 					auto result = 0;
 
-					result += ImGui::RadioButton("any", reinterpret_cast<int*>(&data.filters.type), entity_type::type_any);
+					result += ImGui::RadioButton("entity", reinterpret_cast<int*>(&data.filters.type), entity_type::entity);
 					result += ImGui::RadioButton("actor", reinterpret_cast<int*>(&data.filters.type), entity_type::actor);
 					result += ImGui::RadioButton("spawner", reinterpret_cast<int*>(&data.filters.type), entity_type::spawner);
 					result += ImGui::RadioButton("weapon", reinterpret_cast<int*>(&data.filters.type), entity_type::weapon);
-					result += ImGui::RadioButton("node", reinterpret_cast<int*>(&data.filters.type), entity_type::node);
+					result += ImGui::RadioButton("vehicle", reinterpret_cast<int*>(&data.filters.type), entity_type::vehicle);
+					result += ImGui::RadioButton("path node", reinterpret_cast<int*>(&data.filters.type), entity_type::node);
+					result += ImGui::RadioButton("vehicle node", reinterpret_cast<int*>(&data.filters.type), entity_type::vehicle_node);
 
 					if (result)
 					{
@@ -703,7 +644,8 @@ namespace entity_list
 					ImGui::TreePop();
 				}
 
-				if (ImGui::TreeNode("Entity team"))
+				if ((data.filters.type == entity_type::actor || data.filters.type == entity_type::spawner) 
+					&& ImGui::TreeNode("Entity team"))
 				{
 					auto result = 0;
 
@@ -748,34 +690,65 @@ namespace entity_list
 			}
 
 			ImGui::Separator();
+			ImGui::BeginChild("entity list");
 
 			for (const auto& info : data.entity_info)
 			{
-				if (ImGui::TreeNode(utils::string::va("Entity num %i id %i", info.num, info.id)))
+				if (ImGui::TreeNode(utils::string::va("Entity num %i class %i", 
+					info.entref.entnum, info.entref.classnum)))
 				{
+					ImGui::Text("Info");
+
+					const auto num_str = utils::string::va("%i", info.entref.entnum);
+					const auto classnum_str = utils::string::va("%i", info.entref.classnum);
+
+					ImGui::Text("Entity number");
+					ImGui::SameLine();
+
+					if (ImGui::Button(num_str))
+					{
+						gui::copy_to_clipboard(num_str);
+					}
+
+					ImGui::Text("Entity class");
+					ImGui::SameLine();
+
+					if (ImGui::Button(classnum_str))
+					{
+						gui::copy_to_clipboard(classnum_str);
+					}
+
+					const auto entity_code = utils::string::va("game:getentbyref(%i, %i)", 
+						info.entref.entnum, info.entref.classnum);
+
+					if (ImGui::Button(entity_code))
+					{
+						gui::copy_to_clipboard(entity_code);
+					}
+
 					ImGui::Text("Commands");
 
 					if (ImGui::Button("Set field"))
 					{
 						set_field_window = true;
-						selected_entity = info.id;
+						selected_entity = info.entref;
 					}
 
 					if (ImGui::Button("Teleport to"))
 					{
-						teleport_to(data, info.id);
+						teleport_to(data, info.entref);
 						data.force_update = true;
 					}
 
 					if (ImGui::Button("Teleport to you"))
 					{
-						teleport_to_reverse(data, info.id);
+						teleport_to_reverse(data, info.entref);
 						data.force_update = true;
 					}
 
-					if (info.num != 0 && ImGui::Button("Delete"))
+					if (info.entref.classnum == 0 && info.entref.entnum != 0 && ImGui::Button("Delete"))
 					{
-						delete_entity(data, info.id);
+						delete_entity(data, info.entref);
 						data.force_update = true;
 					}
 
@@ -805,22 +778,28 @@ namespace entity_list
 				}
 			}
 
+			ImGui::EndChild();
 			ImGui::End();
+		}
 
+		void show_selected_fields_window(data_t& data)
+		{
 			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
-			ImGui::Begin("Selected fields");
+			ImGui::Begin("Selected fields", &selected_fields_window);
 
-			static char field_filter[0x100]{};
-			ImGui::InputText("field name", field_filter, IM_ARRAYSIZE(field_filter));
+			ImGui::InputText("field name", &field_filter);
+			ImGui::BeginChild("field list");
+
 			for (auto& field : data.selected_fields)
 			{
-				if (utils::string::find_lower(field.first, field_filter) && 
+				if (utils::string::find_lower(field.first, field_filter) &&
 					ImGui::Checkbox(field.first.data(), &field.second))
 				{
 					data.force_update = true;
 				}
 			}
 
+			ImGui::EndChild();
 			ImGui::End();
 		}
 
@@ -833,15 +812,22 @@ namespace entity_list
 
 			data_.access([](data_t& data)
 			{
-				if (!is_sv_running())
+				if (!game::CL_IsCgameInitialized())
 				{
-					selected_entity = 0;
+					selected_entity = {};
 					data.entity_info = {};
 					data.tasks = {};
 				}
 
+
 				show_entity_list_window(data);
-				if (selected_entity && set_field_window)
+
+				if (selected_fields_window)
+				{
+					show_selected_fields_window(data);
+				}
+
+				if (set_field_window)
 				{
 					show_set_field_window(data);
 				}
@@ -854,13 +840,17 @@ namespace entity_list
 	public:
 		void post_unpack() override
 		{
-			scheduler::on_game_initialized([]()
-			{
-				sv_running = game::Dvar_FindVar("sv_running");
-			});
-
 			gui::on_frame(on_frame);
-			scheduler::loop(update_entity_list, scheduler::pipeline::server, 0ms);
+			scheduler::loop([]()
+			{
+				try
+				{
+					update_entity_list();
+				}
+				catch (...)
+				{
+				}
+			}, scheduler::pipeline::server);
 		}
 	};
 }

@@ -165,9 +165,9 @@ namespace scripting
 		return result;
 	}
 
-	unsigned int array::size() const
+	int array::size() const
 	{
-		return game::scr_VarGlob->objectVariableValue[this->id_].u.f.next;
+		return static_cast<int>(game::scr_VarGlob->objectVariableValue[this->id_].u.f.next);
 	}
 
 	unsigned int array::push(script_value value) const
@@ -212,8 +212,6 @@ namespace scripting
 		{
 			return this->get(key.as<std::string>());
 		}
-
-		return {};
 	}
 
 	script_value array::get(const std::string& key) const

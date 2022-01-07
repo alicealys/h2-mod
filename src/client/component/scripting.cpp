@@ -18,6 +18,7 @@ namespace scripting
 {
 	std::unordered_map<int, std::unordered_map<std::string, int>> fields_table;
 	std::unordered_map<std::string, std::unordered_map<std::string, const char*>> script_function_table;
+	utils::concurrency::container<shared_table_t> shared_table;
 
 	namespace
 	{
@@ -54,14 +55,24 @@ namespace scripting
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
 		}
 
+		void clear_shared_table()
+		{
+			shared_table.access([](shared_table_t& table)
+			{
+				table.clear();
+			});
+		}
+
 		void player_spawn_stub(const game::gentity_s* player)
 		{
 			player_spawn_hook.invoke<void>(player);
+			clear_shared_table();
 			lua::engine::start();
 		}
 
 		void g_shutdown_game_stub(const int free_scripts)
 		{
+			clear_shared_table();
 			lua::engine::stop();
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
@@ -97,6 +108,17 @@ namespace scripting
 			script_function_table[current_file][function_name] = codePos;
 			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
 		}
+
+		utils::hook::detour sub_6B2940_hook;
+		char sub_6B2940_stub(void* a1)
+		{
+			const auto result = sub_6B2940_hook.invoke<char>(a1);
+			if (a1 != nullptr)
+			{
+				lua::engine::start();
+			}
+			return result;
+		}
 	}
 
 	class component final : public component_interface
@@ -112,6 +134,11 @@ namespace scripting
 			scr_add_class_field_hook.create(0x5C2C30_b, scr_add_class_field_stub);
 			scr_set_thread_position_hook.create(0x5BC7E0_b, scr_set_thread_position_stub);
 			process_script_hook.create(0x5C6160_b, process_script_stub);
+
+			// Loading last checkpoint doesn't call spawn player again (player_spawn_hook)
+			// Not sure what this function does but `a1` is != nullptr when loading
+			// the last checkpoint so we need to start lua in this context
+			sub_6B2940_hook.create(0x6B2940_b, sub_6B2940_stub);
 
 			scheduler::loop([]()
 			{

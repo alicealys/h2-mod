@@ -19,9 +19,9 @@ namespace gui_console
 	{
 		bool auto_scroll = true;
 		int history_index = -1;
-		std::string input{};
-		std::string filter{};
-		std::vector<std::string> matches{};
+		std::string input;
+		std::string filter;
+		std::unordered_set<std::string> matches;
 
 		int input_text_edit(ImGuiInputTextCallbackData* data)
 		{
@@ -41,9 +41,9 @@ namespace gui_console
 					game_console::find_matches(text, matches, false);
 				}
 
-				if (matches.size() < 24)
+				if (matches.size() < 24 && matches.size() > 0)
 				{
-					const auto match = matches[0].data();
+					const auto match = matches.begin()->data();
 					data->DeleteChars(0, data->BufTextLen);
 					data->InsertChars(0, match, match + strlen(match));
 				}
@@ -96,8 +96,8 @@ namespace gui_console
 		{
 			std::string text{};
 
-			const auto history = game_console::get_output();
-			for (const auto& line : history)
+			const auto output = game_console::get_output();
+			for (const auto& line : output)
 			{
 				if (utils::string::find_lower(line, filter))
 				{
@@ -116,17 +116,17 @@ namespace gui_console
 
 		void on_frame()
 		{
-			auto* open = &gui::enabled_menus["console"];
-			if (!*open)
+			if (!gui::enabled_menus["console"])
 			{
 				return;
 			}
 
-			auto filtered_text = get_filtered_text();
-			static auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | 
-										   ImGuiInputTextFlags_CallbackHistory;
+			const auto filtered_text = get_filtered_text();
+			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
+			static const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | 
+												 ImGuiInputTextFlags_CallbackHistory;
 			
-			ImGui::Begin("Console", open);
+			ImGui::Begin("Console", &gui::enabled_menus["console"]);
 
 			if (ImGui::BeginPopup("Options"))
 			{
@@ -157,10 +157,16 @@ namespace gui_console
 			ImGui::SameLine();
 			ImGui::InputText("Filter", &filter);
 
-			const float footer_height_to_reserve = ImGui::GetStyle().ItemSpacing.y + ImGui::GetFrameHeightWithSpacing();
 			ImGui::BeginChild("console_scroll", ImVec2(0, -footer_height_to_reserve), false);
 
-			ImGui::Text(filtered_text.data(), ImVec2(-1, -1));
+			const auto output = game_console::get_output();
+			for (const auto& line : output)
+			{
+				if (utils::string::find_lower(line, filter))
+				{
+					ImGui::Text(line.data(), ImVec2(-1, -1));
+				}
+			}
 
 			if (auto_scroll && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
 			{
@@ -183,10 +189,10 @@ namespace gui_console
 					}
 				}
 
-				game_console::add(input.data());
-
-				input.clear();
 				ImGui::SetKeyboardFocusHere(-1);
+				game_console::add(input.data());
+				history_index = -1;
+				input.clear();
 			}
 
 			ImGui::End();

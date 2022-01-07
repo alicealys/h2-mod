@@ -10,6 +10,7 @@
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 #include "../../../component/chat.hpp"
+#include "../../../component/fastfiles.hpp"
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -31,7 +32,7 @@ namespace scripting::lua
 
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
-			state["level"] = entity{*game::levelEntityId};
+			state["level"] = entity{*::game::levelEntityId};
 			state["player"] = call("getentbynum", {0}).as<entity>();
 
 			state["io"]["fileexists"] = utils::io::file_exists;
@@ -300,6 +301,13 @@ namespace scripting::lua
 				return result;
 			};
 
+			entity_type["getentref"] = [](const entity& entity)
+			{
+				const auto entref = entity.get_entity_reference();
+				std::vector<unsigned int> returns = {entref.entnum, entref.classnum};
+				return sol::as_returns(returns);
+			};
+
 			struct game
 			{
 			};
@@ -499,6 +507,68 @@ namespace scripting::lua
 			{
 				notifies::add_entity_damage_callback(callback);
 			};
+
+			game_type["assetlist"] = [](const game&, const sol::this_state s, const std::string& type_string)
+			{
+				auto table = sol::table::create(s.lua_state());
+				auto index = 1;
+				auto type_index = -1;
+
+				for (auto i = 0; i < ::game::XAssetType::ASSET_TYPE_COUNT; i++)
+				{
+					if (type_string == ::game::g_assetNames[i])
+					{
+						type_index = i;
+					}
+				}
+
+				if (type_index == -1)
+				{
+					throw std::runtime_error("Asset type does not exist");
+				}
+
+				const auto type = static_cast<::game::XAssetType>(type_index);
+				fastfiles::enum_assets(type, [type, &table, &index](const ::game::XAssetHeader header)
+				{
+					const auto asset = ::game::XAsset{type, header};
+					const std::string asset_name = ::game::DB_GetXAssetName(&asset);
+					table[index++] = asset_name;
+				}, true);
+
+				return table;
+			};
+
+			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
+			{
+				scripting::shared_table.access([key, value](scripting::shared_table_t& table)
+				{
+					table[key] = value;
+				});
+			};
+
+			game_type["sharedget"] = [](const game&, const std::string& key)
+			{
+				std::string result;
+				scripting::shared_table.access([key, &result](scripting::shared_table_t& table)
+				{
+					result = table[key];
+				});
+				return result;
+			};
+
+			game_type["getentbyref"] = [](const game&, const sol::this_state s, 
+				const unsigned int entnum, const unsigned int classnum)
+			{
+				const auto id = ::game::Scr_GetEntityId(entnum, classnum);
+				if (id)
+				{
+					return convert(s, scripting::entity{id});
+				}
+				else
+				{
+					return sol::lua_value{s, sol::lua_nil};
+				}
+			};
 		}
 	}
 
@@ -537,6 +607,53 @@ namespace scripting::lua
 
 		printf("Loading script '%s'\n", this->folder_.data());
 		this->load_script("__init__");
+	}
+
+	context::context()
+		: folder_({})
+		  , scheduler_(state_)
+		  , event_handler_(state_)
+
+	{
+		this->state_.open_libraries(sol::lib::base,
+		                            sol::lib::package,
+		                            sol::lib::io,
+		                            sol::lib::string,
+		                            sol::lib::os,
+		                            sol::lib::math,
+		                            sol::lib::table);
+
+		this->state_["include"] = []()
+		{
+		};
+
+		this->state_["require"] = []()
+		{
+		};
+
+		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
+	}
+
+	std::string context::load(const std::string& code)
+	{
+		try
+		{
+			const auto result = this->state_.safe_script(code, &sol::script_pass_on_error);
+			if (result.valid())
+			{
+				const auto object = result.get<sol::object>();
+				return this->state_["tostring"](object).get<std::string>();
+			}
+			else
+			{
+				const sol::error error = result;
+				return error.what();
+			}
+		}
+		catch (const std::exception& e)
+		{
+			return e.what();
+		}
 	}
 
 	context::~context()

@@ -444,6 +444,7 @@ namespace game
 		dvar_value latched;
 		dvar_value reset;
 		dvar_limits domain;
+		char __pad0[0xC];
 	};
 
 	struct ScreenPlacement
@@ -462,6 +463,16 @@ namespace game
 		vec2_t realAdjustableMin;
 		vec2_t realAdjustableMax;
 		vec2_t subScreenLeft;
+	};
+
+	struct refdef_t
+	{
+		char __pad0[0x10];
+		float fovX;
+		float fovY;
+		char __pad1[0x8];
+		float org[3];
+		float axis[3][3];
 	};
 
 	struct CmdArgs
@@ -959,7 +970,24 @@ namespace game
 		uint64_t streams[4];
 		const char* name;
 	};
-	
+
+	struct Bounds
+	{
+		vec3_t midPoint;
+		vec3_t halfSize;
+	};
+
+	struct pmove_t
+	{
+	};
+
+	struct trace_t
+	{
+		char __pad0[0x29];
+		bool allsolid; // Confirmed in CM_PositionTestCapsuleInTriangle
+		bool startsolid; // Confirmed in PM_JitterPoint
+	};
+
 	namespace hks
 	{
 		struct GenericChunkHeader

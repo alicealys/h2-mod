@@ -19,8 +19,23 @@ namespace gui
 
 	namespace
 	{
-		utils::concurrency::container<std::vector<std::function<void()>>> on_frame_callbacks;
-		utils::concurrency::container<std::vector<notification_t>> notifications;
+		struct frame_callback
+		{
+			std::function<void()> callback;
+			bool always;
+		};
+
+		struct event
+		{
+			HWND hWnd;
+			UINT msg;
+			WPARAM wParam;
+			LPARAM lParam;
+		};
+
+		utils::concurrency::container<std::vector<frame_callback>> on_frame_callbacks;
+		utils::concurrency::container<std::deque<notification_t>> notifications;
+		utils::concurrency::container<std::vector<event>> event_queue;
 
 		ID3D11Device* device;
 		ID3D11DeviceContext* device_context;
@@ -38,13 +53,29 @@ namespace gui
 			initialized = true;
 		}
 
+		void run_event_queue()
+		{
+			event_queue.access([](std::vector<event>& queue)
+			{
+				for (const auto& event : queue)
+				{
+					ImGui_ImplWin32_WndProcHandler(event.hWnd, event.msg, event.wParam, event.lParam);
+				}
+
+				queue.clear();
+			});
+		}
+
 		void new_gui_frame()
 		{
+			ImGui::GetIO().MouseDrawCursor = toggled;
+			*game::keyCatchers |= 0x10 * toggled;
+
 			ImGui_ImplDX11_NewFrame();
 			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
+			run_event_queue();
 
-			*game::keyCatchers |= 0x10;
+			ImGui::NewFrame();
 		}
 
 		void end_gui_frame()
@@ -61,29 +92,24 @@ namespace gui
 
 		void show_notifications()
 		{
-			static auto window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | 
-									   ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
-									   ImGuiWindowFlags_NoMove;
+			static const auto window_flags = ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoSavedSettings | 
+											 ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | 
+											 ImGuiWindowFlags_NoMove;
 
-			notifications.access([](std::vector<notification_t>& notifications_)
+			notifications.access([](std::deque<notification_t>& notifications_)
 			{
 				auto index = 0;
-				for (auto i = notifications_.begin(); i != notifications_.end(); ++i)
+				for (auto i = notifications_.begin(); i != notifications_.end();)
 				{
 					const auto now = std::chrono::high_resolution_clock::now();
 					if (now - i->creation_time >= i->duration)
 					{
-						notifications_.erase(i--);
+						i = notifications_.erase(i);
 						continue;
 					}
 
-					const auto title = i->title.size() <= 34
-						? i->title
-						: i->title.substr(0, 31) + "...";
-
-					const auto text = i->text.size() <= 34
-						? i->text
-						: i->text.substr(0, 31) + "...";
+					const auto title = utils::string::truncate(i->title, 34, "...");
+					const auto text = utils::string::truncate(i->text, 34, "...");
 
 					ImGui::SetNextWindowSizeConstraints(ImVec2(250, 50), ImVec2(250, 50));
 					ImGui::SetNextWindowBgAlpha(0.6f);
@@ -96,30 +122,42 @@ namespace gui
 
 					ImGui::End();
 
-					index++;
+					++i;
+					++index;
 				}
 			});
 		}
 
-		void gui_draw()
+		void menu_checkbox(const std::string& name, const std::string& menu)
 		{
-			show_notifications();
+			ImGui::Checkbox(name.data(), &enabled_menus[menu]);
+		}
 
-			on_frame_callbacks.access([](std::vector<std::function<void()>>& callbacks)
+		void run_frame_callbacks()
+		{
+			on_frame_callbacks.access([](std::vector<frame_callback>& callbacks)
 			{
 				for (const auto& callback : callbacks)
 				{
-					callback();
+					if (callback.always || toggled)
+					{
+						callback.callback();
+					}
 				}
 			});
+		}
 
+		void draw_main_menu_bar()
+		{
 			if (ImGui::BeginMainMenuBar())
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
-					ImGui::Checkbox("Asset list", &enabled_menus["asset_list"]);
-					ImGui::Checkbox("Entity list", &enabled_menus["entity_list"]);
-					ImGui::Checkbox("Console", &enabled_menus["console"]);
+					menu_checkbox("Asset list", "asset_list");
+					menu_checkbox("Entity list", "entity_list");
+					menu_checkbox("Console", "console");
+					menu_checkbox("Script console", "script_console");
+					menu_checkbox("Debug", "debug");
 
 					ImGui::EndMenu();
 				}
@@ -134,11 +172,10 @@ namespace gui
 			{
 				initialize_gui_context();
 			}
-
-			if (toggled)
+			else
 			{
 				new_gui_frame();
-				gui_draw();
+				run_frame_callbacks();
 				end_gui_frame();
 			}
 		}
@@ -177,9 +214,12 @@ namespace gui
 		utils::hook::detour wnd_proc_hook;
 		LRESULT wnd_proc_stub(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
-			if (toggled && ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+			if (wParam != VK_ESCAPE && toggled)
 			{
-				return TRUE;
+				event_queue.access([hWnd, msg, wParam, lParam](std::vector<event>& queue)
+				{
+					queue.push_back({hWnd, msg, wParam, lParam});
+				});
 			}
 
 			return wnd_proc_hook.invoke<LRESULT>(hWnd, msg, wParam, lParam);
@@ -213,11 +253,11 @@ namespace gui
 		return !toggled;
 	}
 
-	void on_frame(const std::function<void()>& callback)
+	void on_frame(const std::function<void()>& callback, bool always)
 	{
-		on_frame_callbacks.access([callback](std::vector<std::function<void()>>& callbacks)
+		on_frame_callbacks.access([always, callback](std::vector<frame_callback>& callbacks)
 		{
-			callbacks.push_back(callback);
+			callbacks.push_back({callback, always});
 		});
 	}
 
@@ -234,9 +274,9 @@ namespace gui
 		notification.duration = duration;
 		notification.creation_time = std::chrono::high_resolution_clock::now();
 
-		notifications.access([notification](std::vector<notification_t>& notifications_)
+		notifications.access([notification](std::deque<notification_t>& notifications_)
 		{
-			notifications_.insert(notifications_.begin(), notification);
+			notifications_.push_front(notification);
 		});
 	}
 
@@ -263,11 +303,16 @@ namespace gui
 		{
 			utils::hook::jump(0x7A14C4_b, utils::hook::assemble(dxgi_swap_chain_present_stub), true);
 			wnd_proc_hook.create(0x650F10_b, wnd_proc_stub);
+
+			on_frame([]()
+			{
+				show_notifications();
+				draw_main_menu_bar();
+			});
 		}
 
 		void pre_destroy() override
 		{
-			ImGui_ImplDX11_Shutdown();
 			ImGui_ImplWin32_Shutdown();
 			ImGui::DestroyContext();
 		}

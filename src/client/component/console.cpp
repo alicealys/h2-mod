@@ -15,6 +15,7 @@ namespace console
 	namespace
 	{
 		std::thread console_thread;
+		bool kill = false;
 	}
 
 	class component final : public component_interface
@@ -27,13 +28,24 @@ namespace console
 
 			console_thread = utils::thread::create_named_thread("Console", []()
 			{
-				std::string cmd;
-				while (true)
+				while (!kill)
 				{
-					std::getline(std::cin, cmd);
-					game_console::add(cmd.data(), false);
+					// to do: get input without blocking the thread
+					std::this_thread::sleep_for(1ms);
 				}
+
+				std::this_thread::yield();
 			});
+		}
+
+		void pre_destroy() override
+		{
+			kill = true;
+
+			if (console_thread.joinable())
+			{
+				console_thread.join();
+			}
 		}
 	};
 }

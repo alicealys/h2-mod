@@ -5,9 +5,16 @@
 #include "game/dvars.hpp"
 
 #include "scheduler.hpp"
+#include "command.hpp"
 #include "gui.hpp"
 
+#include "game/scripting/lua/context.hpp"
+#include "game/scripting/lua/engine.hpp"
+#include "game/scripting/execution.hpp"
+
 #include <utils/string.hpp>
+#include <utils/hook.hpp>
+#include <utils/concurrency.hpp>
 
 namespace gui_debug
 {
