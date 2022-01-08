@@ -666,7 +666,7 @@ namespace entity_list
 				ImGui::Text("Fields");
 
 				auto index = 0;
-				for (auto i = data.filters.fields.begin(); i != data.filters.fields.end(); ++i)
+				for (auto i = data.filters.fields.begin(); i != data.filters.fields.end();)
 				{
 					if (ImGui::TreeNode(utils::string::va("Filter #%i", index++)))
 					{
@@ -675,12 +675,15 @@ namespace entity_list
 
 						if (ImGui::Button("Erase"))
 						{
-							data.filters.fields.erase(i);
-							--i;
+							i = data.filters.fields.erase(i);
+							ImGui::TreePop();
+							continue;
 						}
 
 						ImGui::TreePop();
 					}
+
+					++i;
 				}
 
 				if (ImGui::Button("Add field filter"))

@@ -81,7 +81,7 @@ namespace gui_debug
 				vector_dot(local, axis[0])
 			};
 
-			if (transform[2] < 0.1f)
+			if (transform[2] < 0.01f)
 			{
 				return false;
 			}
@@ -375,11 +375,12 @@ namespace gui_debug
 			}
 			window->DrawList->PathFillConvex(color_);
 
-			for (auto i = 0; i < max_points - 1; i++)
+			for (auto i = 0; i < max_points; i++)
 			{
 				window->DrawList->PathClear();
 
-				if (!points_bottom[i].valid)
+				if (!points_bottom[i].valid ||
+					!points_top[i].valid)
 				{
 					continue;
 				}
@@ -388,11 +389,21 @@ namespace gui_debug
 
 				if (i == max_points - 1)
 				{
+					if (!points_bottom[0].valid || !points_top[0].valid)
+					{
+						continue;
+					}
+
 					window->DrawList->PathLineTo(points_bottom[0].point);
 					window->DrawList->PathLineTo(points_top[0].point);
 				}
 				else
 				{
+					if (!points_bottom[i + 1].valid || !points_top[i + 1].valid)
+					{
+						continue;
+					}
+
 					window->DrawList->PathLineTo(points_bottom[i + 1].point);
 					window->DrawList->PathLineTo(points_top[i + 1].point);
 				}
@@ -592,8 +603,7 @@ namespace gui_debug
 					continue;
 				}
 
-				float top[3] = {origin[0], origin[1], origin[2] + entity->halfSize[2] * 2.f};
-				draw_cylinder(top, radius, height, trigger_settings.color, trigger_settings.mesh_thickness);
+				draw_cylinder(origin, radius, height, trigger_settings.color, trigger_settings.mesh_thickness);
 			}
 		}
 
@@ -637,7 +647,6 @@ namespace gui_debug
 		void post_unpack() override
 		{
 			gui::on_frame(draw_window);
-			gui::on_frame(draw_nodes, true);
 			gui::on_frame([]()
 			{
 				if (!game::SV_Loaded() || cl_paused->current.integer)
@@ -651,10 +660,10 @@ namespace gui_debug
 				end_render_window();
 			}, true);
 
-			scheduler::on_game_initialized([]()
+			scheduler::once([]()
 			{
 				cl_paused = game::Dvar_FindVar("cl_paused");
-			});
+			}, scheduler::pipeline::main);
 
 			scheduler::loop([]()
 			{
