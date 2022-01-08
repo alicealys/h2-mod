@@ -38,27 +38,31 @@ namespace gui_debug
 		{
 			bool enabled;
 			bool camera_locked;
-			float camera[3] = {};
-			float range = 500.f;
-			float color[4] = {1.f, 0.f, 0.f, 1.f};
-			float mesh_thickness = 1.f;
-			float size = 10.f;
 			object_type type;
+			float range = 500.f;
+			float camera[3] = {};
 		};
 
 		struct : draw_settings
 		{
+			bool draw_node_links;
+			float size = 10.f;
+			float mesh_thickness = 1.f;
 			float link_thickness = 1.f;
-			bool draw_linked_nodes;
+			float color[4] = {1.f, 0.f, 0.f, 1.f};
 		} path_node_settings{};
+
+		struct : draw_settings
+		{
+			int point_count = 30;
+			float color[4] = {0.f, 1.f, 0.f, 0.5f};
+		} trigger_settings{};
 
 		struct point
 		{
 			ImVec2 point;
 			bool valid;
 		};
-
-		draw_settings trigger_settings{};
 
 		float vector_dot(float* a, float* b)
 		{
@@ -248,82 +252,21 @@ namespace gui_debug
 			return pi;
 		}
 
-		void draw_circle(float* center, float radius, float* color, float thickness)
+		void draw_cylinder(float* center, float radius, float height, int point_count, float* color)
 		{
 			const auto pi = get_pi();
 
 			ImGuiWindow* window = ImGui::GetCurrentWindow();
-			
-			window->DrawList->PathClear();
-
-			for (auto angle = 0.f; angle < 360; angle += 1.f)
-			{
-				const auto x = center[0] + radius * cos(angle * pi / 180.f);
-				const auto y = center[1] + radius * sin(angle * pi / 180.f);
-
-				float point[3] = {x, y, center[2]};
-				float point_screen[2] = {};
-
-				if (!world_pos_to_screen_pos(point, point_screen))
-				{
-					return;
-				}
-
-				const auto point_ = ImVec2(point_screen[0], point_screen[1]);
-				window->DrawList->PathLineTo(point_);
-			}
-
-			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
-			window->DrawList->PathStroke(color_, 0, thickness);
-		}
-
-		void draw_circle_filled(float* center, float radius, float* color)
-		{
-			const auto pi = get_pi();
-
-			ImGuiWindow* window = ImGui::GetCurrentWindow();
-			
-			window->DrawList->PathClear();
-
-			for (auto angle = 0; angle < 360; angle += 12)
-			{
-				const auto x = center[0] + radius * cos(static_cast<float>(angle) * pi / 180.f);
-				const auto y = center[1] + radius * sin(static_cast<float>(angle) * pi / 180.f);
-
-				float point[3] = {x, y, center[2]};
-				float point_screen[2] = {};
-
-				if (!world_pos_to_screen_pos(point, point_screen))
-				{
-					continue;
-				}
-
-				const auto point_ = ImVec2(point_screen[0], point_screen[1]);
-				window->DrawList->PathLineTo(point_);
-			}
-
-			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
-			window->DrawList->PathFillConvex(color_);
-		}
-
-		void draw_cylinder(float* center, float radius, float height, float* color, float thickness)
-		{
-			const auto pi = get_pi();
-
-			ImGuiWindow* window = ImGui::GetCurrentWindow();
-
-			float top[3] = {center[0], center[1], center[2] + height};
-
 			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
 
-			const auto max_points = 30;
-			const auto step = 360 / max_points;
+			point_count = std::max(0, std::min(point_count, 360));
+			const auto step = 360.f / point_count;
 
-			point points_top[max_points];
-			point points_bottom[max_points];
+			point points_top[360];
+			point points_bottom[360];
 
 			auto point_index = 0;
-			for (auto angle = 0; angle < 360; angle += step)
+			for (auto angle = 0.f; angle < 360.f; angle += step)
 			{
 				const auto x = center[0] + radius * cos(static_cast<float>(angle) * pi / 180.f);
 				const auto y = center[1] + radius * sin(static_cast<float>(angle) * pi / 180.f);
@@ -352,7 +295,7 @@ namespace gui_debug
 			}
 
 			window->DrawList->PathClear();
-			for (auto i = 0; i < max_points; i++)
+			for (auto i = 0; i < point_count; i++)
 			{
 				if (!points_bottom[i].valid)
 				{
@@ -364,7 +307,7 @@ namespace gui_debug
 			window->DrawList->PathFillConvex(color_);
 
 			window->DrawList->PathClear();
-			for (auto i = 0; i < max_points; i++)
+			for (auto i = 0; i < point_count; i++)
 			{
 				if (!points_top[i].valid)
 				{
@@ -375,7 +318,7 @@ namespace gui_debug
 			}
 			window->DrawList->PathFillConvex(color_);
 
-			for (auto i = 0; i < max_points; i++)
+			for (auto i = 0; i < point_count; i++)
 			{
 				window->DrawList->PathClear();
 
@@ -387,7 +330,7 @@ namespace gui_debug
 
 				window->DrawList->PathLineTo(points_bottom[i].point);
 
-				if (i == max_points - 1)
+				if (i == point_count - 1)
 				{
 					if (!points_bottom[0].valid || !points_top[0].valid)
 					{
@@ -409,27 +352,7 @@ namespace gui_debug
 				}
 
 				window->DrawList->PathLineTo(points_top[i].point);
-
 				window->DrawList->PathFillConvex(color_);
-			}
-		}
-
-		void draw_object(float* origin, object_type type)
-		{
-			switch (type)
-			{
-			case object_type::square:
-				draw_square(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::circle:
-				break;
-			case object_type::cube:
-				draw_cube(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::cube_mesh:
-				draw_cube_mesh(origin, path_node_settings.size, path_node_settings.color,
-					path_node_settings.mesh_thickness);
-				break;
 			}
 		}
 
@@ -447,7 +370,7 @@ namespace gui_debug
 				ImGui::Checkbox("Draw", &path_node_settings.enabled);
 				ImGui::Checkbox("Lock camera", &path_node_settings.camera_locked);
 
-				ImGui::Checkbox("Draw linked nodes", &path_node_settings.draw_linked_nodes);
+				ImGui::Checkbox("Draw node links", &path_node_settings.draw_node_links);
 
 				if (ImGui::TreeNode("Object type"))
 				{
@@ -461,7 +384,7 @@ namespace gui_debug
 				ImGui::SliderFloat("range", &path_node_settings.range, 0.f, 10000.f);
 				ImGui::SliderFloat("size", &path_node_settings.size, 5.f, 100.f);
 
-				if (path_node_settings.draw_linked_nodes)
+				if (path_node_settings.draw_node_links)
 				{
 					ImGui::SliderFloat("link thickness", &path_node_settings.link_thickness, 1.f, 20.f);
 				}
@@ -486,7 +409,7 @@ namespace gui_debug
 				ImGui::Checkbox("Lock camera", &trigger_settings.camera_locked);
 
 				ImGui::SliderFloat("range", &trigger_settings.range, 0.f, 10000.f);
-				ImGui::SliderFloat("mesh thickness", &trigger_settings.mesh_thickness, 1.f, 20.f);
+				ImGui::SliderInt("circle max points", &trigger_settings.point_count, 3, 360);
 
 				if (ImGui::TreeNode("Color picker"))
 				{
@@ -514,7 +437,7 @@ namespace gui_debug
 			game::PathNode_WorldifyPosFromParent(node, out);
 		}
 
-		void draw_linked_nodes(game::pathnode_t* node, float* origin)
+		void draw_node_links(game::pathnode_t* node, float* origin)
 		{
 			for (unsigned int i = 0; i < node->totalLinkCount; i++)
 			{
@@ -572,10 +495,23 @@ namespace gui_debug
 					continue;
 				}
 
-				draw_object(origin, path_node_settings.type);
-				if (path_node_settings.draw_linked_nodes)
+				switch (path_node_settings.type)
 				{
-					draw_linked_nodes(node, origin);
+				case object_type::square:
+					draw_square(origin, path_node_settings.size, path_node_settings.color);
+					break;
+				case object_type::cube:
+					draw_cube(origin, path_node_settings.size, path_node_settings.color);
+					break;
+				case object_type::cube_mesh:
+					draw_cube_mesh(origin, path_node_settings.size, path_node_settings.color,
+						path_node_settings.mesh_thickness);
+					break;
+				}
+
+				if (path_node_settings.draw_node_links)
+				{
+					draw_node_links(node, origin);
 				}
 			}
 		}
@@ -598,12 +534,14 @@ namespace gui_debug
 
 				const auto distance = distance_2d(trigger_settings.camera, origin);
 
-				if (distance - radius > trigger_settings.range || entity->script_classname != trigger_radius)
+				if (distance - radius * 2 > trigger_settings.range || 
+					entity->script_classname != trigger_radius)
 				{
 					continue;
 				}
 
-				draw_cylinder(origin, radius, height, trigger_settings.color, trigger_settings.mesh_thickness);
+				draw_cylinder(origin, radius, height, trigger_settings.point_count, 
+					trigger_settings.color);
 			}
 		}
 
