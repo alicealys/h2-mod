@@ -12,7 +12,7 @@ namespace game
 	{
 		char __pad0[0x8C];
 		vec3_t velocity;
-		char __pad1[59504];
+		char __pad1[0xE870];
 		char flags;
 	};
 
@@ -66,25 +66,27 @@ namespace game
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
-		char __pad1[152];
-		float midPoint[3]; // entityShared.box
-		float halfSize[3]; // entityShared.box
-		char __pad2[64];
+		char __pad1[0x98];
+		float midPoint[0x3]; // entityShared.box
+		float halfSize[0x3]; // entityShared.box
+		char __pad2[0x40];
 		gclient_s* client;
-		char __pad3[48];
+		char __pad3[0x30];
 		scr_string_t script_classname;
-		char __pad4[0x14]; // 416
+		char __pad4[0x18];
 		char flags;
-		char __pad5[392];
+		char __pad5[0x188];
 	}; // size = 760
+
+	//auto a = sizeof(gentity_s);
 
 	static_assert(sizeof(gentity_s) == 760);
 
 	struct pathlink_s
 	{
-		char __pad0[4];
+		char __pad0[0x4];
 		unsigned __int16 nodeNum;
-		char __pad[6];
+		char __pad[0x6];
 	};
 
 	static_assert(sizeof(pathlink_s) == 12);
@@ -99,12 +101,12 @@ namespace game
 		unsigned int target;
 		unsigned int animscript;
 		int animscriptfunc;
-		float vLocalOrigin[3];
-		char __pad0[28];
+		float vLocalOrigin[0x3];
+		char __pad0[0x1C];
 		unsigned __int16 totalLinkCount;
-		char __pad1[2];
+		char __pad1[0x2];
 		pathlink_s* Links;
-		char __pad2[104];
+		char __pad2[0x68];
 	}; // size = 192
 
 	static_assert(sizeof(pathnode_t) == 192);
