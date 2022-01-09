@@ -61,21 +61,28 @@ namespace game
 		scr_string_t_dummy = 0x0,
 	};
 
+	struct Bounds
+	{
+		vec3_t midPoint;
+		vec3_t halfSize;
+	};
+
 	struct gentity_s
 	{
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
 		char __pad1[0x98];
-		float midPoint[0x3]; // entityShared.box
-		float halfSize[0x3]; // entityShared.box
-		char __pad2[0x40];
+		Bounds box;
+		char __pad2[0x4];
+		Bounds absBox;
+		char __pad3[0x24];
 		gclient_s* client;
-		char __pad3[0x30];
+		char __pad4[0x30];
 		scr_string_t script_classname;
-		char __pad4[0x18];
+		char __pad5[0x18];
 		char flags;
-		char __pad5[0x188];
+		char __pad6[0x188];
 	}; // size = 760
 
 	//auto a = sizeof(gentity_s);
@@ -446,6 +453,7 @@ namespace game
 		dvar_value latched;
 		dvar_value reset;
 		dvar_limits domain;
+		char __pad0[0xC];
 	};
 
 	struct ScreenPlacement
@@ -464,6 +472,16 @@ namespace game
 		vec2_t realAdjustableMin;
 		vec2_t realAdjustableMax;
 		vec2_t subScreenLeft;
+	};
+
+	struct refdef_t
+	{
+		char __pad0[0x10];
+		float fovX;
+		float fovY;
+		char __pad1[0x8];
+		float org[3];
+		float axis[3][3];
 	};
 
 	struct CmdArgs
@@ -961,7 +979,18 @@ namespace game
 		uint64_t streams[4];
 		const char* name;
 	};
-	
+
+	struct pmove_t
+	{
+	};
+
+	struct trace_t
+	{
+		char __pad0[0x29];
+		bool allsolid; // Confirmed in CM_PositionTestCapsuleInTriangle
+		bool startsolid; // Confirmed in PM_JitterPoint
+	};
+
 	namespace hks
 	{
 		struct GenericChunkHeader

@@ -153,6 +153,7 @@ namespace game
 	WEAK symbol<int> g_poolSize{0xBF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
+	WEAK symbol<int> num_entities{0x55CC738};
 	WEAK symbol<PathData> pathData{0x52CCDA0};
 
 	WEAK symbol<DWORD> threadIds{0xB11DC80};
