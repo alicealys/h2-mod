@@ -1155,75 +1155,22 @@ namespace ui_scripting::lua
 
 				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
 				{
-					std::vector<scripting::script_value> arguments{};
-
-					for (auto arg : args)
+					try
 					{
-						arguments.push_back(script_convert({s, arg}));
-					}
+						std::vector<scripting::script_value> arguments{};
 
-					const auto player_value = scripting::call("getentbynum", {0});
-					if (player_value.get_raw().type != ::game::SCRIPT_OBJECT)
+						for (auto arg : args)
+						{
+							arguments.push_back(script_convert({s, arg}));
+						}
+
+						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						scripting::notify(player, name, arguments);
+					}
+					catch (...)
 					{
-						return;
 					}
-
-					const auto player = player_value.as<scripting::entity>();
-
-					scripting::notify(player, name, arguments);
 				}, ::scheduler::pipeline::server);
-			};
-
-			player_type["getorigin"] = [](const player&)
-			{
-				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
-				{
-					throw std::runtime_error("Not in game");
-				}
-
-				return scripting::vector(
-					::game::g_entities[0].origin[0],
-					::game::g_entities[0].origin[1],
-					::game::g_entities[0].origin[2]
-				);
-			};
-
-			player_type["setorigin"] = [](const player&, const scripting::vector& velocity)
-			{
-				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
-				{
-					throw std::runtime_error("Not in game");
-				}
-
-				::game::g_entities[0].origin[0] = velocity.get_x();
-				::game::g_entities[0].origin[1] = velocity.get_y();
-				::game::g_entities[0].origin[2] = velocity.get_z();
-			};
-
-			player_type["getvelocity"] = [](const player&)
-			{
-				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
-				{
-					throw std::runtime_error("Not in game");
-				}
-
-				return scripting::vector(
-					::game::g_entities[0].client->velocity[0],
-					::game::g_entities[0].client->velocity[1],
-					::game::g_entities[0].client->velocity[2]
-				);
-			};
-
-			player_type["setvelocity"] = [](const player&, const scripting::vector& velocity)
-			{
-				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
-				{
-					throw std::runtime_error("Not in game");
-				}
-
-				::game::g_entities[0].client->velocity[0] = velocity.get_x();
-				::game::g_entities[0].client->velocity[1] = velocity.get_y();
-				::game::g_entities[0].client->velocity[2] = velocity.get_z();
 			};
 
 			state.script(animation_script);
