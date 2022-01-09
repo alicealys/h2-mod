@@ -12,7 +12,7 @@ namespace game
 	{
 		char __pad0[0x8C];
 		vec3_t velocity;
-		char __pad1[59504];
+		char __pad1[0xE870];
 		char flags;
 	};
 
@@ -56,23 +56,44 @@ namespace game
 		char entityNum;
 	};
 
+	enum scr_string_t
+	{
+		scr_string_t_dummy = 0x0,
+	};
+
+	struct Bounds
+	{
+		vec3_t midPoint;
+		vec3_t halfSize;
+	};
+
 	struct gentity_s
 	{
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
-		char __pad1[0xF0];
+		char __pad1[0x98];
+		Bounds box;
+		char __pad2[0x4];
+		Bounds absBox;
+		char __pad3[0x24];
 		gclient_s* client;
-		char __pad2[0x4C];
+		char __pad4[0x30];
+		scr_string_t script_classname;
+		char __pad5[0x18];
 		char flags;
-		char __pad3[392];
+		char __pad6[0x188];
 	}; // size = 760
+
+	//auto a = sizeof(gentity_s);
+
+	static_assert(sizeof(gentity_s) == 760);
 
 	struct pathlink_s
 	{
-		char __pad0[4];
+		char __pad0[0x4];
 		unsigned __int16 nodeNum;
-		char __pad[6];
+		char __pad[0x6];
 	};
 
 	static_assert(sizeof(pathlink_s) == 12);
@@ -87,12 +108,12 @@ namespace game
 		unsigned int target;
 		unsigned int animscript;
 		int animscriptfunc;
-		float vLocalOrigin[3];
-		char __pad0[28];
+		float vLocalOrigin[0x3];
+		char __pad0[0x1C];
 		unsigned __int16 totalLinkCount;
-		char __pad1[2];
+		char __pad1[0x2];
 		pathlink_s* Links;
-		char __pad2[104];
+		char __pad2[0x68];
 	}; // size = 192
 
 	static_assert(sizeof(pathnode_t) == 192);
@@ -701,11 +722,6 @@ namespace game
 		int freeFlags;
 	};
 
-	enum scr_string_t
-	{
-		scr_string_t_dummy = 0x0,
-	};
-
 	struct scr_entref_t
 	{
 		unsigned short entnum;
@@ -962,12 +978,6 @@ namespace game
 		//GfxImageLoadDef *loadDef;
 		uint64_t streams[4];
 		const char* name;
-	};
-
-	struct Bounds
-	{
-		vec3_t midPoint;
-		vec3_t halfSize;
 	};
 
 	struct pmove_t

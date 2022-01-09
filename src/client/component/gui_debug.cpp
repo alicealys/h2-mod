@@ -25,8 +25,19 @@ namespace gui_debug
 		enum object_type
 		{
 			square,
+			circle,
+			circle_fill,
 			cube,
 			cube_mesh
+		};
+
+		enum entity_type
+		{
+			other,
+			trigger_radius,
+			generic_trigger,
+			actor,
+			count
 		};
 
 		float camera[3] = {};
@@ -35,21 +46,40 @@ namespace gui_debug
 		struct draw_settings
 		{
 			bool enabled;
-			bool native_rendering;
 			bool camera_locked;
-			float camera[3] = {};
-			float range = 500.f;
-			float color[4] = {1.f, 0.f, 0.f, 1.f};
-			float mesh_thickness = 1.f;
-			float size = 10.f;
 			object_type type;
+			float mesh_thickness = 1.f;
+			float range = 500.f;
+			float camera[3] = {};
 		};
 
 		struct : draw_settings
 		{
+			bool draw_node_links;
+			float size = 10.f;
 			float link_thickness = 1.f;
-			bool draw_linked_nodes;
+			float color[4] = {1.f, 0.f, 0.f, 1.f};
 		} path_node_settings{};
+
+		struct : draw_settings
+		{
+			bool enabled_types[entity_type::count];
+			float type_colors[entity_type::count][4] =
+			{
+				{0.f, 0.5f, 1.f, 0.3f},
+				{0.f, 1.f, 0.f, 0.3f},
+				{1.0f, 1.f, 0.f, 0.3f},
+				{1.f, 0.5f, 1.f, 0.3f},
+			};
+			bool mesh_only = false;
+			int point_count = 30;
+		} entity_bound_settings{};
+
+		struct point
+		{
+			ImVec2 point;
+			bool valid;
+		};
 
 		float vector_dot(float* a, float* b)
 		{
@@ -72,7 +102,7 @@ namespace gui_debug
 				vector_dot(local, axis[0])
 			};
 
-			if (transform[2] < 0.1f)
+			if (transform[2] < 0.01f)
 			{
 				return false;
 			}
@@ -147,7 +177,8 @@ namespace gui_debug
 			window->DrawList->AddConvexPolyFilled(points, 4, color_);
 		}
 
-		void draw_square_from_points(float* p1, float* p2, float* p3, float* p4, float* color)
+		void draw_square_from_points(float* p1, float* p2, float* p3, float* p4, float* color, 
+			float thickness, bool mesh_only)
 		{
 			float p1_screen[2] = {};
 			float p2_screen[2] = {};
@@ -176,111 +207,206 @@ namespace gui_debug
 			};
 
 			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
-			window->DrawList->AddConvexPolyFilled(points, 4, color_);
-		}
 
-		void draw_cube(float* origin, float width, float* color)
-		{
-			const auto half = width / 2.f;
+			window->DrawList->PathClear();
+			window->DrawList->PathLineTo(ImVec2(p1_screen[0], p1_screen[1]));
+			window->DrawList->PathLineTo(ImVec2(p2_screen[0], p2_screen[1]));
+			window->DrawList->PathLineTo(ImVec2(p3_screen[0], p3_screen[1]));
+			window->DrawList->PathLineTo(ImVec2(p4_screen[0], p4_screen[1]));
+			window->DrawList->PathLineTo(ImVec2(p1_screen[0], p1_screen[1]));
 
-			float p1[3] = {origin[0] - half, origin[1] + half, origin[2]};
-			float p2[3] = {origin[0] + half, origin[1] + half, origin[2]};
-			float p3[3] = {origin[0] + half, origin[1] - half, origin[2]};
-			float p4[3] = {origin[0] - half, origin[1] - half, origin[2]};
-
-			float p1_top[3] = {p1[0], p1[1], origin[2] + width};
-			float p2_top[3] = {p2[0], p2[1], origin[2] + width};
-			float p3_top[3] = {p3[0], p3[1], origin[2] + width};
-			float p4_top[3] = {p4[0], p4[1], origin[2] + width};
-
-			draw_square_from_points(p1, p2, p3, p4, color);
-			draw_square_from_points(p1_top, p2_top, p3_top, p4_top, color);
-
-			draw_square_from_points(p3, p2, p2_top, p3_top, color);
-			draw_square_from_points(p4, p1, p1_top, p4_top, color);
-
-			draw_square_from_points(p1, p2, p2_top, p1_top, color);
-			draw_square_from_points(p4, p3, p3_top, p4_top, color);
-		}
-
-		void draw_cube_mesh(float* origin, float width, float* color, float thickness)
-		{
-			const auto half = width / 2.f;
-
-			float p1[3] = {origin[0] - half, origin[1] + half, origin[2]};
-			float p2[3] = {origin[0] + half, origin[1] + half, origin[2]};
-			float p3[3] = {origin[0] + half, origin[1] - half, origin[2]};
-			float p4[3] = {origin[0] - half, origin[1] - half, origin[2]};
-
-			float p1_top[3] = {p1[0], p1[1], origin[2] + width};
-			float p2_top[3] = {p2[0], p2[1], origin[2] + width};
-			float p3_top[3] = {p3[0], p3[1], origin[2] + width};
-			float p4_top[3] = {p4[0], p4[1], origin[2] + width};
-
-			draw_line(p1, p2, color, thickness);
-			draw_line(p2, p3, color, thickness);
-			draw_line(p3, p4, color, thickness);
-			draw_line(p4, p1, color, thickness);
-
-			draw_line(p1_top, p2_top, color, thickness);
-			draw_line(p2_top, p3_top, color, thickness);
-			draw_line(p3_top, p4_top, color, thickness);
-			draw_line(p4_top, p1_top, color, thickness);
-
-			draw_line(p1, p1_top, color, thickness);
-			draw_line(p2, p2_top, color, thickness);
-			draw_line(p3, p3_top, color, thickness);
-			draw_line(p4, p4_top, color, thickness);
-		}
-
-		void draw_square_native(float* origin, float width, float* color)
-		{
-			const auto half = width / 2.f;
-
-			float p1[3] = {origin[0] - half, origin[1] + half, origin[2]};
-			float p2[3] = {origin[0] + half, origin[1] + half, origin[2]};
-			float p3[3] = {origin[0] + half, origin[1] - half, origin[2]};
-			float p4[3] = {origin[0] - half, origin[1] - half, origin[2]};
-
-			float p1_screen[2] = {};
-			float p2_screen[2] = {};
-			float p3_screen[2] = {};
-			float p4_screen[2] = {};
-
-			auto result = 1;
-			result *= world_pos_to_screen_pos(p1, p1_screen);
-			result *= world_pos_to_screen_pos(p2, p2_screen);
-			result *= world_pos_to_screen_pos(p3, p3_screen);
-			result *= world_pos_to_screen_pos(p4, p4_screen);
-
-			if (!result)
+			if (mesh_only)
 			{
-				return;
+				window->DrawList->PathStroke(color_, 0, thickness);
+			}
+			else
+			{
+				window->DrawList->PathFillConvex(color_);
+			}
+		}
+
+		void draw_cube(float* origin, float width, float* color, float thickness, bool mesh_only)
+		{
+			const auto half = width / 2.f;
+
+			float p1[3] = {origin[0] - half, origin[1] + half, origin[2]};
+			float p2[3] = {origin[0] + half, origin[1] + half, origin[2]};
+			float p3[3] = {origin[0] + half, origin[1] - half, origin[2]};
+			float p4[3] = {origin[0] - half, origin[1] - half, origin[2]};
+
+			float p1_top[3] = {p1[0], p1[1], origin[2] + width};
+			float p2_top[3] = {p2[0], p2[1], origin[2] + width};
+			float p3_top[3] = {p3[0], p3[1], origin[2] + width};
+			float p4_top[3] = {p4[0], p4[1], origin[2] + width};
+
+			draw_square_from_points(p1, p2, p3, p4, color, thickness, mesh_only);
+			draw_square_from_points(p1_top, p2_top, p3_top, p4_top, color, thickness, mesh_only);
+
+			draw_square_from_points(p3, p2, p2_top, p3_top, color, thickness, mesh_only);
+			draw_square_from_points(p4, p1, p1_top, p4_top, color, thickness, mesh_only);
+
+			draw_square_from_points(p1, p2, p2_top, p1_top, color, thickness, mesh_only);
+			draw_square_from_points(p4, p3, p3_top, p4_top, color, thickness, mesh_only);
+		}
+
+		float get_pi()
+		{
+			static const auto pi = static_cast<float>(atan(1)) * 4.f;
+			return pi;
+		}
+
+		void draw_cylinder(float* center, float radius, float height, int point_count, float* color, 
+			float thickness, bool mesh_only)
+		{
+			const auto pi = get_pi();
+
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
+
+			point_count = std::max(0, std::min(point_count, 360));
+			const auto step = 360.f / point_count;
+
+			point points_top[360];
+			point points_bottom[360];
+
+			auto point_index = 0;
+			for (auto angle = 0.f; angle < 360.f; angle += step)
+			{
+				const auto x = center[0] + radius * cos(static_cast<float>(angle) * pi / 180.f);
+				const auto y = center[1] + radius * sin(static_cast<float>(angle) * pi / 180.f);
+
+				float point[3] = {x, y, center[2]};
+				float point_top[3] = {x, y, center[2] + height};
+
+				float point_screen[2] = {};
+				float point_top_screen[2] = {};
+
+				const auto index = point_index++;
+
+				auto result = 1;
+				result *= world_pos_to_screen_pos(point, point_screen);
+				result *= world_pos_to_screen_pos(point_top, point_top_screen);
+
+				if (!result)
+				{
+					points_bottom[index] = {{}, false};
+					points_top[index] = {{}, false};
+					continue;
+				}
+				
+				points_bottom[index] = {ImVec2(point_screen[0], point_screen[1]), true};
+				points_top[index] = {ImVec2(point_top_screen[0], point_top_screen[1]), true};
 			}
 
-			game::rectangle rect;
-			rect.p0.x = p1_screen[0];
-			rect.p0.y = p1_screen[1];
-			rect.p0.f2 = 0.f;
-			rect.p0.f3 = 1.f;
+			window->DrawList->PathClear();
+			for (auto i = 0; i < point_count; i++)
+			{
+				if (!points_bottom[i].valid)
+				{
+					continue;
+				}
 
-			rect.p1.x = p2_screen[0];
-			rect.p1.y = p2_screen[1];
-			rect.p1.f2 = 0.f;
-			rect.p1.f3 = 1.f;
+				window->DrawList->PathLineTo(points_bottom[i].point);
+			}
 
-			rect.p2.x = p3_screen[0];
-			rect.p2.y = p3_screen[1];
-			rect.p2.f2 = 0.f;
-			rect.p2.f3 = 1.f;
+			if (mesh_only)
+			{
+				window->DrawList->PathStroke(color_, 0, thickness);
+			}
+			else
+			{
+				window->DrawList->PathFillConvex(color_);
+			}
 
-			rect.p3.x = p4_screen[0];
-			rect.p3.y = p4_screen[1];
-			rect.p3.f2 = 0.f;
-			rect.p3.f3 = 1.f;
+			window->DrawList->PathClear();
+			for (auto i = 0; i < point_count; i++)
+			{
+				if (!points_top[i].valid)
+				{
+					continue;
+				}
 
-			const auto material = game::Material_RegisterHandle("white");
-			game::R_DrawRectangle(&rect, 0.f, 0.f, 1.f, 1.f, color, material);
+				window->DrawList->PathLineTo(points_top[i].point);
+			}
+
+			if (mesh_only)
+			{
+				window->DrawList->PathStroke(color_, 0, thickness);
+			}
+			else
+			{
+				window->DrawList->PathFillConvex(color_);
+			}
+
+			for (auto i = 0; i < point_count; i++)
+			{
+				window->DrawList->PathClear();
+
+				if (!points_bottom[i].valid ||
+					!points_top[i].valid)
+				{
+					continue;
+				}
+
+				window->DrawList->PathLineTo(points_bottom[i].point);
+
+				if (i == point_count - 1)
+				{
+					if (!points_bottom[0].valid || !points_top[0].valid)
+					{
+						continue;
+					}
+
+					window->DrawList->PathLineTo(points_bottom[0].point);
+					window->DrawList->PathLineTo(points_top[0].point);
+				}
+				else
+				{
+					if (!points_bottom[i + 1].valid || !points_top[i + 1].valid)
+					{
+						continue;
+					}
+
+					window->DrawList->PathLineTo(points_bottom[i + 1].point);
+					window->DrawList->PathLineTo(points_top[i + 1].point);
+				}
+
+				window->DrawList->PathLineTo(points_top[i].point);
+
+				if (mesh_only)
+				{
+					window->DrawList->PathStroke(color_, 0, thickness);
+				}
+				else
+				{
+					window->DrawList->PathFillConvex(color_);
+				}
+			}
+		}
+
+		void draw_rectangular_prism(float* center, game::Bounds bounds, float* color, float thickness, bool mesh_only)
+		{
+			float vertices[8][3] = 
+			{
+				{center[0] - bounds.halfSize[0], center[1] - bounds.halfSize[1], center[2] - bounds.halfSize[2]},
+				{center[0] - bounds.halfSize[0], center[1] + bounds.halfSize[1], center[2] - bounds.halfSize[2]},
+				{center[0] + bounds.halfSize[0], center[1] + bounds.halfSize[1], center[2] - bounds.halfSize[2]},
+				{center[0] + bounds.halfSize[0], center[1] - bounds.halfSize[1], center[2] - bounds.halfSize[2]},
+
+				{center[0] - bounds.halfSize[0], center[1] - bounds.halfSize[1], center[2] + bounds.halfSize[2]},
+				{center[0] - bounds.halfSize[0], center[1] + bounds.halfSize[1], center[2] + bounds.halfSize[2]},
+				{center[0] + bounds.halfSize[0], center[1] + bounds.halfSize[1], center[2] + bounds.halfSize[2]},
+				{center[0] + bounds.halfSize[0], center[1] - bounds.halfSize[1], center[2] + bounds.halfSize[2]},
+			};
+
+			draw_square_from_points(vertices[0], vertices[1], vertices[2], vertices[3], color, thickness, mesh_only);
+			draw_square_from_points(vertices[4], vertices[5], vertices[6], vertices[7], color, thickness, mesh_only);
+
+			draw_square_from_points(vertices[0], vertices[4], vertices[5], vertices[1], color, thickness, mesh_only);
+			draw_square_from_points(vertices[7], vertices[6], vertices[2], vertices[3], color, thickness, mesh_only);
+
+			draw_square_from_points(vertices[6], vertices[5], vertices[1], vertices[2], color, thickness, mesh_only);
+			draw_square_from_points(vertices[7], vertices[4], vertices[0], vertices[3], color, thickness, mesh_only);
 		}
 
 		void draw_window()
@@ -295,27 +421,23 @@ namespace gui_debug
 			if (ImGui::TreeNode("Path nodes"))
 			{
 				ImGui::Checkbox("Draw", &path_node_settings.enabled);
-				ImGui::Checkbox("Native rendering", &path_node_settings.native_rendering);
 				ImGui::Checkbox("Lock camera", &path_node_settings.camera_locked);
 
-				if (!path_node_settings.native_rendering)
+				ImGui::Checkbox("Draw node links", &path_node_settings.draw_node_links);
+
+				if (ImGui::TreeNode("Object type"))
 				{
-					ImGui::Checkbox("Draw linked nodes", &path_node_settings.draw_linked_nodes);
+					ImGui::RadioButton("square", reinterpret_cast<int*>(&path_node_settings.type), object_type::square);
+					ImGui::RadioButton("cube", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube);
+					ImGui::RadioButton("cube mesh", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube_mesh);
 
-					if (ImGui::TreeNode("Object type"))
-					{
-						ImGui::RadioButton("square", reinterpret_cast<int*>(&path_node_settings.type), object_type::square);
-						ImGui::RadioButton("cube", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube);
-						ImGui::RadioButton("cube mesh", reinterpret_cast<int*>(&path_node_settings.type), object_type::cube_mesh);
-
-						ImGui::TreePop();
-					}
+					ImGui::TreePop();
 				}
 
 				ImGui::SliderFloat("range", &path_node_settings.range, 0.f, 10000.f);
 				ImGui::SliderFloat("size", &path_node_settings.size, 5.f, 100.f);
 
-				if (path_node_settings.draw_linked_nodes)
+				if (path_node_settings.draw_node_links)
 				{
 					ImGui::SliderFloat("link thickness", &path_node_settings.link_thickness, 1.f, 20.f);
 				}
@@ -330,6 +452,51 @@ namespace gui_debug
 					ImGui::ColorPicker4("color", path_node_settings.color);
 					ImGui::TreePop();
 				}
+
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Entity bounds"))
+			{
+				ImGui::Checkbox("Draw", &entity_bound_settings.enabled);
+				ImGui::Checkbox("Lock camera", &entity_bound_settings.camera_locked);
+
+				if (ImGui::TreeNode("Types"))
+				{
+					ImGui::Checkbox("trigger_radius", &entity_bound_settings.enabled_types[entity_type::trigger_radius]);
+					if (entity_bound_settings.enabled_types[entity_type::trigger_radius] && ImGui::TreeNode("Color picker"))
+					{
+						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::trigger_radius]);
+						ImGui::TreePop();
+					}
+
+					ImGui::Checkbox("generic trigger", &entity_bound_settings.enabled_types[entity_type::generic_trigger]);
+					if (entity_bound_settings.enabled_types[entity_type::generic_trigger] && ImGui::TreeNode("Color picker"))
+					{
+						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::generic_trigger]);
+						ImGui::TreePop();
+					}
+
+					ImGui::Checkbox("actor", &entity_bound_settings.enabled_types[entity_type::actor]);
+					if (entity_bound_settings.enabled_types[entity_type::actor] && ImGui::TreeNode("Color picker"))
+					{
+						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::actor]);
+						ImGui::TreePop();
+					}
+
+					ImGui::Checkbox("other entities", &entity_bound_settings.enabled_types[entity_type::other]);
+					if (entity_bound_settings.enabled_types[entity_type::other] && ImGui::TreeNode("Color picker"))
+					{
+						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::other]);
+						ImGui::TreePop();
+					}
+
+				}
+
+				ImGui::SliderFloat("range", &entity_bound_settings.range, 0.f, 10000.f);
+				ImGui::SliderFloat("mesh thickness", &entity_bound_settings.mesh_thickness, 1.f, 20.f);
+				ImGui::Checkbox("mesh only", &entity_bound_settings.mesh_only);
+				ImGui::SliderInt("circle max points", &entity_bound_settings.point_count, 3, 360);
 
 				ImGui::TreePop();
 			}
@@ -351,7 +518,7 @@ namespace gui_debug
 			game::PathNode_WorldifyPosFromParent(node, out);
 		}
 
-		void draw_linked_nodes(game::pathnode_t* node, float* origin)
+		void draw_node_links(game::pathnode_t* node, float* origin)
 		{
 			for (unsigned int i = 0; i < node->totalLinkCount; i++)
 			{
@@ -368,31 +535,8 @@ namespace gui_debug
 			}
 		}
 
-		void draw_node_object(float* origin)
+		void begin_render_window()
 		{
-			switch (path_node_settings.type)
-			{
-			case object_type::square:
-				draw_square(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::cube:
-				draw_cube(origin, path_node_settings.size, path_node_settings.color);
-				break;
-			case object_type::cube_mesh:
-				draw_cube_mesh(origin, path_node_settings.size, path_node_settings.color, 
-					path_node_settings.mesh_thickness);
-				break;
-			}
-		}
-
-		void draw_nodes()
-		{
-			if (!game::SV_Loaded() || path_node_settings.native_rendering || 
-				!path_node_settings.enabled || cl_paused->current.integer)
-			{
-				return;
-			}
-
 			const auto& io = ImGui::GetIO();
 
 			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
@@ -402,6 +546,24 @@ namespace gui_debug
 
 			ImGui::SetWindowPos(ImVec2(0, 0), ImGuiCond_Always);
 			ImGui::SetWindowSize(ImVec2(io.DisplaySize.x, io.DisplaySize.y), ImGuiCond_Always);
+		}
+
+		void end_render_window()
+		{
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+			window->DrawList->PushClipRectFullScreen();
+
+			ImGui::End();
+			ImGui::PopStyleColor();
+			ImGui::PopStyleVar(2);
+		}
+
+		void draw_nodes()
+		{
+			if (!path_node_settings.enabled)
+			{
+				return;
+			}
 
 			for (unsigned int i = 0; i < game::pathData->nodeCount; i++)
 			{
@@ -414,19 +576,88 @@ namespace gui_debug
 					continue;
 				}
 
-				draw_node_object(origin);
-				if (path_node_settings.draw_linked_nodes)
+				switch (path_node_settings.type)
 				{
-					draw_linked_nodes(node, origin);
+				case object_type::square:
+					draw_square(origin, path_node_settings.size, path_node_settings.color);
+					break;
+				case object_type::cube_mesh:
+				case object_type::cube:
+					draw_cube(origin, path_node_settings.size, path_node_settings.color, 
+						path_node_settings.mesh_thickness, path_node_settings.type == object_type::cube_mesh);
+					break;
+				}
+
+				if (path_node_settings.draw_node_links)
+				{
+					draw_node_links(node, origin);
 				}
 			}
+		}
 
-			ImGuiWindow* window = ImGui::GetCurrentWindow();
-			window->DrawList->PushClipRectFullScreen();
+		entity_type get_entity_type(const char* classname)
+		{
+			if (strstr(classname, "trigger_radius"))
+			{
+				return entity_type::trigger_radius;
+			}
+			else if (strstr(classname, "trigger"))
+			{
+				return entity_type::generic_trigger;
+			}
+			else if (strstr(classname, "actor"))
+			{
+				return entity_type::actor;
+			}
 
-			ImGui::End();
-			ImGui::PopStyleColor();
-			ImGui::PopStyleVar(2);
+			return entity_type::other;
+		}
+
+		void draw_triggers()
+		{
+			if (!entity_bound_settings.enabled)
+			{
+				return;
+			}
+
+			for (auto i = 0; i < *game::num_entities; i++)
+			{
+				const auto entity = &game::g_entities[i];
+				const auto origin = entity->origin;
+
+				const auto distance = distance_2d(entity_bound_settings.camera, origin);
+				const auto* classname = game::SL_ConvertToString(entity->script_classname);
+
+				if (distance > entity_bound_settings.range || !classname)
+				{
+					continue;
+				}
+
+				const auto type = get_entity_type(classname);
+				if (!entity_bound_settings.enabled_types[type])
+				{
+					continue;
+				}
+
+				switch (type)
+				{
+				case entity_type::trigger_radius:
+				{
+					const auto radius = entity->box.halfSize[0];
+					const auto height = entity->box.halfSize[2] * 2.f;
+
+					draw_cylinder(origin, radius, height, entity_bound_settings.point_count,
+						entity_bound_settings.type_colors[type], entity_bound_settings.mesh_thickness, entity_bound_settings.mesh_only);
+					break;
+				}
+				default:
+				{
+					draw_rectangular_prism(origin, entity->box, entity_bound_settings.type_colors[type],
+						entity_bound_settings.mesh_thickness, entity_bound_settings.mesh_only);
+					break;
+				}
+				}
+			}
 		}
 
 		void update_camera()
@@ -453,32 +684,12 @@ namespace gui_debug
 				path_node_settings.camera[1] = camera[1];
 				path_node_settings.camera[2] = camera[2];
 			}
-		}
 
-		void draw_nodes_native()
-		{
-			if (!game::SV_Loaded() || !path_node_settings.enabled || cl_paused->current.integer)
+			if (!entity_bound_settings.camera_locked)
 			{
-				return;
-			}
-
-			update_camera();
-
-			if (!path_node_settings.native_rendering)
-			{
-				return;
-			}
-
-			for (unsigned int i = 0; i < game::pathData->nodeCount; i++)
-			{
-				float origin[3] = {};
-				const auto node = &game::pathData->nodes[i];
-
-				get_pathnode_origin(node, origin);
-				if (distance_2d(path_node_settings.camera, origin) < path_node_settings.range)
-				{
-					draw_square_native(origin, path_node_settings.size, path_node_settings.color);
-				}
+				entity_bound_settings.camera[0] = camera[0];
+				entity_bound_settings.camera[1] = camera[1];
+				entity_bound_settings.camera[2] = camera[2];
 			}
 		}
 	}
@@ -489,14 +700,33 @@ namespace gui_debug
 		void post_unpack() override
 		{
 			gui::on_frame(draw_window);
-			gui::on_frame(draw_nodes, true);
+			gui::on_frame([]()
+			{
+				if (!game::SV_Loaded() || cl_paused->current.integer)
+				{
+					return;
+				}
 
-			scheduler::on_game_initialized([]()
+				begin_render_window();
+				draw_nodes();
+				draw_triggers();
+				end_render_window();
+			}, true);
+
+			scheduler::once([]()
 			{
 				cl_paused = game::Dvar_FindVar("cl_paused");
-			});
+			}, scheduler::pipeline::main);
 
-			scheduler::loop(draw_nodes_native, scheduler::pipeline::renderer);
+			scheduler::loop([]()
+			{
+				if (!game::SV_Loaded() || cl_paused->current.integer)
+				{
+					return;
+				}
+
+				update_camera();
+			}, scheduler::pipeline::renderer);
 		}
 	};
 }
