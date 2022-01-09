@@ -464,33 +464,32 @@ namespace gui_debug
 				if (ImGui::TreeNode("Types"))
 				{
 					ImGui::Checkbox("trigger_radius", &entity_bound_settings.enabled_types[entity_type::trigger_radius]);
-					if (entity_bound_settings.enabled_types[entity_type::trigger_radius] && ImGui::TreeNode("Color picker"))
+					if (entity_bound_settings.enabled_types[entity_type::trigger_radius] && ImGui::TreeNode("Color picker #1"))
 					{
 						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::trigger_radius]);
 						ImGui::TreePop();
 					}
 
 					ImGui::Checkbox("generic trigger", &entity_bound_settings.enabled_types[entity_type::generic_trigger]);
-					if (entity_bound_settings.enabled_types[entity_type::generic_trigger] && ImGui::TreeNode("Color picker"))
+					if (entity_bound_settings.enabled_types[entity_type::generic_trigger] && ImGui::TreeNode("Color picker #2"))
 					{
 						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::generic_trigger]);
 						ImGui::TreePop();
 					}
 
 					ImGui::Checkbox("actor", &entity_bound_settings.enabled_types[entity_type::actor]);
-					if (entity_bound_settings.enabled_types[entity_type::actor] && ImGui::TreeNode("Color picker"))
+					if (entity_bound_settings.enabled_types[entity_type::actor] && ImGui::TreeNode("Color picker #3"))
 					{
 						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::actor]);
 						ImGui::TreePop();
 					}
 
 					ImGui::Checkbox("other entities", &entity_bound_settings.enabled_types[entity_type::other]);
-					if (entity_bound_settings.enabled_types[entity_type::other] && ImGui::TreeNode("Color picker"))
+					if (entity_bound_settings.enabled_types[entity_type::other] && ImGui::TreeNode("Color picker #4"))
 					{
 						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::other]);
 						ImGui::TreePop();
 					}
-
 				}
 
 				ImGui::SliderFloat("range", &entity_bound_settings.range, 0.f, 10000.f);
