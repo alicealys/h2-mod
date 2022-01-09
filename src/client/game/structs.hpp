@@ -61,21 +61,28 @@ namespace game
 		scr_string_t_dummy = 0x0,
 	};
 
+	struct Bounds
+	{
+		vec3_t midPoint;
+		vec3_t halfSize;
+	};
+
 	struct gentity_s
 	{
 		EntityState s;
 		char __pad0[0x1B];
 		vec3_t origin;
 		char __pad1[0x98];
-		float midPoint[0x3]; // entityShared.box
-		float halfSize[0x3]; // entityShared.box
-		char __pad2[0x40];
+		Bounds box;
+		char __pad2[0x4];
+		Bounds absBox;
+		char __pad3[0x24];
 		gclient_s* client;
-		char __pad3[0x30];
+		char __pad4[0x30];
 		scr_string_t script_classname;
-		char __pad4[0x18];
+		char __pad5[0x18];
 		char flags;
-		char __pad5[0x188];
+		char __pad6[0x188];
 	}; // size = 760
 
 	//auto a = sizeof(gentity_s);
@@ -971,12 +978,6 @@ namespace game
 		//GfxImageLoadDef *loadDef;
 		uint64_t streams[4];
 		const char* name;
-	};
-
-	struct Bounds
-	{
-		vec3_t midPoint;
-		vec3_t halfSize;
 	};
 
 	struct pmove_t
