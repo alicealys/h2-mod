@@ -198,14 +198,6 @@ namespace gui_debug
 
 			ImGuiWindow* window = ImGui::GetCurrentWindow();
 
-			ImVec2 points[4] =
-			{
-				ImVec2(p1_screen[0], p1_screen[1]),
-				ImVec2(p2_screen[0], p2_screen[1]),
-				ImVec2(p3_screen[0], p3_screen[1]),
-				ImVec2(p4_screen[0], p4_screen[1])
-			};
-
 			const auto color_ = ImGui::GetColorU32({color[0], color[1], color[2], color[3]});
 
 			window->DrawList->PathClear();
