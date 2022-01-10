@@ -55,24 +55,14 @@ namespace scripting
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
 		}
 
-		void clear_shared_table()
-		{
-			shared_table.access([](shared_table_t& table)
-			{
-				table.clear();
-			});
-		}
-
 		void player_spawn_stub(const game::gentity_s* player)
 		{
 			player_spawn_hook.invoke<void>(player);
-			clear_shared_table();
 			lua::engine::start();
 		}
 
 		void g_shutdown_game_stub(const int free_scripts)
 		{
-			clear_shared_table();
 			lua::engine::stop();
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
