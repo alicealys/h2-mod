@@ -556,6 +556,14 @@ namespace scripting::lua
 				return result;
 			};
 
+			game_type["sharedclear"] = [](const game&)
+			{
+				scripting::shared_table.access([](scripting::shared_table_t& table)
+				{
+					table.clear();
+				});
+			};
+
 			game_type["getentbyref"] = [](const game&, const sol::this_state s, 
 				const unsigned int entnum, const unsigned int classnum)
 			{

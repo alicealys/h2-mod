@@ -482,6 +482,8 @@ namespace gui_debug
 						ImGui::ColorPicker4("color", entity_bound_settings.type_colors[entity_type::other]);
 						ImGui::TreePop();
 					}
+
+					ImGui::TreePop();
 				}
 
 				ImGui::SliderFloat("range", &entity_bound_settings.range, 0.f, 10000.f);

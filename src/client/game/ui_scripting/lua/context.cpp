@@ -1025,6 +1025,14 @@ namespace ui_scripting::lua
 				return result;
 			};
 
+			game_type["sharedclear"] = [](const game&)
+			{
+				scripting::shared_table.access([](scripting::shared_table_t& table)
+				{
+					table.clear();
+				});
+			};
+
 			auto userdata_type = state.new_usertype<userdata>("userdata_");
 
 			userdata_type["new"] = sol::property(

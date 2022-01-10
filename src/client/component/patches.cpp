@@ -44,7 +44,7 @@ namespace patches
 
 			if (hash == cg_fov_hash || hash == cg_fov_scale_hash)
 			{
-				flags |= game::DvarFlags::DVAR_FLAG_SAVED;
+				flags = game::DvarFlags::DVAR_FLAG_SAVED;
 			}
 
 			return dvar_register_float_hook.invoke<game::dvar_t*>(hash, dvarName, value, min, max, flags);
@@ -77,8 +77,6 @@ namespace patches
 			gscr_set_save_dvar_hook.create(0x504C60_b, &gscr_set_save_dvar_stub);
 			// Make cg_fov and cg_fovscale saved dvars
 			dvar_register_float_hook.create(game::Dvar_RegisterFloat.get(), dvar_register_float_stub);
-			// Don't make the game reset cg_fov and cg_fovscale along with other dvars
-			utils::hook::nop(0x4C8A08_b, 5);
 		}
 	};
 }
