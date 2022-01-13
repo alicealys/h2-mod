@@ -68,7 +68,7 @@ namespace gui
 
 		void new_gui_frame()
 		{
-			ImGui::GetIO().MouseDrawCursor = toggled;
+			ImGui::GetIO().MouseDrawCursor = toggled || *game::keyCatchers & 0x1;
 			*game::keyCatchers |= 0x10 * toggled;
 
 			ImGui_ImplDX11_NewFrame();
