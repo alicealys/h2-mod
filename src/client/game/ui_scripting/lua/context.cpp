@@ -9,6 +9,7 @@
 #include "../../../component/ui_scripting.hpp"
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
+#include "../../../component/fastfiles.hpp"
 
 #include "component/game_console.hpp"
 #include "component/scheduler.hpp"
@@ -80,7 +81,7 @@ namespace ui_scripting::lua
 			return true;
 		}
 
-		void setup_types(sol::state& state, event_handler& handler, scheduler& scheduler)
+		void setup_io(sol::state& state)
 		{
 			state["io"]["fileexists"] = utils::io::file_exists;
 			state["io"]["writefile"] = utils::io::write_file;
@@ -91,7 +92,10 @@ namespace ui_scripting::lua
 			state["io"]["listfiles"] = utils::io::list_files;
 			state["io"]["copyfolder"] = utils::io::copy_folder;
 			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+		}
 
+		void setup_vector_type(sol::state& state)
+		{
 			auto vector_type = state.new_usertype<scripting::vector>("vector", sol::constructors<scripting::vector(float, float, float)>());
 			vector_type["x"] = sol::property(&scripting::vector::get_x, &scripting::vector::set_x);
 			vector_type["y"] = sol::property(&scripting::vector::get_y, &scripting::vector::set_y);
@@ -193,7 +197,10 @@ namespace ui_scripting::lua
 			{
 				return utils::string::va("{x: %f, y: %f, z: %f}", a.get_x(), a.get_y(), a.get_z());
 			};
+		}
 
+		void setup_element_type(sol::state& state, event_handler& handler, scheduler& scheduler)
+		{
 			auto element_type = state.new_usertype<element>("element", "new", []()
 			{
 				const auto el = new element();
@@ -538,7 +545,10 @@ namespace ui_scripting::lua
 
 				return sol::lua_value{s, convert(s, element.attributes[attribute])};
 			};
+		}
 
+		void setup_menu_type(sol::state& state, event_handler& handler, scheduler& scheduler)
+		{
 			auto menu_type = state.new_usertype<menu>("menu");
 
 			menu_type["onnotify"] = [&handler](menu& menu, const std::string& event,
@@ -687,7 +697,10 @@ namespace ui_scripting::lua
 					return result;
 				}
 			);
+		}
 
+		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
+		{
 			struct game
 			{
 			};
@@ -1033,6 +1046,83 @@ namespace ui_scripting::lua
 				});
 			};
 
+			game_type["assetlist"] = [](const game&, const sol::this_state s, const std::string& type_string)
+			{
+				auto table = sol::table::create(s.lua_state());
+				auto index = 1;
+				auto type_index = -1;
+
+				for (auto i = 0; i < ::game::XAssetType::ASSET_TYPE_COUNT; i++)
+				{
+					if (type_string == ::game::g_assetNames[i])
+					{
+						type_index = i;
+					}
+				}
+
+				if (type_index == -1)
+				{
+					throw std::runtime_error("Asset type does not exist");
+				}
+
+				const auto type = static_cast<::game::XAssetType>(type_index);
+				fastfiles::enum_assets(type, [type, &table, &index](const ::game::XAssetHeader header)
+				{
+					const auto asset = ::game::XAsset{type, header};
+					const std::string asset_name = ::game::DB_GetXAssetName(&asset);
+					table[index++] = asset_name;
+				}, true);
+
+				return table;
+			};
+
+			game_type["getweapondisplayname"] = [](const game&, const std::string& name)
+			{
+				const auto alternate = name.starts_with("alt_");
+				const auto weapon = ::game::G_GetWeaponForName(name.data());
+
+				char buffer[0x400];
+				::game::CG_GetWeaponDisplayName(weapon, alternate, buffer, 0x400);
+
+				return std::string(buffer);
+			};
+
+			struct player
+			{
+			};
+			auto player_type = state.new_usertype<player>("player_");
+			state["player"] = player();
+
+			player_type["notify"] = [](const player&, const sol::this_state s, const std::string& name, sol::variadic_args va)
+			{
+				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
+				{
+					throw std::runtime_error("Not in game");
+				}
+
+				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
+				{
+					try
+					{
+						std::vector<scripting::script_value> arguments{};
+
+						for (auto arg : args)
+						{
+							arguments.push_back(script_convert({s, arg}));
+						}
+
+						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						scripting::notify(player, name, arguments);
+					}
+					catch (...)
+					{
+					}
+				}, ::scheduler::pipeline::server);
+			};
+		}
+
+		void setup_lui_types(sol::state& state, event_handler& handler, scheduler& scheduler)
+		{
 			auto userdata_type = state.new_usertype<userdata>("userdata_");
 
 			userdata_type["new"] = sol::property(
@@ -1148,39 +1238,6 @@ namespace ui_scripting::lua
 				return sol::as_returns(returns);
 			};
 
-			struct player
-			{
-			};
-			auto player_type = state.new_usertype<player>("player_");
-			state["player"] = player();
-
-			player_type["notify"] = [](const player&, const sol::this_state s, const std::string& name, sol::variadic_args va)
-			{
-				if (!::game::CL_IsCgameInitialized() || !::game::g_entities[0].client)
-				{
-					throw std::runtime_error("Not in game");
-				}
-
-				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
-				{
-					try
-					{
-						std::vector<scripting::script_value> arguments{};
-
-						for (auto arg : args)
-						{
-							arguments.push_back(script_convert({s, arg}));
-						}
-
-						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
-						scripting::notify(player, name, arguments);
-					}
-					catch (...)
-					{
-					}
-				}, ::scheduler::pipeline::server);
-			};
-
 			state.script(animation_script);
 		}
 	}
@@ -1216,7 +1273,12 @@ namespace ui_scripting::lua
 			return this->folder_;
 		};
 
-		setup_types(this->state_, this->event_handler_, this->scheduler_);
+		setup_io(this->state_);
+		setup_vector_type(this->state_);
+		setup_element_type(this->state_, this->event_handler_, this->scheduler_);
+		setup_menu_type(this->state_, this->event_handler_, this->scheduler_);
+		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
+		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
 
 		printf("Loading ui script '%s'\n", this->folder_.data());
 		this->load_script("__init__");
