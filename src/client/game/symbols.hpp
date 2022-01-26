@@ -20,6 +20,8 @@ namespace game
 
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x37F450};
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x37F1B0};
+	WEAK symbol<char*(const unsigned int weapon, 
+		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x3B9210};
 
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x59A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x59ABA0};
@@ -155,6 +157,8 @@ namespace game
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
 	WEAK symbol<int> num_entities{0x55CC738};
 	WEAK symbol<PathData> pathData{0x52CCDA0};
+	WEAK symbol<VehiclePathNode> vehicle_pathnodes{0xCFBB844};
+	WEAK symbol<int> vehicle_pathnode_count{0xD009A30};
 
 	WEAK symbol<DWORD> threadIds{0xB11DC80};
 
