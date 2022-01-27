@@ -74,22 +74,24 @@ function modsmenu(a1)
 
     createdivider(menu, "$_Available mods")
 
-    local mods = io.listfiles("mods/")
-    for i = 1, #mods do
-        local desc = "Load " .. mods[i]
-        local infofile = mods[i] .. "/mod.txt"
-        local exists = io.fileexists(infofile)
-
-        if (exists) then
-            desc = io.readfile(infofile)
-        end
-
-        if (mods[i] ~= modfolder) then
-            menu:AddButton("$_" .. mods[i], function()
-                game:executecommand("loadmod " .. mods[i])
-            end, nil, true, nil, {
-                desc_text = desc
-            })
+    if (io.directoryexists("mods")) then
+        local mods = io.listfiles("mods/")
+        for i = 1, #mods do
+            local desc = "Load " .. mods[i]
+            local infofile = mods[i] .. "/mod.txt"
+            local exists = io.fileexists(infofile)
+    
+            if (exists) then
+                desc = io.readfile(infofile)
+            end
+    
+            if (mods[i] ~= modfolder) then
+                menu:AddButton("$_" .. mods[i], function()
+                    game:executecommand("loadmod " .. mods[i])
+                end, nil, true, nil, {
+                    desc_text = desc
+                })
+            end
         end
     end
 
