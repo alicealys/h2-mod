@@ -26,7 +26,7 @@ LUI.MenuBuilder.m_types_build["main_campaign"] = function(a1, a2)
     local button = menu:AddButton("$_MODS", function()
         LUI.FlowManager.RequestAddMenu(nil, "mods_menu")
     end, nil, true, nil, {
-        desc_text = "$_Open mods menu"
+        desc_text = "Open mods menu"
     })
 
     buttonlist:removeElement(button)
