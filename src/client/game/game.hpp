@@ -6,8 +6,9 @@
 namespace game
 {
 	extern uint64_t base_address;
-
 	void load_base_address();
+
+	extern std::string mod_folder;
 
 	namespace environment
 	{

@@ -7,11 +7,14 @@
 
 #include <utils/io.hpp>
 #include <utils/string.hpp>
+#include <utils/nt.hpp>
 
 namespace ui_scripting::lua::engine
 {
 	namespace
 	{
+		const auto mods_menu_script = utils::nt::load_resource(LUI_MODS_MENU);
+
 		float screen_max[2];
 
 		void check_resize()
@@ -302,10 +305,8 @@ namespace ui_scripting::lua::engine
 			return scripts;
 		}
 
-		void load_scripts()
+		void load_scripts(const std::string& script_dir)
 		{
-			const auto script_dir = "ui_scripts/"s;
-
 			if (!utils::io::directory_exists(script_dir))
 			{
 				return;
@@ -317,9 +318,14 @@ namespace ui_scripting::lua::engine
 			{
 				if (std::filesystem::is_directory(script) && utils::io::file_exists(script + "/__init__.lua"))
 				{
-					get_scripts().push_back(std::make_unique<context>(script));
+					get_scripts().push_back(std::make_unique<context>(script, script_type::file));
 				}
 			}
+		}
+
+		void load_code(const std::string& code)
+		{
+			get_scripts().push_back(std::make_unique<context>(code, script_type::code));
 		}
 
 		void render_menus()
@@ -406,7 +412,17 @@ namespace ui_scripting::lua::engine
 		close_all_menus();
 		get_scripts().clear();
 		clear_menus();
-		load_scripts();
+
+		load_code(mods_menu_script);
+
+		load_scripts("ui_scripts/");
+		load_scripts("h2-mod/ui_scripts/");
+		load_scripts("data/ui_scripts/");
+
+		if (!game::mod_folder.empty())
+		{
+			load_scripts(utils::string::va("%s/ui_scripts/", game::mod_folder.data()));
+		}
 	}
 
 	void stop()

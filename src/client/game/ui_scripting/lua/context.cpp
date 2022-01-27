@@ -1087,6 +1087,11 @@ namespace ui_scripting::lua
 				return std::string(buffer);
 			};
 
+			game_type["getloadedmod"] = [](const game&)
+			{
+				return ::game::mod_folder;
+			};
+
 			struct player
 			{
 			};
@@ -1242,9 +1247,8 @@ namespace ui_scripting::lua
 		}
 	}
 
-	context::context(std::string folder)
-		: folder_(std::move(folder))
-		  , scheduler_(state_)
+	context::context(std::string data, script_type type)
+		: scheduler_(state_)
 		  , event_handler_(state_)
 
 	{
@@ -1256,23 +1260,6 @@ namespace ui_scripting::lua
 		                            sol::lib::math,
 		                            sol::lib::table);
 
-		this->state_["include"] = [this](const std::string& file)
-		{
-			this->load_script(file);
-		};
-
-		sol::function old_require = this->state_["require"];
-		auto base_path = utils::string::replace(this->folder_, "/", ".") + ".";
-		this->state_["require"] = [base_path, old_require](const std::string& path)
-		{
-			return old_require(base_path + path);
-		};
-
-		this->state_["scriptdir"] = [this]()
-		{
-			return this->folder_;
-		};
-
 		setup_io(this->state_);
 		setup_vector_type(this->state_);
 		setup_element_type(this->state_, this->event_handler_, this->scheduler_);
@@ -1280,8 +1267,35 @@ namespace ui_scripting::lua
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
 
-		printf("Loading ui script '%s'\n", this->folder_.data());
-		this->load_script("__init__");
+		if (type == script_type::file)
+		{
+			this->folder_ = data;
+
+			this->state_["include"] = [this](const std::string& file)
+			{
+				this->load_script(file);
+			};
+
+			sol::function old_require = this->state_["require"];
+			auto base_path = utils::string::replace(this->folder_, "/", ".") + ".";
+			this->state_["require"] = [base_path, old_require](const std::string& path)
+			{
+				return old_require(base_path + path);
+			};
+
+			this->state_["scriptdir"] = [this]()
+			{
+				return this->folder_;
+			};
+
+			printf("Loading ui script '%s'\n", this->folder_.data());
+			this->load_script("__init__");
+		}
+		
+		if (type == script_type::code)
+		{
+			handle_error(this->state_.safe_script(data, &sol::script_pass_on_error));
+		}
 	}
 
 	context::~context()
