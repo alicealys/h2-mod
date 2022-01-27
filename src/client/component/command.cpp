@@ -448,62 +448,6 @@ namespace command
 					}
 				}, scheduler::pipeline::server);
 			});
-
-			add("loadmod", [](const params& params)
-			{
-				if (params.size() < 2)
-				{
-					game_console::print(game_console::con_type_info, "Usage: loadmod mods/<modname>");
-					return;
-				}
-
-				if (::game::SV_Loaded())
-				{
-					game_console::print(game_console::con_type_error, "Cannot load mod while in-game!\n");
-					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
-					return;
-				}
-
-				const auto path = params.get(1);
-				game_console::print(game_console::con_type_info, "Loading mod %s\n", path);
-
-				if (!utils::io::directory_exists(path))
-				{
-					game_console::print(game_console::con_type_error, "Mod %s not found!\n", path);
-					return;
-				}
-
-				game::mod_folder = path;
-
-				::scheduler::once([]()
-				{
-					command::execute("lui_restart", true);
-				}, ::scheduler::pipeline::renderer);
-			});
-
-			add("unloadmod", [](const params& params)
-			{
-				if (game::mod_folder.empty())
-				{
-					game_console::print(game_console::con_type_info, "No mod loaded\n");
-					return;
-				}
-
-				if (::game::SV_Loaded())
-				{
-					game_console::print(game_console::con_type_error, "Cannot unload mod while in-game!\n");
-					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
-					return;
-				}
-
-				game_console::print(game_console::con_type_info, "Unloading mod %s\n", game::mod_folder.data());
-				game::mod_folder.clear();
-
-				::scheduler::once([]()
-				{
-					command::execute("lui_restart", true);
-				}, ::scheduler::pipeline::renderer);
-			});
 		}
 	};
 }
