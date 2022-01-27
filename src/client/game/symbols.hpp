@@ -157,7 +157,6 @@ namespace game
 	WEAK symbol<gentity_s> g_entities{0x52DDDA0};
 	WEAK symbol<int> num_entities{0x55CC738};
 	WEAK symbol<PathData> pathData{0x52CCDA0};
-	WEAK symbol<VehiclePathNode> vehicle_pathnodes{0xCFBB844};
 	WEAK symbol<int> vehicle_pathnode_count{0xD009A30};
 
 	WEAK symbol<DWORD> threadIds{0xB11DC80};
