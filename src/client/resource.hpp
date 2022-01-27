@@ -22,3 +22,4 @@
 #define ICON_IMAGE            313
 
 #define LUA_ANIMATION_SCRIPT  314
+#define LUI_MODS_MENU         315

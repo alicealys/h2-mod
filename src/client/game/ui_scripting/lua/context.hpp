@@ -15,6 +15,12 @@
 
 namespace ui_scripting::lua
 {
+	enum script_type
+	{
+		file,
+		code
+	};
+
 	extern std::unordered_map<std::string, menu> menus;
 	extern std::vector<element*> elements;
 	extern element ui_element;
@@ -23,7 +29,7 @@ namespace ui_scripting::lua
 	class context
 	{
 	public:
-		context(std::string folder);
+		context(std::string data, script_type);
 		~context();
 
 		context(context&&) noexcept = delete;

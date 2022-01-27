@@ -11,6 +11,8 @@ namespace game
 		base_address = uint64_t(module);
 	}
 
+	std::string mod_folder{};
+
 	namespace environment
 	{
 		launcher::mode mode = launcher::mode::none;

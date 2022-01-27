@@ -98,6 +98,7 @@ ID_ICON               ICON   "resources/icon.ico"
 MENU_MAIN             RCDATA "resources/main.html"
 
 LUA_ANIMATION_SCRIPT  RCDATA "resources/animation.lua"
+LUI_MODS_MENU         RCDATA "resources/mods_menu.lua"
 
 #ifdef _DEBUG
 TLS_DLL               RCDATA "../../build/bin/x64/Debug/tlsdll.dll"

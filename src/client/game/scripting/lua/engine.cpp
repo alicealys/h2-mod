@@ -6,6 +6,7 @@
 #include "../execution.hpp"
 
 #include <utils/io.hpp>
+#include <utils/string.hpp>
 
 namespace scripting::lua::engine
 {
@@ -17,12 +18,13 @@ namespace scripting::lua::engine
 			return scripts;
 		}
 
-		void load_scripts()
+		void load_generic_script()
 		{
 			get_scripts().push_back(std::make_unique<context>());
+		}
 
-			const auto script_dir = "scripts/"s;
-
+		void load_scripts(const std::string& script_dir)
+		{
 			if (!utils::io::directory_exists(script_dir))
 			{
 				return;
@@ -44,7 +46,17 @@ namespace scripting::lua::engine
 	{
 		clear_custom_fields();
 		get_scripts().clear();
-		load_scripts();
+
+		load_generic_script();
+
+		load_scripts("scripts/");
+		load_scripts("h2-mod/scripts/");
+		load_scripts("data/scripts/");
+
+		if (!game::mod_folder.empty())
+		{
+			load_scripts(utils::string::va("%s/scripts/", game::mod_folder.data()));
+		}
 	}
 
 	void stop()
