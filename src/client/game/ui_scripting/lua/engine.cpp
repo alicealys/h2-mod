@@ -318,14 +318,14 @@ namespace ui_scripting::lua::engine
 			{
 				if (std::filesystem::is_directory(script) && utils::io::file_exists(script + "/__init__.lua"))
 				{
-					get_scripts().push_back(std::make_unique<context>(script, script_type::file, true));
+					get_scripts().push_back(std::make_unique<context>(script, script_type::file));
 				}
 			}
 		}
 
-		void load_code(const std::string& code, bool safe_mode)
+		void load_code(const std::string& code)
 		{
-			get_scripts().push_back(std::make_unique<context>(code, script_type::code, safe_mode));
+			get_scripts().push_back(std::make_unique<context>(code, script_type::code));
 		}
 
 		void render_menus()
