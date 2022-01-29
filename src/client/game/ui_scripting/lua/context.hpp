@@ -29,7 +29,7 @@ namespace ui_scripting::lua
 	class context
 	{
 	public:
-		context(std::string data, script_type);
+		context(std::string data, script_type type);
 		~context();
 
 		context(context&&) noexcept = delete;

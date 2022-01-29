@@ -17,6 +17,8 @@
 #include <utils/string.hpp>
 #include <utils/nt.hpp>
 #include <utils/io.hpp>
+#include <utils/http.hpp>
+#include <utils/cryptography.hpp>
 
 namespace ui_scripting::lua
 {
@@ -28,6 +30,7 @@ namespace ui_scripting::lua
 	namespace
 	{
 		const auto animation_script = utils::nt::load_resource(LUA_ANIMATION_SCRIPT);
+		const auto json_script = utils::nt::load_resource(LUA_JSON_SCRIPT);
 
 		scripting::script_value script_convert(const sol::lua_value& value)
 		{
@@ -91,7 +94,16 @@ namespace ui_scripting::lua
 			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
 			state["io"]["listfiles"] = utils::io::list_files;
 			state["io"]["copyfolder"] = utils::io::copy_folder;
+			state["io"]["removefile"] = utils::io::remove_file;
+			state["io"]["removedirectory"] = utils::io::remove_directory;
 			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+		}
+
+		void setup_json(sol::state& state)
+		{
+			const auto json = state.safe_script(json_script, &sol::script_pass_on_error);
+			handle_error(json);
+			state["json"] = json;
 		}
 
 		void setup_vector_type(sol::state& state)
@@ -1092,6 +1104,38 @@ namespace ui_scripting::lua
 				return ::game::mod_folder;
 			};
 
+			static int request_id{};
+			game_type["httpget"] = [](const game&, const std::string& url)
+			{
+				const auto id = request_id++;
+				::scheduler::once([url, id]()
+				{
+					const auto result = utils::http::get_data(url);
+					::scheduler::once([result, id]
+					{
+						event event;
+						event.element = &ui_element;
+						event.name = "http_request_done";
+						if (result.has_value())
+						{
+							event.arguments = { id, true, result.value() };
+						}
+						else
+						{
+							event.arguments = { id, false };
+						}
+
+						notify(event);
+					}, ::scheduler::pipeline::renderer);
+				}, ::scheduler::pipeline::async);
+				return id;
+			};
+
+			game_type["sha"] = [](const game&, const std::string& data)
+			{
+				return utils::cryptography::sha1::compute(data, true);
+			};
+
 			struct player
 			{
 			};
@@ -1261,6 +1305,7 @@ namespace ui_scripting::lua
 		                            sol::lib::table);
 
 		setup_io(this->state_);
+		setup_json(this->state_);
 		setup_vector_type(this->state_);
 		setup_element_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_menu_type(this->state_, this->event_handler_, this->scheduler_);

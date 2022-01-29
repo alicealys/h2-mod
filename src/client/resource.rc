@@ -98,6 +98,8 @@ ID_ICON               ICON   "resources/icon.ico"
 MENU_MAIN             RCDATA "resources/main.html"
 
 LUA_ANIMATION_SCRIPT  RCDATA "resources/animation.lua"
+LUA_JSON_SCRIPT       RCDATA "resources/json.lua"
+
 LUI_MODS_MENU         RCDATA "resources/mods_menu.lua"
 
 #ifdef _DEBUG

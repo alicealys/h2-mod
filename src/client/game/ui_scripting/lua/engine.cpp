@@ -413,7 +413,7 @@ namespace ui_scripting::lua::engine
 		get_scripts().clear();
 		clear_menus();
 
-		load_code(mods_menu_script);
+		//load_code(mods_menu_script);
 
 		load_scripts("ui_scripts/");
 		load_scripts("h2-mod/ui_scripts/");
