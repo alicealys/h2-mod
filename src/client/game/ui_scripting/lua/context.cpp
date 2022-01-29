@@ -93,6 +93,8 @@ namespace ui_scripting::lua
 			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
 			state["io"]["listfiles"] = utils::io::list_files;
 			state["io"]["copyfolder"] = utils::io::copy_folder;
+			state["io"]["removefile"] = utils::io::remove_file;
+			state["io"]["removedirectory"] = utils::io::remove_directory;
 			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
 		}
 
