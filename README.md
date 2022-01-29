@@ -1,5 +1,6 @@
 ![license](https://img.shields.io/github/license/fedddddd/h2-mod.svg)
 [![open bugs](https://img.shields.io/github/issues/fedddddd/h2-mod/bug?label=bugs)](https://github.com/fedddddd/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Build](https://github.com/fedddddd/h2-mod/workflows/Build/badge.svg)](https://github.com/fedddddd/h2-mod/actions)
 [![Build status](https://ci.appveyor.com/api/projects/status/0sh80kdnsvm53rno?svg=true)](https://ci.appveyor.com/project/fedddddd/h2-mod)
 
 
