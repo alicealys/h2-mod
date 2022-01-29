@@ -318,14 +318,14 @@ namespace ui_scripting::lua::engine
 			{
 				if (std::filesystem::is_directory(script) && utils::io::file_exists(script + "/__init__.lua"))
 				{
-					get_scripts().push_back(std::make_unique<context>(script, script_type::file));
+					get_scripts().push_back(std::make_unique<context>(script, script_type::file, true));
 				}
 			}
 		}
 
-		void load_code(const std::string& code)
+		void load_code(const std::string& code, bool safe_mode)
 		{
-			get_scripts().push_back(std::make_unique<context>(code, script_type::code));
+			get_scripts().push_back(std::make_unique<context>(code, script_type::code, safe_mode));
 		}
 
 		void render_menus()
@@ -413,7 +413,7 @@ namespace ui_scripting::lua::engine
 		get_scripts().clear();
 		clear_menus();
 
-		load_code(mods_menu_script);
+		//load_code(mods_menu_script);
 
 		load_scripts("ui_scripts/");
 		load_scripts("h2-mod/ui_scripts/");
