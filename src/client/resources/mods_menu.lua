@@ -112,7 +112,8 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = modsmenu
 local localize = Engine.Localize
 Engine.Localize = function(...)
     local args = {...}
-    if (args[1]:sub(1, 2) == "$_") then
+
+    if (type(args[1]) == "string" and args[1]:sub(1, 2) == "$_") then
         return args[1]:sub(3, -1)
     end
 
