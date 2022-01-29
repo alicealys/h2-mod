@@ -29,11 +29,7 @@ namespace images
 				}
 			});
 
-			if (data.empty() 
-				&& !utils::io::read_file(utils::string::va("images/%s.png", image->name), &data)
-				&& game::mod_folder.empty() && !utils::io::read_file(utils::string::va("%s/images/%s.png", 
-					game::mod_folder.data(), image->name), &data)
-				)
+			if (data.empty() && !utils::io::read_file(utils::string::va("images/%s.png", image->name), &data))
 			{
 				return {};
 			}

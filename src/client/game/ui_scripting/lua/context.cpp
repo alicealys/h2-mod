@@ -18,6 +18,7 @@
 #include <utils/nt.hpp>
 #include <utils/io.hpp>
 #include <utils/http.hpp>
+#include <utils/cryptography.hpp>
 
 namespace ui_scripting::lua
 {
@@ -710,7 +711,7 @@ namespace ui_scripting::lua
 			);
 		}
 
-		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler, bool safe_mode)
+		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			struct game
 			{
@@ -1103,35 +1104,37 @@ namespace ui_scripting::lua
 				return ::game::mod_folder;
 			};
 
-			if (/*!safe_mode*/true)
+			static int request_id{};
+			game_type["httpget"] = [](const game&, const std::string& url)
 			{
-				static int request_id{};
-				game_type["httpget"] = [](const game&, const std::string& url)
+				const auto id = request_id++;
+				::scheduler::once([url, id]()
 				{
-					const auto id = request_id++;
-					::scheduler::once([url, id]()
+					const auto result = utils::http::get_data(url);
+					::scheduler::once([result, id]
 					{
-						const auto result = utils::http::get_data(url);
-						::scheduler::once([result, id]
+						event event;
+						event.element = &ui_element;
+						event.name = "http_request_done";
+						if (result.has_value())
 						{
-							event event;
-							event.element = &ui_element;
-							event.name = "http_request_done";
-							if (result.has_value())
-							{
-								event.arguments = {id, true, result.value()};
-							}
-							else
-							{
-								event.arguments = {id, false};
-							}
+							event.arguments = { id, true, result.value() };
+						}
+						else
+						{
+							event.arguments = { id, false };
+						}
 
-							notify(event);
-						}, ::scheduler::pipeline::renderer);
-					}, ::scheduler::pipeline::async);
-					return id;
-				};
-			}
+						notify(event);
+					}, ::scheduler::pipeline::renderer);
+				}, ::scheduler::pipeline::async);
+				return id;
+			};
+
+			game_type["sha"] = [](const game&, const std::string& data)
+			{
+				return utils::cryptography::sha1::compute(data, true);
+			};
 
 			struct player
 			{
@@ -1288,10 +1291,9 @@ namespace ui_scripting::lua
 		}
 	}
 
-	context::context(std::string data, script_type type, bool safe_mode)
+	context::context(std::string data, script_type type)
 		: scheduler_(state_)
 		  , event_handler_(state_)
-		  , safe_mode_(safe_mode)
 
 	{
 		this->state_.open_libraries(sol::lib::base,
@@ -1307,8 +1309,7 @@ namespace ui_scripting::lua
 		setup_vector_type(this->state_);
 		setup_element_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_menu_type(this->state_, this->event_handler_, this->scheduler_);
-		setup_game_type(this->state_, this->event_handler_, 
-			this->scheduler_, this->safe_mode_);
+		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
 
 		if (type == script_type::file)

@@ -29,7 +29,7 @@ namespace ui_scripting::lua
 	class context
 	{
 	public:
-		context(std::string data, script_type type, bool safe_mode);
+		context(std::string data, script_type type);
 		~context();
 
 		context(context&&) noexcept = delete;
@@ -45,7 +45,6 @@ namespace ui_scripting::lua
 		sol::state state_{};
 		std::string folder_;
 		std::unordered_set<std::string> loaded_scripts_;
-		bool safe_mode_;
 
 		scheduler scheduler_;
 		event_handler event_handler_;
