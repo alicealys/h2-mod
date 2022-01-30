@@ -10,6 +10,7 @@ environment:
 
 branches:
   only:
+    - develop
     - main
 
 skip_branch_with_pr: true
