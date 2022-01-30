@@ -23,4 +23,4 @@
 
 #define LUA_ANIMATION_SCRIPT  314
 #define LUA_JSON_SCRIPT       315
-#define LUI_MODS_MENU         316
+#define LUI_UPDATER_MENU      316
