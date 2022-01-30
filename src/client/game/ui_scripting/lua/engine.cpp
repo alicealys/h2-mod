@@ -13,7 +13,7 @@ namespace ui_scripting::lua::engine
 {
 	namespace
 	{
-		const auto mods_menu_script = utils::nt::load_resource(LUI_MODS_MENU);
+		const auto updater_script = utils::nt::load_resource(LUI_UPDATER_MENU);
 
 		float screen_max[2];
 
@@ -413,7 +413,7 @@ namespace ui_scripting::lua::engine
 		get_scripts().clear();
 		clear_menus();
 
-		//load_code(mods_menu_script);
+		load_code(updater_script);
 
 		load_scripts("ui_scripts/");
 		load_scripts("h2-mod/ui_scripts/");

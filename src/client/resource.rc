@@ -100,7 +100,7 @@ MENU_MAIN             RCDATA "resources/main.html"
 LUA_ANIMATION_SCRIPT  RCDATA "resources/animation.lua"
 LUA_JSON_SCRIPT       RCDATA "resources/json.lua"
 
-LUI_MODS_MENU         RCDATA "resources/mods_menu.lua"
+LUI_UPDATER_MENU      RCDATA "resources/updater.lua"
 
 #ifdef _DEBUG
 TLS_DLL               RCDATA "../../build/bin/x64/Debug/tlsdll.dll"

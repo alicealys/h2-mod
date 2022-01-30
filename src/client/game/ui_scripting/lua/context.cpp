@@ -1119,11 +1119,11 @@ namespace ui_scripting::lua
 						event.name = "http_request_done";
 						if (result.has_value())
 						{
-							event.arguments = { id, true, result.value() };
+							event.arguments = {id, true, result.value()};
 						}
 						else
 						{
-							event.arguments = { id, false };
+							event.arguments = {id, false};
 						}
 
 						notify(event);
@@ -1134,12 +1134,19 @@ namespace ui_scripting::lua
 
 			game_type["sha"] = [](const game&, const std::string& data)
 			{
-				return utils::cryptography::sha1::compute(data, true);
+				return utils::string::to_upper(utils::cryptography::sha1::compute(data, true));
 			};
 
 			game_type["environment"] = [](const game&)
 			{
 				return GIT_BRANCH;
+			};
+
+			game_type["binaryname"] = [](const game&)
+			{
+				char name[MAX_PATH] = {0};
+				GetModuleBaseName(GetCurrentProcess(), GetModuleHandle(NULL), name, MAX_PATH);
+				return std::string(name);
 			};
 
 			struct player

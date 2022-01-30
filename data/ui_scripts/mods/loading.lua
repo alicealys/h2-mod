@@ -26,39 +26,15 @@ function string:truncate(length)
     return self:sub(1, length - 3) .. "..."
 end
 
-local maincampaign = LUI.MenuBuilder.m_types_build["main_campaign"]
-LUI.MenuBuilder.m_types_build["main_campaign"] = function(a1, a2)
-    local menu = maincampaign(a1, a2)
-    local buttonlist = menu:getChildById("main_campaign_list")
-    
-    local button = menu:AddButton("$_MODS", function()
+LUI.addmenubutton("main_campaign", {
+    index = 6,
+    id = "mods_menu-button",
+    text = "$_MODS",
+    description = "Load installed mods.",
+    callback = function()
         LUI.FlowManager.RequestAddMenu(nil, "mods_menu")
-    end, nil, true, nil, {
-        desc_text = "Open mods menu"
-    })
-
-    buttonlist:removeElement(button)
-    buttonlist:insertElement(button, 6)
-    button.id = "mods_menu-button"
-
-    local hintbox = menu.optionTextInfo
-    local firstbutton = buttonlist:getFirstChild()
-    hintbox:dispatchEventToRoot({
-        name = "set_button_info_text",
-        text = firstbutton.properties.desc_text,
-        immediate = true
-    })
-
-    menu:CreateBottomDivider()
-    menu:AddBottomDividerToList(buttonlist:getLastChild())
-    menu:removeElement(menu.optionTextInfo)
-
-    LUI.Options.InitScrollingList(menu.list, nil)
-    menu:CreateBottomDivider()
-    menu.optionTextInfo = LUI.Options.AddOptionTextInfo(menu)
-
-    return menu
-end
+    end
+})
 
 LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
     local menu = LUI.MenuTemplate.new(a1, {
@@ -70,9 +46,11 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
     })
 
     menu:AddButton("$_OPEN STORE", function()
-        LUI.FlowManager.RequestAddMenu(nil, "mod_store_menu")
+        if (LUI.MenuBuilder.m_types_build["mod_store_menu"]) then
+            LUI.FlowManager.RequestAddMenu(nil, "mod_store_menu")
+        end
     end, nil, true, nil, {
-        desc_text = "Open the menu store"
+        desc_text = "Download and install mods."
     })
 
     local modfolder = game:getloadedmod()
