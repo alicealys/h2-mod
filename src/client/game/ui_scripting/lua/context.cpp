@@ -19,6 +19,7 @@
 #include <utils/io.hpp>
 #include <utils/http.hpp>
 #include <utils/cryptography.hpp>
+#include <version.h>
 
 namespace ui_scripting::lua
 {
@@ -1134,6 +1135,11 @@ namespace ui_scripting::lua
 			game_type["sha"] = [](const game&, const std::string& data)
 			{
 				return utils::cryptography::sha1::compute(data, true);
+			};
+
+			game_type["environment"] = [](const game&)
+			{
+				return GIT_BRANCH;
 			};
 
 			struct player
