@@ -28,13 +28,28 @@ end
 
 LUI.addmenubutton("main_campaign", {
     index = 6,
-    id = "mods_menu-button",
     text = "$_MODS",
     description = "Load installed mods.",
     callback = function()
         LUI.FlowManager.RequestAddMenu(nil, "mods_menu")
     end
 })
+
+function getmodname(path)
+    local name = path
+    local infofile = path .. "/info.json"
+
+    if (io.fileexists(infofile)) then
+        pcall(function()
+            local data = json.decode(io.readfile(infofile))
+            desc = string.format("%s\nAuthor: %s\nVersion: %s", 
+                data.description, data.author, data.version)
+            name = data.name
+        end)
+    end
+
+    return name
+end
 
 LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
     local menu = LUI.MenuTemplate.new(a1, {
@@ -55,7 +70,7 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
 
     local modfolder = game:getloadedmod()
     if (modfolder ~= "") then
-        createdivider(menu, "$_Loaded mod: " .. modfolder:truncate(20))
+        createdivider(menu, "$_Loaded mod: ^3" .. getmodname(modfolder):truncate(20))
 
         menu:AddButton("$_UNLOAD", function()
             game:executecommand("unloadmod")
@@ -70,19 +85,8 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
         local mods = io.listfiles("mods/")
         for i = 1, #mods do
             local desc = "Load " .. mods[i]
-            local name = mods[i]
+            local name = getmodname(mods[i])
 
-            local infofile = mods[i] .. "/info.json"
-    
-            if (io.fileexists(infofile)) then
-                pcall(function()
-                    local data = json.decode(io.readfile(infofile))
-                    desc = string.format("%s\nAuthor: %s\nVersion: %s", 
-                        data.description, data.author, data.version)
-                    name = data.name
-                end)
-            end
-    
             if (mods[i] ~= modfolder) then
                 menu:AddButton("$_" .. name, function()
                     game:executecommand("loadmod " .. mods[i])
