@@ -173,29 +173,46 @@ function updaterpopup(oncancel)
     })
 end
 
+function deleteoldfile()
+    io.removefile(game:binaryname() .. ".old")
+end
+
+deleteoldfile()
+
 function verifyfiles(files)
     local needed = {}
-    local needtoupdatebinary = false
+    local updatebinary = false
+
+    if (game:isdebugbuild()) then
+        --return needed, updaetbinary
+    end
+
     local binaryname = game:binaryname()
 
     for i = 1, #files do
         local name = files[i][1]
 
-        if (not io.fileexists(name) or game:sha(io.readfile(name)) ~= files[i][3]) then
-            if (name == game:binaryname()) then
-                needtoupdatebinary = true
-            end
-
-            table.insert(needed, files[i])
+        if (io.fileexists(name) and game:sha(io.readfile(name)) == files[i][3]) then
+            goto continue
         end
+
+        if (name == binaryname) then
+            updatebinary = true
+        end
+
+        table.insert(needed, files[i])
+
+        ::continue::
     end
 
-    return needed, needtoupdatebinary
+    return needed, updatebinary
 end
 
 local canceled = false
 
 function downloadfiles(popup, files, callback)
+    deleteoldfile()
+
     local text = popup:getchildren()[7]
     local folder = game:environment() == "develop" and "data-dev" or "data"
 

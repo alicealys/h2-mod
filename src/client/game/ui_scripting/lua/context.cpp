@@ -1185,6 +1185,11 @@ namespace ui_scripting::lua
 				utils::nt::terminate();
 			};
 
+			game_type["isdebugbuild"] = [](const game&)
+			{
+				return DEBUG;
+			};
+
 			struct player
 			{
 			};
