@@ -1095,7 +1095,7 @@ namespace ui_scripting::lua
 				const auto alternate = name.starts_with("alt_");
 				const auto weapon = ::game::G_GetWeaponForName(name.data());
 
-				char buffer[0x400];
+				char buffer[0x400] = {0};
 				::game::CG_GetWeaponDisplayName(weapon, alternate, buffer, 0x400);
 
 				return std::string(buffer);
