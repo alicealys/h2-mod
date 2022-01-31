@@ -60,7 +60,7 @@ namespace ui_scripting
 
 		void hksi_lual_error_stub(game::hks::lua_State* s, const char* fmt, ...)
 		{
-			char va_buffer[0x200] = { 0 };
+			char va_buffer[2048] = {0};
 
 			va_list ap;
 			va_start(ap, fmt);
