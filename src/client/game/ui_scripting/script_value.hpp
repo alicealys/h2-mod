@@ -22,6 +22,7 @@ namespace ui_scripting
 		script_value(double value);
 
 		script_value(const char* value);
+		script_value(const char* value, unsigned int len);
 		script_value(const std::string& value);
 
 		script_value(const lightuserdata& value);

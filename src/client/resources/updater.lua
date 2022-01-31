@@ -96,7 +96,6 @@ LUI.addmenubutton("pc_controls", {
 stack = {}
 LUI.MenuBuilder.m_types_build["generic_waiting_popup_"] = function (menu, event)
     local oncancel = stack.oncancel
-
 	local popup = LUI.MenuBuilder.BuildRegisteredType("waiting_popup", {
 		message_text = stack.text,
         isLiveWithCancel = true,
@@ -115,13 +114,10 @@ LUI.MenuBuilder.m_types_build["generic_waiting_popup_"] = function (menu, event)
 end
 
 LUI.MenuBuilder.m_types_build["generic_yes_no_popup_"] = function()
-    local title = stack.title
-    local text = stack.text
     local callback = stack.callback
-
     local popup = LUI.MenuBuilder.BuildRegisteredType("generic_yesno_popup", {
-		popup_title = title,
-		message_text = text,
+		popup_title = stack.title,
+		message_text = stack.text,
 		yes_action = function()
             callback(true)
         end,
@@ -137,11 +133,35 @@ LUI.MenuBuilder.m_types_build["generic_yes_no_popup_"] = function()
     return popup
 end
 
+LUI.MenuBuilder.m_types_build["generic_confirmation_popup_"] = function()
+    local popup = LUI.MenuBuilder.BuildRegisteredType( "generic_confirmation_popup", {
+        cancel_will_close = false,
+        popup_title = stack.title,
+        message_text = stack.text,
+        button_text = stack.buttontext,
+        confirmation_action = stack.callback
+    })
+
+    stack = {
+        ret = popup
+    }
+
+    return stack.ret
+end
+
 LUI.yesnopopup = function(data)
     for k, v in luiglobals.next, data do
         stack[k] = v
     end
     LUI.FlowManager.RequestPopupMenu(nil, "generic_yes_no_popup_")
+    return stack.ret
+end
+
+LUI.confirmationpopup = function(data)
+    for k, v in luiglobals.next, data do
+        stack[k] = v
+    end
+    LUI.FlowManager.RequestPopupMenu(nil, "generic_confirmation_popup_")
     return stack.ret
 end
 
@@ -155,16 +175,22 @@ end
 
 function verifyfiles(files)
     local needed = {}
+    local needtoupdatebinary = false
     local binaryname = game:binaryname()
 
     for i = 1, #files do
         local name = files[i][1]
-        if (name ~= binaryname and (not io.fileexists(files[i][1]) or game:sha(io.readfile(files[i][1])) ~= files[i][3])) then
+
+        if (not io.fileexists(name) or game:sha(io.readfile(name)) ~= files[i][3]) then
+            if (name == game:binaryname()) then
+                needtoupdatebinary = true
+            end
+
             table.insert(needed, files[i])
         end
     end
 
-    return needed
+    return needed, needtoupdatebinary
 end
 
 local canceled = false
@@ -193,18 +219,24 @@ function downloadfiles(popup, files, callback)
             return
         end
 
-        local url = "https://master.fed0001.xyz/" .. folder .. "/" .. files[index][1]
-        text:setText(string.format("Downloading file [%i/%i]\n%s", index, #files, files[index][1]))
-        
-        httprequest(url, function(valid, data)
+        local filename = files[index][1]
+
+        local url = "https://master.fed0001.xyz/" .. folder .. "/" .. filename
+        text:setText(string.format("Downloading file [%i/%i]\n%s", index, #files, filename))
+
+        if (filename == game:binaryname()) then
+            io.movefile(filename, filename .. ".old")
+        end
+
+        httprequesttofile(url, filename, function(valid, success)
             if (not valid) then
                 callback(false, "Invalid server response")
                 stop = true
                 return
             end
 
-            if (not io.writefile(files[index][1], data, false)) then
-                callback(false, "Failed to write file " .. files[index][1])
+            if (not success) then
+                callback(false, "Failed to write file " .. filename)
                 stop = true
                 return
             end
@@ -251,7 +283,7 @@ function tryupdate(autoclose)
 
         local valid = pcall(function()
             local files = json.decode(data)
-            local needed = verifyfiles(files)
+            local needed, updatebinary = verifyfiles(files)
 
             if (#needed == 0) then
                 text:setText("No updates available")
@@ -269,13 +301,26 @@ function tryupdate(autoclose)
                     end
     
                     gotresult = true
+
+                    if (not result) then
+                        text:setText("Update failed: " .. error)
+                        return
+                    end
+
+                    if (updatebinary) then
+                        LUI.confirmationpopup({
+                            title = "RESTART REQUIRED",
+                            text = "Update requires restart, relaunch now?",
+                            buttontext = "RESTART",
+                            callback = function()
+                                game:relaunch()
+                            end
+                        })
+                        return
+                    end
     
                     if (result and #needed > 0) then
                         game:executecommand("lui_restart")
-                    end
-    
-                    if (not result) then
-                        text:setText("Update failed: " .. error)
                         return
                     end
     
@@ -324,6 +369,19 @@ function httprequest(url, callback)
 
         listener:clear()
         callback(valid, data)
+    end)
+end
+
+function httprequesttofile(url, dest, callback)
+    local request = game:httpgettofile(url, dest)
+    local listener = nil
+    listener = game:onnotify("http_request_done", function(id, valid, success)
+        if (id ~= request) then
+            return
+        end
+
+        listener:clear()
+        callback(valid, success)
     end)
 end
 

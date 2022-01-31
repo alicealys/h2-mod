@@ -1,4 +1,5 @@
 #include "nt.hpp"
+#include "string.hpp"
 
 namespace utils::nt
 {
@@ -225,7 +226,7 @@ namespace utils::nt
 		return std::string(LPSTR(LockResource(handle)), SizeofResource(nullptr, res));
 	}
 
-	void relaunch_self()
+	void relaunch_self(const std::string& extra_command_line)
 	{
 		const utils::nt::library self;
 
@@ -238,9 +239,14 @@ namespace utils::nt
 
 		char current_dir[MAX_PATH];
 		GetCurrentDirectoryA(sizeof(current_dir), current_dir);
-		auto* const command_line = GetCommandLineA();
 
-		CreateProcessA(self.get_path().data(), command_line, nullptr, nullptr, false, NULL, nullptr, current_dir,
+		std::string command_line = GetCommandLineA();
+		if (!extra_command_line.empty())
+		{
+			command_line += " " + extra_command_line;
+		}
+
+		CreateProcessA(self.get_path().data(), command_line.data(), nullptr, nullptr, false, NULL, nullptr, current_dir,
 		               &startup_info, &process_info);
 
 		if (process_info.hThread && process_info.hThread != INVALID_HANDLE_VALUE) CloseHandle(process_info.hThread);

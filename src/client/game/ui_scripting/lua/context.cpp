@@ -1150,7 +1150,7 @@ namespace ui_scripting::lua
 						if (result.has_value())
 						{
 							const auto write = utils::io::write_file(dest, result.value(), false);
-							event.arguments = {id, write};
+							event.arguments = {id, true, write};
 						}
 						else
 						{
@@ -1177,6 +1177,12 @@ namespace ui_scripting::lua
 			{
 				utils::nt::library self;
 				return self.get_name();
+			};
+
+			game_type["relaunch"] = [](const game&)
+			{
+				utils::nt::relaunch_self("-singleplayer");
+				utils::nt::terminate();
 			};
 
 			struct player
