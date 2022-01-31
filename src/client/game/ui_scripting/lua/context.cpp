@@ -1187,7 +1187,11 @@ namespace ui_scripting::lua
 
 			game_type["isdebugbuild"] = [](const game&)
 			{
-				return DEBUG;
+#ifdef DEBUG
+				return true;
+#else
+				return false;
+#endif
 			};
 
 			struct player

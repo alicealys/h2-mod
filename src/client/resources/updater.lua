@@ -97,7 +97,7 @@ stack = {}
 LUI.MenuBuilder.m_types_build["generic_waiting_popup_"] = function (menu, event)
     local oncancel = stack.oncancel
 	local popup = LUI.MenuBuilder.BuildRegisteredType("waiting_popup", {
-		message_text = stack.text,
+        message_text = stack.text,
         isLiveWithCancel = true,
         cancel_func = function(...)
             local args = {...}
@@ -116,9 +116,9 @@ end
 LUI.MenuBuilder.m_types_build["generic_yes_no_popup_"] = function()
     local callback = stack.callback
     local popup = LUI.MenuBuilder.BuildRegisteredType("generic_yesno_popup", {
-		popup_title = stack.title,
-		message_text = stack.text,
-		yes_action = function()
+        popup_title = stack.title,
+        message_text = stack.text,
+        yes_action = function()
             callback(true)
         end,
         no_action = function()
