@@ -77,6 +77,10 @@ LUI.openpopupmenu = function(menu, args)
 end
 
 LUI.onmenuopen("main_lockout", function()
+    if (game:isdebugbuild()) then
+        return
+    end
+
     if (game:sharedget("has_tried_updating") == "") then
         game:ontimeout(function()
             game:sharedset("has_tried_updating", "1")
@@ -327,7 +331,7 @@ function tryupdate(autoclose)
                     if (updatebinary) then
                         LUI.confirmationpopup({
                             title = "RESTART REQUIRED",
-                            text = "Update requires restart, relaunch now?",
+                            text = "Update requires restart",
                             buttontext = "RESTART",
                             callback = function()
                                 game:relaunch()
