@@ -89,6 +89,7 @@ namespace ui_scripting::lua
 		{
 			state["io"]["fileexists"] = utils::io::file_exists;
 			state["io"]["writefile"] = utils::io::write_file;
+			state["io"]["movefile"] = utils::io::move_file;
 			state["io"]["filesize"] = utils::io::file_size;
 			state["io"]["createdirectory"] = utils::io::create_directory;
 			state["io"]["directoryexists"] = utils::io::directory_exists;
@@ -1117,9 +1118,39 @@ namespace ui_scripting::lua
 						event event;
 						event.element = &ui_element;
 						event.name = "http_request_done";
+
 						if (result.has_value())
 						{
 							event.arguments = {id, true, result.value()};
+						}
+						else
+						{
+							event.arguments = {id, false};
+						}
+
+						notify(event);
+					}, ::scheduler::pipeline::renderer);
+				}, ::scheduler::pipeline::async);
+				return id;
+			};
+
+			game_type["httpgettofile"] = [](const game&, const std::string& url, 
+				const std::string& dest)
+			{
+				const auto id = request_id++;
+				::scheduler::once([url, id, dest]()
+				{
+					const auto result = utils::http::get_data(url);
+					::scheduler::once([result, id, dest]
+					{
+						event event;
+						event.element = &ui_element;
+						event.name = "http_request_done";
+
+						if (result.has_value())
+						{
+							const auto write = utils::io::write_file(dest, result.value(), false);
+							event.arguments = {id, write};
 						}
 						else
 						{
@@ -1144,9 +1175,8 @@ namespace ui_scripting::lua
 
 			game_type["binaryname"] = [](const game&)
 			{
-				char name[MAX_PATH] = {0};
-				GetModuleBaseName(GetCurrentProcess(), GetModuleHandle(NULL), name, MAX_PATH);
-				return std::string(name);
+				utils::nt::library self;
+				return self.get_name();
 			};
 
 			struct player
