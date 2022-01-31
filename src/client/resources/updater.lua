@@ -77,7 +77,7 @@ LUI.openpopupmenu = function(menu, args)
 end
 
 LUI.onmenuopen("main_lockout", function()
-    if (game:isdebugbuild()) then
+    if (game:isdebugbuild() or not Engine.GetDvarBool("cg_autoUpdate")) then
         return
     end
 
@@ -88,14 +88,6 @@ LUI.onmenuopen("main_lockout", function()
         end, 0)
     end
 end)
-
-LUI.addmenubutton("pc_controls", {
-    text = "$_CHECK FOR UPDATES",
-    description = "Check for updates.",
-    callback = function()
-        tryupdate(false)
-    end
-})
 
 stack = {}
 LUI.MenuBuilder.m_types_build["generic_waiting_popup_"] = function (menu, event)
