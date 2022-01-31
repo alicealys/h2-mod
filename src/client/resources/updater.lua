@@ -184,7 +184,7 @@ function verifyfiles(files)
     local updatebinary = false
 
     if (game:isdebugbuild()) then
-        --return needed, updaetbinary
+        return needed, updatebinary
     end
 
     local binaryname = game:binaryname()
