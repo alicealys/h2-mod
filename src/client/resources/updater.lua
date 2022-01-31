@@ -234,7 +234,7 @@ function downloadfiles(popup, files, callback)
 
         local filename = files[index][1]
 
-        local url = "https://master.fed0001.xyz/" .. folder .. "/" .. filename
+        local url = "https://master.fed0001.xyz/" .. folder .. "/" .. filename .. "?" .. os.time()
         text:setText(string.format("Downloading file [%i/%i]\n%s", index, #files, filename))
 
         if (filename == game:binaryname()) then
@@ -287,8 +287,9 @@ function tryupdate(autoclose)
 
     local text = popup:getchildren()[7]
     local file = game:environment() == "develop" and "files-dev.json" or "files.json"
+    local url = "https://master.fed0001.xyz/" .. file .. "?" .. os.time()
 
-    httprequest("https://master.fed0001.xyz/" .. file, function(valid, data)
+    httprequest(url, function(valid, data)
         if (not valid) then
             text:setText("Update check failed: Invalid server response")
             return
