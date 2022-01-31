@@ -43,3 +43,6 @@
 [submodule "deps/imgui"]
 	path = deps/imgui
 	url = https://github.com/fedddddd/imgui.git
+[submodule "deps/curl"]
+	path = deps/curl
+	url = https://github.com/curl/curl.git
