@@ -16,7 +16,7 @@ namespace config
 	public:
 		void post_unpack() override
 		{
-			dvars::register_bool("cg_autoUpdate", false, game::DvarFlags::DVAR_FLAG_SAVED);
+			dvars::register_bool("cg_autoUpdate", true, game::DvarFlags::DVAR_FLAG_SAVED);
 		}
 	};
 }
