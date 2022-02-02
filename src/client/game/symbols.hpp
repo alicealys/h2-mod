@@ -131,6 +131,7 @@ namespace game
 	WEAK symbol<void()> Sys_ShowConsole{0x633080};
 	WEAK symbol<bool()> Sys_IsDatabaseReady2{0x5A9FE0};
 	WEAK symbol<int()> Sys_Milliseconds{0x650720};
+	WEAK symbol<bool()> Sys_IsMainThread{0x5AA020};
 
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x5A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x606080};
