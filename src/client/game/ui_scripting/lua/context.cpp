@@ -1317,12 +1317,6 @@ namespace ui_scripting::lua
 				table.set(name, convert({s, value}));
 			};
 
-			state["luiglobals"] = table((*::game::hks::lua_state)->globals.v.table);
-			state["CoD"] = state["luiglobals"]["CoD"];
-			state["LUI"] = state["luiglobals"]["LUI"];
-			state["Engine"] = state["luiglobals"]["Engine"];
-			state["Game"] = state["luiglobals"]["Game"];
-
 			auto function_type = state.new_usertype<function>("function_");
 
 			function_type[sol::meta_function::call] = [](const function& function, const sol::this_state s, sol::variadic_args va)
@@ -1344,6 +1338,12 @@ namespace ui_scripting::lua
 
 				return sol::as_returns(returns);
 			};
+
+			state["luiglobals"] = table((*::game::hks::lua_state)->globals.v.table);
+			state["CoD"] = state["luiglobals"]["CoD"];
+			state["LUI"] = state["luiglobals"]["LUI"];
+			state["Engine"] = state["luiglobals"]["Engine"];
+			state["Game"] = state["luiglobals"]["Game"];
 
 			state.script(animation_script);
 		}

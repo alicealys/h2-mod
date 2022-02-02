@@ -1,24 +1,24 @@
-LUI.menucallbacks = {}
-LUI.originalmenus = {}
+menucallbacks = {}
+originalmenus = {}
 
 LUI.onmenuopen = function(name, callback)
     if (not LUI.MenuBuilder.m_types_build[name]) then
         return
     end
 
-    if (not LUI.menucallbacks[name]) then
-        LUI.menucallbacks[name] = {}
+    if (not menucallbacks[name]) then
+        menucallbacks[name] = {}
     end
 
-    luiglobals.table.insert(LUI.menucallbacks[name], callback)
+    table.insert(menucallbacks[name], callback)
 
-    if (not LUI.originalmenus[name]) then
-        LUI.originalmenus[name] = LUI.MenuBuilder.m_types_build[name]
+    if (not originalmenus[name]) then
+        originalmenus[name] = LUI.MenuBuilder.m_types_build[name]
         LUI.MenuBuilder.m_types_build[name] = function(...)
             local args = {...}
-            local menu = LUI.originalmenus[name](table.unpack(args))
+            local menu = originalmenus[name](table.unpack(args))
 
-            for k, v in luiglobals.next, LUI.menucallbacks[name] do
+            for k, v in luiglobals.next, menucallbacks[name] do
                 v(menu, table.unpack(args))
             end
 
