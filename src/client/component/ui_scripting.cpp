@@ -200,7 +200,12 @@ namespace ui_scripting
 		{
 			scheduler::loop([]()
 			{
-				ui_scripting::lua::engine::run_frame();
+				const auto self_id = GetCurrentThreadId();
+				if (self_id == game::threadIds[game::THREAD_CONTEXT_MAIN])
+				{
+					ui_scripting::lua::engine::run_frame();
+				}
+
 				fps::draw();
 				branding::draw();
 				game_console::draw_console();
