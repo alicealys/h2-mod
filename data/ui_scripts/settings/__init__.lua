@@ -46,7 +46,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         menu, 
         "ui_cg_autoUpdate", 
         "$_AUTOMATIC UPDATES", 
-        "Enable or disable automatic updates on startup", 
+        "Enable or disable automatic updates on startup.", 
         {
             {
                 text = "$_ENABLED",
@@ -73,7 +73,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         menu, 
         "ui_cg_drawFps", 
         "$_DRAW FPS", 
-        "Enable or disable fps and viewpos drawing on screen", 
+        "Enable or disable drawing fps or viewpos on screen.", 
         {
             {
                 text = "$_DISABLED",
@@ -96,7 +96,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         menu, 
         "ui_cg_drawSpeed", 
         "$_DRAW SPEED", 
-        "Enable or disable speed drawing on screen", 
+        "Enable or disable drawing the player speed on screen.", 
         {
             {
                 text = "$_DISABLED",
@@ -115,7 +115,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         menu, 
         "ui_cg_speedGraph", 
         "$_DRAW SPEED GRAPH", 
-        "Enable or disable speed graph drawing on screen", 
+        "Enable or disable the speed graph.",
         {
             {
                 text = "$_DISABLED",
@@ -136,7 +136,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         menu, 
         "ui_r_fullbright", 
         "$_FULLBRIGHT", 
-        "Select the fullbright mode", 
+        "Change the fullbright mode.", 
         {
             {
                 text = "$_DISABLED",
