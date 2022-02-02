@@ -200,8 +200,7 @@ namespace ui_scripting
 		{
 			scheduler::loop([]()
 			{
-				const auto self_id = GetCurrentThreadId();
-				if (self_id == game::threadIds[game::THREAD_CONTEXT_MAIN])
+				if (game::Sys_IsMainThread())
 				{
 					ui_scripting::lua::engine::run_frame();
 				}
