@@ -76,7 +76,7 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
         menu:AddButton("$_UNLOAD", function()
             game:executecommand("unloadmod")
         end, nil, true, nil, {
-            desc_text = "Unload the currently loaded mod"
+            desc_text = "Unload the currently loaded mod."
         })
     end
 
