@@ -37,6 +37,7 @@ LUI.addmenubutton("main_campaign", {
 
 function getmodname(path)
     local name = path
+    local desc = "Load " .. name
     local infofile = path .. "/info.json"
 
     if (io.fileexists(infofile)) then
@@ -48,7 +49,7 @@ function getmodname(path)
         end)
     end
 
-    return name
+    return name, desc
 end
 
 LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
@@ -84,8 +85,7 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
     if (io.directoryexists("mods")) then
         local mods = io.listfiles("mods/")
         for i = 1, #mods do
-            local desc = "Load " .. mods[i]
-            local name = getmodname(mods[i])
+            local name, desc = getmodname(mods[i])
 
             if (mods[i] ~= modfolder) then
                 menu:AddButton("$_" .. name, function()
