@@ -60,7 +60,7 @@ namespace ui_scripting
 
 		void hksi_lual_error_stub(game::hks::lua_State* s, const char* fmt, ...)
 		{
-			char va_buffer[0x200] = { 0 };
+			char va_buffer[2048] = {0};
 
 			va_list ap;
 			va_start(ap, fmt);
@@ -200,7 +200,11 @@ namespace ui_scripting
 		{
 			scheduler::loop([]()
 			{
-				ui_scripting::lua::engine::run_frame();
+				if (game::Sys_IsMainThread())
+				{
+					ui_scripting::lua::engine::run_frame();
+				}
+
 				fps::draw();
 				branding::draw();
 				game_console::draw_console();

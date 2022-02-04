@@ -5,12 +5,24 @@
 #include "command.hpp"
 #include "game/game.hpp"
 
+#include "game/ui_scripting/execution.hpp"
+
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
+#include <version.h>
 
 namespace branding
 {
-	float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
+	namespace
+	{
+		float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
+
+		int get_build_number_stub(game::hks::lua_State* s)
+		{
+			ui_scripting::push_value(VERSION);
+			return 1;
+		}
+	}
 
 	void draw()
 	{
@@ -26,6 +38,12 @@ namespace branding
 		void post_unpack() override
 		{
 			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
+			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_LINK", "Github Page:");
+			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_URL", "https://github.com/fedddddd/h2-mod");
+			localized_strings::override("MENU_SYSINFO_DONATION_LINK", "Donation Link:");
+			localized_strings::override("MENU_SYSINFO_DONATION_URL", "https://paypal.me/fedecek");
+
+			utils::hook::jump(0x33D550_b, get_build_number_stub, true);
 		}
 	};
 }

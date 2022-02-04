@@ -19,7 +19,7 @@ jobs:
           - Release
     steps:
       - name: Wait for previous workflows
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
         uses: softprops/turnstyle@v1
         with:
           poll-interval-seconds: 10
