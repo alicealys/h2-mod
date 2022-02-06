@@ -71,7 +71,7 @@ namespace ui_scripting::lua::engine
 		clear_converted_functions();
 		get_scripts().clear();
 
-		//load_code(updater_script);
+		load_code(updater_script);
 
 		load_scripts("ui_scripts/");
 		load_scripts("h2-mod/ui_scripts/");
