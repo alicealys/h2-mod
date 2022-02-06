@@ -16,11 +16,10 @@ namespace ui_scripting::lua
 	{
 	public:
 		std::string event = {};
-		void* element{};
 		event_callback callback = {};
 		bool is_volatile = false;
 		bool is_deleted = false;
-		std::vector<std::pair<uint64_t, std::string>> endon_conditions{};
+		std::vector<std::string> endon_conditions{};
 	};
 
 	class event_handler final
@@ -52,7 +51,7 @@ namespace ui_scripting::lua
 		void merge_callbacks();
 		void handle_endon_conditions(const event& event);
 
-		void add_endon_condition(const event_listener_handle& handle, const element* element, const std::string& event);
+		void add_endon_condition(const event_listener_handle& handle, const std::string& event);
 
 		event_arguments build_arguments(const event& event) const;
 	};

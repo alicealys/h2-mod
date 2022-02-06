@@ -354,25 +354,25 @@ namespace game_console
 			draw_output_scrollbar(x, y, width, height);
 			draw_output_text(x, y);
 		}
-	}
 
-	void draw_console()
-	{
-		check_resize();
-
-		if (*game::keyCatchers & 1)
+		void draw_console()
 		{
-			if (!(*game::keyCatchers & 1))
-			{
-				con.output_visible = false;
-			}
+			check_resize();
 
-			if (con.output_visible)
+			if (*game::keyCatchers & 1)
 			{
-				draw_output_window();
-			}
+				if (!(*game::keyCatchers & 1))
+				{
+					con.output_visible = false;
+				}
 
-			draw_input();
+				if (con.output_visible)
+				{
+					draw_output_window();
+				}
+
+				draw_input();
+			}
 		}
 	}
 
@@ -719,6 +719,8 @@ namespace game_console
 	public:
 		void post_unpack() override
 		{
+			scheduler::loop(draw_console, scheduler::pipeline::renderer);
+
 			con.cursor = 0;
 			con.visible_line_count = 0;
 			con.output_visible = false;

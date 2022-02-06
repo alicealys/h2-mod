@@ -9,8 +9,6 @@ namespace game_console
 		con_type_info = 7
 	};
 
-	void draw_console();
-
 	void print(int type, const char* fmt, ...);
 
 	bool console_char_event(int local_client_num, int key);

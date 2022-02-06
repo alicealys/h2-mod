@@ -10,6 +10,8 @@ namespace scheduler
 		// The game's rendering pipeline
 		renderer,
 
+		lui,
+
 		// The game's server thread
 		server,
 

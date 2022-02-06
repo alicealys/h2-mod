@@ -17,9 +17,9 @@ namespace ui_scripting::lua
 			this->remove(handle);
 		};
 
-		event_listener_handle_type["endon"] = [this](const event_listener_handle& handle, const element* entity, const std::string& event)
+		event_listener_handle_type["endon"] = [this](const event_listener_handle& handle, const std::string& event)
 		{
-			this->add_endon_condition(handle, entity, event);
+			this->add_endon_condition(handle, event);
 		};
 	}
 
@@ -35,7 +35,7 @@ namespace ui_scripting::lua
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
-				if (i->event != event.name || i->element != event.element)
+				if (i->event != event.name)
 				{
 					++i;
 					continue;
@@ -78,8 +78,7 @@ namespace ui_scripting::lua
 		return {id};
 	}
 
-	void event_handler::add_endon_condition(const event_listener_handle& handle, const element* element,
-											const std::string& event)
+	void event_handler::add_endon_condition(const event_listener_handle& handle, const std::string& event)
 	{
 		auto merger = [&](task_list& tasks)
 		{
@@ -87,7 +86,7 @@ namespace ui_scripting::lua
 			{
 				if (task.id == handle.id)
 				{
-					task.endon_conditions.emplace_back((uint64_t)element, event);
+					task.endon_conditions.emplace_back(event);
 				}
 			}
 		};
@@ -150,7 +149,7 @@ namespace ui_scripting::lua
 			{
 				for (auto& condition : task.endon_conditions)
 				{
-					if (condition.first == (uint64_t)event.element && condition.second == event.name)
+					if (condition == event.name)
 					{
 						task.is_deleted = true;
 						break;

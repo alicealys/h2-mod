@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../event.hpp"
-#include "../menu.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4702)
@@ -20,11 +19,6 @@ namespace ui_scripting::lua
 		file,
 		code
 	};
-
-	extern std::unordered_map<std::string, menu> menus;
-	extern std::vector<element*> elements;
-	extern element ui_element;
-	extern int mouse[2];
 
 	class context
 	{

@@ -22,14 +22,14 @@ namespace branding
 			ui_scripting::push_value(VERSION);
 			return 1;
 		}
-	}
 
-	void draw()
-	{
-		const auto font = game::R_RegisterFont("fonts/defaultBold.otf", 22);
-		game::R_AddCmdDrawText("h2-mod", 0x7FFFFFFF, font, 15.f,
-			15.f + static_cast<float>(font->pixelHeight),
-			1.f, 1.f, 0.f, color, 0);
+		void draw()
+		{
+			const auto font = game::R_RegisterFont("fonts/defaultBold.otf", 22);
+			game::R_AddCmdDrawText("h2-mod", 0x7FFFFFFF, font, 15.f,
+				15.f + static_cast<float>(font->pixelHeight),
+				1.f, 1.f, 0.f, color, 0);
+		}
 	}
 
 	class component final : public component_interface
@@ -37,6 +37,8 @@ namespace branding
 	public:
 		void post_unpack() override
 		{
+			scheduler::loop(draw, scheduler::pipeline::renderer);
+
 			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
 			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_LINK", "Github Page:");
 			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_URL", "https://github.com/fedddddd/h2-mod");
