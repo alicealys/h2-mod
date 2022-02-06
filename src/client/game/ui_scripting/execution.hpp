@@ -15,7 +15,4 @@ namespace ui_scripting
 	script_value get_field(const table& self, const script_value& key);
 	void set_field(const userdata& self, const script_value& key, const script_value& value);
 	void set_field(const table& self, const script_value& key, const script_value& value);
-
-	arguments call_method(const userdata& self, const std::string& name, const arguments& arguments);
-	arguments call(const std::string& name, const arguments& arguments);
 }
