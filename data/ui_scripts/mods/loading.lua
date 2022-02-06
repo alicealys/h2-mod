@@ -85,14 +85,16 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
     if (io.directoryexists("mods")) then
         local mods = io.listfiles("mods/")
         for i = 1, #mods do
-            local name, desc = getmodname(mods[i])
+            if (io.directoryexists(mods[i]) and not io.directoryisempty(mods[i])) then
+                local name, desc = getmodname(mods[i])
 
-            if (mods[i] ~= modfolder) then
-                menu:AddButton("$_" .. name, function()
-                    game:executecommand("loadmod " .. mods[i])
-                end, nil, true, nil, {
-                    desc_text = desc
-                })
+                if (mods[i] ~= modfolder) then
+                    menu:AddButton("$_" .. name, function()
+                        game:executecommand("loadmod " .. mods[i])
+                    end, nil, true, nil, {
+                        desc_text = desc
+                    })
+                end
             end
         end
     end
