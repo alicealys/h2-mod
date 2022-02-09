@@ -97,9 +97,7 @@ ID_ICON               ICON   "resources/icon.ico"
 
 MENU_MAIN             RCDATA "resources/main.html"
 
-LUA_ANIMATION_SCRIPT  RCDATA "resources/animation.lua"
 LUA_JSON_SCRIPT       RCDATA "resources/json.lua"
-
 LUI_UPDATER_MENU      RCDATA "resources/updater.lua"
 
 #ifdef _DEBUG
