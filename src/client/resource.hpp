@@ -21,6 +21,5 @@
 
 #define ICON_IMAGE            313
 
-#define LUA_ANIMATION_SCRIPT  314
 #define LUA_JSON_SCRIPT       315
 #define LUI_UPDATER_MENU      316
