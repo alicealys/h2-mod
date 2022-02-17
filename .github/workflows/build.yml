@@ -64,7 +64,7 @@ jobs:
   deploy:
     name: Deploy artifacts
     needs: build
-    runs-on: ubuntu-2022
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     steps:
       - name: Setup main environment
