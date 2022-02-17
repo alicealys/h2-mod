@@ -10,7 +10,7 @@ namespace utils::http
 	{
 		struct progress_helper
 		{
-			const std::function<void(size_t, size_t, float)>* callback{};
+			const std::function<void(size_t, size_t, size_t)>* callback{};
 			std::exception_ptr exception{};
 			std::chrono::high_resolution_clock::time_point start{};
 		};
@@ -24,7 +24,7 @@ namespace utils::http
 				const auto now = std::chrono::high_resolution_clock::now();
 				const auto count = std::chrono::duration_cast<
 					std::chrono::milliseconds>(now - helper->start).count();
-				const auto speed = (static_cast<float>(dlnow) / static_cast<float>(count)) * 1000.f;
+				const auto speed = dlnow / count;
 
 				if (*helper->callback)
 				{
@@ -51,7 +51,7 @@ namespace utils::http
 	}
 
 	std::optional<std::string> get_data(const std::string& url, const headers& headers, 
-		const std::function<void(size_t, size_t, float)>& callback)
+		const std::function<void(size_t, size_t, size_t)>& callback)
 	{
 		curl_slist* header_list = nullptr;
 		auto* curl = curl_easy_init();
