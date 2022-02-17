@@ -38,8 +38,8 @@ jobs:
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Generate project files
-        #run: tools/premake5 vs2019 --ci-build
-        run: tools/premake5 vs2019
+        #run: tools/premake5 vs2022 --ci-build
+        run: tools/premake5 vs2022
 
       - name: Set up problem matching
         uses: ammaraskar/msvc-problem-matcher@master
@@ -64,7 +64,7 @@ jobs:
   deploy:
     name: Deploy artifacts
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-2022
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
     steps:
       - name: Setup main environment
