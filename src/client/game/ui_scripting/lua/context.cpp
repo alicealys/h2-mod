@@ -469,7 +469,7 @@ namespace ui_scripting::lua
 				::scheduler::once([url, id, dest]()
 				{
 					auto last_report = std::chrono::high_resolution_clock::now();
-					const auto result = utils::http::get_data(url, {}, [&last_report, id](size_t progress, size_t total, float speed)
+					const auto result = utils::http::get_data(url, {}, [&last_report, id](size_t progress, size_t total, size_t speed)
 					{
 						const auto now = std::chrono::high_resolution_clock::now();
 						if (now - last_report < 100ms && progress < total)
@@ -483,7 +483,12 @@ namespace ui_scripting::lua
 						{
 							event event;
 							event.name = "http_request_progress";
-							event.arguments = {id, static_cast<int>(progress), static_cast<int>(total), speed};
+							event.arguments = {
+								id, 
+								static_cast<int>(progress), 
+								static_cast<int>(total), 
+								static_cast<int>(speed)
+							};
 
 							notify(event);
 						}, ::scheduler::pipeline::lui);
