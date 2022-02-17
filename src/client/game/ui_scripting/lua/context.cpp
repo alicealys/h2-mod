@@ -23,14 +23,8 @@
 
 namespace ui_scripting::lua
 {
-	std::unordered_map<std::string, menu> menus;
-	std::vector<element*> elements;
-	element ui_element;
-	int mouse[2];
-
 	namespace
 	{
-		const auto animation_script = utils::nt::load_resource(LUA_ANIMATION_SCRIPT);
 		const auto json_script = utils::nt::load_resource(LUA_JSON_SCRIPT);
 
 		scripting::script_value script_convert(const sol::lua_value& value)
@@ -213,506 +207,6 @@ namespace ui_scripting::lua
 			};
 		}
 
-		void setup_element_type(sol::state& state, event_handler& handler, scheduler& scheduler)
-		{
-			auto element_type = state.new_usertype<element>("element", "new", []()
-			{
-				const auto el = new element();
-				elements.push_back(el);
-				return el;
-			});
-
-			element_type["setvertalign"] = &element::set_vertalign;
-			element_type["sethorzalign"] = &element::set_horzalign;
-			element_type["setrect"] = &element::set_rect;
-			element_type["setfont"] = sol::overload(
-				static_cast<void(element::*)(const std::string&)>(&element::set_font),
-				static_cast<void(element::*)(const std::string&, int)>(&element::set_font)
-			);
-			element_type["settext"] = &element::set_text;
-			element_type["setmaterial"] = &element::set_material;
-			element_type["setcolor"] = &element::set_color;
-			element_type["setsecondcolor"] = &element::set_second_color;
-			element_type["setglowcolor"] = &element::set_glow_color;
-			element_type["setbackcolor"] = &element::set_background_color;
-			element_type["setbordercolor"] = &element::set_border_color;
-			element_type["setborderwidth"] = sol::overload(
-				static_cast<void(element::*)(float)>(&element::set_border_width),
-				static_cast<void(element::*)(float, float)>(&element::set_border_width),
-				static_cast<void(element::*)(float, float, float)>(&element::set_border_width),
-				static_cast<void(element::*)(float, float, float, float)>(&element::set_border_width)
-			);
-			element_type["settextoffset"] = &element::set_text_offset;
-			element_type["setscale"] = &element::set_scale;
-			element_type["setrotation"] = &element::set_rotation;
-			element_type["setyle"] = &element::set_style;
-			element_type["setslice"] = &element::set_slice;
-
-			element_type["getrect"] = [](const sol::this_state s, element& element)
-			{
-				auto rect = sol::table::create(s.lua_state());
-				rect["x"] = element.x;
-				rect["y"] = element.y;
-				rect["w"] = element.w + element.border_width[1] + element.border_width[3];
-				rect["h"] = element.h + element.border_width[0] + element.border_width[2];
-
-				return rect;
-			};
-
-			element_type["x"] = sol::property(
-				[](element& element)
-				{
-					return element.x;
-				},
-				[](element& element, float x)
-				{
-					element.x = x;
-				}
-			);
-
-			element_type["y"] = sol::property(
-				[](element& element)
-				{
-					return element.y;
-				},
-				[](element& element, float y)
-				{
-					element.y = y;
-				}
-			);
-
-			element_type["w"] = sol::property(
-				[](element& element)
-				{
-					return element.w;
-				},
-				[](element& element, float w)
-				{
-					element.w = w;
-				}
-			);
-
-			element_type["h"] = sol::property(
-				[](element& element)
-				{
-					return element.h;
-				},
-				[](element& element, float h)
-				{
-					element.h = h;
-				}
-			);
-
-			element_type["scalex"] = sol::property(
-				[](element& element)
-				{
-					return element.x_scale;
-				},
-				[](element& element, float x_scale)
-				{
-					element.x_scale = x_scale;
-				}
-			);
-
-			element_type["scaley"] = sol::property(
-				[](element& element)
-				{
-					return element.y_scale;
-				},
-				[](element& element, float y_scale)
-				{
-					element.y_scale = y_scale;
-				}
-			);
-
-			element_type["rotation"] = sol::property(
-				[](element& element)
-				{
-					return element.rotation;
-				},
-				[](element& element, float rotation)
-				{
-					element.rotation = rotation;
-				}
-			);
-
-			element_type["style"] = sol::property(
-				[](element& element)
-				{
-					return element.style;
-				},
-				[](element& element, int style)
-				{
-					element.style = style;
-				}
-			);
-
-			element_type["color"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["r"] = element.color[0];
-					color["g"] = element.color[1];
-					color["b"] = element.color[2];
-					color["a"] = element.color[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
-					element.color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
-					element.color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
-					element.color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
-				}
-			);
-
-			element_type["secondcolor"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["r"] = element.second_color[0];
-					color["g"] = element.second_color[1];
-					color["b"] = element.second_color[2];
-					color["a"] = element.second_color[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.use_gradient = true;
-					element.second_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
-					element.second_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
-					element.second_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
-					element.second_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
-				}
-			);
-
-			element_type["usegradient"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					return element.use_gradient;
-				},
-				[](element& element, bool use_gradient)
-				{
-					element.use_gradient = use_gradient;
-				}
-			);
-
-			element_type["glowcolor"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["r"] = element.glow_color[0];
-					color["g"] = element.glow_color[1];
-					color["b"] = element.glow_color[2];
-					color["a"] = element.glow_color[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.glow_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
-					element.glow_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
-					element.glow_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
-					element.glow_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
-				}
-			);
-
-			element_type["backcolor"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["r"] = element.background_color[0];
-					color["g"] = element.background_color[1];
-					color["b"] = element.background_color[2];
-					color["a"] = element.background_color[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.background_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
-					element.background_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
-					element.background_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
-					element.background_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
-				}
-			);
-
-			element_type["bordercolor"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["r"] = element.border_color[0];
-					color["g"] = element.border_color[1];
-					color["b"] = element.border_color[2];
-					color["a"] = element.border_color[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.border_color[0] = color["r"].get_type() == sol::type::number ? color["r"].get<float>() : 0.f;
-					element.border_color[1] = color["g"].get_type() == sol::type::number ? color["g"].get<float>() : 0.f;
-					element.border_color[2] = color["b"].get_type() == sol::type::number ? color["b"].get<float>() : 0.f;
-					element.border_color[3] = color["a"].get_type() == sol::type::number ? color["a"].get<float>() : 0.f;
-				}
-			);
-
-			element_type["borderwidth"] = sol::property(
-				[](element& element, const sol::this_state s)
-				{
-					auto color = sol::table::create(s.lua_state());
-					color["top"] = element.border_width[0];
-					color["right"] = element.border_width[1];
-					color["bottom"] = element.border_width[2];
-					color["left"] = element.border_width[3];
-					return color;
-				},
-				[](element& element, const sol::lua_table color)
-				{
-					element.border_width[0] = color["top"].get_type() == sol::type::number ? color["top"].get<float>() : 0.f;
-					element.border_width[1] = color["right"].get_type() == sol::type::number ? color["right"].get<float>() : element.border_width[1];
-					element.border_width[2] = color["bottom"].get_type() == sol::type::number ? color["bottom"].get<float>() : element.border_width[2];
-					element.border_width[3] = color["left"].get_type() == sol::type::number ? color["left"].get<float>() : element.border_width[3];
-				}
-			);
-
-			element_type["font"] = sol::property(
-				[](element& element)
-				{
-					return element.font;
-				},
-				[](element& element, const std::string& font)
-				{
-					element.set_font(font);
-				}
-			);
-
-			element_type["fontsize"] = sol::property(
-				[](element& element)
-				{
-					return element.fontsize;
-				},
-				[](element& element, float fontsize)
-				{
-					element.fontsize = (int)fontsize;
-				}
-			);
-
-			element_type["onnotify"] = [&handler](element& element, const std::string& event,
-												  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.element = &element;
-				listener.event = event;
-				listener.is_volatile = false;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			element_type["onnotifyonce"] = [&handler](element& element, const std::string& event,
-													  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.element = &element;
-				listener.event = event;
-				listener.is_volatile = true;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			element_type["notify"] = [&handler](element& element, const sol::this_state s, const std::string& _event,
-									            sol::variadic_args va)
-			{
-				event event;
-				event.element = &element;
-				event.name = _event;
-
-				for (auto arg : va)
-				{
-					event.arguments.push_back(convert({s, arg}));
-				}
-
-				notify(event);
-			};
-
-			element_type["hidden"] = sol::property(
-				[](element& element)
-				{
-					return element.hidden;
-				},
-				[](element& element, bool hidden)
-				{
-					element.hidden = hidden;
-				}
-			);
-
-			element_type[sol::meta_function::new_index] = [](element& element, const sol::this_state s, const std::string& attribute, const sol::lua_value& value)
-			{
-				element.attributes[attribute] = convert({s, value});
-			};
-
-			element_type[sol::meta_function::index] = [](element& element, const sol::this_state s, const std::string& attribute)
-			{
-				if (element.attributes.find(attribute) == element.attributes.end())
-				{
-					return sol::lua_value{s, sol::lua_nil};
-				}
-
-				return sol::lua_value{s, convert(s, element.attributes[attribute])};
-			};
-		}
-
-		void setup_menu_type(sol::state& state, event_handler& handler, scheduler& scheduler)
-		{
-			auto menu_type = state.new_usertype<menu>("menu");
-
-			menu_type["onnotify"] = [&handler](menu& menu, const std::string& event,
-											   const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.element = &menu;
-				listener.event = event;
-				listener.is_volatile = false;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			menu_type["onnotifyonce"] = [&handler](menu& menu, const std::string& event,
-												   const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.element = &menu;
-				listener.event = event;
-				listener.is_volatile = true;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			menu_type["notify"] = [&handler](menu& element, const sol::this_state s, const std::string& _event,
-									         sol::variadic_args va)
-			{
-				event event;
-				event.element = &element;
-				event.name = _event;
-
-				for (auto arg : va)
-				{
-					event.arguments.push_back(convert({s, arg}));
-				}
-
-				notify(event);
-			};
-
-			menu_type["addchild"] = [](const sol::this_state s, menu& menu, element& element)
-			{
-				menu.add_child(&element);
-			};
-
-			menu_type["cursor"] = sol::property(
-				[](menu& menu)
-				{
-					return menu.cursor;
-				},
-				[](menu& menu, bool cursor)
-				{
-					menu.cursor = cursor;
-				}
-			);
-
-			menu_type["hidden"] = sol::property(
-				[](menu& menu)
-				{
-					return menu.hidden;
-				},
-				[](menu& menu, bool hidden)
-				{
-					menu.hidden = hidden;
-				}
-			);
-
-			menu_type["ignoreevents"] = sol::property(
-				[](menu& menu)
-				{
-					return menu.ignoreevents;
-				},
-				[](menu& menu, bool ignoreevents)
-				{
-					menu.ignoreevents = ignoreevents;
-				}
-			);
-
-			menu_type["isopen"] = [](menu& menu)
-			{
-				return menu.visible || (menu.type == menu_type::overlay && game::Menu_IsMenuOpenAndVisible(0, menu.overlay_menu.data()));
-			};
-
-			menu_type["open"] = [&handler](menu& menu)
-			{
-				event event;
-				event.element = &menu;
-				event.name = "close";
-				notify(event);
-
-				menu.open();
-			};
-
-			menu_type["close"] = [&handler](menu& menu)
-			{
-				event event;
-				event.element = &menu;
-				event.name = "close";
-				notify(event);
-
-				menu.close();
-			};
-
-			menu_type["getelement"] = [](menu& menu, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
-			{
-				const auto value_ = convert({s, value});
-
-				for (const auto& element : menu.children)
-				{
-					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
-					{
-						return sol::lua_value{s, element};
-					}
-				}
-
-				return sol::lua_value{s, sol::lua_nil};
-			};
-
-			menu_type["getelements"] = sol::overload
-			(
-				[](menu& menu, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
-				{
-					const auto value_ = convert({s, value});
-					auto result = sol::table::create(s.lua_state());
-
-					for (const auto& element : menu.children)
-					{
-						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
-						{
-							result.add(element);
-						}
-					}
-
-					return result;
-				},
-				[](menu& menu, const sol::this_state s)
-				{
-					auto result = sol::table::create(s.lua_state());
-
-					for (const auto& element : menu.children)
-					{
-						result.add(element);
-					}
-
-					return result;
-				}
-			);
-		}
-
 		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
 			struct game
@@ -721,135 +215,15 @@ namespace ui_scripting::lua
 			auto game_type = state.new_usertype<game>("game_");
 			state["game"] = game();
 
-			game_type["getmenu"] = [](const game&, const sol::this_state s, const std::string& name)
-			{
-				if (menus.find(name) == menus.end())
-				{
-					return sol::lua_value{s, sol::lua_nil};
-				}
-
-				return sol::lua_value{s, &menus[name]};
-			};
-
-			game_type["getelement"] = [](const game&, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
-			{
-				const auto value_ = convert({s, value});
-
-				for (const auto& element : elements)
-				{
-					if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
-					{
-						return sol::lua_value{s, element};
-					}
-				}
-
-				return sol::lua_value{s, sol::lua_nil};
-			};
-
-			game_type["getelements"] = sol::overload
-			(
-				[](const game&, const sol::this_state s, const sol::lua_value& value, const std::string& attribute)
-				{
-					const auto value_ = convert({s, value});
-					auto result = sol::table::create(s.lua_state());
-
-					for (const auto& element : elements)
-					{
-						if (element->attributes.find(attribute) != element->attributes.end() && element->attributes[attribute] == value_)
-						{
-							result.add(element);
-						}
-					}
-
-					return result;
-				},
-				[](const game&, const sol::this_state s)
-				{
-					auto result = sol::table::create(s.lua_state());
-
-					for (const auto& element : elements)
-					{
-						result.add(element);
-					}
-
-					return result;
-				}
-			);
-
 			game_type["time"] = []()
 			{
 				const auto now = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 				return now.count();
 			};
 
-			game_type["newmenu"] = [](const game&, const std::string& name)
-			{
-				menus[name] = {};
-				return &menus[name];
-			};
-
 			game_type["executecommand"] = [](const game&, const std::string& command)
 			{
 				command::execute(command, false);
-			};
-
-			game_type["luiopen"] = [](const game&, const std::string& menu)
-			{
-				::scheduler::once([menu]()
-				{
-					::game::LUI_OpenMenu(0, menu.data(), 0, 0, 0);
-				}, ::scheduler::pipeline::renderer);
-			};
-
-			game_type["newmenuoverlay"] = [](const game&, const std::string& name, const std::string& menu_name)
-			{
-				menus[name] = {};
-				menus[name].type = menu_type::overlay;
-				menus[name].overlay_menu = menu_name;
-				return &menus[name];
-			};
-
-			game_type["getmouseposition"] = [](const sol::this_state s, const game&)
-			{
-				auto pos = sol::table::create(s.lua_state());
-				pos["x"] = mouse[0];
-				pos["y"] = mouse[1];
-
-				return pos;
-			};
-
-			game_type["openmenu"] = [&handler](const game&, const std::string& name)
-			{
-				if (menus.find(name) == menus.end())
-				{
-					return;
-				}
-
-				const auto menu = &menus[name];
-
-				event event;
-				event.element = menu;
-				event.name = "open";
-				notify(event);
-
-				menu->open();
-			};
-
-			game_type["closemenu"] = [&handler](const game&, const std::string& name)
-			{
-				if (menus.find(name) == menus.end())
-				{
-					return;
-				}
-
-				const auto menu = &menus[name];
-
-				event event;
-				event.element = menu;
-				event.name = "close";
-				notify(event);
-
-				menu->close();
 			};
 
 			game_type["onframe"] = [&scheduler](const game&, const sol::protected_function& callback)
@@ -874,7 +248,6 @@ namespace ui_scripting::lua
 			{
 				event_listener listener{};
 				listener.callback = callback;
-				listener.element = &ui_element;
 				listener.event = event;
 				listener.is_volatile = false;
 
@@ -886,7 +259,6 @@ namespace ui_scripting::lua
 			{
 				event_listener listener{};
 				listener.callback = callback;
-				listener.element = &ui_element;
 				listener.event = event;
 				listener.is_volatile = true;
 
@@ -991,49 +363,6 @@ namespace ui_scripting::lua
 					(0x71B970_b)(video.data(), 64, 0);
 			};
 
-			game_type[sol::meta_function::index] = [](const game&, const std::string& name)
-			{
-				return [name](const game&, const sol::this_state s, sol::variadic_args va)
-				{
-					arguments arguments{};
-
-					for (auto arg : va)
-					{
-						arguments.push_back(convert({s, arg}));
-					}
-
-					const auto values = call(name, arguments);
-					std::vector<sol::lua_value> returns;
-
-					for (const auto& value : values)
-					{
-						returns.push_back(convert(s, value));
-					}
-
-					return sol::as_returns(returns);
-				};
-			};
-
-			game_type["call"] = [](const game&, const sol::this_state s, const std::string& name, sol::variadic_args va)
-			{
-				arguments arguments{};
-
-				for (auto arg : va)
-				{
-					arguments.push_back(convert({s, arg}));
-				}
-
-				const auto values = call(name, arguments);
-				std::vector<sol::lua_value> returns;
-
-				for (const auto& value : values)
-				{
-					returns.push_back(convert(s, value));
-				}
-
-				return sol::as_returns(returns);
-			};
-
 			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
 			{
 				scripting::shared_table.access([key, value](scripting::shared_table_t& table)
@@ -1116,7 +445,6 @@ namespace ui_scripting::lua
 					::scheduler::once([result, id]
 					{
 						event event;
-						event.element = &ui_element;
 						event.name = "http_request_done";
 
 						if (result.has_value())
@@ -1129,7 +457,7 @@ namespace ui_scripting::lua
 						}
 
 						notify(event);
-					}, ::scheduler::pipeline::renderer);
+					}, ::scheduler::pipeline::lui);
 				}, ::scheduler::pipeline::async);
 				return id;
 			};
@@ -1140,25 +468,55 @@ namespace ui_scripting::lua
 				const auto id = request_id++;
 				::scheduler::once([url, id, dest]()
 				{
-					const auto result = utils::http::get_data(url);
-					::scheduler::once([result, id, dest]
+					auto last_report = std::chrono::high_resolution_clock::now();
+					const auto result = utils::http::get_data(url, {}, [&last_report, id](size_t progress, size_t total, size_t speed)
 					{
-						event event;
-						event.element = &ui_element;
-						event.name = "http_request_done";
-
-						if (result.has_value())
+						const auto now = std::chrono::high_resolution_clock::now();
+						if (now - last_report < 100ms && progress < total)
 						{
-							const auto write = utils::io::write_file(dest, result.value(), false);
+							return;
+						}
+
+						last_report = now;
+
+						::scheduler::once([id, progress, total, speed]
+						{
+							event event;
+							event.name = "http_request_progress";
+							event.arguments = {
+								id, 
+								static_cast<int>(progress), 
+								static_cast<int>(total), 
+								static_cast<int>(speed)
+							};
+
+							notify(event);
+						}, ::scheduler::pipeline::lui);
+					});
+
+					if (result.has_value())
+					{
+						const auto write = utils::io::write_file(dest, result.value(), false);
+						::scheduler::once([result, id, write]()
+						{
+							event event;
+							event.name = "http_request_done";
 							event.arguments = {id, true, write};
-						}
-						else
-						{
-							event.arguments = {id, false};
-						}
 
-						notify(event);
-					}, ::scheduler::pipeline::renderer);
+							notify(event);
+						}, ::scheduler::pipeline::lui);
+					}
+					else
+					{
+						::scheduler::once([result, id]()
+						{
+							event event;
+							event.name = "http_request_done";
+							event.arguments = {id, false};
+
+							notify(event);
+						}, ::scheduler::pipeline::lui);
+					}
 				}, ::scheduler::pipeline::async);
 				return id;
 			};
@@ -1243,31 +601,6 @@ namespace ui_scripting::lua
 				}
 			);
 
-			for (const auto method : methods)
-			{
-				const auto name = method.first;
-
-				userdata_type[name] = [name](const userdata& userdata, const sol::this_state s, sol::variadic_args va)
-				{
-					arguments arguments{};
-
-					for (auto arg : va)
-					{
-						arguments.push_back(convert({s, arg}));
-					}
-
-					const auto values = call_method(userdata, name, arguments);
-					std::vector<sol::lua_value> returns;
-
-					for (const auto& value : values)
-					{
-						returns.push_back(convert(s, value));
-					}
-
-					return sol::as_returns(returns);
-				};
-			}
-
 			userdata_type[sol::meta_function::index] = [](const userdata& userdata, const sol::this_state s, 
 				const std::string& name)
 			{
@@ -1344,8 +677,6 @@ namespace ui_scripting::lua
 			state["LUI"] = state["luiglobals"]["LUI"];
 			state["Engine"] = state["luiglobals"]["Engine"];
 			state["Game"] = state["luiglobals"]["Game"];
-
-			state.script(animation_script);
 		}
 	}
 
@@ -1365,8 +696,6 @@ namespace ui_scripting::lua
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
-		setup_element_type(this->state_, this->event_handler_, this->scheduler_);
-		setup_menu_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
 

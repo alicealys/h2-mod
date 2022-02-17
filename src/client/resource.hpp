@@ -17,10 +17,8 @@
 #define MENU_MAIN             310
 
 #define TLS_DLL               311
-#define RUNNER                312
 
-#define ICON_IMAGE            313
+#define ICON_IMAGE            312
 
-#define LUA_ANIMATION_SCRIPT  314
-#define LUA_JSON_SCRIPT       315
-#define LUI_UPDATER_MENU      316
+#define LUA_JSON_SCRIPT       313
+#define LUI_UPDATER_MENU      314

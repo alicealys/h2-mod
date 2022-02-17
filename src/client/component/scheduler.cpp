@@ -97,6 +97,11 @@ namespace scheduler
 		void r_end_frame_stub()
 		{
 			execute(pipeline::renderer);
+			if (game::Sys_IsMainThread())
+			{
+				execute(pipeline::lui);
+			}
+
 			r_end_frame_hook.invoke<void>();
 		}
 

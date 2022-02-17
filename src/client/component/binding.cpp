@@ -5,6 +5,8 @@
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
 
+#define ORIGINAL_BIND_COUNT 110
+
 namespace binding
 {
 	namespace
@@ -24,7 +26,7 @@ namespace binding
 				const auto* const key_button = game::Key_KeynumToString(key_index, 0, 1);
 				auto value = game::playerKeys->keys[key_index].binding;
 
-				if (value && value < 100)
+				if (value && value < ORIGINAL_BIND_COUNT)
 				{
 					const auto len = sprintf_s(&buffer[bytes_used], (buffer_size_align - bytes_used),
 					                           "bind %s \"%s\"\n", key_button, game::command_whitelist[value]);
@@ -36,9 +38,9 @@ namespace binding
 
 					bytes_used += len;
 				}
-				else if (value >= 100)
+				else if (value >= ORIGINAL_BIND_COUNT)
 				{
-					value -= 100;
+					value -= ORIGINAL_BIND_COUNT;
 					if (static_cast<size_t>(value) < custom_binds.size() && !custom_binds[value].empty())
 					{
 						const auto len = sprintf_s(&buffer[bytes_used], (buffer_size_align - bytes_used),
@@ -80,7 +82,7 @@ namespace binding
 		int key_get_binding_for_cmd_stub(const char* command)
 		{
 			// original binds
-			for (auto i = 0; i <= 100; i++)
+			for (auto i = 0; i <= ORIGINAL_BIND_COUNT; i++)
 			{
 				if (game::command_whitelist[i] && !strcmp(command, game::command_whitelist[i]))
 				{
@@ -89,14 +91,14 @@ namespace binding
 			}
 
 			// custom binds
-			return 100 + get_binding_for_custom_command(command);
+			return ORIGINAL_BIND_COUNT + get_binding_for_custom_command(command);
 		}
 
 		void cl_execute_key_stub(const int local_client_num, int key, const int down, const unsigned int time)
 		{
-			if (key >= 100)
+			if (key >= ORIGINAL_BIND_COUNT)
 			{
-				key -= 100;
+				key -= ORIGINAL_BIND_COUNT;
 
 				if (static_cast<size_t>(key) < custom_binds.size() && !custom_binds[key].empty())
 				{

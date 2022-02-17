@@ -10,19 +10,25 @@ namespace utils::http
 	{
 		struct progress_helper
 		{
-			const std::function<void(size_t)>* callback{};
+			const std::function<void(size_t, size_t, size_t)>* callback{};
 			std::exception_ptr exception{};
+			std::chrono::high_resolution_clock::time_point start{};
 		};
 
-		int progress_callback(void *clientp, const curl_off_t /*dltotal*/, const curl_off_t dlnow, const curl_off_t /*ultotal*/, const curl_off_t /*ulnow*/)
+		int progress_callback(void *clientp, const curl_off_t dltotal, const curl_off_t dlnow, const curl_off_t /*ultotal*/, const curl_off_t /*ulnow*/)
 		{
 			auto* helper = static_cast<progress_helper*>(clientp);
 
 			try
 			{
+				const auto now = std::chrono::high_resolution_clock::now();
+				const auto count = std::chrono::duration_cast<
+					std::chrono::milliseconds>(now - helper->start).count();
+				const auto speed = dlnow / count;
+
 				if (*helper->callback)
 				{
-					(*helper->callback)(dlnow);
+					(*helper->callback)(dlnow, dltotal, speed);
 				}
 			}
 			catch(...)
@@ -44,7 +50,8 @@ namespace utils::http
 		}
 	}
 
-	std::optional<std::string> get_data(const std::string& url, const headers& headers, const std::function<void(size_t)>& callback)
+	std::optional<std::string> get_data(const std::string& url, const headers& headers, 
+		const std::function<void(size_t, size_t, size_t)>& callback)
 	{
 		curl_slist* header_list = nullptr;
 		auto* curl = curl_easy_init();
@@ -68,6 +75,7 @@ namespace utils::http
 		std::string buffer{};
 		progress_helper helper{};
 		helper.callback = &callback;
+		helper.start = std::chrono::high_resolution_clock::now();
 		
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 		curl_easy_setopt(curl, CURLOPT_URL, url.data());
@@ -82,7 +90,7 @@ namespace utils::http
 			return {std::move(buffer)};
 		}
 
-		if(helper.exception)
+		if (helper.exception)
 		{
 			std::rethrow_exception(helper.exception);
 		}
