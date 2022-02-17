@@ -37,14 +37,22 @@ namespace patches
 			gscr_set_save_dvar_hook.invoke<void>();
 		}
 
+		game::dvar_t* cg_fov = nullptr;
+		game::dvar_t* cg_fovScale = nullptr;
+
 		game::dvar_t* dvar_register_float_stub(int hash, const char* dvarName, float value, float min, float max, unsigned int flags)
 		{
 			static const auto cg_fov_hash = game::generateHashValue("cg_fov");
 			static const auto cg_fov_scale_hash = game::generateHashValue("cg_fovscale");
 
-			if (hash == cg_fov_hash || hash == cg_fov_scale_hash)
+			if (hash == cg_fov_hash)
 			{
-				flags = game::DvarFlags::DVAR_FLAG_SAVED;
+				return cg_fov;
+			}
+
+			if (hash == cg_fov_scale_hash)
+			{
+				return cg_fovScale;
 			}
 
 			return dvar_register_float_hook.invoke<game::dvar_t*>(hash, dvarName, value, min, max, flags);
@@ -75,7 +83,12 @@ namespace patches
 
 			// Prevent game from overriding cg_fov and cg_fovscale values
 			gscr_set_save_dvar_hook.create(0x504C60_b, &gscr_set_save_dvar_stub);
+
 			// Make cg_fov and cg_fovscale saved dvars
+
+			cg_fov = dvars::register_float("cg_fov", 65.f, 40.f, 200.f, game::DvarFlags::DVAR_FLAG_SAVED);
+			cg_fovScale = dvars::register_float("cg_fovScale", 1.f, 0.1f, 2.f, game::DvarFlags::DVAR_FLAG_SAVED);
+
 			dvar_register_float_hook.create(game::Dvar_RegisterFloat.get(), dvar_register_float_stub);
 		}
 	};
