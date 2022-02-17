@@ -248,25 +248,23 @@ end
 
 flags {"NoIncrementalLink", "NoMinimalRebuild", "MultiProcessorCompile", "No64BitChecks"}
 
+filter "platforms:x64"
+	defines {"_WINDOWS", "WIN32"}
+filter {}
 
-configuration "windows"
-defines {"_WINDOWS", "WIN32"}
+filter "configurations:Release"
+	optimize "Size"
+	buildoptions {"/GL"}
+	linkoptions { "/IGNORE:4702", "/LTCG" }
+	defines {"NDEBUG"}
+	flags {"FatalCompileWarnings"}
+filter {}
 
-configuration "Release"
-optimize "Size"
-buildoptions {"/GL"}
-linkoptions { "/IGNORE:4702", "/LTCG" }
-
-defines {"NDEBUG"}
-
-flags {"FatalCompileWarnings"}
-
-configuration "Debug"
-optimize "Debug"
-buildoptions {"/bigobj"}
-defines {"DEBUG", "_DEBUG"}
-
-configuration {}
+filter "configurations:Debug"
+	optimize "Debug"
+	buildoptions {"/bigobj"}
+	defines {"DEBUG", "_DEBUG"}
+filter {}
 
 project "common"
 kind "StaticLib"
