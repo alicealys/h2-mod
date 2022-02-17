@@ -42,7 +42,7 @@ liable for misuse of the software. Use responsibly.
 
 ## Credits
 
-This project is based on [iw6x](https://github.com/XLabsProject/iw6x-client) and [s1x](https://github.com/XLabsProject/s1x-client)
+This project is based on [IW6x](https://github.com/XLabsProject/iw6x-client) and [S1x](https://github.com/XLabsProject/s1x-client)
 * [momo5502](https://github.com/momo5502)
 * [JariKCoding](https://github.com/JariKCoding/CoDLuaDecompiler)
 * [xensik](https://github.com/xensik/gsc-tool/)
