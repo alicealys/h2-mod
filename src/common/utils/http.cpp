@@ -1,8 +1,13 @@
 #include "http.hpp"
+#include <algorithm>
 #include <curl/curl.h>
 #include <gsl/gsl>
 
 #pragma comment(lib, "ws2_32.lib")
+
+#ifdef max
+#undef max
+#endif
 
 namespace utils::http
 {
@@ -22,8 +27,8 @@ namespace utils::http
 			try
 			{
 				const auto now = std::chrono::high_resolution_clock::now();
-				const auto count = std::chrono::duration_cast<
-					std::chrono::milliseconds>(now - helper->start).count();
+				const auto count = std::max(1, static_cast<int>(std::chrono::duration_cast<
+					std::chrono::seconds>(now - helper->start).count()));
 				const auto speed = dlnow / count;
 
 				if (*helper->callback)
