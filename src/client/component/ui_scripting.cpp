@@ -27,6 +27,7 @@ namespace ui_scripting
 		utils::hook::detour hksi_lual_error_hook2;
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
+		utils::hook::detour hks_allocator_hook;
 
 		bool error_hook_enabled = false;
 
@@ -65,6 +66,17 @@ namespace ui_scripting
 		{
 			ui_scripting::lua::engine::stop();
 			hks_shutdown_hook.invoke<void*>();
+		}
+
+		void* hks_allocator_stub(void* userData, void* oldMemory, unsigned __int64 oldSize, unsigned __int64 newSize)
+		{
+			const auto closure = reinterpret_cast<game::hks::cclosure*>(oldMemory);
+			if (converted_functions.find(closure) != converted_functions.end())
+			{
+				converted_functions.erase(closure);
+			}
+
+			return hks_allocator_hook.invoke<void*>(userData, oldMemory, oldSize, newSize);
 		}
 	}
 
@@ -137,11 +149,11 @@ namespace ui_scripting
 		void post_unpack() override
 		{
 			scheduler::loop(ui_scripting::lua::engine::run_frame, scheduler::pipeline::lui);
-
 			hks_start_hook.create(0x328BE0_b, hks_start_stub);
 			hks_shutdown_hook.create(0x3203B0_b, hks_shutdown_stub);
 			hksi_lual_error_hook.create(0x2E3E40_b, hksi_lual_error_stub);
 			hksi_lual_error_hook2.create(0x2DCB40_b, hksi_lual_error_stub);
+			hks_allocator_hook.create(0x2D92A0_b, hks_allocator_stub);
 		}
 	};
 }
