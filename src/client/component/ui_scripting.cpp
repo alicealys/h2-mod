@@ -28,6 +28,8 @@ namespace ui_scripting
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
 		utils::hook::detour hks_allocator_hook;
+		utils::hook::detour lui_error_hook;
+		utils::hook::detour hksi_hks_error_hook;
 
 		bool error_hook_enabled = false;
 
@@ -46,10 +48,37 @@ namespace ui_scripting
 			{
 				return hksi_lual_error_hook.invoke<void>(s, formatted.data());
 			}
-			else
+
+			throw std::runtime_error(formatted);
+		}
+
+		void hksi_hks_error_stub(game::hks::lua_State* s, int a2)
+		{
+			if (!error_hook_enabled)
 			{
-				throw std::runtime_error(formatted);
+				return hksi_hks_error_hook.invoke<void>(s, a2);
 			}
+
+			throw std::runtime_error("unknown error");
+		}
+
+		void lui_error_stub(game::hks::lua_State* s)
+		{
+			if (!error_hook_enabled)
+			{
+				return lui_error_hook.invoke<void>(s);
+			}
+
+			const auto count = static_cast<int>(s->m_apistack.top - s->m_apistack.base);
+			const auto arguments = get_return_values(count);
+
+			std::string error_str = "LUI Error";
+			if (count && arguments[0].is<std::string>())
+			{
+				error_str = arguments[0].as<std::string>();
+			}
+
+			throw std::runtime_error(error_str);
 		}
 
 		void* hks_start_stub(char a1)
@@ -154,6 +183,8 @@ namespace ui_scripting
 			hksi_lual_error_hook.create(0x2E3E40_b, hksi_lual_error_stub);
 			hksi_lual_error_hook2.create(0x2DCB40_b, hksi_lual_error_stub);
 			hks_allocator_hook.create(0x2D92A0_b, hks_allocator_stub);
+			lui_error_hook.create(0x2B9D90_b, lui_error_stub);
+			hksi_hks_error_hook.create(0x2DBC00_b, hksi_hks_error_stub);
 		}
 	};
 }
