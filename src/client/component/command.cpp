@@ -333,8 +333,7 @@ namespace command
 					}
 					else if (arg == "health"s)
 					{
-
-						if (params.size() > 3)
+						if (params.size() > 2)
 						{
 							const auto amount = atoi(params.get(2));
 							const auto health = player.get("health").as<int>();
