@@ -142,10 +142,10 @@ namespace logger
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x32C620_b, print_warning, true);
-			utils::hook::jump(0x32C630_b, print_warning, true);
-			utils::hook::jump(0x32AEF0_b, lui_print, true);
-			com_error_hook.create(0x5A2D80_b, com_error_stub);
+			utils::hook::jump(0x14032C620, print_warning, true);
+			utils::hook::jump(0x14032C630, print_warning, true);
+			utils::hook::jump(0x14032AEF0, lui_print, true);
+			com_error_hook.create(0x1405A2D80, com_error_stub);
 		}
 	};
 }

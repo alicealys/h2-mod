@@ -303,7 +303,7 @@ namespace fps
 		{
 			scheduler::loop(draw, scheduler::pipeline::renderer);
 
-			sub_7C55D0_hook.create(0x7C55D0_b, perf_update);
+			sub_7C55D0_hook.create(0x1407C55D0, perf_update);
 
 			cg_drawSpeed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED);
 			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED);

@@ -94,7 +94,7 @@ namespace notifies
 			a.inc(r14);
 			a.mov(dword_ptr(rbp, 0xA4), r15d);
 
-			a.jmp(0x5C90B3_b);
+			a.jmp(0x1405C90B3);
 
 			a.bind(replace);
 
@@ -137,7 +137,7 @@ namespace notifies
 
 		std::string convert_mod(const int meansOfDeath)
 		{
-			const auto value = reinterpret_cast<game::scr_string_t**>(0xBF49B0_b)[meansOfDeath];
+			const auto value = reinterpret_cast<game::scr_string_t**>(0x140BF49B0)[meansOfDeath];
 			const auto string = game::SL_ConvertToString(*value);
 
 			return string;
@@ -147,7 +147,7 @@ namespace notifies
 			int damage, int dflags, const unsigned int hitLoc, const unsigned int weapon, bool isAlternate, unsigned int a11, const int meansOfDeath, unsigned int a13, unsigned int a14)
 		{
 			{
-				const std::string _hitLoc = reinterpret_cast<const char**>(0xBF4AA0_b)[hitLoc];
+				const std::string _hitLoc = reinterpret_cast<const char**>(0x140BF4AA0)[hitLoc];
 				const auto _mod = convert_mod(meansOfDeath);
 				const auto _weapon = get_weapon_name(weapon, isAlternate);
 
@@ -199,9 +199,9 @@ namespace notifies
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x5C90A5_b, utils::hook::assemble(vm_execute_stub), true);
+			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
 
-			scr_entity_damage_hook.create(0x4BD2E0_b, scr_entity_damage_stub);
+			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
 		}
 	};
 }

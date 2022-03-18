@@ -116,19 +116,19 @@ namespace scripting
 	public:
 		void post_unpack() override
 		{
-			vm_notify_hook.create(0x5CC450_b, vm_notify_stub);
+			vm_notify_hook.create(0x1405CC450, vm_notify_stub);
 
-			g_shutdown_game_hook.create(0x4CBAD0_b, g_shutdown_game_stub);
-			player_spawn_hook.create(0x4B0710_b, player_spawn_stub);
+			g_shutdown_game_hook.create(0x1404CBAD0, g_shutdown_game_stub);
+			player_spawn_hook.create(0x1404B0710, player_spawn_stub);
 
-			scr_add_class_field_hook.create(0x5C2C30_b, scr_add_class_field_stub);
-			scr_set_thread_position_hook.create(0x5BC7E0_b, scr_set_thread_position_stub);
-			process_script_hook.create(0x5C6160_b, process_script_stub);
+			scr_add_class_field_hook.create(0x1405C2C30, scr_add_class_field_stub);
+			scr_set_thread_position_hook.create(0x1405BC7E0, scr_set_thread_position_stub);
+			process_script_hook.create(0x1405C6160, process_script_stub);
 
 			// Loading last checkpoint doesn't call spawn player again (player_spawn_hook)
 			// Not sure what this function does but `a1` is != nullptr when loading
 			// the last checkpoint so we need to start lua in this context
-			sub_6B2940_hook.create(0x6B2940_b, sub_6B2940_stub);
+			sub_6B2940_hook.create(0x1406B2940, sub_6B2940_stub);
 
 			scheduler::loop([]()
 			{

@@ -118,13 +118,13 @@ namespace binding
 		void post_unpack() override
 		{
 			// write all bindings to config file
-			key_write_bindings_to_buffer_hook.create(0x3D3840_b, key_write_bindings_to_buffer_stub);
+			key_write_bindings_to_buffer_hook.create(0x1403D3840, key_write_bindings_to_buffer_stub);
 
 			// links a custom command to an index
-			utils::hook::jump(0x59AE30_b, key_get_binding_for_cmd_stub, true);
+			utils::hook::jump(0x14059AE30, key_get_binding_for_cmd_stub, true);
 
 			// execute custom binds
-			cl_execute_key_hook.create(0x3CF1E0_b, &cl_execute_key_stub);
+			cl_execute_key_hook.create(0x1403CF1E0, &cl_execute_key_stub);
 		}
 	};
 }

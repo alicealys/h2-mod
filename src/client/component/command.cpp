@@ -148,7 +148,7 @@ namespace command
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x5A74F0_b, dvar_command_stub, true);
+			utils::hook::jump(0x1405A74F0, dvar_command_stub, true);
 
 			add("quit", game::Quit);
 
@@ -156,7 +156,7 @@ namespace command
 			{
 				const auto map = params.get(1);
 
-				const auto exists = utils::hook::invoke<bool>(0x412B50_b, map, 0);
+				const auto exists = utils::hook::invoke<bool>(0x140412B50, map, 0);
 
 				if (!exists)
 				{
@@ -165,7 +165,7 @@ namespace command
 				}
 
 				// SV_SpawnServer
-				utils::hook::invoke<void>(0x6B3AA0_b, map, 0, 0, 0, 0);
+				utils::hook::invoke<void>(0x1406B3AA0, map, 0, 0, 0, 0);
 			});
 
 			add("say", [](const params& params)
@@ -205,11 +205,6 @@ namespace command
 						game_console::print(game_console::con_type_info, "%s\n", asset_name);
 					}, true);
 				}
-			});
-
-			add("baseAddress", []()
-			{
-				printf("%p\n", (void*)game::base_address);
 			});
 
 			add("commandDump", []()

@@ -39,7 +39,7 @@ launcher::mode detect_mode_from_arguments()
 	return launcher::mode::none;
 }
 
-FARPROC load_binary(const launcher::mode mode, uint64_t* base_address)
+FARPROC load_binary(const launcher::mode mode)
 {
 	loader loader;
 	utils::nt::library self;
@@ -87,7 +87,7 @@ FARPROC load_binary(const launcher::mode mode, uint64_t* base_address)
 			binary.data()));
 	}
 
-	return loader.load_library(binary, base_address);
+	return loader.load(self, data);
 }
 
 void remove_crash_file()
@@ -97,7 +97,7 @@ void remove_crash_file()
 
 void verify_version()
 {
-	const auto value = *reinterpret_cast<DWORD*>(0x123456_b);
+	const auto value = *reinterpret_cast<DWORD*>(0x140123456);
 	if (value != 0xE465E151)
 	{
 		throw std::runtime_error("Unsupported Call of Duty: Modern Warfare 2 Campaign Remastered version");
@@ -184,14 +184,12 @@ int main()
 
 			game::environment::set_mode(mode);
 
-			uint64_t base_address{};
-			entry_point = load_binary(mode, &base_address);
+			entry_point = load_binary(mode);
 			if (!entry_point)
 			{
 				throw std::runtime_error("Unable to load binary into memory");
 			}
 
-			game::base_address = base_address;
 			verify_version();
 
 			if (!component_loader::post_load())

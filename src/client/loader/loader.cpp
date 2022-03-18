@@ -31,16 +31,13 @@ FARPROC loader::load(const utils::nt::library& library, const std::string& buffe
 	return FARPROC(library.get_ptr() + source.get_relative_entry_point());
 }
 
-FARPROC loader::load_library(const std::string& filename, uint64_t* base_address) const
+FARPROC loader::load_library(const std::string& filename) const
 {
 	const auto target = utils::nt::library::load(filename);
 	if (!target)
 	{
 		throw std::runtime_error{"Failed to map binary!"};
 	}
-
-	const auto base = size_t(target.get_ptr());
-	*base_address = base;
 
 	this->load_imports(target, target);
 	this->load_tls(target, target);

@@ -1,6 +1,13 @@
 #include <std_include.hpp>
 
-#pragma comment(linker, "/base:0x7FFF00000000")
+#pragma comment(linker, "/merge:.data=.cld")
+#pragma comment(linker, "/merge:.rdata=.clr")
+#pragma comment(linker, "/merge:.cl=.main")
+#pragma comment(linker, "/merge:.text=.main")
+#pragma comment(linker, "/stack:0x1000000")
+#pragma comment(linker, "/base:0x140000000")
+#pragma bss_seg(".payload")
+char payload_data[BINARY_PAYLOAD_SIZE];
 
 extern "C"
 {
