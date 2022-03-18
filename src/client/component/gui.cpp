@@ -208,7 +208,7 @@ namespace gui
 			a.call_aligned(rbx);
 			a.mov(ecx, eax);
 
-			a.jmp(0x7A14D1_b);
+			a.jmp(0x1407A14D1);
 		}
 
 		utils::hook::detour wnd_proc_hook;
@@ -301,8 +301,8 @@ namespace gui
 
 		void post_unpack() override
 		{
-			utils::hook::jump(0x7A14C4_b, utils::hook::assemble(dxgi_swap_chain_present_stub), true);
-			wnd_proc_hook.create(0x650F10_b, wnd_proc_stub);
+			utils::hook::jump(0x1407A14C4, utils::hook::assemble(dxgi_swap_chain_present_stub), true);
+			wnd_proc_hook.create(0x140650F10, wnd_proc_stub);
 
 			on_frame([]()
 			{

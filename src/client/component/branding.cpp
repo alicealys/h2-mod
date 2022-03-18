@@ -45,7 +45,7 @@ namespace branding
 			localized_strings::override("MENU_SYSINFO_DONATION_LINK", "Donation Link:");
 			localized_strings::override("MENU_SYSINFO_DONATION_URL", "https://paypal.me/fedecek");
 
-			utils::hook::jump(0x33D550_b, get_build_number_stub, true);
+			utils::hook::jump(0x14033D550, get_build_number_stub, true);
 		}
 	};
 }

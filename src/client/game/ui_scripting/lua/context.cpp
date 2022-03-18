@@ -360,7 +360,7 @@ namespace ui_scripting::lua
 			game_type["playmenuvideo"] = [](const game&, const std::string& video)
 			{
 				reinterpret_cast<void (*)(const char* a1, int a2, int a3)>
-					(0x71B970_b)(video.data(), 64, 0);
+					(0x14071B970)(video.data(), 64, 0);
 			};
 
 			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)

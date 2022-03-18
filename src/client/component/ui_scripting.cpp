@@ -178,13 +178,13 @@ namespace ui_scripting
 		void post_unpack() override
 		{
 			scheduler::loop(ui_scripting::lua::engine::run_frame, scheduler::pipeline::lui);
-			hks_start_hook.create(0x328BE0_b, hks_start_stub);
-			hks_shutdown_hook.create(0x3203B0_b, hks_shutdown_stub);
-			hksi_lual_error_hook.create(0x2E3E40_b, hksi_lual_error_stub);
-			hksi_lual_error_hook2.create(0x2DCB40_b, hksi_lual_error_stub);
-			hks_allocator_hook.create(0x2D92A0_b, hks_allocator_stub);
-			lui_error_hook.create(0x2B9D90_b, lui_error_stub);
-			hksi_hks_error_hook.create(0x2DBC00_b, hksi_hks_error_stub);
+			hks_start_hook.create(0x140328BE0, hks_start_stub);
+			hks_shutdown_hook.create(0x1403203B0, hks_shutdown_stub);
+			hksi_lual_error_hook.create(0x1402E3E40, hksi_lual_error_stub);
+			hksi_lual_error_hook2.create(0x1402DCB40, hksi_lual_error_stub);
+			hks_allocator_hook.create(0x1402D92A0, hks_allocator_stub);
+			lui_error_hook.create(0x1402B9D90, lui_error_stub);
+			hksi_hks_error_hook.create(0x1402DBC00, hksi_hks_error_stub);
 		}
 	};
 }

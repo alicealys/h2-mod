@@ -74,9 +74,9 @@ namespace input
 	public:
 		void post_unpack() override
 		{
-			cl_char_event_hook.create(0x3D27B0_b, cl_char_event_stub);
-			cl_key_event_hook.create(0x3D2AE0_b, cl_key_event_stub);
-			cl_mouse_move_hook.create(0x3296F0_b, cl_mouse_move_stub);
+			cl_char_event_hook.create(0x1403D27B0, cl_char_event_stub);
+			cl_key_event_hook.create(0x1403D2AE0, cl_key_event_stub);
+			cl_mouse_move_hook.create(0x1403296F0, cl_mouse_move_stub);
 		}
 	};
 }

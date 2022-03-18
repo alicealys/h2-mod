@@ -5,9 +5,6 @@
 
 namespace game
 {
-	extern uint64_t base_address;
-	void load_base_address();
-
 	extern std::string mod_folder;
 
 	namespace environment
@@ -35,7 +32,7 @@ namespace game
 
 		T* get() const
 		{
-			return reinterpret_cast<T*>((uint64_t)address_ + base_address);
+			return reinterpret_cast<T*>(address_);
 		}
 
 		operator T* () const
@@ -52,7 +49,5 @@ namespace game
 		T* address_;
 	};
 }
-
-uintptr_t operator"" _b(const uintptr_t ptr);
 
 #include "symbols.hpp"
