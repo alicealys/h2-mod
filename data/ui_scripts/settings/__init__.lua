@@ -1,4 +1,4 @@
-game:addlocalizedstring("MENU_GENERAL", "General")
+game:addlocalizedstring("MENU_GENERAL", "GENERAL")
 game:addlocalizedstring("MENU_GENERAL_DESC", "Set the client's settings.")
 game:addlocalizedstring("LUA_MENU_AUTO_UPDATE", "Automatic updates")
 game:addlocalizedstring("LUA_MENU_CHECK_UPDATES", "Check for updates")
@@ -46,7 +46,7 @@ end
 LUI.addmenubutton("pc_controls", {
     index = 4,
     text = "@MENU_GENERAL",
-    description = "@MENU_GENERAL_DESC",
+    description = Engine.Localize("@MENU_GENERAL_DESC"),
     callback = function()
         LUI.FlowManager.RequestAddMenu(nil, "settings_menu")
     end
