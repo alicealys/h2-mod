@@ -352,7 +352,7 @@ namespace updater
 		if (!is_update_check_done() || !get_update_check_status() || is_update_cancelled())
 		{
 			return;
-		}//
+		}
 
 		scheduler::once([]()
 		{

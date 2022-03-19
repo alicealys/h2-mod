@@ -74,7 +74,7 @@ namespace ui_scripting::lua::engine
 		get_scripts().clear();
 
 		load_code(lui_common);
-		// load_code(lui_updater);
+		load_code(lui_updater);
 
 		for (const auto& path : filesystem::get_search_paths())
 		{
