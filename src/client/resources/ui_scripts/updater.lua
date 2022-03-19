@@ -89,11 +89,7 @@ function startupdatedownload(popup, autoclose)
                 end
             })
         else
-            if (LUI.mp_menus) then
-                Engine.Exec("lui_restart; lui_open mp_main_menu")
-            else
-                Engine.Exec("lui_restart")
-            end
+            Engine.Exec("lui_restart")
         end
 
         if (autoclose) then
@@ -160,5 +156,5 @@ function tryautoupdate()
     end
 end
 
-LUI.onmenuopen("mp_main_menu", tryautoupdate)
+LUI.tryupdating = tryupdate
 LUI.onmenuopen("main_lockout", tryautoupdate)
