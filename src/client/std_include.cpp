@@ -17,6 +17,12 @@ extern "C"
 
 extern "C"
 {
+	// workaround for release build removing 'payload_data'
+	char* dont_remove_this()
+	{
+		return payload_data;
+	}
+
 	int s_read_arc4random(void*, size_t)
 	{
 		return -1;
