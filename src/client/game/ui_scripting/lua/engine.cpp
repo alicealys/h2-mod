@@ -14,7 +14,8 @@ namespace ui_scripting::lua::engine
 {
 	namespace
 	{
-		const auto updater_script = utils::nt::load_resource(LUI_UPDATER_MENU);
+		const auto lui_common = utils::nt::load_resource(LUI_COMMON);
+		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 
 		void handle_key_event(const int key, const int down)
 		{
@@ -72,7 +73,8 @@ namespace ui_scripting::lua::engine
 		clear_converted_functions();
 		get_scripts().clear();
 
-		load_code(updater_script);
+		load_code(lui_common);
+		// load_code(lui_updater);
 
 		for (const auto& path : filesystem::get_search_paths())
 		{
