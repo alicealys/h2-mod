@@ -4,6 +4,7 @@
 
 #include "../../../component/scheduler.hpp"
 #include "../../../component/ui_scripting.hpp"
+#include "../../../component/filesystem.hpp"
 
 #include <utils/io.hpp>
 #include <utils/string.hpp>
@@ -73,13 +74,9 @@ namespace ui_scripting::lua::engine
 
 		load_code(updater_script);
 
-		load_scripts("ui_scripts/");
-		load_scripts("h2-mod/ui_scripts/");
-		load_scripts("data/ui_scripts/");
-
-		if (!game::mod_folder.empty())
+		for (const auto& path : filesystem::get_search_paths())
 		{
-			load_scripts(utils::string::va("%s/ui_scripts/", game::mod_folder.data()));
+			load_scripts(path + "/ui_scripts/");
 		}
 	}
 
