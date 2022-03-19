@@ -27,7 +27,9 @@ namespace game
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x14059ABA0};
 
 	WEAK symbol<void(errorParm code, const char* message, ...)> Com_Error{0x1405A2D80};
+	WEAK symbol<void(char const* finalMessage)> Com_Shutdown{0x1405A62C0};
 	WEAK symbol<void()> Com_Quit_f{0x1405A50D0};
+	WEAK symbol<bool()> Com_InFrontend{0x140328BD0};
 	WEAK symbol<void()> Quit{0x1405A52A0};
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
@@ -117,6 +119,7 @@ namespace game
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x140746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x1407472A0};
 	WEAK symbol<void()> R_SyncRenderThread{0x14076E7D0};
+	WEAK symbol<void()> R_WaitWorkerCmds{0x140794330};
 	WEAK symbol<void(const void* obj, void* pose, unsigned int entnum, unsigned int renderFxFlags, float* lightingOrigin, 
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x140775C40};
 

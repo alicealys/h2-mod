@@ -1,8 +1,11 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
-#include "game/game.hpp"
+
 #include "images.hpp"
 #include "game_console.hpp"
+#include "filesystem.hpp"
+
+#include "game/game.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -29,7 +32,7 @@ namespace images
 				}
 			});
 
-			if (data.empty() && !utils::io::read_file(utils::string::va("images/%s.png", image->name), &data))
+			if (data.empty() && !filesystem::read_file(utils::string::va("images/%s.png", image->name), &data))
 			{
 				return {};
 			}
