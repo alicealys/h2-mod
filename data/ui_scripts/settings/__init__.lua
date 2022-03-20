@@ -63,7 +63,7 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
 
     LUI.Options.CreateOptionButton(
         menu, 
-        "cg_autoUpdate", 
+        "cg_auto_update", 
         "@LUA_MENU_AUTO_UPDATE", 
         "Enable or disable automatic updates on startup.", 
         {
