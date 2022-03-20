@@ -19,10 +19,16 @@ namespace mods
 	{
 		utils::hook::detour db_release_xassets_hook;
 
+		bool release_assets = false;
+
 		void db_release_xassets_stub()
 		{
-			materials::clear();
-			fonts::clear();
+			if (release_assets)
+			{
+				materials::clear();
+				fonts::clear();
+			}
+
 			db_release_xassets_hook.invoke<void>();
 		}
 
@@ -30,7 +36,9 @@ namespace mods
 		{
 			scheduler::once([]()
 			{
+				release_assets = true;
 				game::Com_Shutdown("");
+				release_assets = false;
 			}, scheduler::pipeline::main);
 		}
 	}
