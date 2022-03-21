@@ -3,8 +3,6 @@
 
 namespace game
 {
-	std::string mod_folder{};
-
 	namespace environment
 	{
 		launcher::mode mode = launcher::mode::none;

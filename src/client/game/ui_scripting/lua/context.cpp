@@ -12,6 +12,7 @@
 #include "../../../component/fastfiles.hpp"
 #include "../../../component/updater.hpp"
 #include "../../../component/localized_strings.hpp"
+#include "../../../component/mods.hpp"
 
 #include "component/game_console.hpp"
 #include "component/scheduler.hpp"
@@ -434,7 +435,7 @@ namespace ui_scripting::lua
 
 			game_type["getloadedmod"] = [](const game&)
 			{
-				return ::game::mod_folder;
+				return mods::mod_path;
 			};
 
 			game_type["addlocalizedstring"] = [](const game&, const std::string& string,

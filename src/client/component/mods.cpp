@@ -9,16 +9,18 @@
 #include "filesystem.hpp"
 #include "materials.hpp"
 #include "fonts.hpp"
+#include "mods.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
 
 namespace mods
 {
+	std::string mod_path{};
+
 	namespace
 	{
 		utils::hook::detour db_release_xassets_hook;
-
 		bool release_assets = false;
 
 		void db_release_xassets_stub()
@@ -71,22 +73,22 @@ namespace mods
 				}
 
 				const auto path = params.get(1);
-				game_console::print(game_console::con_type_info, "Loading mod %s\n", path);
-
 				if (!utils::io::directory_exists(path))
 				{
 					game_console::print(game_console::con_type_error, "Mod %s not found!\n", path);
 					return;
 				}
 
+				game_console::print(game_console::con_type_info, "Loading mod %s\n", path);
+				filesystem::get_search_paths().erase(mod_path);
 				filesystem::get_search_paths().insert(path);
-				game::mod_folder = path;
+				mod_path = path;
 				restart();
 			});
 
 			command::add("unloadmod", [](const command::params& params)
 			{
-				if (game::mod_folder.empty())
+				if (mod_path.empty())
 				{
 					game_console::print(game_console::con_type_info, "No mod loaded\n");
 					return;
@@ -99,9 +101,9 @@ namespace mods
 					return;
 				}
 
-				game_console::print(game_console::con_type_info, "Unloading mod %s\n", game::mod_folder.data());
-				filesystem::get_search_paths().erase(game::mod_folder);
-				game::mod_folder.clear();
+				game_console::print(game_console::con_type_info, "Unloading mod %s\n", mod_path.data());
+				filesystem::get_search_paths().erase(mod_path);
+				mod_path.clear();
 				restart();
 			});
 		}
