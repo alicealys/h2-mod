@@ -5,8 +5,6 @@
 
 namespace game
 {
-	extern std::string mod_folder;
-
 	namespace environment
 	{
 		launcher::mode get_mode();
