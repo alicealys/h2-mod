@@ -27,6 +27,8 @@ namespace ui_scripting::lua
 {
 	namespace
 	{
+		const auto json_script = utils::nt::load_resource(LUA_JSON);
+
 		scripting::script_value script_convert(const sol::lua_value& value)
 		{
 			if (value.is<int>())
@@ -93,6 +95,13 @@ namespace ui_scripting::lua
 			state["io"]["removefile"] = utils::io::remove_file;
 			state["io"]["removedirectory"] = utils::io::remove_directory;
 			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+		}
+
+		void setup_json(sol::state& state)
+		{
+			const auto json = state.safe_script(json_script, &sol::script_pass_on_error);
+			handle_error(json);
+			state["json"] = json;
 		}
 
 		void setup_vector_type(sol::state& state)
@@ -600,6 +609,7 @@ namespace ui_scripting::lua
 		                            sol::lib::table);
 
 		setup_io(this->state_);
+		setup_json(this->state_);
 		setup_vector_type(this->state_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);

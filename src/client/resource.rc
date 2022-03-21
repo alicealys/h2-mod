@@ -100,6 +100,8 @@ MENU_MAIN             RCDATA "resources/main.html"
 LUI_COMMON            RCDATA "resources/ui_scripts/common.lua"
 LUI_UPDATER           RCDATA "resources/ui_scripts/updater.lua"
 
+LUA_JSON              RCDATA "resources/json.lua"
+
 #ifdef _DEBUG
 TLS_DLL               RCDATA "../../build/bin/x64/Debug/tlsdll.dll"
 #else
