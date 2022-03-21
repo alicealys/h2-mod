@@ -33,29 +33,31 @@ namespace scripting::lua
 			this->merge_callbacks();
 			this->handle_endon_conditions(event);
 
-			for (auto i = 0; i < tasks.size();)
+			for (auto i = tasks.begin(); i != tasks.end();)
 			{
-				const auto task = tasks[i];
-				if (task.event != event.name || task.entity != event.entity)
+				if (i->is_deleted)
+				{
+					i = tasks.erase(i);
+					continue;
+				}
+
+				if (i->event != event.name || i->entity != event.entity)
 				{
 					++i;
 					continue;
 				}
 
-				if (!task.is_deleted)
+				if (!has_built_arguments)
 				{
-					if (!has_built_arguments)
-					{
-						has_built_arguments = true;
-						arguments = this->build_arguments(event);
-					}
-
-					handle_error(task.callback(sol::as_args(arguments)));
+					has_built_arguments = true;
+					arguments = this->build_arguments(event);
 				}
 
-				if (task.is_volatile || task.is_deleted)
+				handle_error(i->callback(sol::as_args(arguments)));
+
+				if (i->is_volatile || i->is_deleted)
 				{
-					tasks.erase(tasks.begin() + i);
+					i = tasks.erase(i);
 				}
 				else
 				{
