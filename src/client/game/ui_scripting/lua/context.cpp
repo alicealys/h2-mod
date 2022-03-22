@@ -210,7 +210,7 @@ namespace ui_scripting::lua
 			};
 		}
 
-		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
+		void setup_game_type(sol::state& state, scheduler& scheduler)
 		{
 			struct game
 			{
@@ -244,28 +244,6 @@ namespace ui_scripting::lua
 			                                       const long long milliseconds)
 			{
 				return scheduler.add(callback, milliseconds, false);
-			};
-
-			game_type["onnotify"] = [&handler](const game&, const std::string& event,
-												  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.event = event;
-				listener.is_volatile = false;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			game_type["onnotifyonce"] = [&handler](const game&, const std::string& event,
-													  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.event = event;
-				listener.is_volatile = true;
-
-				return handler.add_event_listener(std::move(listener));
 			};
 
 			game_type["isingame"] = []()
@@ -478,7 +456,7 @@ namespace ui_scripting::lua
 			};
 		}
 
-		void setup_lui_types(sol::state& state, event_handler& handler, scheduler& scheduler)
+		void setup_lui_types(sol::state& state)
 		{
 			auto userdata_type = state.new_usertype<userdata>("userdata_");
 
@@ -494,15 +472,15 @@ namespace ui_scripting::lua
 			);
 
 			userdata_type[sol::meta_function::index] = [](const userdata& userdata, const sol::this_state s, 
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, userdata.get(name));
+				return convert(s, userdata.get(convert({s, key})));
 			};
 
 			userdata_type[sol::meta_function::new_index] = [](const userdata& userdata, const sol::this_state s, 
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				userdata.set(name, convert({s, value}));
+				userdata.set(convert({s, key}), convert({s, value}));
 			};
 
 			auto table_type = state.new_usertype<table>("table_");
@@ -519,27 +497,27 @@ namespace ui_scripting::lua
 			);
 
 			table_type["get"] = [](const table& table, const sol::this_state s,
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, table.get(name));
+				return convert(s, table.get(convert({s, key})));
 			};
 
 			table_type["set"] = [](const table& table, const sol::this_state s,
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				table.set(name, convert({s, value}));
+				table.set(convert({s, key}), convert({s, value}));
 			};
 
 			table_type[sol::meta_function::index] = [](const table& table, const sol::this_state s,
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, table.get(name));
+				return convert(s, table.get(convert({s, key})));
 			};
 
 			table_type[sol::meta_function::new_index] = [](const table& table, const sol::this_state s,
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				table.set(name, convert({s, value}));
+				table.set(convert({s, key}), convert({s, value}));
 			};
 
 			auto function_type = state.new_usertype<function>("function_");
@@ -598,8 +576,6 @@ namespace ui_scripting::lua
 
 	context::context(std::string data, script_type type)
 		: scheduler_(state_)
-		  , event_handler_(state_)
-
 	{
 		this->state_.open_libraries(sol::lib::base,
 		                            sol::lib::package,
@@ -612,8 +588,8 @@ namespace ui_scripting::lua
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
-		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
-		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
+		setup_game_type(this->state_, this->scheduler_);
+		setup_lui_types(this->state_);
 
 		if (type == script_type::file)
 		{
@@ -650,7 +626,6 @@ namespace ui_scripting::lua
 	{
 		this->state_.collect_garbage();
 		this->scheduler_.clear();
-		this->event_handler_.clear();
 		this->state_ = {};
 	}
 
@@ -658,12 +633,6 @@ namespace ui_scripting::lua
 	{
 		this->scheduler_.run_frame();
 		this->state_.collect_garbage();
-	}
-
-	void context::notify(const event& e)
-	{
-		this->scheduler_.dispatch(e);
-		this->event_handler_.dispatch(e);
 	}
 
 	void context::load_script(const std::string& script)

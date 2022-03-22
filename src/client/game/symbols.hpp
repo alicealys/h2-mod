@@ -86,6 +86,10 @@ namespace game
 	WEAK symbol<const char*(int, int, int)> Key_KeynumToString{0x1403D32D0};
 
 	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
+	WEAK symbol<bool(int clientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
+	WEAK symbol<void(hks::lua_State* s)> LUI_EndEvent{0x140316890};
+	WEAK symbol<void()> LUI_EnterCriticalSection{0x140316980};
+	WEAK symbol<void()> LUI_LeaveCriticalSection{0x14031BC20};
 	WEAK symbol<bool(int clientNum, const char* menu)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x140759BA0};
@@ -135,6 +139,8 @@ namespace game
 	WEAK symbol<bool()> Sys_IsDatabaseReady2{0x1405A9FE0};
 	WEAK symbol<int()> Sys_Milliseconds{0x140650720};
 	WEAK symbol<bool()> Sys_IsMainThread{0x1405AA020};
+	WEAK symbol<void(int critSec)> Sys_EnterCriticalSection{0x140624240};
+	WEAK symbol<void(int critSec)> Sys_LeaveCriticalSection{0x1406242C0};
 
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x1405A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x140606080};
@@ -202,5 +208,8 @@ namespace game
 			int internal_, int profilerTreatClosureAsFunc)> cclosure_Create{0x1402C84B0};
 		WEAK symbol<int(lua_State* s, int t)> hksi_luaL_ref{0x1402E4520};
 		WEAK symbol<void(lua_State* s, int t, int ref)> hksi_luaL_unref{0x1402DCE50};
+		WEAK symbol<void(lua_State* s, int index, const char* k)> hksi_lua_setfield{0x1402DEA30};
+		WEAK symbol<int(lua_State* s, int nargs, int nresults, int errfunc)> hksi_lua_pcall{0x1402DDE50};
+		WEAK symbol<void(lua_State* s, HksObject* lfp)> closePendingUpvalues{0x1402CBAD0};
 	}
 }

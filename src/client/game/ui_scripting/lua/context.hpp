@@ -41,7 +41,6 @@ namespace ui_scripting::lua
 		std::unordered_set<std::string> loaded_scripts_;
 
 		scheduler scheduler_;
-		event_handler event_handler_;
 
 		void load_script(const std::string& script);
 	};

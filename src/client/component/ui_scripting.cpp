@@ -30,8 +30,9 @@ namespace ui_scripting
 		utils::hook::detour hks_allocator_hook;
 		utils::hook::detour lui_error_hook;
 		utils::hook::detour hksi_hks_error_hook;
+		utils::hook::detour hks_frame_hook;
 
-		bool error_hook_enabled = false;
+		int error_hook_enabled = 0;
 
 		void hksi_lual_error_stub(game::hks::lua_State* s, const char* fmt, ...)
 		{
@@ -107,6 +108,15 @@ namespace ui_scripting
 
 			return hks_allocator_hook.invoke<void*>(userData, oldMemory, oldSize, newSize);
 		}
+
+		void hks_frame_stub()
+		{
+			const auto state = *game::hks::lua_state;
+			if (state)
+			{
+				ui_scripting::lua::engine::run_frame();
+			}
+		}
 	}
 
 	int main_function_handler(game::hks::lua_State* state)
@@ -158,17 +168,12 @@ namespace ui_scripting
 
 	void enable_error_hook()
 	{
-		error_hook_enabled = true;
+		error_hook_enabled++;
 	}
 
 	void disable_error_hook()
 	{
-		error_hook_enabled = false;
-	}
-
-	void notify(const event& e)
-	{
-		lua::engine::notify(e);
+		error_hook_enabled--;
 	}
 
 	class component final : public component_interface
@@ -177,7 +182,7 @@ namespace ui_scripting
 
 		void post_unpack() override
 		{
-			scheduler::loop(ui_scripting::lua::engine::run_frame, scheduler::pipeline::lui);
+			hks_frame_hook.create(0x140327880, hks_frame_stub);
 			hks_start_hook.create(0x140328BE0, hks_start_stub);
 			hks_shutdown_hook.create(0x1403203B0, hks_shutdown_stub);
 			hksi_lual_error_hook.create(0x1402E3E40, hksi_lual_error_stub);
