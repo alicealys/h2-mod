@@ -10,6 +10,4 @@ namespace ui_scripting
 
 	void enable_error_hook();
 	void disable_error_hook();
-
-	void notify(const event& e);
 }

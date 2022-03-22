@@ -17,27 +17,6 @@ namespace ui_scripting::lua::engine
 		const auto lui_common = utils::nt::load_resource(LUI_COMMON);
 		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 
-		void handle_key_event(const int key, const int down)
-		{
-			event event;
-			event.name = down
-				? "keydown"
-				: "keyup";
-			event.arguments = {key};
-
-			engine::notify(event);
-		}
-
-		void handle_char_event(const int key)
-		{
-			std::string key_str = {(char)key};
-			event event;
-			event.name = "keypress";
-			event.arguments = {key_str};
-
-			engine::notify(event);
-		}
-
 		auto& get_scripts()
 		{
 			static std::vector<std::unique_ptr<context>> scripts{};
@@ -86,27 +65,6 @@ namespace ui_scripting::lua::engine
 	{
 		clear_converted_functions();
 		get_scripts().clear();
-	}
-
-	void ui_event(const std::string& type, const std::vector<int>& arguments)
-	{
-		if (type == "key")
-		{
-			handle_key_event(arguments[0], arguments[1]);
-		}
-
-		if (type == "char")
-		{
-			handle_char_event(arguments[0]);
-		}
-	}
-
-	void notify(const event& e)
-	{
-		for (auto& script : get_scripts())
-		{
-			script->notify(e);
-		}
 	}
 
 	void run_frame()
