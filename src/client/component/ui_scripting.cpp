@@ -4,7 +4,6 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "chat.hpp"
 #include "scheduler.hpp"
 #include "command.hpp"
 

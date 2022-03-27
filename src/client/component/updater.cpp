@@ -70,16 +70,6 @@ namespace updater
 			return main;
 		}
 
-		std::string get_data_path()
-		{
-			if (GIT_BRANCH == "develop"s)
-			{
-				return DATA_PATH_DEV;
-			}
-
-			return DATA_PATH;
-		}
-
 		void set_update_check_status(bool done, bool success, const std::string& error = {})
 		{
 			update_data.access([done, success, error](update_data_t& data_)

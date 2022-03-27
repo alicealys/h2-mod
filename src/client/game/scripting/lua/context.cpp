@@ -9,7 +9,6 @@
 #include "../../../component/notifies.hpp"
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
-#include "../../../component/chat.hpp"
 #include "../../../component/fastfiles.hpp"
 
 #include <utils/string.hpp>
@@ -377,9 +376,8 @@ namespace scripting::lua
 				command::execute(utils::string::va("setdiscordstate %s", state.data()), false);
 			};
 
-			game_type["say"] = [](const game&, const std::string& msg)
+			game_type["say"] = [](const game&)
 			{
-				chat::print(msg);
 			};
 
 			game_type["detour"] = [](const game&, const sol::this_state s, const std::string& filename,
