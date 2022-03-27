@@ -9,7 +9,7 @@
 
 #include <utils/string.hpp>
 
-namespace gui_debug
+namespace gui::debug
 {
 	namespace
 	{
@@ -396,12 +396,13 @@ namespace gui_debug
 
 		void draw_window()
 		{
-			if (!gui::enabled_menus["debug"])
+			static auto* enabled = &gui::enabled_menus["debug"];
+			if (!*enabled)
 			{
 				return;
 			}
 
-			ImGui::Begin("Debug", &gui::enabled_menus["debug"]);
+			ImGui::Begin("Debug", enabled);
 
 			if (ImGui::TreeNode("Path nodes"))
 			{
@@ -717,4 +718,4 @@ namespace gui_debug
 	};
 }
 
-REGISTER_COMPONENT(gui_debug::component)
+REGISTER_COMPONENT(gui::debug::component)

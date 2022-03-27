@@ -15,7 +15,7 @@
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 
-namespace entity_list
+namespace gui::entity_list
 {
 	namespace
 	{
@@ -593,8 +593,9 @@ namespace entity_list
 
 		void show_entity_list_window(data_t& data)
 		{
+			static auto* enabled = &gui::enabled_menus["entity_list"];
 			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
-			ImGui::Begin("Entity list", &gui::enabled_menus["entity_list"]);
+			ImGui::Begin("Entity list", enabled);
 
 			if (ImGui::Button("Update list"))
 			{
@@ -808,7 +809,8 @@ namespace entity_list
 
 		void on_frame()
 		{
-			if (!gui::enabled_menus["entity_list"])
+			static auto* enabled = &gui::enabled_menus["entity_list"];
+			if (!*enabled)
 			{
 				return;
 			}
@@ -858,4 +860,4 @@ namespace entity_list
 	};
 }
 
-REGISTER_COMPONENT(entity_list::component)
+REGISTER_COMPONENT(gui::entity_list::component)

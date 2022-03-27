@@ -22,31 +22,30 @@ namespace asset_list
 
 		void on_frame()
 		{
-			if (!gui::enabled_menus["asset_list"])
+			static auto* enabled = &gui::enabled_menus["asset_list"];
+			if (!*enabled)
 			{
 				return;
 			}
 
+			ImGui::Begin("Asset list", enabled);
+
+			ImGui::InputText("asset type", &asset_type_filter);
+			ImGui::BeginChild("asset type list");
+
+			for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 			{
-				ImGui::Begin("Asset list", &gui::enabled_menus["asset_list"]);
+				const auto name = game::g_assetNames[i];
+				const auto type = static_cast<game::XAssetType>(i);
 
-				ImGui::InputText("asset type", &asset_type_filter);
-				ImGui::BeginChild("asset type list");
-
-				for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
+				if (utils::string::find_lower(name, asset_type_filter))
 				{
-					const auto name = game::g_assetNames[i];
-					const auto type = static_cast<game::XAssetType>(i);
-
-					if (utils::string::find_lower(name, asset_type_filter))
-					{
-						ImGui::Checkbox(name, &shown_assets[type]);
-					}
+					ImGui::Checkbox(name, &shown_assets[type]);
 				}
-
-				ImGui::EndChild();
-				ImGui::End();
 			}
+
+			ImGui::EndChild();
+			ImGui::End();
 
 			for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 			{

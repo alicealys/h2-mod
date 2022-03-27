@@ -15,7 +15,7 @@
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 
-namespace gui_script_console
+namespace gui::script_console
 {
 	namespace
 	{
@@ -228,4 +228,4 @@ namespace gui_script_console
 	};
 }
 
-REGISTER_COMPONENT(gui_script_console::component)
+REGISTER_COMPONENT(gui::script_console::component)
