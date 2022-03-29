@@ -86,8 +86,6 @@
 #include <asmjit/core/jitruntime.h>
 #include <asmjit/x86/x86assembler.h>
 
-#include <google/protobuf/stubs/logging.h>
-
 #include <d3d11.h>
 #include <imgui.h>
 #include <imgui_internal.h>
