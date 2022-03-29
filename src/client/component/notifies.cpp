@@ -32,20 +32,20 @@ namespace notifies
 		{
 			if (vm_execute_hooks.find(pos) == vm_execute_hooks.end())
 			{
+				hook_enabled = true;
 				return false;
 			}
 
-			if (!hook_enabled && pos > (char*)vm_execute_hooks.size())
+			if (!hook_enabled && pos > reinterpret_cast<char*>(vm_execute_hooks.size()))
 			{
 				hook_enabled = true;
 				return false;
 			}
 
-			const auto hook = vm_execute_hooks[pos];
+			const auto& hook = vm_execute_hooks[pos];
 			const auto state = hook.lua_state();
 
-			const auto self_id = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
-			const auto self = scripting::entity(self_id);
+			const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
 
 			std::vector<sol::lua_value> args;
 
@@ -58,16 +58,6 @@ namespace notifies
 
 			const auto result = hook(self, sol::as_args(args));
 			scripting::lua::handle_error(result);
-
-			const auto value = scripting::lua::convert({state, result});
-			const auto type = value.get_raw().type;
-
-			game::Scr_ClearOutParams();
-
-			if (result.valid() && type && type < game::SCRIPT_END)
-			{
-				scripting::push_value(value);
-			}
 
 			return true;
 		}
@@ -99,7 +89,7 @@ namespace notifies
 			a.bind(replace);
 
 			a.popad64();
-			a.mov(r14, (char*)empty_function);
+			a.mov(r14, reinterpret_cast<char*>(empty_function));
 			a.jmp(end);
 		}
 
