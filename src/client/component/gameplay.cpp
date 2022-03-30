@@ -46,10 +46,10 @@ namespace gameplay
 			a.jnz(allsolid);
 
 			a.bind(stand);
-			a.jmp(0x6878CD_b);
+			a.jmp(0x1406878CD);
 
 			a.bind(allsolid);
-			a.jmp(0x6878D4_b);
+			a.jmp(0x1406878D4);
 		}
 
 		void pm_crashland_stub(void* ps, void* pm)
@@ -70,12 +70,12 @@ namespace gameplay
 			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", true, game::DVAR_FLAG_REPLICATED);
 
 			// Influence PM_JitterPoint code flow so the trace->startsolid checks are 'ignored' 
-			pm_player_trace_hook.create(0x068F0A0_b, &pm_player_trace_stub);
+			pm_player_trace_hook.create(0x14068F0A0, &pm_player_trace_stub);
 
 			// If g_enableElevators is 1 the 'ducked' flag will always be removed from the player state
-			utils::hook::jump(0x6878C1_b, utils::hook::assemble(pm_trace_stub), true);
+			utils::hook::jump(0x1406878C1, utils::hook::assemble(pm_trace_stub), true);
 
-			pm_crashland_hook.create(0x688A20_b, pm_crashland_stub);
+			pm_crashland_hook.create(0x140688A20, pm_crashland_stub);
 
 			dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
 			dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);

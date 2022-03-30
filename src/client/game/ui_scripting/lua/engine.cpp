@@ -4,6 +4,7 @@
 
 #include "../../../component/scheduler.hpp"
 #include "../../../component/ui_scripting.hpp"
+#include "../../../component/filesystem.hpp"
 
 #include <utils/io.hpp>
 #include <utils/string.hpp>
@@ -13,28 +14,8 @@ namespace ui_scripting::lua::engine
 {
 	namespace
 	{
-		const auto updater_script = utils::nt::load_resource(LUI_UPDATER_MENU);
-
-		void handle_key_event(const int key, const int down)
-		{
-			event event;
-			event.name = down
-				? "keydown"
-				: "keyup";
-			event.arguments = {key};
-
-			engine::notify(event);
-		}
-
-		void handle_char_event(const int key)
-		{
-			std::string key_str = {(char)key};
-			event event;
-			event.name = "keypress";
-			event.arguments = {key_str};
-
-			engine::notify(event);
-		}
+		const auto lui_common = utils::nt::load_resource(LUI_COMMON);
+		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 
 		auto& get_scripts()
 		{
@@ -71,15 +52,12 @@ namespace ui_scripting::lua::engine
 		clear_converted_functions();
 		get_scripts().clear();
 
-		load_code(updater_script);
+		load_code(lui_common);
+		load_code(lui_updater);
 
-		load_scripts("ui_scripts/");
-		load_scripts("h2-mod/ui_scripts/");
-		load_scripts("data/ui_scripts/");
-
-		if (!game::mod_folder.empty())
+		for (const auto& path : filesystem::get_search_paths())
 		{
-			load_scripts(utils::string::va("%s/ui_scripts/", game::mod_folder.data()));
+			load_scripts(path + "/ui_scripts/");
 		}
 	}
 
@@ -87,27 +65,6 @@ namespace ui_scripting::lua::engine
 	{
 		clear_converted_functions();
 		get_scripts().clear();
-	}
-
-	void ui_event(const std::string& type, const std::vector<int>& arguments)
-	{
-		if (type == "key")
-		{
-			handle_key_event(arguments[0], arguments[1]);
-		}
-
-		if (type == "char")
-		{
-			handle_char_event(arguments[0]);
-		}
-	}
-
-	void notify(const event& e)
-	{
-		for (auto& script : get_scripts())
-		{
-			script->notify(e);
-		}
 	}
 
 	void run_frame()

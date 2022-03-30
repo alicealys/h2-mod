@@ -13,7 +13,7 @@
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 
-namespace gui_console
+namespace gui::console
 {
 	namespace
 	{
@@ -52,7 +52,7 @@ namespace gui_console
 			}
 			case ImGuiInputTextFlags_CallbackHistory:
 			{
-				const auto history = game_console::get_history();
+				const auto& history = game_console::get_history();
 
 				if (data->EventKey == ImGuiKey_UpArrow)
 				{
@@ -96,7 +96,7 @@ namespace gui_console
 		{
 			std::string text{};
 
-			const auto output = game_console::get_output();
+			const auto& output = game_console::get_output();
 			for (const auto& line : output)
 			{
 				if (utils::string::find_lower(line, filter))
@@ -116,7 +116,8 @@ namespace gui_console
 
 		void on_frame()
 		{
-			if (!gui::enabled_menus["console"])
+			static auto* enabled = &gui::enabled_menus["console"];
+			if (!*enabled)
 			{
 				return;
 			}
@@ -126,7 +127,7 @@ namespace gui_console
 			static const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion | 
 												 ImGuiInputTextFlags_CallbackHistory;
 			
-			ImGui::Begin("Console", &gui::enabled_menus["console"]);
+			ImGui::Begin("Console", enabled);
 
 			if (ImGui::BeginPopup("Options"))
 			{
@@ -159,7 +160,7 @@ namespace gui_console
 
 			ImGui::BeginChild("console_scroll", ImVec2(0, -footer_height_to_reserve), false);
 
-			const auto output = game_console::get_output();
+			const auto& output = game_console::get_output();
 			for (const auto& line : output)
 			{
 				if (utils::string::find_lower(line, filter))
@@ -177,7 +178,7 @@ namespace gui_console
 			
 			if (ImGui::InputText("Input", &input, input_text_flags, input_text_edit))
 			{
-				auto history = game_console::get_history();
+				auto& history = game_console::get_history();
 
 				if (history_index != -1)
 				{
@@ -209,4 +210,4 @@ namespace gui_console
 	};
 }
 
-REGISTER_COMPONENT(gui_console::component)
+REGISTER_COMPONENT(gui::console::component)

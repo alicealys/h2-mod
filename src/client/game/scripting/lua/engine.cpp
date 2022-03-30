@@ -3,6 +3,7 @@
 #include "context.hpp"
 
 #include "../../../component/notifies.hpp"
+#include "../../../component/filesystem.hpp"
 #include "../execution.hpp"
 
 #include <utils/io.hpp>
@@ -49,13 +50,9 @@ namespace scripting::lua::engine
 
 		load_generic_script();
 
-		load_scripts("scripts/");
-		load_scripts("h2-mod/scripts/");
-		load_scripts("data/scripts/");
-
-		if (!game::mod_folder.empty())
+		for (const auto& path : filesystem::get_search_paths())
 		{
-			load_scripts(utils::string::va("%s/scripts/", game::mod_folder.data()));
+			load_scripts(path + "/scripts/");
 		}
 	}
 

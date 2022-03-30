@@ -6,6 +6,7 @@
 #include "game_console.hpp"
 #include "gui.hpp"
 #include "game/ui_scripting/lua/engine.hpp"
+#include "game/ui_scripting/execution.hpp"
 
 #include <utils/hook.hpp>
 
@@ -25,7 +26,11 @@ namespace input
 
 		void cl_char_event_stub(const int local_client_num, const int key)
 		{
-			ui_scripting::lua::engine::ui_event("char", {key});
+			ui_scripting::notify("keypress",
+			{
+				{"keynum", key},
+				{"key", game::Key_KeynumToString(key, 0, 1)},
+			});
 
 			if (!game_console::console_char_event(local_client_num, key))
 			{
@@ -42,7 +47,11 @@ namespace input
 
 		void cl_key_event_stub(const int local_client_num, const int key, const int down)
 		{
-			ui_scripting::lua::engine::ui_event("key", {key, down});
+			ui_scripting::notify(down ? "keydown" : "keyup", 
+			{
+				{"keynum", key},
+				{"key", game::Key_KeynumToString(key, 0, 1)},
+			});
 
 			if (!game_console::console_key_event(local_client_num, key, down))
 			{
@@ -64,7 +73,6 @@ namespace input
 				return;
 			}
 
-			ui_scripting::lua::engine::ui_event("mousemove", {x, y});
 			cl_mouse_move_hook.invoke<void>(local_client_num, x, y);
 		}
 	}
@@ -74,9 +82,9 @@ namespace input
 	public:
 		void post_unpack() override
 		{
-			cl_char_event_hook.create(0x3D27B0_b, cl_char_event_stub);
-			cl_key_event_hook.create(0x3D2AE0_b, cl_key_event_stub);
-			cl_mouse_move_hook.create(0x3296F0_b, cl_mouse_move_stub);
+			cl_char_event_hook.create(0x1403D27B0, cl_char_event_stub);
+			cl_key_event_hook.create(0x1403D2AE0, cl_key_event_stub);
+			cl_mouse_move_hook.create(0x1403296F0, cl_mouse_move_stub);
 		}
 	};
 }

@@ -32,20 +32,20 @@ namespace notifies
 		{
 			if (vm_execute_hooks.find(pos) == vm_execute_hooks.end())
 			{
+				hook_enabled = true;
 				return false;
 			}
 
-			if (!hook_enabled && pos > (char*)vm_execute_hooks.size())
+			if (!hook_enabled && pos > reinterpret_cast<char*>(vm_execute_hooks.size()))
 			{
 				hook_enabled = true;
 				return false;
 			}
 
-			const auto hook = vm_execute_hooks[pos];
+			const auto& hook = vm_execute_hooks[pos];
 			const auto state = hook.lua_state();
 
-			const auto self_id = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
-			const auto self = scripting::entity(self_id);
+			const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
 
 			std::vector<sol::lua_value> args;
 
@@ -58,16 +58,6 @@ namespace notifies
 
 			const auto result = hook(self, sol::as_args(args));
 			scripting::lua::handle_error(result);
-
-			const auto value = scripting::lua::convert({state, result});
-			const auto type = value.get_raw().type;
-
-			game::Scr_ClearOutParams();
-
-			if (result.valid() && type && type < game::SCRIPT_END)
-			{
-				scripting::push_value(value);
-			}
 
 			return true;
 		}
@@ -94,12 +84,12 @@ namespace notifies
 			a.inc(r14);
 			a.mov(dword_ptr(rbp, 0xA4), r15d);
 
-			a.jmp(0x5C90B3_b);
+			a.jmp(0x1405C90B3);
 
 			a.bind(replace);
 
 			a.popad64();
-			a.mov(r14, (char*)empty_function);
+			a.mov(r14, reinterpret_cast<char*>(empty_function));
 			a.jmp(end);
 		}
 
@@ -137,7 +127,7 @@ namespace notifies
 
 		std::string convert_mod(const int meansOfDeath)
 		{
-			const auto value = reinterpret_cast<game::scr_string_t**>(0xBF49B0_b)[meansOfDeath];
+			const auto value = reinterpret_cast<game::scr_string_t**>(0x140BF49B0)[meansOfDeath];
 			const auto string = game::SL_ConvertToString(*value);
 
 			return string;
@@ -147,7 +137,7 @@ namespace notifies
 			int damage, int dflags, const unsigned int hitLoc, const unsigned int weapon, bool isAlternate, unsigned int a11, const int meansOfDeath, unsigned int a13, unsigned int a14)
 		{
 			{
-				const std::string _hitLoc = reinterpret_cast<const char**>(0xBF4AA0_b)[hitLoc];
+				const std::string _hitLoc = reinterpret_cast<const char**>(0x140BF4AA0)[hitLoc];
 				const auto _mod = convert_mod(meansOfDeath);
 				const auto _weapon = get_weapon_name(weapon, isAlternate);
 
@@ -199,9 +189,9 @@ namespace notifies
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x5C90A5_b, utils::hook::assemble(vm_execute_stub), true);
+			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
 
-			scr_entity_damage_hook.create(0x4BD2E0_b, scr_entity_damage_stub);
+			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
 		}
 	};
 }

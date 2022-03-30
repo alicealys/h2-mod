@@ -9,7 +9,6 @@
 #include "../../../component/notifies.hpp"
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
-#include "../../../component/chat.hpp"
 #include "../../../component/fastfiles.hpp"
 
 #include <utils/string.hpp>
@@ -47,16 +46,6 @@ namespace scripting::lua
 		{
 			state["level"] = entity{*::game::levelEntityId};
 			state["player"] = call("getentbynum", {0}).as<entity>();
-
-			state["io"]["fileexists"] = utils::io::file_exists;
-			state["io"]["writefile"] = utils::io::write_file;
-			state["io"]["filesize"] = utils::io::file_size;
-			state["io"]["createdirectory"] = utils::io::create_directory;
-			state["io"]["directoryexists"] = utils::io::directory_exists;
-			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
-			state["io"]["listfiles"] = utils::io::list_files;
-			state["io"]["copyfolder"] = utils::io::copy_folder;
-			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
 
 			auto vector_type = state.new_usertype<vector>("vector", sol::constructors<vector(float, float, float)>());
 			vector_type["x"] = sol::property(&vector::get_x, &vector::set_x);
@@ -198,8 +187,8 @@ namespace scripting::lua
 
 		void setup_entity_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
-			state["level"] = entity{ *::game::levelEntityId };
-			state["player"] = call("getentbynum", { 0 }).as<entity>();
+			state["level"] = entity{*::game::levelEntityId};
+			state["player"] = call("getentbynum", {0}).as<entity>();
 
 			auto entity_type = state.new_usertype<entity>("entity");
 
@@ -387,9 +376,8 @@ namespace scripting::lua
 				command::execute(utils::string::va("setdiscordstate %s", state.data()), false);
 			};
 
-			game_type["say"] = [](const game&, const std::string& msg)
+			game_type["say"] = [](const game&)
 			{
-				chat::print(msg);
 			};
 
 			game_type["detour"] = [](const game&, const sol::this_state s, const std::string& filename,

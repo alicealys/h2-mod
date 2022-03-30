@@ -35,22 +35,25 @@ namespace scripting::lua
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
+				if (i->is_deleted)
+				{
+					i = tasks.erase(i);
+					continue;
+				}
+
 				if (i->event != event.name || i->entity != event.entity)
 				{
 					++i;
 					continue;
 				}
 
-				if (!i->is_deleted)
+				if (!has_built_arguments)
 				{
-					if (!has_built_arguments)
-					{
-						has_built_arguments = true;
-						arguments = this->build_arguments(event);
-					}
-
-					handle_error(i->callback(sol::as_args(arguments)));
+					has_built_arguments = true;
+					arguments = this->build_arguments(event);
 				}
+
+				handle_error(i->callback(sol::as_args(arguments)));
 
 				if (i->is_volatile || i->is_deleted)
 				{
@@ -94,8 +97,8 @@ namespace scripting::lua
 
 		callbacks_.access([&](task_list& tasks)
 		{
-				merger(tasks);
-				new_callbacks_.access(merger);
+			merger(tasks);
+			new_callbacks_.access(merger);
 		});
 	}
 

@@ -9,7 +9,6 @@
 #include "command.hpp"
 #include "scheduler.hpp"
 #include "game_console.hpp"
-#include "chat.hpp"
 #include "fastfiles.hpp"
 
 #include <utils/hook.hpp>
@@ -116,7 +115,9 @@ namespace command
 		const auto command = utils::string::to_lower(name);
 
 		if (handlers.find(command) == handlers.end())
+		{
 			add_raw(name, main_handler);
+		}
 
 		handlers[command] = callback;
 	}
@@ -148,7 +149,7 @@ namespace command
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x5A74F0_b, dvar_command_stub, true);
+			utils::hook::jump(0x1405A74F0, dvar_command_stub, true);
 
 			add("quit", game::Quit);
 
@@ -156,7 +157,7 @@ namespace command
 			{
 				const auto map = params.get(1);
 
-				const auto exists = utils::hook::invoke<bool>(0x412B50_b, map, 0);
+				const auto exists = utils::hook::invoke<bool>(0x140412B50, map, 0);
 
 				if (!exists)
 				{
@@ -165,12 +166,7 @@ namespace command
 				}
 
 				// SV_SpawnServer
-				utils::hook::invoke<void>(0x6B3AA0_b, map, 0, 0, 0, 0);
-			});
-
-			add("say", [](const params& params)
-			{
-				chat::print(params.join(1));
+				utils::hook::invoke<void>(0x1406B3AA0, map, 0, 0, 0, 0);
 			});
 
 			add("listassetpool", [](const params& params)
@@ -205,11 +201,6 @@ namespace command
 						game_console::print(game_console::con_type_info, "%s\n", asset_name);
 					}, true);
 				}
-			});
-
-			add("baseAddress", []()
-			{
-				printf("%p\n", (void*)game::base_address);
 			});
 
 			add("commandDump", []()
@@ -333,8 +324,7 @@ namespace command
 					}
 					else if (arg == "health"s)
 					{
-
-						if (params.size() > 3)
+						if (params.size() > 2)
 						{
 							const auto amount = atoi(params.get(2));
 							const auto health = player.get("health").as<int>();
@@ -414,7 +404,7 @@ namespace command
 
 				try
 				{
-					const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
 					if (weapon == "all"s)
 					{
 						player.call("takeallweapons");

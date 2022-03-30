@@ -10,6 +10,9 @@
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 #include "../../../component/fastfiles.hpp"
+#include "../../../component/updater.hpp"
+#include "../../../component/localized_strings.hpp"
+#include "../../../component/mods.hpp"
 
 #include "component/game_console.hpp"
 #include "component/scheduler.hpp"
@@ -25,7 +28,7 @@ namespace ui_scripting::lua
 {
 	namespace
 	{
-		const auto json_script = utils::nt::load_resource(LUA_JSON_SCRIPT);
+		const auto json_script = utils::nt::load_resource(LUA_JSON);
 
 		scripting::script_value script_convert(const sol::lua_value& value)
 		{
@@ -207,7 +210,7 @@ namespace ui_scripting::lua
 			};
 		}
 
-		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
+		void setup_game_type(sol::state& state, scheduler& scheduler)
 		{
 			struct game
 			{
@@ -241,28 +244,6 @@ namespace ui_scripting::lua
 			                                       const long long milliseconds)
 			{
 				return scheduler.add(callback, milliseconds, false);
-			};
-
-			game_type["onnotify"] = [&handler](const game&, const std::string& event,
-												  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.event = event;
-				listener.is_volatile = false;
-
-				return handler.add_event_listener(std::move(listener));
-			};
-
-			game_type["onnotifyonce"] = [&handler](const game&, const std::string& event,
-													  const event_callback& callback)
-			{
-				event_listener listener{};
-				listener.callback = callback;
-				listener.event = event;
-				listener.is_volatile = true;
-
-				return handler.add_event_listener(std::move(listener));
 			};
 
 			game_type["isingame"] = []()
@@ -360,7 +341,7 @@ namespace ui_scripting::lua
 			game_type["playmenuvideo"] = [](const game&, const std::string& video)
 			{
 				reinterpret_cast<void (*)(const char* a1, int a2, int a3)>
-					(0x71B970_b)(video.data(), 64, 0);
+					(0x14071B970)(video.data(), 64, 0);
 			};
 
 			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
@@ -432,124 +413,13 @@ namespace ui_scripting::lua
 
 			game_type["getloadedmod"] = [](const game&)
 			{
-				return ::game::mod_folder;
+				return mods::mod_path;
 			};
 
-			static int request_id{};
-			game_type["httpget"] = [](const game&, const std::string& url)
+			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
+				const std::string& value)
 			{
-				const auto id = request_id++;
-				::scheduler::once([url, id]()
-				{
-					const auto result = utils::http::get_data(url);
-					::scheduler::once([result, id]
-					{
-						event event;
-						event.name = "http_request_done";
-
-						if (result.has_value())
-						{
-							event.arguments = {id, true, result.value()};
-						}
-						else
-						{
-							event.arguments = {id, false};
-						}
-
-						notify(event);
-					}, ::scheduler::pipeline::lui);
-				}, ::scheduler::pipeline::async);
-				return id;
-			};
-
-			game_type["httpgettofile"] = [](const game&, const std::string& url, 
-				const std::string& dest)
-			{
-				const auto id = request_id++;
-				::scheduler::once([url, id, dest]()
-				{
-					auto last_report = std::chrono::high_resolution_clock::now();
-					const auto result = utils::http::get_data(url, {}, [&last_report, id](size_t progress, size_t total, size_t speed)
-					{
-						const auto now = std::chrono::high_resolution_clock::now();
-						if (now - last_report < 100ms && progress < total)
-						{
-							return;
-						}
-
-						last_report = now;
-
-						::scheduler::once([id, progress, total, speed]
-						{
-							event event;
-							event.name = "http_request_progress";
-							event.arguments = {
-								id, 
-								static_cast<int>(progress), 
-								static_cast<int>(total), 
-								static_cast<int>(speed)
-							};
-
-							notify(event);
-						}, ::scheduler::pipeline::lui);
-					});
-
-					if (result.has_value())
-					{
-						const auto write = utils::io::write_file(dest, result.value(), false);
-						::scheduler::once([result, id, write]()
-						{
-							event event;
-							event.name = "http_request_done";
-							event.arguments = {id, true, write};
-
-							notify(event);
-						}, ::scheduler::pipeline::lui);
-					}
-					else
-					{
-						::scheduler::once([result, id]()
-						{
-							event event;
-							event.name = "http_request_done";
-							event.arguments = {id, false};
-
-							notify(event);
-						}, ::scheduler::pipeline::lui);
-					}
-				}, ::scheduler::pipeline::async);
-				return id;
-			};
-
-			game_type["sha"] = [](const game&, const std::string& data)
-			{
-				return utils::string::to_upper(utils::cryptography::sha1::compute(data, true));
-			};
-
-			game_type["environment"] = [](const game&)
-			{
-				return GIT_BRANCH;
-			};
-
-			game_type["binaryname"] = [](const game&)
-			{
-				utils::nt::library self;
-				return self.get_name();
-			};
-
-			game_type["relaunch"] = [](const game&)
-			{
-				utils::nt::relaunch_self("-singleplayer");
-				utils::nt::terminate();
-			};
-
-			game_type["isdebugbuild"] = [](const game&)
-			{
-#ifdef DEBUG
-				return true;
-#else
-				return false;
-#endif
+				localized_strings::override(string, value);
 			};
 
 			struct player
@@ -586,7 +456,7 @@ namespace ui_scripting::lua
 			};
 		}
 
-		void setup_lui_types(sol::state& state, event_handler& handler, scheduler& scheduler)
+		void setup_lui_types(sol::state& state)
 		{
 			auto userdata_type = state.new_usertype<userdata>("userdata_");
 
@@ -602,15 +472,15 @@ namespace ui_scripting::lua
 			);
 
 			userdata_type[sol::meta_function::index] = [](const userdata& userdata, const sol::this_state s, 
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, userdata.get(name));
+				return convert(s, userdata.get(convert({s, key})));
 			};
 
 			userdata_type[sol::meta_function::new_index] = [](const userdata& userdata, const sol::this_state s, 
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				userdata.set(name, convert({s, value}));
+				userdata.set(convert({s, key}), convert({s, value}));
 			};
 
 			auto table_type = state.new_usertype<table>("table_");
@@ -627,27 +497,27 @@ namespace ui_scripting::lua
 			);
 
 			table_type["get"] = [](const table& table, const sol::this_state s,
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, table.get(name));
+				return convert(s, table.get(convert({s, key})));
 			};
 
 			table_type["set"] = [](const table& table, const sol::this_state s,
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				table.set(name, convert({s, value}));
+				table.set(convert({s, key}), convert({s, value}));
 			};
 
 			table_type[sol::meta_function::index] = [](const table& table, const sol::this_state s,
-				const std::string& name)
+				const sol::lua_value& key)
 			{
-				return convert(s, table.get(name));
+				return convert(s, table.get(convert({s, key})));
 			};
 
 			table_type[sol::meta_function::new_index] = [](const table& table, const sol::this_state s,
-				const std::string& name, const sol::lua_value& value)
+				const sol::lua_value& key, const sol::lua_value& value)
 			{
-				table.set(name, convert({s, value}));
+				table.set(convert({s, key}), convert({s, value}));
 			};
 
 			auto function_type = state.new_usertype<function>("function_");
@@ -677,13 +547,35 @@ namespace ui_scripting::lua
 			state["LUI"] = state["luiglobals"]["LUI"];
 			state["Engine"] = state["luiglobals"]["Engine"];
 			state["Game"] = state["luiglobals"]["Game"];
+
+			auto updater_table = sol::table::create(state.lua_state());
+
+			updater_table["relaunch"] = updater::relaunch;
+
+			updater_table["sethastriedupdate"] = updater::set_has_tried_update;
+			updater_table["gethastriedupdate"] = updater::get_has_tried_update;
+			updater_table["autoupdatesenabled"] = updater::auto_updates_enabled;
+
+			updater_table["startupdatecheck"] = updater::start_update_check;
+			updater_table["isupdatecheckdone"] = updater::is_update_check_done;
+			updater_table["getupdatecheckstatus"] = updater::get_update_check_status;
+			updater_table["isupdateavailable"] = updater::is_update_available;
+
+			updater_table["startupdatedownload"] = updater::start_update_download;
+			updater_table["isupdatedownloaddone"] = updater::is_update_download_done;
+			updater_table["getupdatedownloadstatus"] = updater::get_update_download_status;
+			updater_table["cancelupdate"] = updater::cancel_update;
+			updater_table["isrestartrequired"] = updater::is_restart_required;
+
+			updater_table["getlasterror"] = updater::get_last_error;
+			updater_table["getcurrentfile"] = updater::get_current_file;
+
+			state["updater"] = updater_table;
 		}
 	}
 
 	context::context(std::string data, script_type type)
 		: scheduler_(state_)
-		  , event_handler_(state_)
-
 	{
 		this->state_.open_libraries(sol::lib::base,
 		                            sol::lib::package,
@@ -696,8 +588,8 @@ namespace ui_scripting::lua
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
-		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
-		setup_lui_types(this->state_, this->event_handler_, this->scheduler_);
+		setup_game_type(this->state_, this->scheduler_);
+		setup_lui_types(this->state_);
 
 		if (type == script_type::file)
 		{
@@ -734,7 +626,6 @@ namespace ui_scripting::lua
 	{
 		this->state_.collect_garbage();
 		this->scheduler_.clear();
-		this->event_handler_.clear();
 		this->state_ = {};
 	}
 
@@ -742,12 +633,6 @@ namespace ui_scripting::lua
 	{
 		this->scheduler_.run_frame();
 		this->state_.collect_garbage();
-	}
-
-	void context::notify(const event& e)
-	{
-		this->scheduler_.dispatch(e);
-		this->event_handler_.dispatch(e);
 	}
 
 	void context::load_script(const std::string& script)

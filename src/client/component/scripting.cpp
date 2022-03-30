@@ -25,7 +25,8 @@ namespace scripting
 		utils::hook::detour vm_notify_hook;
 
 		utils::hook::detour g_shutdown_game_hook;
-		utils::hook::detour player_spawn_hook;
+		utils::hook::detour client_spawn_hook;
+		utils::hook::detour sv_check_load_level_hook;
 
 		utils::hook::detour scr_add_class_field_hook;
 
@@ -55,9 +56,9 @@ namespace scripting
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
 		}
 
-		void player_spawn_stub(const game::gentity_s* player)
+		void client_spawn_stub(const game::gentity_s* client)
 		{
-			player_spawn_hook.invoke<void>(player);
+			client_spawn_hook.invoke<void>(client);
 			lua::engine::start();
 		}
 
@@ -67,16 +68,16 @@ namespace scripting
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
 	
-		void scr_add_class_field_stub(unsigned int classnum, game::scr_string_t _name, unsigned int canonicalString, unsigned int offset)
+		void scr_add_class_field_stub(unsigned int classnum, game::scr_string_t name, unsigned int canonicalString, unsigned int offset)
 		{
-			const auto name = game::SL_ConvertToString(_name);
+			const auto name_ = game::SL_ConvertToString(name);
 
-			if (fields_table[classnum].find(name) == fields_table[classnum].end())
+			if (fields_table[classnum].find(name_) == fields_table[classnum].end())
 			{
-				fields_table[classnum][name] = offset;
+				fields_table[classnum][name_] = offset;
 			}
 
-			scr_add_class_field_hook.invoke<void>(classnum, _name, canonicalString, offset);
+			scr_add_class_field_hook.invoke<void>(classnum, name, canonicalString, offset);
 		}
 
 		void process_script_stub(const char* filename)
@@ -99,11 +100,10 @@ namespace scripting
 			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
 		}
 
-		utils::hook::detour sub_6B2940_hook;
-		char sub_6B2940_stub(void* a1)
+		char sv_check_load_level_stub(void* save_game)
 		{
-			const auto result = sub_6B2940_hook.invoke<char>(a1);
-			if (a1 != nullptr)
+			const auto result = sv_check_load_level_hook.invoke<char>(save_game);
+			if (save_game != nullptr)
 			{
 				lua::engine::start();
 			}
@@ -116,19 +116,15 @@ namespace scripting
 	public:
 		void post_unpack() override
 		{
-			vm_notify_hook.create(0x5CC450_b, vm_notify_stub);
+			vm_notify_hook.create(0x1405CC450, vm_notify_stub);
 
-			g_shutdown_game_hook.create(0x4CBAD0_b, g_shutdown_game_stub);
-			player_spawn_hook.create(0x4B0710_b, player_spawn_stub);
+			g_shutdown_game_hook.create(0x1404CBAD0, g_shutdown_game_stub);
+			client_spawn_hook.create(0x1404B0710, client_spawn_stub);
+			sv_check_load_level_hook.create(0x1406B2940, sv_check_load_level_stub);
 
-			scr_add_class_field_hook.create(0x5C2C30_b, scr_add_class_field_stub);
-			scr_set_thread_position_hook.create(0x5BC7E0_b, scr_set_thread_position_stub);
-			process_script_hook.create(0x5C6160_b, process_script_stub);
-
-			// Loading last checkpoint doesn't call spawn player again (player_spawn_hook)
-			// Not sure what this function does but `a1` is != nullptr when loading
-			// the last checkpoint so we need to start lua in this context
-			sub_6B2940_hook.create(0x6B2940_b, sub_6B2940_stub);
+			scr_add_class_field_hook.create(0x1405C2C30, scr_add_class_field_stub);
+			scr_set_thread_position_hook.create(0x1405BC7E0, scr_set_thread_position_stub);
+			process_script_hook.create(0x1405C6160, process_script_stub);
 
 			scheduler::loop([]()
 			{

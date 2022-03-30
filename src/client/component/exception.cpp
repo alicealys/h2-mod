@@ -158,7 +158,6 @@ namespace exception
 			line("Timestamp: "s + get_timestamp());
 			line(utils::string::va("Exception: 0x%08X", exceptioninfo->ExceptionRecord->ExceptionCode));
 			line(utils::string::va("Address: 0x%llX", exceptioninfo->ExceptionRecord->ExceptionAddress));
-			line(utils::string::va("Base: 0x%llX", game::base_address));
 
 #pragma warning(push)
 #pragma warning(disable: 4996)

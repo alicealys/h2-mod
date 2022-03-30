@@ -2,7 +2,7 @@
 [![open bugs](https://img.shields.io/github/issues/fedddddd/h2-mod/bug?label=bugs)](https://github.com/fedddddd/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
 [![Build](https://github.com/fedddddd/h2-mod/workflows/Build/badge.svg)](https://github.com/fedddddd/h2-mod/actions)
 [![Build status](https://ci.appveyor.com/api/projects/status/0sh80kdnsvm53rno?svg=true)](https://ci.appveyor.com/project/fedddddd/h2-mod)
-
+[![Discord](https://img.shields.io/discord/955362057581129738?color=%237289DA&label=members&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/dpnRn2tKT9)
 
 # H2: Mod
 <p align="center">
@@ -15,7 +15,7 @@
 
 **NOTE**: Cracked/Pirated versions of the game are NOT compatible with this mod, if you run such a version and have issues/crashes launching the client refer to [this issue](https://github.com/fedddddd/h2-mod/issues/111).
 
-- **[Click here to get the latest release](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202019%2C%20PREMAKE_ACTION%3Dvs2019%2C%20CI%3D1%3B%20Configuration%3A%20Release)**
+- **[Click here to get the latest release](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202022%2C%20PREMAKE_ACTION%3Dvs2022%2C%20CI%3D1%3B%20Configuration%3A%20Release)**
 - **You will need to drop this in your Call of Duty: Modern Warfare 2 Campaign Remastered installation folder. If you don't have Call of Duty: Modern Warfare 2 Campaign Remastered, get those game files first.**
 
 ## Compile from source

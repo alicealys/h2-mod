@@ -59,15 +59,15 @@ namespace scripting
 
 		script_function get_function_by_index(const unsigned index)
 		{
-			static const auto function_table = 0xB153F90;
-			static const auto method_table = 0xB155890;
+			static const auto function_table = 0x14B153F90;
+			static const auto method_table = 0x14B155890;
 
 			if (index < 0x320)
 			{
-				return reinterpret_cast<script_function*>(game::base_address + function_table)[index - 1];
+				return reinterpret_cast<script_function*>(function_table)[index - 1];
 			}
 
-			return reinterpret_cast<script_function*>(game::base_address + method_table)[index - 0x8000];
+			return reinterpret_cast<script_function*>(method_table)[index - 0x8000];
 		}
 	}
 
