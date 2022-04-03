@@ -106,7 +106,7 @@ namespace gui::console
 				}
 			}
 
-			if (text[text.size() - 1] == '\n')
+			if (!text.empty() && text[text.size() - 1] == '\n')
 			{
 				text.pop_back();
 			}
