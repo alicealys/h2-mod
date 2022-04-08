@@ -30,45 +30,6 @@ namespace ui_scripting::lua
 	{
 		const auto json_script = utils::nt::load_resource(LUA_JSON);
 
-		scripting::script_value script_convert(const sol::lua_value& value)
-		{
-			if (value.is<int>())
-			{
-				return {value.as<int>()};
-			}
-
-			if (value.is<unsigned int>())
-			{
-				return {value.as<unsigned int>()};
-			}
-
-			if (value.is<bool>())
-			{
-				return {value.as<bool>()};
-			}
-
-			if (value.is<double>())
-			{
-				return {value.as<double>()};
-			}
-
-			if (value.is<float>())
-			{
-				return {value.as<float>()};
-			}
-			if (value.is<std::string>())
-			{
-				return {value.as<std::string>()};
-			}
-
-			if (value.is<scripting::vector>())
-			{
-				return {value.as<scripting::vector>()};
-			}
-
-			return {};
-		}
-
 		bool valid_dvar_name(const std::string& name)
 		{
 			for (const auto c : name)
@@ -435,15 +396,24 @@ namespace ui_scripting::lua
 					throw std::runtime_error("Not in game");
 				}
 
-				::scheduler::once([s, name, args = std::vector<sol::object>(va.begin(), va.end())]()
+				const sol::state_view view{s};
+				const auto to_string = view["tostring"].get<sol::protected_function>();
+
+				std::vector<std::string> args{};
+				for (auto arg : va)
+				{
+					args.push_back(to_string.call(arg).get<std::string>());
+				}
+
+				::scheduler::once([s, name, args]()
 				{
 					try
 					{
 						std::vector<scripting::script_value> arguments{};
 
-						for (auto arg : args)
+						for (const auto& arg : args)
 						{
-							arguments.push_back(script_convert({s, arg}));
+							arguments.push_back(arg);
 						}
 
 						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
