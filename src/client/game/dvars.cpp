@@ -2238,6 +2238,13 @@ namespace dvars
 		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
 
+    game::dvar_t* register_enum(const std::string& name, const char** valueList, int defaultIndex, game::DvarFlags flags)
+    {
+        dvar_list.insert(name);
+        const auto hash = game::generateHashValue(name.data());
+        return game::Dvar_RegisterEnum(hash, "", valueList, defaultIndex, flags);
+    }
+
 	game::dvar_t* register_float(const std::string& name, float value, float min, 
 		float max, game::DvarFlags flags)
 	{
