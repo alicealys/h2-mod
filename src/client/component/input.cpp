@@ -26,41 +26,44 @@ namespace input
 
 		void cl_char_event_stub(const int local_client_num, const int key)
 		{
-			ui_scripting::notify("keypress",
+			if (!gui::gui_char_event(local_client_num, key))
 			{
-				{"keynum", key},
-				{"key", game::Key_KeynumToString(key, 0, 1)},
-			});
+				return;
+			}
 
 			if (!game_console::console_char_event(local_client_num, key))
 			{
 				return;
 			}
 
-			if (!gui::gui_char_event(local_client_num, key))
+			ui_scripting::notify("keypress",
 			{
-				return;
-			}
+				{"keynum", key},
+				{"key", game::Key_KeynumToString(key, 0, 1)},
+			});
 
 			cl_char_event_hook.invoke<void>(local_client_num, key);
 		}
 
 		void cl_key_event_stub(const int local_client_num, const int key, const int down)
 		{
-			ui_scripting::notify(down ? "keydown" : "keyup", 
+			if (!gui::gui_key_event(local_client_num, key, down))
 			{
-				{"keynum", key},
-				{"key", game::Key_KeynumToString(key, 0, 1)},
-			});
+				return;
+			}
 
 			if (!game_console::console_key_event(local_client_num, key, down))
 			{
 				return;
 			}
 
-			if (!gui::gui_key_event(local_client_num, key, down))
+			if (!(*game::keyCatchers & 1) && !(*game::keyCatchers & 0x10))
 			{
-				return;
+				ui_scripting::notify(down ? "keydown" : "keyup",
+				{
+					{"keynum", key},
+					{"key", game::Key_KeynumToString(key, 0, 1)},
+				});
 			}
 
 			cl_key_event_hook.invoke<void>(local_client_num, key, down);
