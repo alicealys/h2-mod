@@ -57,6 +57,7 @@ namespace ui_scripting
 
 			table event{};
 			event.set("name", name);
+			event.set("dispatchChildren", true);
 
 			for (const auto& arg : arguments)
 			{

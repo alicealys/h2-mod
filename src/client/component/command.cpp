@@ -303,70 +303,77 @@ namespace command
 					return;
 				}
 
-				try
+				const std::string arg = params.get(1);
+				const std::string arg2 = params.get(2);
+				const auto count = params.size();
+
+				scheduler::once([=]()
 				{
-					const auto arg = params.get(1);
-					const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
-					auto ps = game::g_entities[0].client;
+					printf("%i\n", game::Sys_IsMainThread());
 
-					if (arg == "ammo"s)
+					try
 					{
-						const auto weapon = player.call("getcurrentweapon").as<std::string>();
-						player.call("givemaxammo", {weapon});
-					}
-					else if (arg == "allammo"s)
-					{
-						const auto weapons = player.call("getweaponslist").as<scripting::array>();
-						for (auto i = 0; i < weapons.size(); i++)
-						{
-							player.call("givemaxammo", {weapons[i]});
-						}
-					}
-					else if (arg == "health"s)
-					{
-						if (params.size() > 2)
-						{
-							const auto amount = atoi(params.get(2));
-							const auto health = player.get("health").as<int>();
-							player.set("health", {health + amount});
-						}
-						else
-						{
-							const auto amount = game::Dvar_FindVar("g_player_maxhealth")->current.integer;
-							player.set("health", {amount});
-						}
-					}
-					else if (arg == "all"s)
-					{
-						const auto type = game::XAssetType::ASSET_TYPE_WEAPON;
-						fastfiles::enum_assets(type, [&player, type](const game::XAssetHeader header)
-						{
-							const auto asset = game::XAsset{type, header};
-							const auto* const asset_name = game::DB_GetXAssetName(&asset);
+						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						auto ps = game::g_entities[0].client;
 
-							player.call("giveweapon", {asset_name});
-						}, true);
-					}
-					else
-					{
-						const auto wp = game::G_GetWeaponForName(arg);
-						if (wp)
+						if (arg == "ammo")
 						{
-							if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0, 0))
+							const auto weapon = player.call("getcurrentweapon").as<std::string>();
+							player.call("givemaxammo", {weapon});
+						}
+						else if (arg == "allammo")
+						{
+							const auto weapons = player.call("getweaponslist").as<scripting::array>();
+							for (auto i = 0; i < weapons.size(); i++)
 							{
-								game::G_InitializeAmmo(ps, wp, 0);
-								game::G_SelectWeapon(0, wp);
+								player.call("givemaxammo", {weapons[i]});
 							}
 						}
+						else if (arg == "health")
+						{
+							if (count > 2)
+							{
+								const auto amount = atoi(arg2.data());
+								const auto health = player.get("health").as<int>();
+								player.set("health", {health + amount});
+							}
+							else
+							{
+								const auto amount = game::Dvar_FindVar("g_player_maxhealth")->current.integer;
+								player.set("health", {amount});
+							}
+						}
+						else if (arg == "all")
+						{
+							const auto type = game::XAssetType::ASSET_TYPE_WEAPON;
+							fastfiles::enum_assets(type, [&player, type](const game::XAssetHeader header)
+							{
+								const auto asset = game::XAsset{type, header};
+								const auto* const asset_name = game::DB_GetXAssetName(&asset);
+								player.call("giveweapon", {asset_name});
+							}, true);
+						}
 						else
 						{
-							game::CG_GameMessage(0, "Weapon does not exist");
+							const auto wp = game::G_GetWeaponForName(arg.data());
+							if (wp)
+							{
+								if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0, 0))
+								{
+									game::G_InitializeAmmo(ps, wp, 0);
+									game::G_SelectWeapon(0, wp);
+								}
+							}
+							else
+							{
+								game::CG_GameMessage(0, "Weapon does not exist");
+							}
 						}
 					}
-				}
-				catch (...)
-				{
-				}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
 			});
 
 			add("dropweapon", [](const params& params)
@@ -376,15 +383,18 @@ namespace command
 					return;
 				}
 
-				try
+				scheduler::once([]()
 				{
-					const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
-					const auto weapon = player.call("getcurrentweapon");
-					player.call("dropitem", {weapon});
-				}
-				catch (...)
-				{
-				}
+					try
+					{
+						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						const auto weapon = player.call("getcurrentweapon");
+						player.call("dropitem", {weapon});
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
 			});
 
 			add("take", [](const params& params)
@@ -400,23 +410,26 @@ namespace command
 					return;
 				}
 
-				const auto weapon = params.get(1);
+				const std::string weapon = params.get(1);
 
-				try
+				scheduler::once([=]()
 				{
-					const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
-					if (weapon == "all"s)
+					try
 					{
-						player.call("takeallweapons");
+						const auto player = scripting::call("getentbynum", {0}).as<scripting::entity>();
+						if (weapon == "all"s)
+						{
+							player.call("takeallweapons");
+						}
+						else
+						{
+							player.call("takeweapon", {weapon});
+						}
 					}
-					else
+					catch (...)
 					{
-						player.call("takeweapon", {weapon});
 					}
-				}
-				catch (...)
-				{
-				}
+				}, scheduler::pipeline::server);
 			});
 
 			add("kill", [](const params& params)
