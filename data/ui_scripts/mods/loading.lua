@@ -2,7 +2,7 @@ game:addlocalizedstring("MENU_MODS", "MODS")
 game:addlocalizedstring("MENU_MODS_DESC", "Load installed mods.")
 game:addlocalizedstring("LUA_MENU_MOD_DESC_DEFAULT", "Load &&1.")
 game:addlocalizedstring("LUA_MENU_MOD_DESC", "&&1\nAuthor: &&2\nVersion: &&3")
-game:addlocalizedstring("LUA_MENU_OPEN_STORE", "Open store")
+game:addlocalizedstring("LUA_MENU_OPEN_STORE", "Store")
 game:addlocalizedstring("LUA_MENU_OPEN_STORE_DESC", "Download and install mods.")
 game:addlocalizedstring("LUA_MENU_LOADED_MOD", "Loaded mod: ^3&&1")
 game:addlocalizedstring("LUA_MENU_AVAILABLE_MODS", "Available mods")
@@ -27,6 +27,7 @@ function createdivider(menu, text)
 	}))
 
 	menu.list:addElement(element)
+	return element
 end
 
 function string:truncate(length)
@@ -55,10 +56,10 @@ function getmodname(path)
 
 	if (io.fileexists(infofile)) then
 		pcall(function()
-			game:addlocalizedstring(data.description)
-			game:addlocalizedstring(data.author)
-			game:addlocalizedstring(data.version)
 			local data = json.decode(io.readfile(infofile))
+			game:addlocalizedstring(data.description, data.description)
+			game:addlocalizedstring(data.author, data.author)
+			game:addlocalizedstring(data.version, data.version)
 			desc = Engine.Localize("@LUA_MENU_MOD_DESC", 
 				data.description, data.author, data.version)
 			name = data.name
@@ -68,7 +69,7 @@ function getmodname(path)
 	return name, desc
 end
 
-LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
+LUI.MenuBuilder.registerType("mods_menu", function(a1)
 	local menu = LUI.MenuTemplate.new(a1, {
 		menu_title = "@MENU_MODS",
 		exclusiveController = 0,
@@ -78,8 +79,8 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
 	})
 
 	menu:AddButton("@LUA_MENU_OPEN_STORE", function()
-		if (LUI.MenuBuilder.m_types_build["mod_store_menu"]) then
-			LUI.FlowManager.RequestAddMenu(nil, "mod_store_menu")
+		if (LUI.MenuBuilder.m_types_build["mods_store_menu"]) then
+			LUI.FlowManager.RequestAddMenu(nil, "mods_store_menu")
 		end
 	end, nil, true, nil, {
 		desc_text = Engine.Localize("@LUA_MENU_OPEN_STORE_DESC")
@@ -127,4 +128,4 @@ LUI.MenuBuilder.m_types_build["mods_menu"] = function(a1)
 	menu.optionTextInfo = LUI.Options.AddOptionTextInfo(menu)
 
 	return menu
-end
+end)
