@@ -1,7 +1,5 @@
 #pragma once
 
-#include "../event.hpp"
-
 #pragma warning(push)
 #pragma warning(disable: 4702)
 
@@ -10,7 +8,6 @@
 #include <sol/sol.hpp>
 
 #include "scheduler.hpp"
-#include "event_handler.hpp"
 
 namespace ui_scripting::lua
 {
@@ -33,7 +30,6 @@ namespace ui_scripting::lua
 		context& operator=(const context&) = delete;
 
 		void run_frame();
-		void notify(const event& e);
 
 	private:
 		sol::state state_{};

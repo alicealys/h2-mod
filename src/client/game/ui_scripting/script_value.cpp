@@ -60,8 +60,12 @@ namespace ui_scripting
 		game::hks::HksObject obj{};
 
 		const auto state = *game::hks::lua_state;
-		state->m_apistack.top = state->m_apistack.base;
+		if (state == nullptr)
+		{
+			return;
+		}
 
+		state->m_apistack.top = state->m_apistack.base;
 		game::hks::hksi_lua_pushlstring(state, value, static_cast<unsigned int>(strlen(value)));
 		obj = state->m_apistack.top[-1];
 
@@ -73,8 +77,12 @@ namespace ui_scripting
 		game::hks::HksObject obj{};
 
 		const auto state = *game::hks::lua_state;
-		state->m_apistack.top = state->m_apistack.base;
+		if (state == nullptr)
+		{
+			return;
+		}
 
+		state->m_apistack.top = state->m_apistack.base;
 		game::hks::hksi_lua_pushlstring(state, value, len);
 		obj = state->m_apistack.top[-1];
 
