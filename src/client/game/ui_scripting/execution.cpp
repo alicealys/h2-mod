@@ -40,7 +40,7 @@ namespace ui_scripting
 	bool notify(const std::string& name, const event_arguments& arguments)
 	{
 		const auto state = *game::hks::lua_state;
-		if (!state)
+		if (state == nullptr)
 		{
 			return false;
 		}

@@ -1,6 +1,5 @@
 #pragma once
 #include "game/ui_scripting/lua/value_conversion.hpp"
-#include "game/ui_scripting/event.hpp"
 
 namespace ui_scripting
 {
