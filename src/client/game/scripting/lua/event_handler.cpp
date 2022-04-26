@@ -35,12 +35,6 @@ namespace scripting::lua
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
-				if (i->is_deleted)
-				{
-					i = tasks.erase(i);
-					continue;
-				}
-
 				if (i->event != event.name || i->entity != event.entity)
 				{
 					++i;
