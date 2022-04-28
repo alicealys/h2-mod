@@ -55,8 +55,8 @@ LUI.addmenubutton("pc_controls", {
 LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     local menu = LUI.MenuTemplate.new(a1, {
 		menu_title = "@MENU_GENERAL",
-		menu_list_divider_top_offset = -(LUI.H1MenuTab.tabChangeHoldingElementHeight + luiglobals.H1MenuDims.spacing),
-		menu_width = luiglobals.GenericMenuDims.OptionMenuWidth
+		menu_list_divider_top_offset = -(LUI.H1MenuTab.tabChangeHoldingElementHeight + H1MenuDims.spacing),
+		menu_width = GenericMenuDims.OptionMenuWidth
 	})
 
     createdivider(menu, "@LUA_MENU_UPDATES")

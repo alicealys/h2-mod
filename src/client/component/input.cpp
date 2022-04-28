@@ -5,7 +5,6 @@
 
 #include "game_console.hpp"
 #include "gui.hpp"
-#include "game/ui_scripting/lua/engine.hpp"
 #include "game/ui_scripting/execution.hpp"
 
 #include <utils/hook.hpp>

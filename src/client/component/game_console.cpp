@@ -386,11 +386,13 @@ namespace game_console
 		va_end(ap);
 
 		const auto formatted = std::string(va_buffer);
+		printf(va_buffer);
+
 		const auto lines = utils::string::split(formatted, '\n');
 
 		for (auto& line : lines)
 		{
-			print(type == con_type_info ? line : "^"s.append(std::to_string(type)).append(line));
+			print(type == con_type_info ? line : "^"s.append(std::to_string(type)).append(line), false);
 		}
 	}
 

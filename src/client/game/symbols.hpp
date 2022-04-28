@@ -211,5 +211,11 @@ namespace game
 		WEAK symbol<void(lua_State* s, int index, const char* k)> hksi_lua_setfield{0x1402DEA30};
 		WEAK symbol<int(lua_State* s, int nargs, int nresults, int errfunc)> hksi_lua_pcall{0x1402DDE50};
 		WEAK symbol<void(lua_State* s, HksObject* lfp)> closePendingUpvalues{0x1402CBAD0};
+		WEAK symbol<int(lua_State* s, const HksCompilerSettings* options, const char* buff, 
+			unsigned __int64 sz, const char* name)> hksi_hksL_loadbuffer{0x1402DB8B0};
+		WEAK symbol<int(lua_State* s, const char* what, lua_Debug* ar)> hksi_lua_getinfo{0x1402DD1F0};
+		WEAK symbol<int(lua_State* s, int level, lua_Debug* ar)> hksi_lua_getstack{0x1402DD4C0};
+		WEAK symbol<void(lua_State* s, const char* fmt, ...)> hksi_luaL_error{0x1402E3E40};
+		WEAK symbol<const char*> typenames{0x140BE9F50};
 	}
 }
