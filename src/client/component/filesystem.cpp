@@ -27,13 +27,18 @@ namespace filesystem
 		return {};
 	}
 
-	bool read_file(const std::string& path, std::string* data)
+	bool read_file(const std::string& path, std::string* data, std::string* real_path)
 	{
 		for (const auto& search_path : get_search_paths())
 		{
 			const auto path_ = search_path + "/" + path;
 			if (utils::io::read_file(path_, data))
 			{
+				if (real_path != nullptr)
+				{
+					*real_path = path_;
+				}
+
 				return true;
 			}
 		}
