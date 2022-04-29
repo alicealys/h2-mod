@@ -6,11 +6,41 @@
 
 namespace ui_scripting
 {
+	namespace
+	{
+		script_value get_field(void* ptr, game::hks::HksObjectType type, const script_value& key)
+		{
+			const auto state = *game::hks::lua_state;
+			const auto top = state->m_apistack.top;
+
+			push_value(key);
+
+			game::hks::HksObject value{};
+			game::hks::HksObject obj{};
+			obj.t = type;
+			obj.v.ptr = ptr;
+
+			game::hks::hks_obj_gettable(&value, state, &obj, &state->m_apistack.top[-1]);
+			state->m_apistack.top = top;
+			return value;
+		}
+
+		void set_field(void* ptr, game::hks::HksObjectType type, const script_value& key, const script_value& value)
+		{
+			const auto state = *game::hks::lua_state;
+
+			game::hks::HksObject obj{};
+			obj.t = type;
+			obj.v.ptr = ptr;
+
+			game::hks::hks_obj_settable(state, &obj, &key.get_raw(), &value.get_raw());
+		}
+	}
+
 	void push_value(const script_value& value)
 	{
 		const auto state = *game::hks::lua_state;
-		const auto value_ = value.get_raw();
-		*state->m_apistack.top = value_;
+		*state->m_apistack.top = value.get_raw();
 		state->m_apistack.top++;
 	}
 
@@ -60,8 +90,8 @@ namespace ui_scripting
 
 		const auto globals = table((*::game::hks::lua_state)->globals.v.table);
 		const auto engine = globals.get("Engine").as<table>();
-		const auto root = engine.get("GetLuiRoot").as<function>().call({})[0].as<userdata>();
-		const auto process_event = root.get("processEvent").as<function>();
+		const auto root = engine.get("GetLuiRoot")()[0].as<userdata>();
+		const auto process_event = root.get("processEvent");
 
 		table event{};
 		event.set("name", name);
@@ -72,14 +102,13 @@ namespace ui_scripting
 			event.set(arg.first, arg.second);
 		}
 
-		process_event.call({root, event});
+		process_event(root, event);
 		return true;
 	}
 
 	arguments call_script_function(const function& function, const arguments& arguments)
 	{
 		const auto state = *game::hks::lua_state;
-		state->m_apistack.top = state->m_apistack.base;
 		const auto top = state->m_apistack.top;
 
 		push_value(function);
@@ -98,57 +127,21 @@ namespace ui_scripting
 
 	script_value get_field(const userdata& self, const script_value& key)
 	{
-		const auto state = *game::hks::lua_state;
-		const auto top = state->m_apistack.top;
-
-		push_value(key);
-
-		game::hks::HksObject value{};
-		game::hks::HksObject userdata{};
-		userdata.t = game::hks::TUSERDATA;
-		userdata.v.ptr = self.ptr;
-
-		game::hks::hks_obj_gettable(&value, state, &userdata, &state->m_apistack.top[-1]);
-		state->m_apistack.top = top;
-		return value;
+		return get_field(self.ptr, game::hks::TUSERDATA, key);
 	}
 
 	script_value get_field(const table& self, const script_value& key)
 	{
-		const auto state = *game::hks::lua_state;
-		const auto top = state->m_apistack.top;
-
-		push_value(key);
-
-		game::hks::HksObject value{};
-		game::hks::HksObject userdata{};
-		userdata.t = game::hks::TTABLE;
-		userdata.v.ptr = self.ptr;
-
-		game::hks::hks_obj_gettable(&value, state, &userdata, &state->m_apistack.top[-1]);
-		state->m_apistack.top = top;
-		return value;
+		return get_field(self.ptr, game::hks::TTABLE, key);
 	}
 
 	void set_field(const userdata& self, const script_value& key, const script_value& value)
 	{
-		const auto state = *game::hks::lua_state;
-
-		game::hks::HksObject userdata{};
-		userdata.t = game::hks::TUSERDATA;
-		userdata.v.ptr = self.ptr;
-
-		game::hks::hks_obj_settable(state, &userdata, &key.get_raw(), &value.get_raw());
+		set_field(self.ptr, game::hks::TUSERDATA, key, value);
 	}
 
 	void set_field(const table& self, const script_value& key, const script_value& value)
 	{
-		const auto state = *game::hks::lua_state;
-
-		game::hks::HksObject userdata{};
-		userdata.t = game::hks::TTABLE;
-		userdata.v.ptr = self.ptr;
-
-		game::hks::hks_obj_settable(state, &userdata, &key.get_raw(), &value.get_raw());
+		set_field(self.ptr, game::hks::TTABLE, key, value);
 	}
 }
