@@ -1,6 +1,7 @@
 #include <std_include.hpp>
 #include "execution.hpp"
 #include "component/ui_scripting.hpp"
+#include "component/game_console.hpp"
 
 #include <utils/string.hpp>
 
@@ -88,22 +89,31 @@ namespace ui_scripting
 		const auto _1 = gsl::finally(game::LUI_LeaveCriticalSection);
 		game::LUI_EnterCriticalSection();
 
-		const auto globals = table((*::game::hks::lua_state)->globals.v.table);
-		const auto engine = globals.get("Engine").as<table>();
-		const auto root = engine.get("GetLuiRoot")()[0].as<userdata>();
-		const auto process_event = root.get("processEvent");
-
-		table event{};
-		event.set("name", name);
-		event.set("dispatchChildren", true);
-
-		for (const auto& arg : arguments)
+		try
 		{
-			event.set(arg.first, arg.second);
+			const auto globals = table((*::game::hks::lua_state)->globals.v.table);
+			const auto engine = globals.get("Engine").as<table>();
+			const auto root = engine.get("GetLuiRoot")()[0].as<userdata>();
+			const auto process_event = root.get("processEvent");
+
+			table event{};
+			event.set("name", name);
+			event.set("dispatchChildren", true);
+
+			for (const auto& arg : arguments)
+			{
+				event.set(arg.first, arg.second);
+			}
+
+			process_event(root, event);
+			return true;
+		}
+		catch (const std::exception& e)
+		{
+			game_console::print(game_console::con_type_error, "Error processing event '%s' %s\n", name.data(), e.what());
 		}
 
-		process_event(root, event);
-		return true;
+		return false;
 	}
 
 	arguments call_script_function(const function& function, const arguments& arguments)
