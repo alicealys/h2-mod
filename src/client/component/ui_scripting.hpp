@@ -39,8 +39,7 @@ namespace ui_scripting
 	template <class F>
 	auto wrap_function(F f)
 	{
-		std::function f_ = f;
-		return wrap_function(f_);
+		return wrap_function(std::function(f));
 	}
 
 	template <typename F>
