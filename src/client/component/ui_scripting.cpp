@@ -166,7 +166,6 @@ namespace ui_scripting
 		{
 			const auto lua = get_globals();
 
-			lua["io"] = table();
 			lua["io"]["fileexists"] = utils::io::file_exists;
 			lua["io"]["writefile"] = utils::io::write_file;
 			lua["io"]["movefile"] = utils::io::move_file;
