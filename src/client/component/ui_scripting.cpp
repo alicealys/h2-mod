@@ -351,24 +351,37 @@ namespace ui_scripting
 			}
 		}
 
-		void* hks_start_stub(char a1)
+		void try_start()
 		{
-			const auto _ = gsl::finally(&start);
-			return hks_start_hook.invoke<void*>(a1);
+			try
+			{
+				start();
+			}
+			catch (const std::exception& e)
+			{
+				game_console::print(game_console::con_type_error, "Failed to load LUI scripts: %s\n", e.what());
+			}
+		}
+
+		void hks_start_stub(char a1)
+		{
+			const auto _0 = gsl::finally(&try_start);
+			return hks_start_hook.invoke<void>(a1);
 		}
 
 		void hks_shutdown_stub()
 		{
 			converted_functions.clear();
-			hks_shutdown_hook.invoke<void*>();
+			globals = {};
+			hks_shutdown_hook.invoke<void>();
 		}
 
-		void hks_package_require_stub(game::hks::lua_State* state)
+		void* hks_package_require_stub(game::hks::lua_State* state)
 		{
 			const auto script = get_current_script();
 			const auto root = get_root_script(script);
 			globals.in_require_script = root;
-			hks_package_require_hook.invoke<void>(state);
+			return hks_package_require_hook.invoke<void*>(state);
 		}
 
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
