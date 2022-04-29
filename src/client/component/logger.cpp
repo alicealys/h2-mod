@@ -146,6 +146,7 @@ namespace logger
 			utils::hook::jump(0x14032C630, print_warning, true);
 			utils::hook::jump(0x14032AEF0, lui_print, true);
 			com_error_hook.create(0x1405A2D80, com_error_stub);
+			utils::hook::jump(0x14013A98C, print);
 		}
 	};
 }

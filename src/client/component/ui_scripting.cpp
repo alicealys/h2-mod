@@ -13,6 +13,7 @@
 #include "fastfiles.hpp"
 #include "mods.hpp"
 #include "updater.hpp"
+#include "game_console.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -87,14 +88,14 @@ namespace ui_scripting
 
 		void print_error(const std::string& error)
 		{
-			printf("************** UI Script execution error **************\n");
-			printf("%s\n", error.data());
-			printf("****************************************************\n");
+			game_console::print(game_console::con_type_error, "************** LUI script execution error **************\n");
+			game_console::print(game_console::con_type_error, "%s\n", error.data());
+			game_console::print(game_console::con_type_error, "********************************************************\n");
 		}
 
 		void print_loading_script(const std::string& name)
 		{
-			printf("Loading LUI script '%s'\n", name.data());
+			game_console::print(game_console::con_type_info, "Loading LUI script '%s'\n", name.data());
 		}
 
 		std::string get_current_script()
@@ -371,17 +372,11 @@ namespace ui_scripting
 			hks_package_require_hook.invoke<void>(state);
 		}
 
-		utils::hook::detour db_find_xasset_header_hook;
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
 		{
-			if (type != game::XAssetType::ASSET_TYPE_LUAFILE)
-			{
-				return db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
-			}
-
 			if (!is_loaded_script(globals.in_require_script))
 			{
-				return db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
+				return game::DB_FindXAssetHeader(type, name, allow_create_default);
 			}
 
 			const auto folder = globals.in_require_script.substr(0, globals.in_require_script.find_last_of("/\\"));
@@ -396,7 +391,7 @@ namespace ui_scripting
 			}
 			else if (name_.starts_with("ui/LUI/"))
 			{
-				return db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
+				return game::DB_FindXAssetHeader(type, name, allow_create_default);
 			}
 
 			return static_cast<game::XAssetHeader>(nullptr);
@@ -470,11 +465,9 @@ namespace ui_scripting
 
 		void post_unpack() override
 		{
+			utils::hook::call(0x14030BF2B, db_find_xasset_header_stub);
 			utils::hook::call(0x14030C079, db_find_xasset_header_stub);
 			utils::hook::call(0x14030C104, hks_load_stub);
-			utils::hook::jump(0x14013A98C, printf);
-
-			db_find_xasset_header_hook.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
 
 			hks_package_require_hook.create(0x1402B4DA0, hks_package_require_stub);
 			hks_start_hook.create(0x140328BE0, hks_start_stub);
