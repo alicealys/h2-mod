@@ -3,6 +3,7 @@
 
 #include "scheduler.hpp"
 #include "updater.hpp"
+#include "game/ui_scripting/execution.hpp"
 
 #include "version.h"
 
@@ -70,6 +71,14 @@ namespace updater
 			return main;
 		}
 
+		void notify(const std::string& name)
+		{
+			scheduler::once([=]()
+			{
+				ui_scripting::notify(name, {});
+			}, scheduler::pipeline::lui);
+		}
+
 		void set_update_check_status(bool done, bool success, const std::string& error = {})
 		{
 			update_data.access([done, success, error](update_data_t& data_)
@@ -77,6 +86,8 @@ namespace updater
 				data_.check.done = done;
 				data_.check.success = success;
 				data_.error = error;
+
+				notify("update_check_done");
 			});
 		}
 
@@ -87,6 +98,7 @@ namespace updater
 				data_.download.done = done;
 				data_.download.success = success;
 				data_.error = error;
+				notify("update_done");
 			});
 		}
 
@@ -330,6 +342,8 @@ namespace updater
 				data_.check.success = true;
 				data_.required_files = required_files;
 			});
+
+			notify("update_check_done");
 		}, scheduler::pipeline::async);
 	}
 

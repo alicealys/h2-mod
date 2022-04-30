@@ -11,12 +11,28 @@
 
 <br/>
 
-## Download
+## Installation
 
-**NOTE**: Cracked/Pirated versions of the game are NOT compatible with this mod, if you run such a version and have issues/crashes launching the client refer to [this issue](https://github.com/fedddddd/h2-mod/issues/111).
+**NOTE**: Cracked/Pirated versions of the game are **NOT** compatible with this mod, if you run such a version and have issues/crashes when running the client read **Step 2**.
 
-- **[Click here to get the latest release](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202022%2C%20PREMAKE_ACTION%3Dvs2022%2C%20CI%3D1%3B%20Configuration%3A%20Release)**
-- **You will need to drop this in your Call of Duty: Modern Warfare 2 Campaign Remastered installation folder. If you don't have Call of Duty: Modern Warfare 2 Campaign Remastered, get those game files first.**
+1. Download the latest **[release](https://github.com/fedddddd/h2-mod/releases/latest/download/h2-mod.exe)** or **[develop](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202022%2C%20PREMAKE_ACTION%3Dvs2022%2C%20CI%3D1%3B%20Configuration%3A%20Release)** build
+2. Drop the file in your **Call of Duty: Modern Warfare 2 Campaign Remastered** installation folder.  
+  If you don't have the game installed (or own a cracked/pirated copy of it) you can download it for free from the official **Battle.Net** servers using [Battle.Net Installer](https://github.com/barncastle/Battle.Net-Installer) and executing this command:
+  
+   ```
+   .\bnetinstaller.exe --prod lazr --uid lazarus --lang enUS --dir "YOUR INSTALL PATH"
+   ```
+   
+   **Make sure to replace "YOUR INSTALL PATH" with an actual installation path of your choice.**
+3. Run **h2-mod.exe** and make sure you press **"YES"** when asked whether to install updates.
+
+## Common issues
+
+- If you get crashes that show errors like **"Create2DTexture(...) failed ..."** or **"IDXGISwapChain::Present failed: ..."** when loading certain maps try:
+  * Disabling shader preloading
+  * Lowering graphics settings
+  * Freeing up RAM (close programs)
+  * Updating your GPU drivers
 
 ## Compile from source
 
@@ -24,14 +40,12 @@
 - Update the submodules and run `premake5 vs2019` or simply use the delivered `generate.bat`.
 - Build via solution file in `build\h2-mod.sln`.
 
-### Premake arguments
+  ### Premake arguments
 
-| Argument                    | Description                                    |
-|:----------------------------|:-----------------------------------------------|
-| `--copy-to=PATH`            | Optional, copy the EXE to a custom folder after build, define the path here if wanted. |
-| `--dev-build`               | Enable development builds of the client. |
-
-<br/>
+  | Argument                    | Description                                    |
+  |:----------------------------|:-----------------------------------------------|
+  | `--copy-to=PATH`            | Optional, copy the EXE to a custom folder after build, define the path here if wanted. |
+  | `--dev-build`               | Enable development builds of the client. |
 
 ## Disclaimer
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "game/game.hpp"
 #include "script_value.hpp"
+#include "../../component/ui_scripting.hpp"
 
 namespace ui_scripting
 {
@@ -10,6 +11,8 @@ namespace ui_scripting
         lightuserdata(void*);
         void* ptr;
     };
+
+    class userdata_value;
 
     class userdata
     {
@@ -27,6 +30,8 @@ namespace ui_scripting
         script_value get(const script_value& key) const;
         void set(const script_value& key, const script_value& value) const;
 
+        userdata_value operator[](const script_value& key) const;
+
         void* ptr;
 
     private:
@@ -35,6 +40,19 @@ namespace ui_scripting
 
         int ref{};
     };
+
+    class userdata_value : public script_value
+    {
+    public:
+        userdata_value(const userdata& table, const script_value& key);
+        void operator=(const script_value& value);
+        bool operator==(const script_value& value);
+    private:
+        userdata userdata_;
+        script_value key_;
+    };
+
+    class table_value;
 
     class table
     {
@@ -53,6 +71,8 @@ namespace ui_scripting
         script_value get(const script_value& key) const;
         void set(const script_value& key, const script_value& value) const;
 
+        table_value operator[](const script_value& key) const;
+
         game::hks::HashTable* ptr;
 
     private:
@@ -62,10 +82,31 @@ namespace ui_scripting
         int ref{};
     };
 
+    class table_value : public script_value
+    {
+    public:
+        table_value(const table& table, const script_value& key);
+        void operator=(const script_value& value);
+        void operator=(const table_value& value);
+        bool operator==(const script_value& value);
+        bool operator==(const table_value& value);
+    private:
+        table table_;
+        script_value key_;
+    };
+
     class function
     {
     public:
+        function(game::hks::lua_function);
         function(game::hks::cclosure*, game::hks::HksObjectType);
+
+        template <typename F>
+        function(F f)
+        {
+            this->ptr = ui_scripting::convert_function(f);
+            this->type = game::hks::TCFUNCTION;
+        }
 
         function(const function& other);
         function(function&& other) noexcept;
@@ -77,6 +118,16 @@ namespace ui_scripting
 
         arguments call(const arguments& arguments) const;
 
+        arguments operator()(const arguments& arguments) const;
+
+        template<class ...T>
+        arguments operator()(T... arguments) const
+        {
+            return this->call({arguments...});
+        }
+
+        arguments operator()() const;
+
         game::hks::cclosure* ptr;
         game::hks::HksObjectType type;
 
@@ -85,29 +136,5 @@ namespace ui_scripting
         void release();
 
         int ref{};
-    };
-
-    class stack final
-    {
-    public:
-        stack();
-
-        void save(int num_args);
-        void fix();
-
-        stack(stack&&) = delete;
-        stack(const stack&) = delete;
-        stack& operator=(stack&&) = delete;
-        stack& operator=(const stack&) = delete;
-
-    private:
-        game::hks::lua_State* state;
-
-        int num_args_;
-        int num_calls_;
-
-        uint64_t base_bottom_;
-        uint64_t top_bottom_;
-        uint64_t callstack_;
     };
 }

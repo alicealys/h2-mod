@@ -1,12 +1,16 @@
-updatecancelled = false
-taskinterval = 100
+if (not Engine.InFrontend()) then
+	return
+end
 
+updatecancelled = false
 updater.cancelupdate()
 
 function startupdatecheck(popup, autoclose)
-	updatecancelled = false
+	Engine.GetLuiRoot():registerEventHandler("update_check_done", function(element, event)
+		if (updatecancelled) then
+			return
+		end
 
-	local callback = function()
 		if (not updater.getupdatecheckstatus()) then
 			if (autoclose) then
 				LUI.FlowManager.RequestLeaveMenu(popup)
@@ -38,23 +42,18 @@ function startupdatecheck(popup, autoclose)
 				end
 			end
 		})
-	end
+	end)
 
 	updater.startupdatecheck()
-	createtask({
-		done = updater.isupdatecheckdone, 
-		cancelled = isupdatecancelled, 
-		callback = callback, 
-		interval = taskinterval
-	})
 end
 
 function startupdatedownload(popup, autoclose)
-	updater.startupdatedownload()
-
 	local textupdate = nil
 	local previousfile = nil
-	textupdate = game:oninterval(function()
+	local timer = LUI.UITimer.new(10, "update_file")
+
+	popup:addElement(timer)
+	popup:registerEventHandler("update_file", function()
 		local file = updater.getcurrentfile()
 		if (file == previousfile) then
 			return
@@ -62,10 +61,14 @@ function startupdatedownload(popup, autoclose)
 
 		file = previousfile
 		popup.text:setText("Downloading file " .. updater.getcurrentfile() .. "...")
-	end, 10)
+	end)
 
-	local callback = function()
-		textupdate:clear()
+	Engine.GetLuiRoot():registerEventHandler("update_done", function(element, event)
+		timer:close()
+
+		if (updatecancelled) then
+			return
+		end
 
 		if (not updater.getupdatedownloadstatus()) then
 			if (autoclose) then
@@ -95,14 +98,9 @@ function startupdatedownload(popup, autoclose)
 		if (autoclose) then
 			LUI.FlowManager.RequestLeaveMenu(popup)
 		end
-	end
+	end)
 
-	createtask({
-		done = updater.isupdatedownloaddone,
-		cancelled = isupdatecancelled,
-		callback = callback,
-		interval = taskinterval
-	})
+	updater.startupdatedownload()
 end
 
 function updaterpopup(oncancel)
@@ -129,10 +127,6 @@ function createtask(data)
 	return interval
 end
 
-function isupdatecancelled()
-	return updatecancelled
-end
-
 function tryupdate(autoclose)
 	updatecancelled = false
 	local popup = updaterpopup(function()
@@ -149,10 +143,13 @@ function tryautoupdate()
 	end
 
 	if (not updater.gethastriedupdate()) then
-		game:ontimeout(function()
+		local timer = LUI.UITimer.new(100, "tryupdate")
+		Engine.GetLuiRoot():addElement(timer)
+		Engine.GetLuiRoot():registerEventHandler("tryupdate", function()
+			timer:close()
 			updater.sethastriedupdate(true)
 			tryupdate(true)
-		end, 100)
+		end)
 	end
 end
 
