@@ -78,6 +78,26 @@ namespace ui_scripting
 		return values;
 	}
 
+	arguments get_return_values(game::hks::HksObject* base)
+	{
+		const auto state = *game::hks::lua_state;
+		const auto count = static_cast<int>(state->m_apistack.top - base);
+		arguments values;
+
+		for (auto i = count - 1; i >= 0; i--)
+		{
+			const auto v = get_return_value(i);
+			values.push_back(v);
+		}
+
+		if (values.size() == 0)
+		{
+			values.push_back({});
+		}
+
+		return values;
+	}
+
 	bool notify(const std::string& name, const event_arguments& arguments)
 	{
 		const auto state = *game::hks::lua_state;
@@ -127,10 +147,8 @@ namespace ui_scripting
 			push_value(*i);
 		}
 
-		const auto num_args = static_cast<int>(arguments.size());
-
-		game::hks::vm_call_internal(state, num_args, -1, 0);
-		const auto args = get_return_values();
+		game::hks::vm_call_internal(state, static_cast<int>(arguments.size()), -1, 0);
+		const auto args = get_return_values(top);
 		state->m_apistack.top = top;
 		return args;
 	}

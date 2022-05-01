@@ -182,11 +182,6 @@ namespace ui_scripting
 			auto game_type = game();
 			lua["game"] = game_type;
 
-			game_type["addlocalizedstring"] = [](const game&, const std::string& a, const std::string& b)
-			{
-				localized_strings::override(a, b);
-			};
-
 			game_type["sharedset"] = [](const game&, const std::string& key, const std::string& value)
 			{
 				scripting::shared_table.access([key, value](scripting::shared_table_t& table)
@@ -248,7 +243,7 @@ namespace ui_scripting
 				const auto alternate = name.starts_with("alt_");
 				const auto weapon = ::game::G_GetWeaponForName(name.data());
 
-				char buffer[0x400] = { 0 };
+				char buffer[0x400] = {0};
 				::game::CG_GetWeaponDisplayName(weapon, alternate, buffer, 0x400);
 
 				return std::string(buffer);
@@ -281,7 +276,9 @@ namespace ui_scripting
 				std::vector<std::string> args{};
 				for (const auto& value : va)
 				{
-					args.push_back(to_string(value)[0].as<std::string>());
+					const auto value_str = to_string(value);
+
+					args.push_back(value_str[0].as<std::string>());
 				}
 
 				::scheduler::once([name, args]()
