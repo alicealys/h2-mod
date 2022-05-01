@@ -167,8 +167,11 @@ namespace ui_scripting
 		{
 			if (!this->is<T>())
 			{
+				const auto hks_typename = game::hks::typenames[this->get_raw().t + 2];
+				const auto typename_ = get_typename<T>();
+
 				throw std::runtime_error(utils::string::va("%s expected, got %s", 
-					typeid(T).name(), game::hks::typenames[this->get_raw().t + 2]));
+					typename_.data(), hks_typename));
 			}
 
 			return get<T>();
@@ -184,6 +187,7 @@ namespace ui_scripting
 
 		hks_object value_{};
 
+	private:
 		template <typename T>
 		T get() const;
 
@@ -201,16 +205,15 @@ namespace ui_scripting
 		template <typename T>
 		T as() const
 		{
-			if (!this->value_.is<T>())
+			try
 			{
-				const auto hks_typename = game::hks::typenames[this->value_.get_raw().t + 2];
-				const auto typename_ = get_typename<T>();
-
-				throw std::runtime_error(utils::string::va("bad argument #%d (%s expected, got %s)",
-					this->index_ + 1, typename_.data(), hks_typename));
+				return this->value_.as<T>();
 			}
-
-			return this->value_.get<T>();
+			catch (const std::exception& e)
+			{
+				throw std::runtime_error(utils::string::va("bad argument #%d (%s)",
+					this->index_ + 1, e.what()));
+			}
 		}
 
 		template <>
