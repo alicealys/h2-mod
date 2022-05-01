@@ -10,6 +10,7 @@ namespace ui_scripting
 
 	script_value get_return_value(int offset);
 	arguments get_return_values();
+	arguments get_return_values(game::hks::HksObject* base);
 
 	bool notify(const std::string& name, const event_arguments& arguments);
 
