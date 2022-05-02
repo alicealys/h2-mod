@@ -1102,12 +1102,12 @@ namespace game
 
 	struct DB_FileSysInterface;
 
-	// this is a best guess, interface doesn't match up exactly w/other games (IW8)
+	// this is a best guess, interface doesn't match up exactly w/other games (IW8, T9)
 	struct DB_FileSysInterface_vtbl
 	{
 		DB_IFileSysFile* (__fastcall* OpenFile)(DB_FileSysInterface* _this, Sys_Folder folder, const char* filename);
-		FileSysResult (__fastcall* StartRead)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64 /* idk */, unsigned __int64 offset, unsigned __int64 size);
-		FileSysResult (__fastcall* NumberOfBytesRead)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64* bytesRead);
+		FileSysResult (__fastcall* Read)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64 offset, unsigned __int64 size, void* dest);
+		FileSysResult (__fastcall* Tell)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64* bytesRead);
 		__int64 (__fastcall* Size)(DB_FileSysInterface* _this, DB_IFileSysFile* handle);
 		void (__fastcall* Close)(DB_FileSysInterface* _this, DB_IFileSysFile* handle);
 		bool (__fastcall* Exists)(DB_FileSysInterface* _this, Sys_Folder folder, const char* filename);
@@ -1116,6 +1116,13 @@ namespace game
 	struct DB_FileSysInterface
 	{
 		DB_FileSysInterface_vtbl* vftbl;
+	};
+
+	__declspec(align(8)) struct DiskFile
+	{
+		DWORD status;
+		HANDLE handle;
+		_OVERLAPPED overlapped;
 	};
 
 	namespace hks

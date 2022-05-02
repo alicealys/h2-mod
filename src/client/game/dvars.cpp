@@ -2223,7 +2223,7 @@ namespace dvars
     };
 
 	game::dvar_t* register_int(const std::string& name, int value, int min, int max, 
-		game::DvarFlags flags)
+		unsigned int flags)
 	{
 		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
@@ -2231,14 +2231,14 @@ namespace dvars
 	}
 
 	game::dvar_t* register_bool(const std::string& name, bool value, 
-		game::DvarFlags flags)
+		unsigned int flags)
 	{
 		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
 		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
 
-    game::dvar_t* register_enum(const std::string& name, const char** valueList, int defaultIndex, game::DvarFlags flags)
+    game::dvar_t* register_enum(const std::string& name, const char** valueList, int defaultIndex, unsigned int flags)
     {
         dvar_list.insert(name);
         const auto hash = game::generateHashValue(name.data());
@@ -2246,7 +2246,7 @@ namespace dvars
     }
 
 	game::dvar_t* register_float(const std::string& name, float value, float min, 
-		float max, game::DvarFlags flags)
+		float max, unsigned int flags)
 	{
 		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());
@@ -2254,7 +2254,7 @@ namespace dvars
 	}
 
 	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z, 
-		float w, float min, float max, game::DvarFlags flags)
+		float w, float min, float max, unsigned int flags)
 	{
 		dvar_list.insert(name);
 		const auto hash = game::generateHashValue(name.data());

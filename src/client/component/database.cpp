@@ -4,7 +4,7 @@
 #include "game/dvars.hpp"
 #include "game/game.hpp"
 
-#include <utils/flags.hpp>
+#include <utils/io.hpp>
 #include <utils/hook.hpp>
 
 namespace database
@@ -12,10 +12,9 @@ namespace database
 	namespace
 	{
 		game::dvar_t* db_filesysImpl = nullptr;
+		utils::hook::detour db_fsinitialize_hook;
 
-		utils::hook::detour sub_140272EC0_hook;
-
-		game::DB_FileSysInterface* sub_140272EC0_stub()
+		game::DB_FileSysInterface* db_fsinitialize_stub()
 		{
 			switch (db_filesysImpl->current.integer)
 			{
@@ -27,8 +26,6 @@ namespace database
 				return nullptr; // this should not happen
 			}
 		}
-
-		
 	}
 
 	class component final : public component_interface
@@ -42,15 +39,16 @@ namespace database
 				nullptr
 			};
 
-			int default_value = utils::flags::has_flag("disk") ? 1 : 0;
+			int default_value = utils::io::directory_exists("Data/data") ? 0 : 1;
 			db_filesysImpl = dvars::register_enum("db_filesysImpl", values, default_value, game::DVAR_FLAG_READ);
 
 			if (default_value == 1)
 			{
 				utils::hook::nop(0x1405A4868, 22); // TACT related stuff that's pointless if we're using DiskFS
+				utils::hook::nop(0x14071AF83, 45); // Skip setting Bink file OS callbacks (not necessary since we're loading from disk)
 			}
 			
-			sub_140272EC0_hook.create(0x140272EC0, sub_140272EC0_stub);
+			db_fsinitialize_hook.create(game::DB_FSInitialize, db_fsinitialize_stub);
 		}
 	};
 }
