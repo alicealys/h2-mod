@@ -39,7 +39,7 @@ namespace database
 				nullptr
 			};
 
-			int default_value = utils::io::directory_exists("Data/data") ? 0 : 1;
+			int default_value = (utils::io::directory_exists("Data/data") && utils::io::directory_exists("Data/config") && utils::io::directory_exists("Data/indices")) ? 0 : 1;
 			db_filesysImpl = dvars::register_enum("db_filesysImpl", values, default_value, game::DVAR_FLAG_READ);
 
 			if (default_value == 1)
