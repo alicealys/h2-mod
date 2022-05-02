@@ -1079,6 +1079,52 @@ namespace game
 		bool startsolid; // Confirmed in PM_JitterPoint
 	};
 
+	enum Sys_Folder : std::int32_t
+	{
+		SF_ZONE = 0x0,
+		SF_ZONE_LOC = 0x1,
+		SF_VIDEO = 0x2,
+		SF_VIDEO_LOC = 0x3,
+		SF_PAKFILE = 0x4,
+		SF_PAKFILE_LOC = 0x5,
+		SF_ZONE_REGION = 0x6,
+		SF_COUNT = 0x7,
+	};
+
+	enum FileSysResult : std::int32_t
+	{
+		FILESYSRESULT_SUCCESS = 0x0,
+		FILESYSRESULT_EOF = 0x1,
+		FILESYSRESULT_ERROR = 0x2,
+	};
+
+	struct DB_IFileSysFile;
+
+	struct DB_FileSysInterface;
+
+	// this is a best guess, interface doesn't match up exactly w/other games (IW8, T9)
+	struct DB_FileSysInterface_vtbl
+	{
+		DB_IFileSysFile* (__fastcall* OpenFile)(DB_FileSysInterface* _this, Sys_Folder folder, const char* filename);
+		FileSysResult (__fastcall* Read)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64 offset, unsigned __int64 size, void* dest);
+		FileSysResult (__fastcall* Tell)(DB_FileSysInterface* _this, DB_IFileSysFile* handle, unsigned __int64* bytesRead);
+		__int64 (__fastcall* Size)(DB_FileSysInterface* _this, DB_IFileSysFile* handle);
+		void (__fastcall* Close)(DB_FileSysInterface* _this, DB_IFileSysFile* handle);
+		bool (__fastcall* Exists)(DB_FileSysInterface* _this, Sys_Folder folder, const char* filename);
+	};
+
+	struct DB_FileSysInterface
+	{
+		DB_FileSysInterface_vtbl* vftbl;
+	};
+
+	__declspec(align(8)) struct DiskFile
+	{
+		DWORD status;
+		HANDLE handle;
+		_OVERLAPPED overlapped;
+	};
+
 	namespace hks
 	{
 		struct lua_State;
