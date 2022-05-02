@@ -37,6 +37,7 @@ namespace game
 	WEAK symbol<const char*(const XAsset* asset)> DB_GetXAssetName{0x1403E4090};
 	WEAK symbol<void(XZoneInfo* zoneInfo, unsigned int zoneCount, DBSyncMode syncMode)> DB_LoadXAssets{0x140414FF0};
 	WEAK symbol<XAssetHeader(XAssetType type, const char* name, int allowCreateDefault)> DB_FindXAssetHeader{0x140412F60};
+	WEAK symbol<DB_FileSysInterface*()> DB_FSInitialize{0x140272EC0};
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x140413D80};
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
 
@@ -127,6 +128,7 @@ namespace game
 	WEAK symbol<void()> R_WaitWorkerCmds{0x140794330};
 	WEAK symbol<void(const void* obj, void* pose, unsigned int entnum, unsigned int renderFxFlags, float* lightingOrigin, 
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x140775C40};
+	WEAK symbol<HANDLE(unsigned __int64* outUserData, void* dest, unsigned __int64 bytes)> R_Cinematic_SysIO_BinkRead{0x1407191B0};
 
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x1403E16A0};
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x1403E1660};
@@ -163,6 +165,7 @@ namespace game
 	WEAK symbol<HWND> hWnd{0x14CCF81C0};
 
 	WEAK symbol<const char*> g_assetNames{0x140BEF280};
+
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
@@ -190,6 +193,8 @@ namespace game
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0x14B617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14BA9EE40};
 	WEAK symbol<function_stack_t> scr_function_stack{0x14BAA93C0};
+
+	WEAK symbol<DB_FileSysInterface*> g_fileSystem{0x1420B27E8};
 
 	namespace hks
 	{
