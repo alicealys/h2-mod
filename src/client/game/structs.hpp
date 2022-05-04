@@ -1118,6 +1118,15 @@ namespace game
 		DB_FileSysInterface_vtbl* vftbl;
 	};
 
+	struct map_t
+	{
+		const char* name;
+		int id;
+		int unk;
+	};
+
+	static_assert(sizeof(map_t) == 0x10);
+
 	__declspec(align(8)) struct DiskFile
 	{
 		DWORD status;

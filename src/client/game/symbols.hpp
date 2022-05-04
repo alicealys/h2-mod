@@ -196,6 +196,8 @@ namespace game
 
 	WEAK symbol<DB_FileSysInterface*> g_fileSystem{0x1420B27E8};
 
+	WEAK symbol<map_t> maps{0x14097EE90};
+
 	namespace hks
 	{
 		WEAK symbol<lua_State*> lua_state{0x1419D83E8};

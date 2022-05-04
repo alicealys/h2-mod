@@ -4,9 +4,11 @@
 
 #include "command.hpp"
 #include "game_console.hpp"
+#include "localized_strings.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
+#include <utils/string.hpp>
 
 namespace fastfiles
 {
@@ -15,6 +17,7 @@ namespace fastfiles
 	namespace
 	{
 		utils::hook::detour db_try_load_x_file_internal_hook;
+		utils::hook::detour db_find_xasset_header;
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -24,6 +27,41 @@ namespace fastfiles
 				fastfile = zone_name;
 			});
 			return db_try_load_x_file_internal_hook.invoke<void>(zone_name, flags);
+		}
+
+		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
+		{
+			const auto start = game::Sys_Milliseconds();
+			const auto result = db_find_xasset_header.invoke<game::XAssetHeader>(type, name, allow_create_default);
+			const auto diff = game::Sys_Milliseconds() - start;
+
+			if (diff > 100)
+			{
+				game_console::print(
+					result.data == nullptr
+						? game_console::con_type_error
+						: game_console::con_type_warning,
+					"Waited %i msec for %sasset \"%s\", of type \"%s\"\n", 
+					diff, 
+					result.data == nullptr 
+						? "missing " 
+						: "", 
+					name, 
+					game::g_assetNames[type]
+				);
+			}
+
+			return result;
+		}
+
+		void add_missing_localized_strings()
+		{
+			for (auto map = &game::maps[0]; map->unk; ++map)
+			{
+				const auto str = utils::string::va("LUA_MENU_SP_LOCATION_%s",
+					utils::string::to_upper(map->name).data());
+				localized_strings::override(str, str);
+			}
 		}
 	}
 
@@ -39,11 +77,10 @@ namespace fastfiles
 	std::string get_current_fastfile()
 	{
 		std::string fastfile_copy;
-		current_fastfile.access([&](std::string& fastfile)
+		return current_fastfile.access<std::string>([&](std::string& fastfile)
 		{
-			fastfile_copy = fastfile;
+			return fastfile;
 		});
-		return fastfile_copy;
 	}
 
 	class component final : public component_interface
@@ -51,7 +88,10 @@ namespace fastfiles
 	public:
 		void post_unpack() override
 		{
-			db_try_load_x_file_internal_hook.create(0x1404173B0, &db_try_load_x_file_internal);
+			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
+			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
+
+			add_missing_localized_strings();
 
 			command::add("loadzone", [](const command::params& params)
 			{
