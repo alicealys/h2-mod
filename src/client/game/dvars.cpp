@@ -1299,7 +1299,7 @@ namespace dvars
         "player_sprintJumpDropWeaponScaler",
         "player_sprintSpeedScale",
         "player_sprintUnlimited",
-		"player_sustainammo",
+        "player_sustainAmmo",
         "player_swimAcceleration",
         "player_swimCombatTimer",
         "player_swimDragHandFrictionMax",
