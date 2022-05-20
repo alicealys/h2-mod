@@ -15,13 +15,15 @@ namespace dvars
 	game::dvar_t* con_inputDvarInactiveValueColor = nullptr;
 	game::dvar_t* con_inputCmdMatchColor = nullptr;
 
-	game::dvar_t* jump_enableFallDamage;
+	game::dvar_t* jump_enableFallDamage = nullptr;
 
-	game::dvar_t* r_fullbright;
+	game::dvar_t* r_fullbright = nullptr;
 
-	game::dvar_t* cg_legacyCrashHandling;
+	game::dvar_t* cg_legacyCrashHandling = nullptr;
 
 	game::dvar_t* g_enableElevators = nullptr;
+
+    game::dvar_t* player_sustainAmmo = nullptr;
 
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{

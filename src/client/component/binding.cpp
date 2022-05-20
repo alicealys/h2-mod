@@ -116,7 +116,8 @@ namespace binding
 					return;
 				}
 
-				return game::Cbuf_AddText(local_client_num, utils::string::va("%s\n", bind.value().data()));
+				game::Cbuf_AddText(local_client_num, utils::string::va("%s\n", bind.value().data()));
+				return;
 			}
 
 			cl_execute_key_hook.invoke<void>(local_client_num, key, down, time);

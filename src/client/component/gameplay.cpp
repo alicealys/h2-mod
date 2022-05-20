@@ -12,6 +12,7 @@ namespace gameplay
 	{
 		utils::hook::detour pm_player_trace_hook;
 		utils::hook::detour pm_crashland_hook;
+		utils::hook::detour pm_weapon_use_ammo_hook;
 
 		void pm_player_trace_stub(game::pmove_t* pm, game::trace_t* trace, const float* f3,
 			const float* f4, const game::Bounds* bounds, int a6, int a7)
@@ -59,6 +60,15 @@ namespace gameplay
 				pm_crashland_hook.invoke<void>(ps, pm);
 			}
 		}
+
+		void pm_weapon_use_ammo_stub(void* ps, unsigned int weapon,
+			bool is_alternate, int amount, game::PlayerHandIndex hand)
+		{
+			if (!dvars::player_sustainAmmo->current.enabled)
+			{
+				pm_weapon_use_ammo_hook.invoke<void>(ps, weapon, is_alternate, amount, hand);
+			}
+		}
 	}
 
 	class component final : public component_interface
@@ -66,8 +76,9 @@ namespace gameplay
 	public:
 		void post_unpack() override
 		{
-			dvars::g_enableElevators = dvars::register_bool("g_enableElevators", false, game::DvarFlags::DVAR_FLAG_NONE);
+			dvars::g_enableElevators = dvars::register_bool("g_enableElevators", false, game::DvarFlags::DVAR_FLAG_REPLICATED);
 			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", true, game::DVAR_FLAG_REPLICATED);
+			dvars::player_sustainAmmo = dvars::register_bool("player_sustainAmmo", false, game::DVAR_FLAG_REPLICATED);
 
 			// Influence PM_JitterPoint code flow so the trace->startsolid checks are 'ignored' 
 			pm_player_trace_hook.create(0x14068F0A0, &pm_player_trace_stub);
@@ -76,6 +87,8 @@ namespace gameplay
 			utils::hook::jump(0x1406878C1, utils::hook::assemble(pm_trace_stub), true);
 
 			pm_crashland_hook.create(0x140688A20, pm_crashland_stub);
+
+			pm_weapon_use_ammo_hook.create(0x140366170, pm_weapon_use_ammo_stub);
 
 			dvars::register_float("jump_height", 39, 0, 1000, game::DVAR_FLAG_REPLICATED);
 			dvars::register_float("g_gravity", 800, 1, 1000, game::DVAR_FLAG_REPLICATED);

@@ -1068,6 +1068,14 @@ namespace game
 		const char* name;
 	};
 
+	enum PlayerHandIndex
+	{
+		WEAPON_HAND_RIGHT = 0x0,
+		WEAPON_HAND_LEFT = 0x1,
+		NUM_WEAPON_HANDS = 0x2,
+		WEAPON_HAND_DEFAULT = 0x0,
+	};
+
 	struct pmove_t
 	{
 	};
