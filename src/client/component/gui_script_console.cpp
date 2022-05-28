@@ -176,7 +176,7 @@ namespace gui::script_console
 				bool execute = false;
 				if (multi_line_input)
 				{
-					ImGui::InputTextMultiline("", &input, ImVec2(0, 100), 
+					ImGui::InputTextMultiline("Input", &input, ImVec2(0, 100), 
 						ImGuiInputTextFlags_CallbackCompletion, multi_line_input_text_edit);
 					ImGui::SameLine();
 					execute = ImGui::Button("Execute", ImVec2(100, 100));
