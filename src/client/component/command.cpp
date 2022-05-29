@@ -309,8 +309,6 @@ namespace command
 
 				scheduler::once([=]()
 				{
-					printf("%i\n", game::Sys_IsMainThread());
-
 					try
 					{
 						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
