@@ -16,6 +16,8 @@ namespace dvars
 	game::dvar_t* con_inputCmdMatchColor = nullptr;
 
 	game::dvar_t* jump_enableFallDamage;
+    game::dvar_t* jump_ladderPushVel;
+    game::dvar_t* jump_spreadAdd;
 
 	game::dvar_t* r_fullbright;
 
