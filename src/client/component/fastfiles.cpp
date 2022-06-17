@@ -112,7 +112,7 @@ namespace fastfiles
 			{
 				for (auto i = 0; i < game::ASSET_TYPE_COUNT; i++)
 				{
-					console::info("g_poolSize[% i]: % i // %s\n", i, game::g_poolSize[i], game::g_assetNames[i]);
+					console::info("g_poolSize[%i]: %i // %s\n", i, game::g_poolSize[i], game::g_assetNames[i]);
 				}
 			});
 		}
