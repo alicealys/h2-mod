@@ -1,6 +1,5 @@
 #pragma once
 
-#include "game.hpp"
 #include "structs.hpp"
 #include <string>
 
@@ -17,6 +16,8 @@ namespace dvars
 	extern game::dvar_t* con_inputCmdMatchColor;
 
 	extern game::dvar_t* jump_enableFallDamage;
+	extern game::dvar_t* jump_ladderPushVel;
+	extern game::dvar_t* jump_spreadAdd;
 
 	extern game::dvar_t* r_fullbright;
 
