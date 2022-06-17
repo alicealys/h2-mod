@@ -304,20 +304,23 @@ namespace fps
 
 			sub_7C55D0_hook.create(0x1407C55D0, perf_update);
 
-			cg_drawSpeed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED);
-			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED);
+			cg_drawSpeed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED, "Draw speed");
+			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED, "Draw fps");
 
-			cg_speedGraph = dvars::register_bool("cg_speedGraph", 0, game::DVAR_FLAG_SAVED);
+			cg_speedGraph = dvars::register_bool("cg_speedGraph", 0, game::DVAR_FLAG_SAVED, "Enable speed graph");
 
-			cg_speedGraphColor = dvars::register_vec4("cg_speedGraphColor", 1.f, 0.f, 0.f, 1.0f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
-			cg_speedGraphFontColor = dvars::register_vec4("cg_speedGraphFontColor", 1.f, 1.f, 1.f, 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
-			cg_speedGraphBackgroundColor = dvars::register_vec4("cg_speedGraphBackgroundColor", 0.f, 0.f, 0.f, 0.8f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
+			cg_speedGraphColor = dvars::register_vec4("cg_speedGraphColor", 
+				1.f, 0.f, 0.f, 1.0f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph color");
+			cg_speedGraphFontColor = dvars::register_vec4("cg_speedGraphFontColor", 
+				1.f, 1.f, 1.f, 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph font color");
+			cg_speedGraphBackgroundColor = dvars::register_vec4("cg_speedGraphBackgroundColor", 
+				0.f, 0.f, 0.f, 0.8f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph background color");
 
-			cg_speedGraphX = dvars::register_int("cg_speedGraphX", 15, 0, 1000, game::DVAR_FLAG_SAVED);
-			cg_speedGraphY = dvars::register_int("cg_speedGraphY", 15, 0, 1000, game::DVAR_FLAG_SAVED);
+			cg_speedGraphX = dvars::register_int("cg_speedGraphX", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph x position");
+			cg_speedGraphY = dvars::register_int("cg_speedGraphY", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph y position");
 
-			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED);
-			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED);
+			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph width");
+			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph height");
 		}
 	};
 }

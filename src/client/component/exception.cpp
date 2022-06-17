@@ -234,7 +234,8 @@ namespace exception
 
 		void post_unpack() override
 		{
-			dvars::cg_legacyCrashHandling = dvars::register_bool("cg_legacyCrashHandling", false, game::DVAR_FLAG_SAVED);
+			dvars::cg_legacyCrashHandling = dvars::register_bool("cg_legacyCrashHandling", false, 
+				game::DVAR_FLAG_SAVED, "Disable new crash handling");
 		}
 	};
 }

@@ -42,6 +42,7 @@ namespace game
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
+	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x1405A75D0};
 	WEAK symbol<dvar_t*(int hash, const char* name, bool value, unsigned int flags)> Dvar_RegisterBool{0x140617BB0};
 	WEAK symbol<dvar_t*(int hash, const char* name, const char** valueList, int defaultIndex, unsigned int flags)> Dvar_RegisterEnum{0x140617E90};

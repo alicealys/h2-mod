@@ -94,10 +94,14 @@ namespace gameplay
 	public:
 		void post_unpack() override
 		{
-			dvars::g_enableElevators = dvars::register_bool("g_enableElevators", false, game::DvarFlags::DVAR_FLAG_NONE);
-			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", true, game::DVAR_FLAG_REPLICATED);
-			dvars::jump_ladderPushVel = dvars::register_float("jump_ladderPushVel", 128.0f, 0.0f, 1024.0f, game::DVAR_FLAG_REPLICATED);
-			dvars::jump_spreadAdd = dvars::register_float("jump_spreadAdd", 64.0f, 0.0f, 512.0f, game::DVAR_FLAG_REPLICATED);
+			dvars::g_enableElevators = dvars::register_bool("g_enableElevators", false, 
+				game::DVAR_FLAG_REPLICATED, "Enable elevators");
+			dvars::jump_enableFallDamage = dvars::register_bool("jump_enableFallDamage", true, 
+				game::DVAR_FLAG_REPLICATED, "Enable fall damage");
+			dvars::jump_ladderPushVel = dvars::register_float("jump_ladderPushVel", 128.0f, 0.0f, 1024.0f, 
+				game::DVAR_FLAG_REPLICATED, "The velocity of a jump off of a ladder");
+			dvars::jump_spreadAdd = dvars::register_float("jump_spreadAdd", 64.0f, 0.0f, 512.0f, 
+				game::DVAR_FLAG_REPLICATED, "The amount of spread scale to add as a side effect of jumping");
 
 			// Influence PM_JitterPoint code flow so the trace->startsolid checks are 'ignored' 
 			pm_player_trace_hook.create(0x14068F0A0, &pm_player_trace_stub);
@@ -114,10 +118,14 @@ namespace gameplay
 			utils::hook::nop(0x14067AE0F, 4);
 
 			// Dvars already present in-game
-			dvars::register_float("jump_height", 39.0f, 0.0f, 1000.0f, game::DVAR_FLAG_REPLICATED);
-			dvars::register_float("jump_stepSize", 18.0f, 0.0f, 64.0f, game::DVAR_FLAG_REPLICATED);
-			dvars::register_float("g_gravity", 800.0f, 1.0f, 1000.0f, game::DVAR_FLAG_REPLICATED);
-			dvars::register_int("g_speed", 190, 0, 1000, game::DVAR_FLAG_REPLICATED);
+			dvars::register_float("jump_height", 39.0f, 0.0f, 1000.0f,
+				game::DVAR_FLAG_REPLICATED, "The maximum height of a player\'s jump");
+			dvars::register_float("jump_stepSize", 18.0f, 0.0f, 64.0f, 
+				game::DVAR_FLAG_REPLICATED, "The maximum step up to the top of a jump arc");
+			dvars::register_float("g_gravity", 800.0f, 1.0f, 1000.0f, 
+				game::DVAR_FLAG_REPLICATED, "Game gravity in inches per second squared");
+			dvars::register_int("g_speed", 190, 0, 1000, 
+				game::DVAR_FLAG_REPLICATED, "Player speed");
 		}
 	};
 }

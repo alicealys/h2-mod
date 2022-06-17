@@ -44,7 +44,12 @@ namespace command
 				return 0;
 			}
 
-			const auto dvar = game::Dvar_FindVar(args[0]);
+			auto dvar = game::Dvar_FindVar(args[0]);
+			if (dvar == nullptr)
+			{
+				const auto hash = static_cast<int>(std::strtoull(args[0], nullptr, 16));
+				dvar = game::Dvar_FindMalleableVar(hash);
+			}
 
 			if (dvar)
 			{
@@ -53,15 +58,25 @@ namespace command
 					const auto current = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
 					const auto reset = game::Dvar_ValueToString(dvar, nullptr, &dvar->reset);
 
-					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX",
-						args[0], current, reset, dvar->name);
+					const auto info = dvars::get_dvar_info_from_hash(dvar->name);
+					std::string desc{};
+					std::string name = args[0];
 
-					game_console::print(game_console::con_type_info, "   %s\n",
-						dvars::dvar_get_domain(dvar->type, dvar->domain).data());
+					if (info.has_value())
+					{
+						name = info.value().name;
+						desc = info.value().description;
+					}
+
+					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX\n",
+						name.data(), current, reset, dvar->name);
+
+					game_console::print(game_console::con_type_info, "%s\n", desc.data());
+					game_console::print(game_console::con_type_info, "   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());
 				}
 				else
 				{
-					char command[0x1000] = { 0 };
+					char command[0x1000] = {0};
 					game::Dvar_GetCombinedString(command, 1);
 					game::Dvar_SetCommand(dvar->name, "", command);
 				}
