@@ -51,6 +51,12 @@ namespace game
 		FL_BADPLACE_VOLUME = 0x80000000,
 	};
 
+	enum
+	{
+		PMF_TIME_HARDLANDING = 1 << 7,
+		PMF_TIME_KNOCKBACK = 1 << 8,
+	};
+
 	struct EntityState
 	{
 		char entityNum;
