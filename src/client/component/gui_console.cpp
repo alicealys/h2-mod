@@ -21,7 +21,7 @@ namespace gui::console
 		int history_index = -1;
 		std::string input;
 		std::string filter;
-		std::unordered_set<std::string> matches;
+		std::vector<dvars::dvar_info> matches;
 
 		int input_text_edit(ImGuiInputTextCallbackData* data)
 		{
@@ -43,7 +43,7 @@ namespace gui::console
 
 				if (matches.size() < 24 && matches.size() > 0)
 				{
-					const auto match = matches.begin()->data();
+					const auto match = matches.begin()->name.data();
 					data->DeleteChars(0, data->BufTextLen);
 					data->InsertChars(0, match, match + strlen(match));
 				}

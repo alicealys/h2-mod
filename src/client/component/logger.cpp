@@ -15,6 +15,8 @@ namespace logger
 		utils::hook::detour nullsub_48_hook;
 		utils::hook::detour sub_32AEF0;
 
+		game::dvar_t* logger_dev = nullptr;
+
 		void print_error(const char* msg, ...)
 		{
 			char buffer[2048];
@@ -91,8 +93,7 @@ namespace logger
 
 		void print_dev(const char* msg, ...)
 		{
-			static auto* enabled = dvars::register_bool("logger_dev", false, game::DVAR_FLAG_SAVED);
-			if (!enabled->current.enabled)
+			if (!logger_dev->current.enabled)
 			{
 				return;
 			}
@@ -126,8 +127,7 @@ namespace logger
 			}
 			else
 			{
-				static auto* enabled = dvars::register_bool("logger_dev", false, game::DVAR_FLAG_SAVED);
-				if (!enabled->current.enabled)
+				if (!logger_dev->current.enabled)
 				{
 					return;
 				}
@@ -147,6 +147,8 @@ namespace logger
 			utils::hook::jump(0x14032AEF0, lui_print, true);
 			com_error_hook.create(0x1405A2D80, com_error_stub);
 			utils::hook::jump(0x14013A98C, print);
+
+			logger_dev = dvars::register_bool("logger_dev", false, game::DVAR_FLAG_SAVED, "Print dev stuff");
 		}
 	};
 }

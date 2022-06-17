@@ -44,7 +44,7 @@ namespace database
 				|| !utils::io::directory_exists("Data/config")
 				|| !utils::io::directory_exists("Data/indices"));
 
-			db_filesysImpl = dvars::register_enum("db_filesysImpl", values, default_value, game::DVAR_FLAG_READ);
+			db_filesysImpl = dvars::register_enum("db_filesysImpl", values, default_value, game::DVAR_FLAG_READ, "Filesystem implementation");
 
 			if (default_value == 1)
 			{

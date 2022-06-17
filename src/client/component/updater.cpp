@@ -414,7 +414,8 @@ namespace updater
 		void post_unpack() override
 		{
 			delete_old_file();
-			cl_auto_update = dvars::register_bool("cg_auto_update", true, game::DVAR_FLAG_SAVED);
+			cl_auto_update = dvars::register_bool("cg_auto_update", true, 
+				game::DVAR_FLAG_SAVED, "Automatically check for updates on launch");
 		}
 	};
 }

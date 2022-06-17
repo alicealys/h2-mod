@@ -2,7 +2,6 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
-#include "game/dvars.hpp"
 
 #include "game_console.hpp"
 #include "command.hpp"
@@ -55,7 +54,7 @@ namespace game_console
 		std::deque<std::string> history;
 
 		std::string fixed_input;
-		std::unordered_set<std::string> matches;
+		std::vector<dvars::dvar_info> matches;
 
 		float color_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 		float color_h2[4] = {0.9f, 0.9f, 0.5f, 1.0f};
@@ -161,21 +160,22 @@ namespace game_console
 			con.globals.x = game::R_TextWidth(str, 0, console_font) + con.globals.x + 6.0f;
 		}
 
-		void draw_hint_box(const int lines, float* color, [[maybe_unused]] float offset_x = 0.0f,
+		float draw_hint_box(const int lines, float* color, [[maybe_unused]] float offset_x = 0.0f,
 			[[maybe_unused]] float offset_y = 0.0f)
 		{
 			const auto _h = lines * con.globals.font_height + 12.0f;
-			const auto _y = con.globals.y - 3.0f + con.globals.font_height + 12.0f;
+			const auto _y = con.globals.y - 3.0f + con.globals.font_height + 12.0f + offset_y;
 			const auto _w = (con.screen_max[0] - con.screen_min[0]) - ((con.globals.x - 6.0f) - con.screen_min[0]);
 
 			draw_box(con.globals.x - 6.0f, _y, _w, _h, color);
+			return _h;
 		}
 
-		void draw_hint_text(const int line, const char* text, float* color, const float offset = 0.0f)
+		void draw_hint_text(const int line, const char* text, float* color, const float offset_x = 0.0f, const float offset_y = 0.0f)
 		{
-			const auto _y = con.globals.font_height + con.globals.y + (con.globals.font_height * (line + 1)) + 15.0f;
+			const auto _y = con.globals.font_height + con.globals.y + (con.globals.font_height * (line + 1)) + 15.0f + offset_y;
 
-			game::R_AddCmdDrawText(text, 0x7FFFFFFF, console_font, con.globals.x + offset, _y, 1.0f, 1.0f, 0.0f, color, 0);
+			game::R_AddCmdDrawText(text, 0x7FFFFFFF, console_font, con.globals.x + offset_x, _y, 1.0f, 1.0f, 0.0f, color, 0);
 		}
 
 		bool match_compare(const std::string& input, const std::string& text, const bool exact)
@@ -242,56 +242,68 @@ namespace game_console
 			}
 			else if (matches.size() == 1)
 			{
-				const auto first = *matches.begin();
-				auto* const dvar = game::Dvar_FindVar(first.data());
-				const auto line_count = dvar ? 2 : 1;
+				auto* const dvar = game::Dvar_FindVar(matches[0].name.data());
+				const auto line_count = dvar ? 3 : 1;
 
-				draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
-				draw_hint_text(0, first.data(),
-							  dvar
-								  ? dvars::con_inputDvarMatchColor->current.vector
-								  : dvars::con_inputCmdMatchColor->current.vector);
+				const auto height = draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
+				draw_hint_text(0, matches[0].name.data(), dvar
+					? dvars::con_inputDvarMatchColor->current.vector
+					: dvars::con_inputCmdMatchColor->current.vector);
 
 				if (dvar)
 				{
-					const auto offset = (con.screen_max[0] - con.globals.x) / 2.5f;
+					const auto offset = (con.screen_max[0] - con.globals.x) / 4.f;
 
 					draw_hint_text(0, game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
 						dvars::con_inputDvarValueColor->current.vector, offset);
 					draw_hint_text(1, "  default", dvars::con_inputDvarInactiveValueColor->current.vector);
 					draw_hint_text(1, game::Dvar_ValueToString(dvar, nullptr, &dvar->reset),
 						dvars::con_inputDvarInactiveValueColor->current.vector, offset);
+					draw_hint_text(2, matches[0].description.data(),
+						color_white, 0);
+
+					const auto offset_y = height + 3.f;
+					const auto line_count_ = dvar->type == game::dvar_type::enumeration
+						? dvar->domain.enumeration.stringCount + 1
+						: 1;
+
+					draw_hint_box(line_count_, dvars::con_inputHintBoxColor->current.vector, 0, offset_y);
+					draw_hint_text(0, dvars::dvar_get_domain(dvar->type, dvar->domain).data(),
+						dvars::con_inputCmdMatchColor->current.vector, 0, offset_y);
 				}
 
-				strncpy_s(con.globals.auto_complete_choice, first.data(), 64);
+				strncpy_s(con.globals.auto_complete_choice, matches[0].name.data(), 64);
 				con.globals.may_auto_complete = true;
 			}
 			else if (matches.size() > 1)
 			{
 				draw_hint_box(static_cast<int>(matches.size()), dvars::con_inputHintBoxColor->current.vector);
 
-				const auto offset = (con.screen_max[0] - con.globals.x) / 2.5f;
+				const auto offset = (con.screen_max[0] - con.globals.x) / 4.f;
 
-				auto index = 0;
-				for (const auto& match : matches)
+				for (size_t i = 0; i < matches.size(); i++)
 				{
-					auto* const dvar = game::Dvar_FindVar(match.data());
+					auto* const dvar = game::Dvar_FindVar(matches[i].name.data());
 
-					draw_hint_text(static_cast<int>(index), match.data(),
-					               dvar
-						               ? dvars::con_inputDvarMatchColor->current.vector
-						               : dvars::con_inputCmdMatchColor->current.vector);
+					draw_hint_text(static_cast<int>(i), matches[i].name.data(),
+						dvar
+						? dvars::con_inputDvarMatchColor->current.vector
+						: dvars::con_inputCmdMatchColor->current.vector);
 
 					if (dvar)
 					{
-						draw_hint_text(static_cast<int>(index), game::Dvar_ValueToString(dvar, nullptr, &dvar->current),
-									   dvars::con_inputDvarValueColor->current.vector, offset);
-					}
+						const auto value = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
+						const auto truncated = utils::string::truncate(value, 34, "...");
 
-					index++;
+						draw_hint_text(static_cast<int>(i), truncated.data(),
+							dvars::con_inputDvarValueColor->current.vector, offset);
+
+						draw_hint_text(static_cast<int>(i), matches[i].description.data(),
+							dvars::con_inputDvarValueColor->current.vector, offset * 1.5f);
+					}
 				}
 
-				strncpy_s(con.globals.auto_complete_choice, matches.begin()->data(), 64);
+				strncpy_s(con.globals.auto_complete_choice, matches[0].name.data(), 64);
 				con.globals.may_auto_complete = true;
 			}
 		}
@@ -653,16 +665,16 @@ namespace game_console
 		return true;
 	}
 
-	void find_matches(std::string input, std::unordered_set<std::string>& suggestions, const bool exact)
+	void find_matches(std::string input, std::vector<dvars::dvar_info>& suggestions, const bool exact)
 	{
 		input = utils::string::to_lower(input);
 
 		for (const auto& dvar : dvars::dvar_list)
 		{
-			auto name = utils::string::to_lower(dvar);
+			auto name = utils::string::to_lower(dvar.name);
 			if (game::Dvar_FindVar(name.data()) && match_compare(input, name, exact))
 			{
-				suggestions.insert(dvar);
+				suggestions.push_back(dvar);
 			}
 
 			if (exact && suggestions.size() > 1)
@@ -673,7 +685,7 @@ namespace game_console
 
 		if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
 		{
-			suggestions.insert(input.data());
+			suggestions.push_back({ input, "" });
 		}
 
 		game::cmd_function_s* cmd = (*game::cmd_functions);
@@ -685,7 +697,7 @@ namespace game_console
 
 				if (match_compare(input, name, exact))
 				{
-					suggestions.insert(cmd->name);
+					suggestions.push_back({ cmd->name, "" });
 				}
 
 				if (exact && suggestions.size() > 1)
@@ -693,6 +705,7 @@ namespace game_console
 					return;
 				}
 			}
+
 			cmd = cmd->next;
 		}
 	}
@@ -743,58 +756,59 @@ namespace game_console
 
 			// add our dvars
 			dvars::con_inputBoxColor = dvars::register_vec4(
-				"con_inputBoxColor",
-				0.2f, 0.2f, 0.2f, 0.9f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_inputBoxColor", 
+				0.2f, 0.2f, 0.2f, 0.9f, 0.0f, 1.0f,
+				game::DVAR_FLAG_SAVED,
+				"color of console input box"
+			);
 			dvars::con_inputHintBoxColor = dvars::register_vec4(
-				"con_inputHintBoxColor",
-				0.3f, 0.3f, 0.3f, 1.0f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_inputHintBoxColor", 
+				0.3f, 0.3f, 0.3f, 1.0f, 0.0f, 1.0f,
+				game::DVAR_FLAG_SAVED, 
+				"color of console input hint box"
+			);
 			dvars::con_outputBarColor = dvars::register_vec4(
-				"con_outputBarColor",
-				0.5f, 0.5f, 0.5f, 0.6f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_outputBarColor", 
+				0.5f, 0.5f, 0.5f, 0.6f, 0.0f, 1.0f, 
+				game::DVAR_FLAG_SAVED,
+				"color of console output bar"
+			);
 			dvars::con_outputSliderColor = dvars::register_vec4(
-				"con_outputSliderColor",
-				0.9f, 0.9f, 0.5f, 1.00f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_outputSliderColor", 
+				0.3f, 0.7f, 0.3f, 1.0f, 0.0f, 1.0f,
+				game::DVAR_FLAG_SAVED, 
+				"color of console output slider"
+			);
 			dvars::con_outputWindowColor = dvars::register_vec4(
-				"con_outputWindowColor",
-				0.25f, 0.25f, 0.25f, 0.85f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_outputWindowColor", 
+				0.25f, 0.25f, 0.25f, 0.85f, 0.0f, 1.0f,
+				game::DVAR_FLAG_SAVED, 
+				"color of console output window"
+			);
 			dvars::con_inputDvarMatchColor = dvars::register_vec4(
-				"con_inputDvarMatchColor",
-				1.0f, 1.0f, 0.8f, 1.0f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_inputDvarMatchColor", 
+				1.0f, 1.0f, 0.8f, 1.0f, 0.0f, 1.0f,
+				game::DVAR_FLAG_SAVED, 
+				"color of console matched dvar"
+			);
 			dvars::con_inputDvarValueColor = dvars::register_vec4(
-				"con_inputDvarValueColor",
-				1.0f, 1.0f, 0.8f, 1.0f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_inputDvarValueColor", 
+				1.0f, 1.0f, 0.8f, 1.0f, 0.0f, 1.0f, 
+				game::DVAR_FLAG_SAVED, 
+				"color of console matched dvar value"
+			);
 			dvars::con_inputDvarInactiveValueColor = dvars::register_vec4(
-				"con_inputDvarInactiveValueColor",
-				0.8f, 0.8f, 0.8f, 1.0f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
-
+				"con_inputDvarInactiveValueColor", 
+				0.8f, 0.8f, 0.8f, 1.0f, 0.0f, 1.0f, 
+				game::DVAR_FLAG_SAVED,
+				"color of console inactive dvar value"
+			);
 			dvars::con_inputCmdMatchColor = dvars::register_vec4(
-				"con_inputCmdMatchColor",
-				0.80f, 0.80f, 1.0f, 1.0f,
-				0.0f, 1.0f,
-				game::DVAR_FLAG_SAVED);
+				"con_inputCmdMatchColor", 
+				0.80f, 0.80f, 1.0f, 1.0f, 0.0f, 1.0f, 
+				game::DVAR_FLAG_SAVED, 
+				"color of console matched command"
+			);
 		}
 	};
 }
