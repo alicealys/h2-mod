@@ -8,7 +8,7 @@
 
 #include "command.hpp"
 #include "scheduler.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "fastfiles.hpp"
 
 #include <utils/hook.hpp>
@@ -68,11 +68,11 @@ namespace command
 						desc = info.value().description;
 					}
 
-					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX\n",
+					console::info("\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX\n",
 						name.data(), current, reset, dvar->name);
 
-					game_console::print(game_console::con_type_info, "%s\n", desc.data());
-					game_console::print(game_console::con_type_info, "   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());
+					console::info("%s\n", desc.data());
+					console::info("   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());
 				}
 				else
 				{
@@ -176,7 +176,7 @@ namespace command
 
 				if (!exists)
 				{
-					game_console::print(game_console::con_type_error, "map '%s' not found\n", map);
+					console::error("map '%s' not found\n", map);
 					return;
 				}
 
@@ -188,11 +188,11 @@ namespace command
 			{
 				if (params.size() < 2)
 				{
-					game_console::print(game_console::con_type_info, "listassetpool <poolnumber>: list all the assets in the specified pool\n");
+					console::info("listassetpool <poolnumber>: list all the assets in the specified pool\n");
 
 					for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 					{
-						game_console::print(game_console::con_type_info, "%d %s\n", i, game::g_assetNames[i]);
+						console::info("%d %s\n", i, game::g_assetNames[i]);
 					}
 				}
 				else
@@ -201,11 +201,11 @@ namespace command
 
 					if (type < 0 || type >= game::XAssetType::ASSET_TYPE_COUNT)
 					{
-						game_console::print(game_console::con_type_info, "Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
+						console::info("Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
 						return;
 					}
 
-					game_console::print(game_console::con_type_info, "Listing assets in pool %s\n", game::g_assetNames[type]);
+					console::info("Listing assets in pool %s\n", game::g_assetNames[type]);
 
 					fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
 					{
@@ -213,7 +213,7 @@ namespace command
 						const auto* const asset_name = game::DB_GetXAssetName(&asset);
 						//const auto entry = game::DB_FindXAssetEntry(type, asset_name);
 						//TODO: display which zone the asset is from
-						game_console::print(game_console::con_type_info, "%s\n", asset_name);
+						console::info("%s\n", asset_name);
 					}, true);
 				}
 			});
@@ -228,7 +228,7 @@ namespace command
 				{
 					if (cmd->name)
 					{
-						game_console::print(game_console::con_type_info, "%s\n", cmd->name);
+						console::info("%s\n", cmd->name);
 					}
 
 					cmd = cmd->next;

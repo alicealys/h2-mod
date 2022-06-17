@@ -2,7 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "images.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "filesystem.hpp"
 
 #include "game/game.hpp"
@@ -84,7 +84,7 @@ namespace images
 			}
 			catch (std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load image %s: %s\n", image->name, e.what());
+				console::error("Failed to load image %s: %s\n", image->name, e.what());
 			}
 
 			load_texture_hook.invoke<void>(image, a2, a3);

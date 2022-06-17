@@ -2,7 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "game/dvars.hpp"
 
 #include <utils/hook.hpp>
@@ -28,7 +28,7 @@ namespace logger
 
 			va_end(ap);
 
-			game_console::print(game_console::con_type_error, buffer);
+			console::error("%s", buffer);
 		}
 
 		void print_com_error(int, const char* msg, ...)
@@ -42,7 +42,7 @@ namespace logger
 
 			va_end(ap);
 
-			game_console::print(game_console::con_type_error, buffer);
+			console::error("%s", buffer);
 		}
 
 		void com_error_stub(const int error, const char* msg, ...)
@@ -57,7 +57,7 @@ namespace logger
 
 				va_end(ap);
 
-				game_console::print(game_console::con_type_error, "Error: %s\n", buffer);
+				console::error("Error: %s\n", buffer);
 			}
 
 			com_error_hook.invoke<void>(error, "%s", buffer);
@@ -74,7 +74,7 @@ namespace logger
 
 			va_end(ap);
 
-			game_console::print(game_console::con_type_warning, buffer);
+			console::warn("%s", buffer);
 		}
 
 		void print(const char* msg, ...)
@@ -88,7 +88,7 @@ namespace logger
 
 			va_end(ap);
 
-			game_console::print(game_console::con_type_info, buffer);
+			console::info("%s", buffer);
 		}
 
 		void print_dev(const char* msg, ...)
@@ -107,7 +107,7 @@ namespace logger
 
 			va_end(ap);
 
-			game_console::print(game_console::con_type_info, buffer);
+			console::info("%s", buffer);
 		}
 
 		void lui_print(const char* msg, ...)
@@ -123,7 +123,7 @@ namespace logger
 
 			if (strstr(msg, "LUI WARNING:"))
 			{
-				game_console::print(game_console::con_type_warning, buffer);
+				console::warn("%s", buffer);
 			}
 			else
 			{
@@ -132,7 +132,7 @@ namespace logger
 					return;
 				}
 
-				game_console::print(game_console::con_type_info, buffer);
+				console::info("%s", buffer);
 			}
 		}
 	}

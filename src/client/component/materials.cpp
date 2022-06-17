@@ -2,7 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "materials.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "filesystem.hpp"
 
 #include "game/game.hpp"
@@ -122,7 +122,7 @@ namespace materials
 			}
 			catch (const std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load material %s: %s\n", name.data(), e.what());
+				console::error("Failed to load material %s: %s\n", name.data(), e.what());
 			}
 
 			return nullptr;

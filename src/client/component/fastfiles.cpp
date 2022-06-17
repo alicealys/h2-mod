@@ -3,7 +3,7 @@
 #include "fastfiles.hpp"
 
 #include "command.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "localized_strings.hpp"
 
 #include <utils/hook.hpp>
@@ -21,7 +21,7 @@ namespace fastfiles
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
-			game_console::print(game_console::con_type_info, "Loading fastfile %s\n", zone_name);
+			console::info("Loading fastfile %s\n", zone_name);
 			current_fastfile.access([&](std::string& fastfile)
 			{
 				fastfile = zone_name;
@@ -37,10 +37,10 @@ namespace fastfiles
 
 			if (diff > 100)
 			{
-				game_console::print(
+				console::print(
 					result.data == nullptr
-						? game_console::con_type_error
-						: game_console::con_type_warning,
+						? console::con_type_error
+						: console::con_type_warning,
 					"Waited %i msec for %sasset \"%s\", of type \"%s\"\n", 
 					diff, 
 					result.data == nullptr 
@@ -97,7 +97,7 @@ namespace fastfiles
 			{
 				if (params.size() < 2)
 				{
-					game_console::print(game_console::con_type_info, "usage: loadzone <zone>\n");
+					console::info("usage: loadzone <zone>\n");
 					return;
 				}
 
@@ -112,7 +112,7 @@ namespace fastfiles
 			{
 				for (auto i = 0; i < game::ASSET_TYPE_COUNT; i++)
 				{
-					game_console::print(game_console::con_type_info, "g_poolSize[%i]: %i // %s\n", i, game::g_poolSize[i], game::g_assetNames[i]);
+					console::info("g_poolSize[% i]: % i // %s\n", i, game::g_poolSize[i], game::g_assetNames[i]);
 				}
 			});
 		}
