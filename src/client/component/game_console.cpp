@@ -5,6 +5,7 @@
 
 #include "game_console.hpp"
 #include "command.hpp"
+#include "console.hpp"
 #include "scheduler.hpp"
 
 #include "game/scripting/event.hpp"
@@ -68,7 +69,7 @@ namespace game_console
 			matches.clear();
 		}
 
-		void print(const std::string& data, bool print_ = true)
+		void print(const std::string& data)
 		{
 			if (con.visible_line_count > 0 && con.display_line_offset == (con.output.size() - con.visible_line_count))
 			{
@@ -76,11 +77,6 @@ namespace game_console
 			}
 
 			con.output.push_back(data);
-
-			if (print_)
-			{
-				printf("%s\n", data.data());
-			}
 
 			if (con.output.size() > 1024)
 			{
@@ -404,7 +400,28 @@ namespace game_console
 
 		for (auto& line : lines)
 		{
-			print(type == con_type_info ? line : "^"s.append(std::to_string(type)).append(line), false);
+			print(type == console::con_type_info ? line : "^"s.append(std::to_string(type)).append(line));
+		}
+	}
+
+	void print(const int type, const std::string& data)
+	{
+		try
+		{
+			if (game::environment::is_dedi())
+			{
+				return;
+			}
+		}
+		catch (std::exception&)
+		{
+			return;
+		}
+
+		const auto lines = utils::string::split(data, '\n');
+		for (const auto& line : lines)
+		{
+			print(type == console::con_type_info ? line : "^"s.append(std::to_string(type)).append(line));
 		}
 	}
 
@@ -523,7 +540,7 @@ namespace game_console
 		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
 	}
 
-	void add(const std::string& cmd, bool print_)
+	void add(const std::string& cmd)
 	{
 		execute(cmd.data());
 
@@ -533,7 +550,7 @@ namespace game_console
 			history.erase(history.begin() + 10);
 		}
 
-		print(cmd, print_);
+		printf("]%s", cmd.data());
 	}
 
 	bool console_key_event(const int localClientNum, const int key, const int down)
@@ -648,7 +665,7 @@ namespace game_console
 
 					history.push_front(con.buffer);
 
-					print(""s.append(con.buffer));
+					printf("]%s", con.buffer);
 
 					if (history.size() > 10)
 					{

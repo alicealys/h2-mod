@@ -13,7 +13,7 @@
 #include "fastfiles.hpp"
 #include "mods.hpp"
 #include "updater.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -88,14 +88,14 @@ namespace ui_scripting
 
 		void print_error(const std::string& error)
 		{
-			game_console::print(game_console::con_type_error, "************** LUI script execution error **************\n");
-			game_console::print(game_console::con_type_error, "%s\n", error.data());
-			game_console::print(game_console::con_type_error, "********************************************************\n");
+			console::error("************** LUI script execution error **************\n");
+			console::error("%s\n", error.data());
+			console::error("********************************************************\n");
 		}
 
 		void print_loading_script(const std::string& name)
 		{
-			game_console::print(game_console::con_type_info, "Loading LUI script '%s'\n", name.data());
+			console::info("Loading LUI script '%s'\n", name.data());
 		}
 
 		std::string get_current_script()
@@ -356,7 +356,7 @@ namespace ui_scripting
 			}
 			catch (const std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load LUI scripts: %s\n", e.what());
+				console::error("Failed to load LUI scripts: %s\n", e.what());
 			}
 		}
 

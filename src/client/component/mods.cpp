@@ -4,7 +4,7 @@
 #include "game/game.hpp"
 
 #include "command.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "scheduler.hpp"
 #include "filesystem.hpp"
 #include "materials.hpp"
@@ -61,13 +61,13 @@ namespace mods
 			{
 				if (params.size() < 2)
 				{
-					game_console::print(game_console::con_type_info, "Usage: loadmod mods/<modname>");
+					console::info("Usage: loadmod mods/<modname>");
 					return;
 				}
 
 				if (!game::Com_InFrontend())
 				{
-					game_console::print(game_console::con_type_error, "Cannot load mod while in-game!\n");
+					console::error("Cannot load mod while in-game!\n");
 					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
 					return;
 				}
@@ -75,11 +75,11 @@ namespace mods
 				const auto path = params.get(1);
 				if (!utils::io::directory_exists(path))
 				{
-					game_console::print(game_console::con_type_error, "Mod %s not found!\n", path);
+					console::error("Mod %s not found!\n", path);
 					return;
 				}
 
-				game_console::print(game_console::con_type_info, "Loading mod %s\n", path);
+				console::info("Loading mod %s\n", path);
 				filesystem::get_search_paths().erase(mod_path);
 				filesystem::get_search_paths().insert(path);
 				mod_path = path;
@@ -90,18 +90,18 @@ namespace mods
 			{
 				if (mod_path.empty())
 				{
-					game_console::print(game_console::con_type_info, "No mod loaded\n");
+					console::info("No mod loaded\n");
 					return;
 				}
 
 				if (!game::Com_InFrontend())
 				{
-					game_console::print(game_console::con_type_error, "Cannot unload mod while in-game!\n");
+					console::error("Cannot unload mod while in-game!\n");
 					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
 					return;
 				}
 
-				game_console::print(game_console::con_type_info, "Unloading mod %s\n", mod_path.data());
+				console::info("Unloading mod %s\n", mod_path.data());
 				filesystem::get_search_paths().erase(mod_path);
 				mod_path.clear();
 				restart();

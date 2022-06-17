@@ -2,7 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "fonts.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "filesystem.hpp"
 
 #include "game/game.hpp"
@@ -79,7 +79,7 @@ namespace fonts
 			}
 			catch (const std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load font %s: %s\n", name.data(), e.what());
+				console::error("Failed to load font %s: %s\n", name.data(), e.what());
 			}
 
 			return nullptr;

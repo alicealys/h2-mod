@@ -4,13 +4,6 @@
 
 namespace game_console
 {
-	enum console_type
-	{
-		con_type_error = 1,
-		con_type_warning = 3,
-		con_type_info = 7
-	};
-
 	void print(int type, const char* fmt, ...);
 
 	bool console_char_event(int local_client_num, int key);
@@ -19,7 +12,7 @@ namespace game_console
 	void find_matches(std::string input, std::vector<dvars::dvar_info>& suggestions, const bool exact);
 	void execute(const char* cmd);
 	void clear_console();
-	void add(const std::string& cmd, bool print_ = true);
+	void add(const std::string& cmd);
 
 	std::deque<std::string>& get_output();
 	std::deque<std::string>& get_history();

@@ -4,7 +4,7 @@
 #include "game/game.hpp"
 
 #include "command.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 
 #include <utils/hook.hpp>
 
@@ -19,7 +19,7 @@ namespace lui
 			{
 				if (params.size() <= 1)
 				{
-					game_console::print(game_console::con_type_info, "usage: lui_open <name>\n");
+					console::info("usage: lui_open <name>\n");
 					return;
 				}
 
@@ -30,7 +30,7 @@ namespace lui
 			{
 				if (params.size() <= 1)
 				{
-					game_console::print(game_console::con_type_info, "usage: lui_open_popup <name>\n");
+					console::info("usage: lui_open_popup <name>\n");
 					return;
 				}
 
