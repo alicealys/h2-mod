@@ -207,21 +207,23 @@ namespace utils::string
 
 	bool strstr_lower(const char* a, const char* b)
 	{
-		size_t index{};
-		while (*a != '\0' && b[index] != '\0')
+		const char* a_ = a;
+		const char* b_ = b;
+
+		while (*a_ != '\0' && *b_ != '\0')
 		{
-			if (std::tolower(*a) == std::tolower(b[index]))
+			if (std::tolower(*a_) == std::tolower(*b_))
 			{
-				index++;
+				b_++;
 			}
-			else if (index != 0)
+			else
 			{
-				return false;
+				b_ = b;
 			}
 
-			a++;
+			a_++;
 		}
 
-		return b[index] == '\0';
+		return *b_ == '\0';
 	}
 }
