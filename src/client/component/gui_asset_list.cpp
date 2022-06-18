@@ -38,7 +38,7 @@ namespace asset_list
 				const auto name = game::g_assetNames[i];
 				const auto type = static_cast<game::XAssetType>(i);
 
-				if (utils::string::find_lower(name, asset_type_filter))
+				if (utils::string::strstr_lower(name, asset_type_filter.data()))
 				{
 					ImGui::Checkbox(name, &shown_assets[type]);
 				}
@@ -63,14 +63,12 @@ namespace asset_list
 				ImGui::InputText("asset name", &assets_name_filter[type]);
 				ImGui::BeginChild("assets list");
 
-				const auto lowercase_filter = utils::string::to_lower(assets_name_filter[type]);
-
-				fastfiles::enum_assets(type, [&lowercase_filter, type](const game::XAssetHeader header)
+				fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
 				{
 					const auto asset = game::XAsset{type, header};
 					const auto* const asset_name = game::DB_GetXAssetName(&asset);
 
-					if (strstr(asset_name, lowercase_filter.data()) && ImGui::Button(asset_name))
+					if (utils::string::strstr_lower(asset_name, assets_name_filter[type].data()) && ImGui::Button(asset_name))
 					{
 						gui::copy_to_clipboard(asset_name);
 					}
