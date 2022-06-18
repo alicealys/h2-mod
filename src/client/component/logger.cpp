@@ -135,6 +135,13 @@ namespace logger
 				console::info("%s", buffer);
 			}
 		}
+
+
+		void r_warn_once_per_frame_vsnprintf_stub(char* buffer, size_t buffer_length, char* msg, va_list va)
+		{
+			vsnprintf(buffer, buffer_length, msg, va);
+			console::warn(buffer);
+		}
 	}
 
 	class component final : public component_interface
@@ -144,9 +151,13 @@ namespace logger
 		{
 			utils::hook::jump(0x14032C620, print_warning, true);
 			utils::hook::jump(0x14032C630, print_warning, true);
+
 			utils::hook::jump(0x14032AEF0, lui_print, true);
 			com_error_hook.create(0x1405A2D80, com_error_stub);
+
 			utils::hook::jump(0x14013A98C, print);
+
+			utils::hook::call(0x140791A01, r_warn_once_per_frame_vsnprintf_stub);
 
 			logger_dev = dvars::register_bool("logger_dev", false, game::DVAR_FLAG_SAVED, "Print dev stuff");
 		}
