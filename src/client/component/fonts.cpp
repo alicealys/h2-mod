@@ -19,6 +19,23 @@ namespace fonts
 {
 	namespace
 	{
+		const char* hudelem_fonts[] =
+		{
+			"",
+			"bigfixed",
+			"smallfixed",
+			"objective",
+			"big",
+			"small",
+			"hudbig",
+			"hudsmall",
+			"buttomprompt",
+			"subtitle",
+			"timer",
+			"nameplate",
+			"bank"
+		};
+
 		struct font_data_t
 		{
 			std::unordered_map<std::string, game::TTF*> fonts;
@@ -94,6 +111,62 @@ namespace fonts
 			}
 			return result;
 		}
+
+		game::Font_s* bank_font = nullptr;
+
+		utils::hook::detour ui_get_font_handle_hook;
+		utils::hook::detour ui_asset_cache_hook;
+
+		game::Font_s* ui_get_font_handle_stub(void* a1, int font_index)
+		{
+			if (font_index == 12 && bank_font != nullptr)
+			{
+				return bank_font;
+			}
+
+			return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
+		}
+
+		void* ui_asset_cache_stub()
+		{
+			if (!game::Com_InFrontend())
+			{
+				bank_font = game::R_RegisterFont("fonts/bank.ttf", 32);
+			}
+			else
+			{
+				bank_font = nullptr;
+			}
+
+			return ui_asset_cache_hook.invoke<void*>();
+		}
+
+		int get_font_handle_index(int hudelem_font_index, int current)
+		{
+			if (hudelem_font_index == 12)
+			{
+				return 12;
+			}
+
+			return current;
+		}
+
+		void get_hud_elem_info_stub(utils::hook::assembler& a)
+		{
+			a.push(ebx);
+			a.pushad64();
+			a.mov(edx, ebx);
+			a.mov(ecx, dword_ptr(rsi, 4));
+			a.call_aligned(get_font_handle_index);
+			a.mov(dword_ptr(rsp, 0x80), eax);
+			a.popad64();
+			a.pop(ebx);
+
+			a.mov(edx, dword_ptr(rdi, 0x240));
+			a.lea(r8, qword_ptr(rsp, 0x98));
+
+			a.jmp(0x14037B39E);
+		}
 	}
 
 	void add(const std::string& name, const std::string& data)
@@ -124,6 +197,14 @@ namespace fonts
 		void post_unpack() override
 		{
 			utils::hook::call(0x140747096, db_find_xasset_header_stub);
+
+			// add fonts/bank.ttf to hud elem fonts
+			// make font index 12 => bank.ttf
+			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);
+			ui_get_font_handle_hook.create(0x1406058F0, ui_get_font_handle_stub);
+			utils::hook::jump(0x14037B390, utils::hook::assemble(get_hud_elem_info_stub), true);
+			utils::hook::inject(0x1404C17A6, hudelem_fonts);
+			utils::hook::set(0x1404C17B7, 13); // 13 hud elem fonts
 		}
 	};
 }
