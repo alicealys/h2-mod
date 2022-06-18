@@ -204,4 +204,24 @@ namespace utils::string
 			? text
 			: text.substr(0, length - end.size()) + end;
 	}
+
+	bool strstr_lower(const char* a, const char* b)
+	{
+		size_t index{};
+		while (*a != '\0' && b[index] != '\0')
+		{
+			if (std::tolower(*a) == std::tolower(b[index]))
+			{
+				index++;
+			}
+			else if (index != 0)
+			{
+				return false;
+			}
+
+			a++;
+		}
+
+		return b[index] == '\0';
+	}
 }
