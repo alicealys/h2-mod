@@ -2,6 +2,7 @@
 #include "game/game.hpp"
 #include "variable_value.hpp"
 #include "vector.hpp"
+#include "animation.hpp"
 
 namespace scripting
 {
@@ -28,6 +29,8 @@ namespace scripting
 		script_value(const array& value);
 
 		script_value(const vector& value);
+
+		script_value(const animation& value);
 
 		template <typename T>
 		bool is() const;

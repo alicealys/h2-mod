@@ -104,6 +104,15 @@ namespace scripting
 		this->value_ = variable;
 	}
 
+	script_value::script_value(const animation& value)
+	{
+		game::VariableValue variable{};
+		variable.type = 13;
+		variable.u.value = value.get_value();
+
+		this->value_ = variable;
+	}
+
 	/***************************************************************
 	 * Integer
 	 **************************************************************/
@@ -300,6 +309,22 @@ namespace scripting
 	vector script_value::get() const
 	{
 		return this->get_raw().u.vectorValue;
+	}
+
+	/***************************************************************
+	 * Animation
+	 **************************************************************/
+
+	template <>
+	bool script_value::is<animation>() const
+	{
+		return this->get_raw().type == 13;
+	}
+
+	template <>
+	animation script_value::get() const
+	{
+		return this->get_raw().u.uintValue;
 	}
 
 	/***************************************************************
