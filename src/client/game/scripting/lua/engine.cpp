@@ -45,7 +45,6 @@ namespace scripting::lua::engine
 
 	void start()
 	{
-		clear_custom_fields();
 		get_scripts().clear();
 
 		load_generic_script();
