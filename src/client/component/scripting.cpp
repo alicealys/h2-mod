@@ -33,7 +33,10 @@ namespace scripting
 		utils::hook::detour scr_set_thread_position_hook;
 		utils::hook::detour process_script_hook;
 
+		utils::hook::detour sl_get_canonical_string_hook;
+
 		std::string current_file;
+		unsigned int current_file_id{};
 
 		void vm_notify_stub(const unsigned int notify_list_owner_id, const game::scr_string_t string_value,
 		                    game::VariableValue* top)
@@ -82,23 +85,47 @@ namespace scripting
 
 		void process_script_stub(const char* filename)
 		{
-			current_file = filename;
-
 			const auto file_id = atoi(filename);
 			if (file_id)
 			{
-				current_file = scripting::find_token(file_id);
+				current_file_id = file_id;
+			}
+			else
+			{
+				current_file_id = 0;
+				current_file = filename;
 			}
 
 			process_script_hook.invoke<void>(filename);
 		}
 
-		void scr_set_thread_position_stub(unsigned int threadName, const char* codePos)
+		void add_function(const std::string& file, unsigned int id, const char* pos)
 		{
-			const auto function_name = scripting::find_token(threadName);
-			script_function_table[current_file][function_name] = codePos;
-			scr_set_thread_position_hook.invoke<void>(threadName, codePos);
+			const auto function_names = scripting::find_token(id);
+			for (const auto& name : function_names)
+			{
+				script_function_table[file][name] = pos;
+			}
 		}
+
+		void scr_set_thread_position_stub(unsigned int thread_name, const char* code_pos)
+		{
+			if (current_file_id)
+			{
+				const auto names = scripting::find_token(current_file_id);
+				for (const auto& name : names)
+				{
+					add_function(name, thread_name, code_pos);
+				}
+			}
+			else
+			{
+				add_function(current_file, thread_name, code_pos);
+			}
+
+			scr_set_thread_position_hook.invoke<void>(thread_name, code_pos);
+		}
+
 
 		char sv_check_load_level_stub(void* save_game)
 		{
@@ -107,6 +134,13 @@ namespace scripting
 			{
 				lua::engine::start();
 			}
+			return result;
+		}
+
+		unsigned int sl_get_canonical_string_stub(const char* str)
+		{
+			const auto result = sl_get_canonical_string_hook.invoke<unsigned int>(str);
+			scripting::token_map[str] = result;
 			return result;
 		}
 	}
@@ -125,6 +159,7 @@ namespace scripting
 			scr_add_class_field_hook.create(0x1405C2C30, scr_add_class_field_stub);
 			scr_set_thread_position_hook.create(0x1405BC7E0, scr_set_thread_position_stub);
 			process_script_hook.create(0x1405C6160, process_script_stub);
+			sl_get_canonical_string_hook.create(game::SL_GetCanonicalString, sl_get_canonical_string_stub);
 
 			scheduler::loop([]()
 			{

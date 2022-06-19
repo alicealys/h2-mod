@@ -136,6 +136,7 @@ namespace game
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x1405BFBB0};
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x1405C0170};
+	WEAK symbol<unsigned int(const char* str)> SL_GetCanonicalString{0x1405BC970};
 
 	WEAK symbol<bool()> SV_Loaded{0x1406B3860};
 
