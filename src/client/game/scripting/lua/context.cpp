@@ -190,6 +190,130 @@ namespace scripting::lua
 			state["level"] = entity{*::game::levelEntityId};
 			state["player"] = call("getentbynum", {0}).as<entity>();
 
+			auto animation_type = state.new_usertype<animation>("animation");
+
+			auto array_type = state.new_usertype<array>("array", sol::constructors<array()>());
+
+			array_type["erase"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					array.erase(index);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					array.erase(_key);
+				}
+			};
+
+			array_type["push"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				array.push(_value);
+			};
+
+			array_type["pop"] = [](const array& array, const sol::this_state s)
+			{
+				return convert(s, array.pop());
+			};
+
+			array_type["get"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					return convert(s, array.get(index));
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					return convert(s, array.get(_key));
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			array_type["set"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key, const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				const auto nil = _value.get_raw().type == 0;
+
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					nil ? array.erase(index) : array.set(index, _value);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					nil ? array.erase(_key) : array.set(_key, _value);
+				}
+			};
+
+			array_type["size"] = [](const array& array, const sol::this_state s)
+			{
+				return array.size();
+			};
+
+			array_type[sol::meta_function::length] = [](const array& array, const sol::this_state s)
+			{
+				return array.size();
+			};
+
+			array_type[sol::meta_function::index] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					return convert(s, array.get(index));
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					return convert(s, array.get(_key));
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			array_type[sol::meta_function::new_index] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key, const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				const auto nil = _value.get_raw().type == 0;
+
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					nil ? array.erase(index) : array.set(index, _value);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					nil ? array.erase(_key) : array.set(_key, _value);
+				}
+			};
+
+			array_type["getkeys"] = [](const array& array, const sol::this_state s)
+			{
+				std::vector<sol::lua_value> keys;
+
+				const auto keys_ = array.get_keys();
+				for (const auto& key : keys_)
+				{
+					keys.push_back(convert(s, key));
+				}
+				
+				return keys;
+			};
+
 			auto entity_type = state.new_usertype<entity>("entity");
 
 			for (const auto& func : method_map)
@@ -592,6 +716,28 @@ namespace scripting::lua
 					return sol::lua_value{s, sol::lua_nil};
 				}
 			};
+
+			game_type["getvarusage"] = [](const game&)
+			{
+				auto count = 0;
+				for (auto i = 0; i < 56320; i++)
+				{
+					const auto value = ::game::scr_VarGlob->objectVariableValue[i];
+					count += value.w.type != 24;
+				}
+				return count;
+			};
+
+			game_type["getchildvarusage"] = [](const game&)
+			{
+				auto count = 0;
+				for (auto i = 0; i < 384000; i++)
+				{
+					const auto value = ::game::scr_VarGlob->childVariableValue[i];
+					count += value.type != 24;
+				}
+				return count;
+			};
 		}
 	}
 
@@ -657,7 +803,10 @@ namespace scripting::lua
 		{
 		};
 
+		setup_io(this->state_);
+		setup_vector_type(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
+		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 	}
 
 	std::string context::load(const std::string& code)

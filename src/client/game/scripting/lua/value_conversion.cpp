@@ -198,7 +198,7 @@ namespace scripting::lua
 
 			const auto variable = &game::scr_VarGlob->childVariableValue[variable_id + offset];
 
-			const auto new_variable = convert({ s, value }).get_raw();
+			const auto new_variable = convert({s, value}).get_raw();
 
 			game::AddRefToValue(new_variable.type, new_variable.u);
 			game::RemoveRefToValue(variable->type, variable->u.u);
@@ -276,6 +276,11 @@ namespace scripting::lua
 			return {value.as<std::string>()};
 		}
 
+		if (value.is<array>())
+		{
+			return {value.as<array>()};
+		}
+
 		if (value.is<entity>())
 		{
 			return {value.as<entity>()};
@@ -284,6 +289,11 @@ namespace scripting::lua
 		if (value.is<vector>())
 		{
 			return {value.as<vector>()};
+		}
+
+		if (value.is<animation>())
+		{
+			return {value.as<animation>()};
 		}
 
 		return {};
@@ -311,9 +321,9 @@ namespace scripting::lua
 			return entity_to_struct(state, value.get_raw().u.uintValue);
 		}
 
-		if (value.is<std::vector<script_value>>())
+		if (value.is<array>())
 		{
-			return entity_to_array(state, value.get_raw().u.uintValue);
+			return {state, value.as<array>()};
 		}
 
 		if (value.is<std::function<void()>>())
@@ -329,6 +339,11 @@ namespace scripting::lua
 		if (value.is<vector>())
 		{
 			return {state, value.as<vector>()};
+		}
+
+		if (value.is<animation>())
+		{
+			return {state, value.as<animation>()};
 		}
 
 		return {state, sol::lua_nil};

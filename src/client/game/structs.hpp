@@ -859,6 +859,7 @@ namespace game
 		unsigned int pointerValue;
 		VariableStackBuffer* stackValue;
 		unsigned int entityOffset;
+		uint64_t value;
 	};
 
 	struct VariableValue
