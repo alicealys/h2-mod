@@ -376,6 +376,11 @@ namespace scripting::lua
 				command::execute(utils::string::va("setdiscordstate %s", state.data()), false);
 			};
 
+			game_type["setdiscorddetails"] = [](const game&, const std::string& state)
+			{
+				command::execute(utils::string::va("setdiscorddetails %s", state.data()), false);
+			};
+
 			game_type["say"] = [](const game&)
 			{
 			};
