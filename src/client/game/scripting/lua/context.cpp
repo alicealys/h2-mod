@@ -10,14 +10,19 @@
 #include "../../../component/scripting.hpp"
 #include "../../../component/command.hpp"
 #include "../../../component/fastfiles.hpp"
+#include "../../../component/mods.hpp"
+#include "../../../component/localized_strings.hpp"
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
+#include <utils/nt.hpp>
 
 namespace scripting::lua
 {
 	namespace
 	{
+		const auto json_script = utils::nt::load_resource(LUA_JSON);
+
 		vector normalize_vector(const vector& vec)
 		{
 			const auto length = sqrt((vec.get_x() * vec.get_x()) + (vec.get_y() * vec.get_y()) + (vec.get_z() * vec.get_z()));
@@ -27,6 +32,13 @@ namespace scripting::lua
 				vec.get_y() / length,
 				vec.get_z() / length
 			);
+		}
+
+		void setup_json(sol::state& state)
+		{
+			const auto json = state.safe_script(json_script, &sol::script_pass_on_error);
+			handle_error(json);
+			state["json"] = json;
 		}
 
 		void setup_io(sol::state& state)
@@ -738,6 +750,17 @@ namespace scripting::lua
 				}
 				return count;
 			};
+
+			game_type["getloadedmod"] = [](const game&)
+			{
+				return mods::mod_path;
+			};
+
+			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
+				const std::string& value)
+			{
+				localized_strings::override(string, value);
+			};
 		}
 	}
 
@@ -773,6 +796,7 @@ namespace scripting::lua
 		};
 
 		setup_io(this->state_);
+		setup_json(this->state_);
 		setup_vector_type(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
@@ -804,6 +828,7 @@ namespace scripting::lua
 		};
 
 		setup_io(this->state_);
+		setup_json(this->state_);
 		setup_vector_type(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
