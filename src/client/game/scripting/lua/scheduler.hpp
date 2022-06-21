@@ -14,9 +14,9 @@ namespace scripting::lua
 	class task final : public task_handle
 	{
 	public:
-		std::chrono::steady_clock::time_point last_call{};
+		int last_call{};
 		sol::protected_function callback{};
-		std::chrono::milliseconds delay{};
+		int delay{};
 		bool is_volatile = false;
 		bool is_deleted = false;
 		std::vector<std::pair<entity, std::string>> endon_conditions{};
