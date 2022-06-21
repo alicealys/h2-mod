@@ -196,6 +196,8 @@ namespace game
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14BA9EE40};
 	WEAK symbol<function_stack_t> scr_function_stack{0x14BAA93C0};
 
+	WEAK symbol<int> gameTime{0x1455CC780};
+
 	WEAK symbol<DB_FileSysInterface*> g_fileSystem{0x1420B27E8};
 
 	WEAK symbol<map_t> maps{0x14097EE90};
