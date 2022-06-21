@@ -2,6 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
+#include "game/dvars.hpp"
 
 #include "command.hpp"
 #include "scheduler.hpp"
@@ -35,6 +36,10 @@ namespace scripting
 
 		utils::hook::detour sl_get_canonical_string_hook;
 
+		utils::hook::detour respawn_hook;
+
+		game::dvar_t* scr_auto_respawn = nullptr;
+
 		std::string current_file;
 		unsigned int current_file_id{};
 
@@ -62,6 +67,7 @@ namespace scripting
 		void client_spawn_stub(const game::gentity_s* client)
 		{
 			client_spawn_hook.invoke<void>(client);
+			scr_auto_respawn->current.enabled = true;
 			lua::engine::start();
 		}
 
@@ -132,6 +138,7 @@ namespace scripting
 			const auto result = sv_check_load_level_hook.invoke<char>(save_game);
 			if (save_game != nullptr)
 			{
+				scr_auto_respawn->current.enabled = true;
 				lua::engine::start();
 			}
 			return result;
@@ -142,6 +149,16 @@ namespace scripting
 			const auto result = sl_get_canonical_string_hook.invoke<unsigned int>(str);
 			scripting::token_map[str] = result;
 			return result;
+		}
+
+		void respawn_stub()
+		{
+			if (!scr_auto_respawn->current.enabled)
+			{
+				return;
+			}
+
+			respawn_hook.invoke<void>();
 		}
 	}
 
@@ -160,6 +177,9 @@ namespace scripting
 			scr_set_thread_position_hook.create(0x1405BC7E0, scr_set_thread_position_stub);
 			process_script_hook.create(0x1405C6160, process_script_stub);
 			sl_get_canonical_string_hook.create(game::SL_GetCanonicalString, sl_get_canonical_string_stub);
+
+			scr_auto_respawn = dvars::register_bool("scr_autoRespawn", true, 0, "Automatically respawn player on death");
+			respawn_hook.create(0x1404B1E00, respawn_stub);
 
 			scheduler::loop([]()
 			{
