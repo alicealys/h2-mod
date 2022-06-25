@@ -114,8 +114,8 @@ namespace images
 	public:
 		void post_unpack() override
 		{
-			setup_texture_hook.create(0x14074A390, setup_texture_stub);
-			load_texture_hook.create(0x1402A7940, load_texture_stub);
+			setup_texture_hook.create(0x1402A7940, setup_texture_stub);
+			load_texture_hook.create(0x1402A6690, load_texture_stub);
 		}
 	};
 }
