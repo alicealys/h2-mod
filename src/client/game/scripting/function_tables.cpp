@@ -1782,5 +1782,6 @@ namespace scripting
         {"main", 616},
         {"player", 794},
         {"default_start", 10126},
+        {"maps/_utility", 42407},
     };
 }
