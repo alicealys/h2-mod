@@ -315,6 +315,7 @@ namespace mapents
 
 	void clear()
 	{
+		game::Dvar_SetFromStringFromSource("addon_mapname", "", game::DVAR_SOURCE_INTERNAL);
 		allocator.clear();
 	}
 
