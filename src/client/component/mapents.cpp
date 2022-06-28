@@ -326,10 +326,10 @@ namespace mapents
 	public:
 		void post_unpack() override
 		{
-			scheduler::on_game_initialized([]()
+			scheduler::once([]()
 			{
 				addon_mapname = dvars::register_string("addon_mapname", "", 0, "");
-			});
+			}, scheduler::pipeline::main);
 
 			utils::hook::call(0x14058BDD3, db_find_xasset_header_stub);
 			utils::hook::call(0x14058BD6B, should_load_addon_mapents);
