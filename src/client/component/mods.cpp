@@ -10,6 +10,7 @@
 #include "materials.hpp"
 #include "fonts.hpp"
 #include "mods.hpp"
+#include "mapents.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -30,6 +31,8 @@ namespace mods
 				materials::clear();
 				fonts::clear();
 			}
+
+			mapents::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}

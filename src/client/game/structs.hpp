@@ -771,6 +771,57 @@ namespace game
 		int fontFace;
 	};
 
+	struct MapEnts
+	{
+		const char* name;
+		char* entityString;
+		int numEntityChars;
+	};
+
+	struct TriggerModel
+	{
+		int contents;
+		unsigned __int16 hullCount;
+		unsigned __int16 firstHull;
+	};
+
+	struct TriggerHull
+	{
+		Bounds bounds;
+		int contents;
+		unsigned __int16 slabCount;
+		unsigned __int16 firstSlab;
+	};
+
+	struct TriggerSlab
+	{
+		float dir[3];
+		float midPoint;
+		float halfSize;
+	};
+
+	struct MapTriggers
+	{
+		unsigned int modelCount;
+		TriggerModel* models;
+		unsigned int hullCount;
+		TriggerHull* hulls;
+		unsigned int slabCount;
+		TriggerSlab* slabs;
+	};
+
+	struct AddonMapEnts
+	{
+		const char* name;
+		char* entityString;
+		int numEntityChars;
+		MapTriggers trigger;
+		void* info;
+		unsigned int numSubModels;
+		void* cmodels;
+		void* models;
+	};
+
 	union XAssetHeader
 	{
 		void* data;
@@ -781,6 +832,8 @@ namespace game
 		StringTable* stringTable;
 		LuaFile* luaFile;
 		TTF* ttf;
+		MapEnts* mapents;
+		AddonMapEnts* addon_mapents;
 	};
 
 	struct XAsset
