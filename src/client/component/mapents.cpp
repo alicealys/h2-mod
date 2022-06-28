@@ -226,7 +226,8 @@ namespace mapents
 		std::optional<std::string> get_mapents_data(std::string* real_path = nullptr)
 		{
 			std::string data{};
-			if (filesystem::read_file("addon_map_ents/"s + addon_mapname->current.string + ".mapents"s, &data, real_path))
+			if (addon_mapname->current.string != ""s && 
+				filesystem::read_file("addon_map_ents/"s + addon_mapname->current.string + ".mapents"s, &data, real_path))
 			{
 				return {data};
 			}
@@ -271,10 +272,7 @@ namespace mapents
 
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
 		{
-			const auto _0 = gsl::finally([]()
-			{
-				game::Dvar_SetFromStringFromSource("addon_mapname", "", game::DVAR_SOURCE_INTERNAL);
-			});
+			const auto _0 = gsl::finally(&mapents::clear_dvars);
 
 			const auto mapents = allocator.allocate<game::AddonMapEnts>();
 			mapents->name = allocator.duplicate_string(name);
@@ -313,9 +311,13 @@ namespace mapents
 		}
 	}
 
+	void clear_dvars()
+	{
+		game::Dvar_SetString(addon_mapname, "");
+	}
+
 	void clear()
 	{
-		game::Dvar_SetFromStringFromSource("addon_mapname", "", game::DVAR_SOURCE_INTERNAL);
 		allocator.clear();
 	}
 

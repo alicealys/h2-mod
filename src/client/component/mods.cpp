@@ -30,6 +30,7 @@ namespace mods
 			{
 				materials::clear();
 				fonts::clear();
+				mapents::clear_dvars();
 			}
 
 			mapents::clear();
