@@ -8,6 +8,7 @@
 #include "console.hpp"
 #include "scheduler.hpp"
 #include "mapents.hpp"
+#include "command.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -40,31 +41,37 @@ namespace mapents
 			{"type", 1244},
 			{"owner", 743},
 			{"radius", 851},
+			{"height", 488},
 			{"customangles", 9555},
 			{"speed", 997},
 			{"script_vehicle_anim", 40318},
 
+			{"_color", 1398},
+			{"skycolor", 34255},
+			{"suncolor", 1049},
+			{"sundirection", 1050},
+
+			{"export", 13703},
+
 			{"script_flag", 31190},
 			{"script_flag_true", 31196},
-			{"export", 13703},
 			{"script_stealth_function", 31462},
 			{"script_stealth", 31460},
 			{"script_deathflag", 31114},
 			{"script_forcespawn", 31214},
 			{"script_stealthgroup", 31463},
-			{"script_forcespawn", 31214},
 			{"script_delay", 916},
 			{"script_color_allies", 31096},
-			{"_color", 1398},
 			{"script_patroller", 31391},
 			{"script_idlereach", 31253},
 			{"script_linkto", 31273},
 			{"script_animation", 31039},
 			{"script_startinghealth", 31454},
 			{"script_pet", 9},
-			{"skycolor", 34255},
-			{"suncolor", 1049},
-			{"sundirection", 1050},
+			{"script_goalheight", 31236},
+			{"script_parameters", 31388},
+			{"script_combatmode", 31102},
+			{"script_ammo_clip", 31034},
 		};
 
 		// zonetool/iw4/addonmapents.cpp
@@ -330,6 +337,30 @@ namespace mapents
 			{
 				addon_mapname = dvars::register_string("addon_mapname", "", 0, "");
 			}, scheduler::pipeline::main);
+
+			command::add("dumpMapEnts", []()
+			{
+				if (!game::SV_Loaded())
+				{
+					console::info("Not in game\n");
+					return;
+				}
+
+				static const auto mapname = game::Dvar_FindVar("mapname");
+				const auto name = utils::string::va("maps/%s.d3dbsp", mapname->current.string);
+				const auto mapents = game::DB_FindXAssetHeader(game::ASSET_TYPE_MAP_ENTS, 
+					name, false).mapents;
+				if (mapents == nullptr)
+				{
+					console::info("Failed to dump mapents\n");
+					return;
+				}
+
+				const auto dest = utils::string::va("dumps/%s.ents", name);
+				const auto data = std::string(mapents->entityString, mapents->numEntityChars);
+				utils::io::write_file(dest, data, false);
+				console::info("Mapents dumped to %s\n", dest);
+			});
 
 			utils::hook::call(0x14058BDD3, db_find_xasset_header_stub);
 			utils::hook::call(0x14058BD6B, should_load_addon_mapents);
