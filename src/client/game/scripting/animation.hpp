@@ -7,7 +7,7 @@ namespace scripting
 	class animation final
 	{
 	public:
-		animation(unsigned int value);
+		animation(uint64_t value);
 
 		uint64_t get_value() const;
 	private:

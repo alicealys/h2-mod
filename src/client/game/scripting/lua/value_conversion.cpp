@@ -176,6 +176,11 @@ namespace scripting::lua
 		auto table = sol::table::create(state);
 		auto metatable = sol::table::create(state);
 
+		table["getentity"] = [parent_id]()
+		{
+			return entity(parent_id);
+		};
+
 		metatable[sol::meta_function::new_index] = [parent_id](const sol::table t, const sol::this_state s,
 			const sol::lua_value& field, const sol::lua_value& value)
 		{
@@ -287,11 +292,6 @@ namespace scripting::lua
 			return {state, value.as<std::string>()};
 		}
 		
-		if (value.is<std::map<std::string, script_value>>())
-		{
-			return entity_to_struct(state, value.get_raw().u.uintValue);
-		}
-
 		if (value.is<array>())
 		{
 			return {state, value.as<array>()};

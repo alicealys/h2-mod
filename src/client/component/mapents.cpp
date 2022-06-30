@@ -9,6 +9,7 @@
 #include "scheduler.hpp"
 #include "mapents.hpp"
 #include "command.hpp"
+#include "game/scripting/functions.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -22,7 +23,7 @@ namespace mapents
 		game::dvar_t* addon_mapname = nullptr;
 		utils::memory::allocator allocator;
 
-		std::unordered_map<std::string, int> keys =
+		std::unordered_map<std::string, unsigned int> keys =
 		{
 			{"code_classname", 172},
 			{"classname", 170},
@@ -50,7 +51,7 @@ namespace mapents
 			{"skycolor", 34255},
 			{"suncolor", 1049},
 			{"sundirection", 1050},
-
+			{"modelscale", 23881},
 			{"export", 13703},
 
 			{"script_flag", 31190},
@@ -72,7 +73,14 @@ namespace mapents
 			{"script_parameters", 31388},
 			{"script_combatmode", 31102},
 			{"script_ammo_clip", 31034},
+			{"script_moveoverride", 31299},
+			{"script_forcegoal", 31212},
+			{"script_ammo_max", 31036},
 		};
+
+		std::unordered_map<unsigned int, game::scriptType_e> custom_fields;
+
+		unsigned int token_id_start = 0x16000;
 
 		// zonetool/iw4/addonmapents.cpp
 		class asset_reader
@@ -202,29 +210,27 @@ namespace mapents
 
 				empty = false;
 
-				auto key_id = 0;
-				if (key[0] != '"')
+				auto key_id = std::atoi(key.data());
+				if (key_id != 0)
 				{
-					key_id = std::atoi(key.data());
+					out_buffer.append(utils::string::va("%i \"%s\"\n", key_id, value.data()));
+					continue;
 				}
-				else if (key.size() >= 3 && key[key.size() - 1] == '"')
-				{
-					const auto key_ = key.substr(1, key.size() - 2);
-					if (keys.find(key_) == keys.end())
-					{
-						console::warn("[addon_map_ents parser] Key '%s' not found, on line %i", key_.data(), line_index);
-						continue;
-					}
 
-					key_id = keys[key_];//
-				}
-				else
+				if (key.size() < 3 || (!key.starts_with("\"") || !key.ends_with("\"")))
 				{
 					console::warn("[addon_map_ents parser] Bad key '%s' on line %i", key.data(), line_index);
 					continue;
 				}
 
-				out_buffer.append(utils::string::va("%i \"%s\"\n", key_id, value.data()));
+				const auto key_ = key.substr(1, key.size() - 2);
+				if (keys.find(key_) == keys.end())
+				{
+					console::warn("[addon_map_ents parser] Key '%s' not found, on line %i", key_.data(), line_index);
+					continue;
+				}
+
+				out_buffer.append(utils::string::va("%i \"%s\"\n", keys[key_], value.data()));
 			}
 
 			return out_buffer;
@@ -257,6 +263,7 @@ namespace mapents
 		void try_parse_mapents(const std::string& path, const std::string& data, game::AddonMapEnts* mapents)
 		{
 			const auto parsed = parse_mapents(data);
+			utils::io::write_file("parsed_mapents.txt", parsed, false);
 
 			mapents->entityString = allocator.duplicate_string(parsed.data());
 			mapents->numEntityChars = static_cast<int>(parsed.size()) + 1;
@@ -316,6 +323,26 @@ namespace mapents
 				game::Com_Error(game::ERR_DROP, "CM_TriggerModelBounds: you are probably missing a mapents.triggers file");
 			}
 		}
+
+		void add_field(const std::string& name, game::scriptType_e type)
+		{
+			const auto id = token_id_start++;
+			custom_fields[id] = type;
+			keys[name] = id;
+			scripting::token_map[name] = id;
+		}
+
+		utils::hook::detour scr_find_field_hook;
+		unsigned int scr_find_field_stub(unsigned int name, game::scriptType_e* type)
+		{
+			if (custom_fields.find(name) != custom_fields.end())
+			{
+				*type = custom_fields[name];
+				return name;
+			}
+
+			return scr_find_field_hook.invoke<unsigned int>(name, type);
+		}
 	}
 
 	void clear_dvars()
@@ -333,6 +360,8 @@ namespace mapents
 	public:
 		void post_unpack() override
 		{
+			scr_find_field_hook.create(0x1405C5240, scr_find_field_stub);
+
 			scheduler::once([]()
 			{
 				addon_mapname = dvars::register_string("addon_mapname", "", 0, "");
@@ -365,6 +394,8 @@ namespace mapents
 			utils::hook::call(0x14058BDD3, db_find_xasset_header_stub);
 			utils::hook::call(0x14058BD6B, should_load_addon_mapents);
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
+
+			add_field("script_specialops", game::SCRIPT_INTEGER);
 		}
 	};
 }
