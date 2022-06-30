@@ -326,6 +326,11 @@ namespace scripting::lua
 				return keys;
 			};
 
+			array_type["getentity"] = [](const array& array, const sol::this_state s)
+			{
+				return array.get_raw();
+			};
+
 			auto entity_type = state.new_usertype<entity>("entity");
 
 			for (const auto& func : method_map)

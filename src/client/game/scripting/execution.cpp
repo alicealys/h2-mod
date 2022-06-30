@@ -39,6 +39,21 @@ namespace scripting
 
 			return script_value(game::scr_VmPub->top[1 - game::scr_VmPub->outparamcount]);
 		}
+		
+		bool is_entity_variable(const game::scr_entref_t& entref, const unsigned int id)
+		{
+			const auto type = game::scr_VarGlob->objectVariableValue[id].w.type;
+			if (entref.classnum == 0)
+			{
+				return type == game::SCRIPT_ENTITY;
+			}
+			else if (entref.classnum > 0)
+			{
+				return true;
+			}
+
+			return false;
+		}
 	}
 
 	void push_value(const script_value& value)
@@ -149,8 +164,9 @@ namespace scripting
 	{
 		const auto entref = entity.get_entity_reference();
 		const int id = get_field_id(entref.classnum, field);
+		const auto ent_id = entity.get_entity_id();
 
-		if (id != -1)
+		if (id != -1 && is_entity_variable(entref, ent_id))
 		{
 			stack_isolation _;
 			push_value(value);
@@ -165,7 +181,7 @@ namespace scripting
 		}
 		else
 		{
-			set_object_variable(entity.get_entity_id(), field, value);
+			set_object_variable(ent_id, field, value);
 		}
 	}
 
@@ -173,8 +189,9 @@ namespace scripting
 	{
 		const auto entref = entity.get_entity_reference();
 		const auto id = get_field_id(entref.classnum, field);
+		const auto ent_id = entity.get_entity_id();
 
-		if (id != -1)
+		if (id != -1 && is_entity_variable(entref, ent_id))
 		{
 			stack_isolation _;
 
@@ -192,7 +209,7 @@ namespace scripting
 			return value;
 		}
 
-		return get_object_variable(entity.get_entity_id(), field);
+		return get_object_variable(ent_id, field);
 	}
 
 	unsigned int make_array()

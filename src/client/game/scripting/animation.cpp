@@ -5,7 +5,7 @@
 
 namespace scripting
 {
-	animation::animation(unsigned int value)
+	animation::animation(uint64_t value)
 		: value_(value)
 	{
 	}

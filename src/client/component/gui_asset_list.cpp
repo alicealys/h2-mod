@@ -63,15 +63,22 @@ namespace asset_list
 				ImGui::InputText("asset name", &assets_name_filter[type]);
 				ImGui::BeginChild("assets list");
 
-				fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
+				size_t asset_num{};
+				fastfiles::enum_assets(type, [type, &asset_num](const game::XAssetHeader header)
 				{
 					const auto asset = game::XAsset{type, header};
-					const auto* const asset_name = game::DB_GetXAssetName(&asset);
+					auto asset_name = game::DB_GetXAssetName(&asset);
+					if (asset_name[0] == '\0')
+					{
+						asset_name = utils::string::va("__%i", asset_num);
+					}
 
 					if (utils::string::strstr_lower(asset_name, assets_name_filter[type].data()) && ImGui::Button(asset_name))
 					{
 						gui::copy_to_clipboard(asset_name);
 					}
+
+					asset_num++;
 				}, true);
 
 				ImGui::EndChild();
