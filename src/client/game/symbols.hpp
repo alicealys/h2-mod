@@ -91,6 +91,9 @@ namespace game
 
 	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
 	WEAK symbol<bool(int clientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
+	WEAK symbol<bool(int clientNum, int lui_event_cache, hks::lua_State* s)> LUI_BeginCachedEvent{0x1403153E0};
+	WEAK symbol<void(const char* name, int value, hks::lua_State* s)> LUI_SetTableInt{0x140320060};
+	WEAK symbol<void(const char* name, const char* value, hks::lua_State* s)> LUI_SetTableString{0x1403201F0};
 	WEAK symbol<void(hks::lua_State* s)> LUI_EndEvent{0x140316890};
 	WEAK symbol<void()> LUI_EnterCriticalSection{0x140316980};
 	WEAK symbol<void()> LUI_LeaveCriticalSection{0x14031BC20};

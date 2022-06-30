@@ -332,6 +332,17 @@ namespace ui_scripting
 			const auto lua = get_globals();
 			lua["EnableGlobals"]();
 
+			table keydown_event{};
+			keydown_event["key"] = "";
+			keydown_event["keynum"] = 0;
+
+			table keyup_event{};
+			keyup_event["key"] = "";
+			keyup_event["keynum"] = 0;
+
+			lua["LUI"]["CachedEvents"]["keydown"] = keydown_event;
+			lua["LUI"]["CachedEvents"]["keyup"] = keyup_event;
+
 			setup_functions();
 
 			lua["print"] = function(reinterpret_cast<game::hks::lua_function>(0x1402B81C0));

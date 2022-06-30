@@ -22,6 +22,7 @@ namespace input
 		utils::hook::detour cl_char_event_hook;
 		utils::hook::detour cl_key_event_hook;
 		utils::hook::detour cl_mouse_move_hook;
+		utils::hook::detour lui_cod_key_event_hook;
 
 		void cl_char_event_stub(const int local_client_num, const int key)
 		{
@@ -34,12 +35,6 @@ namespace input
 			{
 				return;
 			}
-
-			ui_scripting::notify("keypress",
-			{
-				{"keynum", key},
-				{"key", game::Key_KeynumToString(key, 0, 1)},
-			});
 
 			cl_char_event_hook.invoke<void>(local_client_num, key);
 		}
@@ -56,16 +51,22 @@ namespace input
 				return;
 			}
 
-			if (!(*game::keyCatchers & 1) && !(*game::keyCatchers & 0x10))
+			cl_key_event_hook.invoke<void>(local_client_num, key, down);
+		}
+
+		void lui_cod_key_event_stub(const int local_client_num, const int a2, const int key, const int down)
+		{
+			const auto state = *game::hks::lua_state;
+			if (game::LUI_BeginCachedEvent(local_client_num, down ? 3 : 4, state))
 			{
-				ui_scripting::notify(down ? "keydown" : "keyup",
-				{
-					{"keynum", key},
-					{"key", game::Key_KeynumToString(key, 0, 1)},
-				});
+				const auto key_str = game::Key_KeynumToString(key, 0, 1);
+				game::LUI_SetTableInt("keynum", key, state);
+				game::LUI_SetTableString("key", key_str, state);
+				game::LUI_SetTableString("name", down ? "keydown" : "keyup", state);
+				game::LUI_EndEvent(state);
 			}
 
-			cl_key_event_hook.invoke<void>(local_client_num, key, down);
+			lui_cod_key_event_hook.invoke<void>(local_client_num, a2, key, down);
 		}
 
 		void cl_mouse_move_stub(const int local_client_num, int x, int y)
@@ -84,9 +85,21 @@ namespace input
 	public:
 		void post_unpack() override
 		{
+			static const char* lui_cached_events[5] = 
+			{
+				"process_events",
+				"gamepad_button",
+				"transition_complete",
+				"keydown",
+				"keyup",
+			};
+
+			utils::hook::inject(0x14031EB8B, lui_cached_events);
+
 			cl_char_event_hook.create(0x1403D27B0, cl_char_event_stub);
 			cl_key_event_hook.create(0x1403D2AE0, cl_key_event_stub);
 			cl_mouse_move_hook.create(0x1403296F0, cl_mouse_move_stub);
+			lui_cod_key_event_hook.create(0x140328F50, lui_cod_key_event_stub);
 		}
 	};
 }
