@@ -359,8 +359,8 @@ namespace scripting
         {"missile_deleteattractor", 0x1AD}, // 0x4D7730
         {"newhudelem", 0x1AF}, // 0x4C2570
         {"newclienthudelem", 0x1B0}, // 0x4C2510
-        {"isplayer", 0x1B2}, // 0x5C8350, time related
-        {"isplayernumber", 0x1B3}, // 0x504650
+        {"resettimeout", 0x1B2}, // 0x5C8350, time related
+        {"isplayer", 0x1B3}, // 0x504650
         {"getpartname", 0x1B5}, // 0x4EDE60
         {"weaponfiretime", 0x1B6}, // 0x4EF400
         {"weaponclipsize", 0x1B7}, // 0x4EC650
