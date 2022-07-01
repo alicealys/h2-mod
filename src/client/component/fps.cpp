@@ -29,6 +29,7 @@ namespace fps
 		game::dvar_t* cg_speedGraphY;
 		game::dvar_t* cg_speedGraphWidth;
 		game::dvar_t* cg_speedGraphHeight;
+		game::dvar_t* cg_speedGraphIncludeZAxis;
 
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
@@ -190,7 +191,7 @@ namespace fps
 			const auto speed = static_cast<float>(sqrt(
 				pow(game::g_entities[0].client->velocity[0], 2) +
 				pow(game::g_entities[0].client->velocity[1], 2) +
-				pow(game::g_entities[0].client->velocity[2], 2)
+				(cg_speedGraphIncludeZAxis->current.enabled ? pow(game::g_entities[0].client->velocity[2], 2) : 0)
 			));
 
 			const auto base_width = relative(cg_speedGraphWidth->current.integer);
@@ -209,30 +210,40 @@ namespace fps
 				speed_history.push_back(speed);
 			}
 
+			auto max_speed = 0.f;
+			for (const auto& value : speed_history)
+			{
+				if (value > max_speed)
+				{
+					max_speed = value;
+				}
+			}
+
 			const auto base_x = relative(cg_speedGraphX->current.integer);
 			const auto base_y = screen_max[1] - relative(cg_speedGraphY->current.integer);
 			const auto width = 1.f;
 
-			draw_box(base_x, base_y - base_height - 4.f, base_width + 4.f, 
+			draw_box(base_x, base_y - base_height - 4.f, base_width + 5.f, 
 				base_height + 4.f, cg_speedGraphBackgroundColor->current.vector);
 
 			const auto diff = max - static_cast<int>(speed_history.size());
 
 			for (auto i = 0; i < speed_history.size(); i++)
 			{
-				const auto percentage = std::min(speed_history[i] / 1000.f, 1.f);
+				const auto percentage = std::min(speed_history[i] / std::max(1500.f, max_speed), 1.f);
 				const auto height = percentage * base_height;
 
 				const auto x = base_x + static_cast<float>(diff + i) * width + 2.f;
 				const auto y = base_y - height - 2.f;
 
-				draw_line(x, y, width, height);
+				draw_line(x + 1.f, y, width, height);
 			}
 
-			const auto speed_string = utils::string::va("%i\n", static_cast<int>(speed));
+			const auto speed_string = utils::string::va("%i (%i)\n", 
+				static_cast<int>(speed), static_cast<int>(max_speed));
 
-			const auto font_height = relative(20);
-			const auto font = game::R_RegisterFont("fonts/fira_mono_regular.ttf", static_cast<int>(font_height));
+			const auto font_height = relative(15);
+			const auto font = game::R_RegisterFont("fonts/default.ttf", static_cast<int>(font_height));
 
 			const auto text_x = base_x + relative(5);
 			const auto text_y = base_y - (base_height / 2.f) + (font_height / 2.f);
@@ -321,6 +332,9 @@ namespace fps
 
 			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph width");
 			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph height");
+
+			cg_speedGraphIncludeZAxis = dvars::register_bool("cg_speedGraphIncludeZAxis", false, game::DVAR_FLAG_SAVED, 
+				"Include velocity on the z axis when calculating the speed");
 		}
 	};
 }
