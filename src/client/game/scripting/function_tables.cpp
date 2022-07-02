@@ -1783,6 +1783,9 @@ namespace scripting
         {"maps/_load", 42323},
         {"maps/_compass", 42272},
         {"maps/_spawner", 42372},
+        {"maps/_vehicle", 42411},
+        {"maps/_attack_heli", 42508},
+        {"maps/_slowmo_breach", 42367},
 
         {"init", 521},
         {"main", 616},
