@@ -175,6 +175,7 @@ namespace game
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
+	WEAK symbol<gclient_s> g_clients{0x1455DA980};
 	WEAK symbol<int> num_entities{0x1455CC738};
 	WEAK symbol<PathData> pathData{0x1452CCDA0};
 	WEAK symbol<int> vehicle_pathnode_count{0x14D009A30};
