@@ -142,9 +142,9 @@ namespace fps
 			}
 
 			const auto speed = static_cast<float>(sqrt(
-				pow(game::g_entities[0].client->velocity[0], 2) +
-				pow(game::g_entities[0].client->velocity[1], 2) +
-				pow(game::g_entities[0].client->velocity[2], 2)
+				pow(game::g_clients[0].velocity[0], 2) +
+				pow(game::g_clients[0].velocity[1], 2) +
+				pow(game::g_clients[0].velocity[2], 2)
 			));
 
 			const auto font = speed_font;
@@ -165,7 +165,7 @@ namespace fps
 
 		void draw_box(const float x, const float y, const float w, const float h, float* color)
 		{
-			game::vec4_t dark_color;
+			game::vec4_t dark_color{};
 
 			dark_color[0] = color[0] * 0.5f;
 			dark_color[1] = color[1] * 0.5f;
@@ -189,9 +189,9 @@ namespace fps
 			}
 
 			const auto speed = static_cast<float>(sqrt(
-				pow(game::g_entities[0].client->velocity[0], 2) +
-				pow(game::g_entities[0].client->velocity[1], 2) +
-				(cg_speedGraphIncludeZAxis->current.enabled ? pow(game::g_entities[0].client->velocity[2], 2) : 0)
+				pow(game::g_clients[0].velocity[0], 2) +
+				pow(game::g_clients[0].velocity[1], 2) +
+				(cg_speedGraphIncludeZAxis->current.enabled ? pow(game::g_clients[0].velocity[2], 2) : 0)
 			));
 
 			const auto base_width = relative(cg_speedGraphWidth->current.integer);
@@ -230,7 +230,7 @@ namespace fps
 
 			for (auto i = 0; i < speed_history.size(); i++)
 			{
-				const auto percentage = std::min(speed_history[i] / std::max(1500.f, max_speed), 1.f);
+				const auto percentage = std::min(speed_history[i] / std::max(500.f, max_speed), 1.f);
 				const auto height = percentage * base_height;
 
 				const auto x = base_x + static_cast<float>(diff + i) * width + 2.f;
@@ -295,7 +295,7 @@ namespace fps
 			check_resize();
 			draw_fps();
 
-			if (!game::CL_IsCgameInitialized() || !game::g_entities[0].client)
+			if (!game::CL_IsCgameInitialized() || game::g_entities[0].client == nullptr)
 			{
 				return;
 			}
