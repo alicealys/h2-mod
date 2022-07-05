@@ -14,6 +14,7 @@
 #include "game/scripting/lua/engine.hpp"
 
 #include <utils/hook.hpp>
+#include <utils/concurrency.hpp>
 
 namespace scripting
 {
@@ -38,12 +39,17 @@ namespace scripting
 
 		utils::hook::detour respawn_hook;
 
+		utils::hook::detour scr_run_current_threads_hook;
+
 		game::dvar_t* scr_auto_respawn = nullptr;
 
 		std::string current_file;
 		unsigned int current_file_id{};
 
 		std::unordered_map<unsigned int, std::string> canonical_string_table;
+
+		using notify_list = std::vector<event>;
+		utils::concurrency::container<notify_list> scheduled_notifies;
 
 		void vm_notify_stub(const unsigned int notify_list_owner_id, const game::scr_string_t string_value,
 		                    game::VariableValue* top)
@@ -60,16 +66,28 @@ namespace scripting
 					e.arguments.emplace_back(*value);
 				}
 
-				lua::engine::notify(e);
+				scheduled_notifies.access([&](notify_list& list)
+				{
+					list.push_back(e);
+				});
 			}
 
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
+		}
+
+		void clear_scheduler_notifies()
+		{
+			scheduled_notifies.access([](notify_list& list)
+			{
+				list.clear();
+			});
 		}
 
 		void client_spawn_stub(const game::gentity_s* client)
 		{
 			client_spawn_hook.invoke<void>(client);
 			scr_auto_respawn->current.enabled = true;
+			clear_scheduler_notifies();
 			lua::engine::start();
 		}
 
@@ -80,6 +98,7 @@ namespace scripting
 				canonical_string_table.clear();
 			}
 
+			clear_scheduler_notifies();
 			lua::engine::stop();
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
@@ -158,6 +177,7 @@ namespace scripting
 			if (save_game != nullptr)
 			{
 				scr_auto_respawn->current.enabled = true;
+				clear_scheduler_notifies();
 				lua::engine::start();
 			}
 			return result;
@@ -179,6 +199,23 @@ namespace scripting
 
 			respawn_hook.invoke<void>();
 		}
+
+		void scr_run_current_threads_stub()
+		{
+			notify_list list_copy{};
+			scheduled_notifies.access([&](notify_list& list)
+			{
+				list_copy = list;
+				list.clear();
+			});
+
+			for (const auto& e : list_copy)
+			{
+				lua::engine::notify(e);
+			}
+
+			scr_run_current_threads_hook.invoke<void>();
+		}
 	}
 
 	class component final : public component_interface
@@ -199,6 +236,8 @@ namespace scripting
 
 			scr_auto_respawn = dvars::register_bool("scr_autoRespawn", true, 0, "Automatically respawn player on death");
 			respawn_hook.create(0x1404B1E00, respawn_stub);
+
+			scr_run_current_threads_hook.create(0x1405C8370, scr_run_current_threads_stub);
 
 			scheduler::loop([]()
 			{
