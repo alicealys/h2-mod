@@ -54,7 +54,7 @@ namespace input
 			cl_key_event_hook.invoke<void>(local_client_num, key, down);
 		}
 
-		void lui_cod_key_event_stub(const int local_client_num, const int a2, const int key, const int down)
+		void lui_cod_key_event_stub(const int local_client_num, const int a2, const int key, const int down, void* a5, void* a6)
 		{
 			const auto state = *game::hks::lua_state;
 			if (game::LUI_BeginCachedEvent(local_client_num, down ? 3 : 4, state))
@@ -66,7 +66,7 @@ namespace input
 				game::LUI_EndEvent(state);
 			}
 
-			lui_cod_key_event_hook.invoke<void>(local_client_num, a2, key, down);
+			lui_cod_key_event_hook.invoke<void>(local_client_num, a2, key, down, a5, a6);
 		}
 
 		void cl_mouse_move_stub(const int local_client_num, int x, int y)
