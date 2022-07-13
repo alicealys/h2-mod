@@ -31,6 +31,8 @@ namespace fps
 		game::dvar_t* cg_speedGraphHeight;
 		game::dvar_t* cg_speedGraphIncludeZAxis;
 
+		game::dvar_t* cg_drawGameTime;
+
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
 		float fps_color_bad[4] = {1.0f, 0.3f, 0.3f, 1.0f};
@@ -243,7 +245,7 @@ namespace fps
 				static_cast<int>(speed), static_cast<int>(max_speed));
 
 			const auto font_height = relative(15);
-			const auto font = game::R_RegisterFont("fonts/default.ttf", static_cast<int>(font_height));
+			const auto font = game::R_RegisterFont("fonts/default.otf", static_cast<int>(font_height));
 
 			const auto text_x = base_x + relative(5);
 			const auto text_y = base_y - (base_height / 2.f) + (font_height / 2.f);
@@ -290,6 +292,47 @@ namespace fps
 				60.f, 1.0f, 1.0f, 0.0f, fps_color_ok, 0);
 		}
 
+		void draw_game_time()
+		{
+			if (!cg_drawGameTime->current.enabled)
+			{
+				return;
+			}
+
+			auto msec = *game::gameTime;
+
+			// remove first frames
+			if (msec >= 300)
+			{
+				msec -= 300;
+			}
+
+			const auto ms = static_cast<int>((msec % 1000) / 10);
+			const auto s = static_cast<int>(msec / 1000) % 60;
+			const auto m = static_cast<int>(msec / 1000 / 60);
+			const auto text = utils::string::va("%d:%02d.%02d", m, s, ms);
+
+			const auto height = relative(24);
+			const auto base_width = relative(cg_speedGraphWidth->current.integer);
+			const auto base_height = cg_speedGraph->current.enabled ? relative(cg_speedGraphHeight->current.integer) : 0;
+
+			const auto base_x = relative(cg_speedGraphX->current.integer);
+			const auto base_y = screen_max[1] - relative(cg_speedGraphY->current.integer) - base_height - height
+				- (cg_speedGraph->current.enabled ? 2.f : 0.f);
+
+			const auto font_height = relative(20);
+			const auto font = game::R_RegisterFont("fonts/default.otf", static_cast<int>(font_height));
+			const auto text_width = game::R_TextWidth(text, 0x7FFFFFFF, font);
+
+			draw_box(base_x, base_y, base_width + 5.f,
+				height, cg_speedGraphBackgroundColor->current.vector);
+
+			const auto text_y = base_y + (height / 2.f) + ((font_height + relative(5)) / 2.f);
+
+			game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, base_x + base_width - text_width,
+				text_y, 1.0f, 1.0f, 0.0f, cg_speedGraphFontColor->current.vector, 0);
+		}
+
 		void draw()
 		{
 			check_resize();
@@ -303,6 +346,7 @@ namespace fps
 			draw_pos();
 			draw_speed();
 			draw_speed_graph();
+			draw_game_time();
 		}
 	}
 
@@ -335,6 +379,8 @@ namespace fps
 
 			cg_speedGraphIncludeZAxis = dvars::register_bool("cg_speedGraphIncludeZAxis", false, game::DVAR_FLAG_SAVED, 
 				"Include velocity on the z axis when calculating the speed");
+
+			cg_drawGameTime = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
 		}
 	};
 }
