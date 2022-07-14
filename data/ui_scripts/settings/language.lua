@@ -12,10 +12,10 @@ game:addlocalizedstring("MENU_traditional_chinese", "中国人")
 game:addlocalizedstring("MENU_simplified_chinese", "简体中文")
 game:addlocalizedstring("MENU_arabic", "عربى")
 game:addlocalizedstring("MENU_czech", "České") -- ??
-game:addlocalizedstring("MENU_spanishna", "Español (parcial)") -- text only (English dubbing)
+game:addlocalizedstring("MENU_spanishna", "Español (Parcial)") -- text only (English dubbing)
 game:addlocalizedstring("MENU_korean", "한국어")
 game:addlocalizedstring("MENU_english_safe", "English (Safe)")
-game:addlocalizedstring("MENU_russian_partial", "Русский (только текст)") -- text only (English dubbing)
+game:addlocalizedstring("MENU_russian_partial", "Русский (Только текст)") -- text only (English dubbing)
 
 LUI.addmenubutton("pc_controls", {
 	index = 4,
