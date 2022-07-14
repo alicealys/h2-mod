@@ -27,7 +27,7 @@ namespace discord
 				state = {};
 				details.reset();
 
-				discord_presence.details = "Main Menu";
+				discord_presence.details = game::UI_SafeTranslateString("MENU_MAIN_MENU");
 				discord_presence.state = "";
 
 				discord_presence.startTimestamp = 0;

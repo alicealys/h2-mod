@@ -194,14 +194,8 @@ namespace game_console
 			con.globals.left_x = con.globals.x;
 			con.globals.auto_complete_choice[0] = 0;
 
-			/*
 			game::R_AddCmdDrawTextWithCursor(con.buffer, 0x7FFFFFFF, console_font, 18, con.globals.x,
-				con.globals.y + con.globals.font_height, 1.0f, 1.0f, 0, color_white, 0,
-				con.cursor, '|');
-			*/
-
-			game::R_AddCmdDrawText(con.buffer, 0x7FFF, console_font, con.globals.x,
-				con.globals.y + con.globals.font_height, 1.0f, 1.0f, 0.0f, color_white, 0);
+				con.globals.y + con.globals.font_height, 1.0f, 1.0f, 0, color_white, nullptr, con.cursor, '|');
 
 			// check if using a prefixed '/' or not
 			const auto input = con.buffer[1] && (con.buffer[0] == '/' || con.buffer[0] == '\\')
@@ -443,13 +437,13 @@ namespace game_console
 			{
 				if (con.globals.may_auto_complete)
 				{
-					const auto firstChar = con.buffer[0];
+					const auto first_char = con.buffer[0];
 
 					clear();
 
-					if (firstChar == '\\' || firstChar == '/')
+					if (first_char == '\\' || first_char == '/')
 					{
-						con.buffer[0] = firstChar;
+						con.buffer[0] = first_char;
 						con.buffer[1] = '\0';
 					}
 
