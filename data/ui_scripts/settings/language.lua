@@ -95,14 +95,14 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 			if (id == 5 or (id >= 8 and id < 12) or id == 17) then
 				LUI.MenuGenericButtons.ButtonLabelFont.Font = RegisterFont("fonts/noto_sans_sc.otf", 30)
 				overrideyoffset = 0
-				LUI.MenuGenericButtons.ButtonLabelFont.Height = 24
+				LUI.MenuGenericButtons.ButtonLabelFont.Height = 17
 			elseif (id == 12) then
 				LUI.MenuGenericButtons.ButtonLabelFont.Font = RegisterFont("fonts/noto_sans_arabic.ttf", 30)
 				LUI.MenuGenericButtons.ButtonLabelFont.Height = 28
 				overrideyoffset = 0
 			elseif (id == 15) then
 				LUI.MenuGenericButtons.ButtonLabelFont.Font = RegisterFont("fonts/noto_sans_kr.otf", 30)
-				LUI.MenuGenericButtons.ButtonLabelFont.Height = 24
+				LUI.MenuGenericButtons.ButtonLabelFont.Height = 18
 				overrideyoffset = 0
 			end
 		end
