@@ -124,9 +124,13 @@ namespace game
 					 float rotation, float* color1, float* color2, int style)> R_AddCmdDrawText2{0x14076C860};
 	WEAK symbol<void(rectangle* rect, float a2, float a3, float a4, float a5, float* color, Material* material)> R_DrawRectangle{0x14076A280};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, int fontSize, float x, float y, float xScale, float yScale, float rotation, 
-		const float* color, int style, int cursorPos, char cursor)> R_AddCmdDrawTextWithCursor{0x14076CAF0};
+		const float* color, int style, int cursorPos, char cursor, void* fontGlowStyle)> AddBaseDrawTextCmd{0x14076CAF0};
+	WEAK symbol<int(void* font)> R_GetFontHeight{0x1407470C0};
+	WEAK symbol<void*(int style)> R_GetFontGlowStyle{0x140746680};
 	WEAK symbol<void*(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale,
 		int a8, float* color1, unsigned int style, rgba color2)> R_AddCmdDrawTextGradient{0x14076C570};
+	WEAK symbol<void(char const* text, int maxChars, Font_s* font, int height, float x, float y, float xScale, float yScale, 
+		float rotation, float const* color, void* font_glow_style, int, char)> R_AddCmdDrawTextWithCursor{0x14076CAF0};
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x140746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x1407472A0};
 	WEAK symbol<void()> R_SyncRenderThread{0x14076E7D0};
