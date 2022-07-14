@@ -1194,6 +1194,16 @@ namespace game
 		_OVERLAPPED overlapped;
 	};
 
+	struct language_values
+	{
+		const char* name;
+		const char* shortname;
+		const char* prefix1;
+		const char* prefix2;
+		const char* prefix3;
+		char __pad0[0x8];
+	};
+
 	namespace hks
 	{
 		struct lua_State;

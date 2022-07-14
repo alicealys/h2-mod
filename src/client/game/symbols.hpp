@@ -207,6 +207,8 @@ namespace game
 
 	WEAK symbol<map_t> maps{0x14097EE90};
 
+	WEAK symbol<language_values> languages{0x140BF9740};
+
 	namespace hks
 	{
 		WEAK symbol<lua_State*> lua_state{0x1419D83E8};
