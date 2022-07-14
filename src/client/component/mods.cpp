@@ -43,8 +43,12 @@ namespace mods
 			scheduler::once([]()
 			{
 				release_assets = true;
+				const auto _0 = gsl::finally([]()
+				{
+					release_assets = false;
+				});
+
 				game::Com_Shutdown("");
-				release_assets = false;
 			}, scheduler::pipeline::main);
 		}
 	}
@@ -108,6 +112,16 @@ namespace mods
 				console::info("Unloading mod %s\n", mod_path.data());
 				filesystem::get_search_paths().erase(mod_path);
 				mod_path.clear();
+				restart();
+			});
+
+			command::add("com_restart", []()
+			{
+				if (!game::Com_InFrontend())
+				{
+					return;
+				}
+
 				restart();
 			});
 		}

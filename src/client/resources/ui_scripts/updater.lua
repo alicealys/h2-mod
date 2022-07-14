@@ -92,7 +92,7 @@ function startupdatedownload(popup, autoclose)
 				end
 			})
 		else
-			Engine.Exec("lui_restart")
+			Engine.Exec("com_restart")
 		end
 
 		if (autoclose) then
