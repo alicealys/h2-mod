@@ -4,6 +4,7 @@
 #include "fonts.hpp"
 #include "console.hpp"
 #include "filesystem.hpp"
+#include "command.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
@@ -205,6 +206,26 @@ namespace fonts
 			utils::hook::jump(0x14037B390, utils::hook::assemble(get_hud_elem_info_stub), true);
 			utils::hook::inject(0x1404C17A6, hudelem_fonts);
 			utils::hook::set(0x1404C17B7, 13); // 13 hud elem fonts
+
+			command::add("dumpFont", [](const command::params& params)
+			{
+				if (params.size() < 2)
+				{
+					return;
+				}
+
+				const auto name = params.get(1);
+				const auto ttf = game::DB_FindXAssetHeader(game::XAssetType::ASSET_TYPE_TTF, name, false).ttf;
+				if (ttf == nullptr)
+				{
+					console::error("Font does not exist\n");
+					return;
+				}
+
+				const auto path = utils::string::va("dumps/%s", ttf->name);
+				utils::io::write_file(path, std::string(ttf->buffer, ttf->len), false);
+				console::info("Dumped to %s", path);
+			});
 		}
 	};
 }

@@ -14,6 +14,7 @@
 #include "mods.hpp"
 #include "updater.hpp"
 #include "console.hpp"
+#include "language.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -258,6 +259,17 @@ namespace ui_scripting
 				const std::string& value)
 			{
 				localized_strings::override(string, value);
+			};
+
+			game_type["setlanguage"] = [](const game&, const std::string& language)
+			{
+				language::set(language);
+			};
+
+			lua["Engine"]["SetLanguage"] = [](const int index)
+			{
+				language::set_from_index(index);
+				updater::relaunch();
 			};
 
 			using player = table;
