@@ -10,7 +10,7 @@ game:addlocalizedstring("MENU_japanese_full", "日本語")
 game:addlocalizedstring("MENU_japanese_partial", "日本語(一部)")
 game:addlocalizedstring("MENU_traditional_chinese", "繁體中文")
 game:addlocalizedstring("MENU_simplified_chinese", "简体中文")
-game:addlocalizedstring("MENU_arabic", "عربى")
+game:addlocalizedstring("MENU_arabic", "العربية")
 game:addlocalizedstring("MENU_czech", "České") -- ??
 game:addlocalizedstring("MENU_spanishna", "Español (Parcial)") -- text only (English dubbing)
 game:addlocalizedstring("MENU_korean", "한국어")
