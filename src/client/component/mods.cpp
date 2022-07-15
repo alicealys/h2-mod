@@ -88,8 +88,8 @@ namespace mods
 				}
 
 				console::info("Loading mod %s\n", path);
-				filesystem::get_search_paths().erase(mod_path);
-				filesystem::get_search_paths().insert(path);
+				filesystem::unregister_path(mod_path);
+				filesystem::register_path(path);
 				mod_path = path;
 				restart();
 			});
@@ -110,7 +110,7 @@ namespace mods
 				}
 
 				console::info("Unloading mod %s\n", mod_path.data());
-				filesystem::get_search_paths().erase(mod_path);
+				filesystem::unregister_path(mod_path);
 				mod_path.clear();
 				restart();
 			});

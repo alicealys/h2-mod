@@ -155,6 +155,8 @@ namespace game
 	WEAK symbol<void(int critSec)> Sys_EnterCriticalSection{0x140624240};
 	WEAK symbol<void(int critSec)> Sys_LeaveCriticalSection{0x1406242C0};
 
+	WEAK symbol<const char*()> SEH_GetCurrentLanguageCode{0x1405E5180};
+
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x1405A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x140606080};
 
