@@ -37,85 +37,6 @@ LUI.UIGenericButton.ButtonLabelFactory = function(data, ...)
 	return factory(data, ...)
 end
 
-local languages = {
-	"english",
-	"french",
-	"german",
-	"italian",
-	"spanish",
-	"russian",
-	"polish",
-	"portuguese",
-	"japanese_full",
-	"japanese_partial",
-	"traditional_chinese",
-	"simplified_chinese",
-	"arabic",
-	"czech",
-	"spanishna",
-	"korean",
-	"english_safe",
-	"russian_partial",
-}
-
-local function usingspeciallanguage()
-	local id = Engine.GetCurrentLanguage() + 1
-	local lang = languages[id] or "english"
-
-	local normalfontlangs = {
-		["english"] = true,
-		["french"] = true,
-		["german"] = true,
-		["italian"] = true,
-		["spanish"] = true,
-		["portuguese"] = true,
-		["spanishna"] = true,
-		["english_safe"] = true,
-		["russian"] = true,
-		["polish"] = true,
-		["russian_partial"] = true,
-	}
-
-	return normalfontlangs[lang] ~= true
-end
-
-LUI.UIButtonText.IsOffsetedLanguage = function()
-	if Engine.IsRightToLeftLanguage() then
-		return true
-	elseif Engine.IsAsianLanguage() then
-		return true
-	else
-		return false
-	end
-end
-
-local lang = Engine.GetCurrentLanguage()
-if (lang == 5 or lang == 6 or lang == 17) then
-	local scale = function (size)
-		return size * 720 / 1080
-	end
-
-	CoD.TextSettings.SP_HudAmmoStatusText = {
-		Font = RegisterFont("fonts/bank.ttf", 16),
-		Height = 16
-	}
-	
-	CoD.TextSettings.SP_HudAmmoCounterFont = {
-		Font = RegisterFont("fonts/bank.ttf", 34),
-		Height = 34
-	}
-	
-	CoD.TextSettings.HudAmmoCounterFont = {
-		Font = RegisterFont("fonts/bank.ttf", 105),
-		Height = 64
-	}
-	
-	CoD.TextSettings.H2TitleFont = {
-		Font = RegisterFont("fonts/bank.ttf", 56),
-		Height = scale(56)
-	}
-end
-
 local arabicfont = RegisterFont("fonts/arabic.ttf", 30)
 local koreanfont = RegisterFont("fonts/korean.ttf", 30)
 local polrusfont = RegisterFont("polrus/fonts/default.otf", 30)
@@ -168,7 +89,7 @@ local function setpolrusfont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = polrusfont
-	overrideyoffset = nil
+	overrideyoffset = 2.5
 end
 
 LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
@@ -231,3 +152,63 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 
 	return menu
 end)
+
+-- rus/pol patches
+
+if (not Engine.InFrontend()) then
+	local weaponinfodef = LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"]
+	LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"] = function(...)
+		local rus = CoD.Language.Russian
+		CoD.Language.Russian = 1337
+		local res = weaponinfodef(...)
+		CoD.Language.Russian = rus
+		return res
+	end
+else
+	local levelselectmenu = LUI.sp_menus.LevelSelectMenu
+	local setupinfobox = levelselectmenu.SetupInfoBoxLeftForArcadeMode
+	levelselectmenu.SetupInfoBoxLeftForArcadeMode = function(...)
+		local rus = CoD.Language.Russian
+		CoD.Language.Russian = 1337
+		local res = setupinfobox(...)
+		CoD.Language.Russian = rus
+		return res
+	end
+end
+
+LUI.UIButtonText.IsOffsetedLanguage = function()
+	if Engine.IsRightToLeftLanguage() then
+		return true
+	elseif Engine.IsAsianLanguage() then
+		return true
+	else
+		return false
+	end
+end
+
+local lang = Engine.GetCurrentLanguage()
+if (lang == 5 or lang == 6 or lang == 17) then
+	local scale = function (size)
+		return size * 720 / 1080
+	end
+
+	CoD.TextSettings.SP_HudAmmoStatusText = {
+		Font = RegisterFont("fonts/bank.ttf", 16),
+		Height = 16
+	}
+	
+	CoD.TextSettings.SP_HudAmmoCounterFont = {
+		Font = RegisterFont("fonts/bank.ttf", 34),
+		Height = 34
+	}
+	
+	CoD.TextSettings.HudAmmoCounterFont = {
+		Font = RegisterFont("fonts/bank.ttf", 105),
+		Height = 64
+	}
+	
+	CoD.TextSettings.H2TitleFont = {
+		Font = RegisterFont("fonts/bank.ttf", 56),
+		Height = scale(56)
+	}
+end
