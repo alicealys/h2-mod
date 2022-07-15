@@ -258,7 +258,7 @@ namespace ui_scripting
 			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
 				const std::string& value)
 			{
-				localized_strings::override(string, value);
+				localized_strings::override(string, value, true);
 			};
 
 			game_type["setlanguage"] = [](const game&, const std::string& language)

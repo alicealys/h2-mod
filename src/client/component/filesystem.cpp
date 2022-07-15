@@ -3,6 +3,7 @@
 
 #include "filesystem.hpp"
 #include "console.hpp"
+#include "localized_strings.hpp"
 
 #include "game/game.hpp"
 
@@ -37,6 +38,8 @@ namespace filesystem
 			filesystem::register_path(L".");
 			filesystem::register_path(L"h2-mod");
 			filesystem::register_path(L"data");
+
+			localized_strings::clear();
 
 			utils::hook::invoke<void>(0x14060BF50, name);
 		}

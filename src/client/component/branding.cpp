@@ -40,10 +40,6 @@ namespace branding
 			scheduler::loop(draw, scheduler::pipeline::renderer);
 
 			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
-			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_LINK", "Github Page:");
-			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_URL", "https://github.com/fedddddd/h2-mod");
-			localized_strings::override("MENU_SYSINFO_DONATION_LINK", "Donation Link:");
-			localized_strings::override("MENU_SYSINFO_DONATION_URL", "https://paypal.me/fedecek");
 
 			utils::hook::jump(0x14033D550, get_build_number_stub, true);
 		}

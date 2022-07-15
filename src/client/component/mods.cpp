@@ -11,6 +11,7 @@
 #include "fonts.hpp"
 #include "mods.hpp"
 #include "mapents.hpp"
+#include "localized_strings.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -34,6 +35,7 @@ namespace mods
 			}
 
 			mapents::clear();
+			localized_strings::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}
