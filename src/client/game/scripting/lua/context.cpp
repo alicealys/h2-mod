@@ -764,7 +764,7 @@ namespace scripting::lua
 			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
 				const std::string& value)
 			{
-				localized_strings::override(string, value);
+				localized_strings::override(string, value, true);
 			};
 		}
 	}
