@@ -822,6 +822,12 @@ namespace game
 		void* models;
 	};
 
+	struct LocalizeEntry
+	{
+		const char* value;
+		const char* name;
+	};
+
 	union XAssetHeader
 	{
 		void* data;
@@ -834,6 +840,7 @@ namespace game
 		TTF* ttf;
 		MapEnts* mapents;
 		AddonMapEnts* addon_mapents;
+		LocalizeEntry* localize;
 	};
 
 	struct XAsset

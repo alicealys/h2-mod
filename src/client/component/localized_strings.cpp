@@ -30,6 +30,32 @@ namespace localized_strings
 				return seh_string_ed_get_string_hook.invoke<const char*>(reference);
 			});
 		}
+
+		game::XAssetHeader db_find_localize_entry_stub(game::XAssetType type, const char* name, int allow_create_default)
+		{
+			const auto value = localized_overrides.access<const char*>([&](const localized_map& map)
+				-> const char*
+			{
+				const auto entry = map.find(name);
+				if (entry != map.end())
+				{
+					return utils::string::va("%s", entry->second.data());
+				}
+
+				return nullptr;
+			});
+
+			if (value == nullptr)
+			{
+				return game::DB_FindXAssetHeader(type, name, allow_create_default);
+			}
+
+			static game::LocalizeEntry entry{};
+			entry.value = value;
+			entry.name = name;
+
+			return static_cast<game::XAssetHeader>(&entry);
+		}
 	}
 
 	void override(const std::string& key, const std::string& value)
@@ -47,6 +73,7 @@ namespace localized_strings
 		{
 			// Change some localized strings
 			seh_string_ed_get_string_hook.create(0x1405E5FD0, &seh_string_ed_get_string);
+			utils::hook::call(0x1405E5AB9, db_find_localize_entry_stub);
 		}
 	};
 }
