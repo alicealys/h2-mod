@@ -71,9 +71,22 @@ local function usingspeciallanguage()
 		["portuguese"] = true,
 		["spanishna"] = true,
 		["english_safe"] = true,
+		["russian"] = true,
+		["polish"] = true,
+		["russian_partial"] = true,
 	}
 
 	return normalfontlangs[lang] ~= true
+end
+
+LUI.UIButtonText.IsOffsetedLanguage = function()
+	if Engine.IsRightToLeftLanguage() then
+		return true
+	elseif Engine.IsAsianLanguage() then
+		return true
+	else
+		return false
+	end
 end
 
 LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
@@ -92,7 +105,9 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 		local id = languages[i].id
 
 		if (not usingspeciallanguage()) then
-			if (id == 5 or (id >= 8 and id < 12) or id == 17) then
+			if (id == 5 or id == 6 or id == 17) then
+				LUI.MenuGenericButtons.ButtonLabelFont.Font = RegisterFont("polrus/fonts/default.otf", 30)
+			elseif (id >= 8 and id < 12) then
 				LUI.MenuGenericButtons.ButtonLabelFont.Font = RegisterFont("fonts/noto_sans_sc.otf", 30)
 				overrideyoffset = 0
 				LUI.MenuGenericButtons.ButtonLabelFont.Height = 17
