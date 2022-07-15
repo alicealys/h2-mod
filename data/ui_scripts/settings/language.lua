@@ -89,6 +89,33 @@ LUI.UIButtonText.IsOffsetedLanguage = function()
 	end
 end
 
+local lang = Engine.GetCurrentLanguage()
+if (lang == 5 or lang == 6 or lang == 17) then
+	local scale = function (size)
+		return size * 720 / 1080
+	end
+
+	CoD.TextSettings.SP_HudAmmoStatusText = {
+		Font = RegisterFont("fonts/bank.ttf", 16),
+		Height = 16
+	}
+	
+	CoD.TextSettings.SP_HudAmmoCounterFont = {
+		Font = RegisterFont("fonts/bank.ttf", 34),
+		Height = 34
+	}
+	
+	CoD.TextSettings.HudAmmoCounterFont = {
+		Font = RegisterFont("fonts/bank.ttf", 105),
+		Height = 64
+	}
+	
+	CoD.TextSettings.H2TitleFont = {
+		Font = RegisterFont("fonts/bank.ttf", 56),
+		Height = scale(56)
+	}
+end
+
 LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 	local menu = LUI.MenuTemplate.new(a1, {
 		menu_title = "@LUA_MENU_CHOOSE_LANGUAGE",

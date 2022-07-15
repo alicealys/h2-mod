@@ -1,6 +1,4 @@
-if (Engine.InFrontend()) then
-    require("language")
-end
+require("language")
 
 game:addlocalizedstring("MENU_GENERAL", "GENERAL")
 game:addlocalizedstring("MENU_GENERAL_DESC", "Set the client's settings.")
