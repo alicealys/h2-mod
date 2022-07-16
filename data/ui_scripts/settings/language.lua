@@ -37,11 +37,11 @@ LUI.UIGenericButton.ButtonLabelFactory = function(data, ...)
 	return factory(data, ...)
 end
 
-local arabicfont = RegisterFont("fonts/arabic.ttf", 30)
-local koreanfont = RegisterFont("fonts/korean.ttf", 30)
+local arabicfont = RegisterFont("ara/fonts/default.otf", 30)
+local koreanfont = RegisterFont("kor/fonts/default.otf", 30)
 local polrusfont = RegisterFont("polrus/fonts/default.otf", 30)
-local japanesefont = RegisterFont("fonts/japanese.ttf", 30)
-local chinesefont = RegisterFont("fonts/chinese.ttf", 30)
+local japanesefont = RegisterFont("jpf/fonts/default.otf", 30)
+local chinesefont = RegisterFont("tch/fonts/default.otf", 30)
 
 local function setchinesefont(lang)
 	if (lang ~= CoD.Language.Traditional_chinese and lang ~= CoD.Language.Simplified_chinese) then
