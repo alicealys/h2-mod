@@ -49,8 +49,8 @@ local function setchinesefont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = chinesefont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 22
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 17
+	overrideyoffset = 2
 end
 
 local function setjapanesefont(lang)
@@ -59,8 +59,8 @@ local function setjapanesefont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = japanesefont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 18
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 25
+	overrideyoffset = 0
 end
 
 local function setkoreanfont(lang)
@@ -69,8 +69,8 @@ local function setkoreanfont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = koreanfont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 25
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 20
+	overrideyoffset = 1.5
 end
 
 local function setarabicfont(lang)
