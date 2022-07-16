@@ -153,7 +153,12 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 	return menu
 end)
 
--- rus/pol patches
+-- global patch
+LUI.UIButtonText.IsOffsetedLanguage = function()
+	return false
+end
+
+-- rus/pol patch
 
 if (not Engine.InFrontend()) then
 	local weaponinfodef = LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"]
@@ -176,18 +181,10 @@ else
 	end
 end
 
-LUI.UIButtonText.IsOffsetedLanguage = function()
-	if Engine.IsRightToLeftLanguage() then
-		return true
-	elseif Engine.IsAsianLanguage() then
-		return true
-	else
-		return false
-	end
-end
+-- rus/pol/ara patch
 
 local lang = Engine.GetCurrentLanguage()
-if (lang == 5 or lang == 6 or lang == 17) then
+if (lang == 5 or lang == 6 or lang == 12 or lang == 17) then
 	local scale = function (size)
 		return size * 720 / 1080
 	end
