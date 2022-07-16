@@ -117,7 +117,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 			setchinesefont(id)
 			setkoreanfont(id)
 			setarabicfont(id)
-		elseif (lang ~= CoD.Language.Arabic and lang ~= CoD.Language.Korean) then
+		elseif (lang ~= CoD.Language.Arabic or lang ~= CoD.Language.Korean) then
 			setpolrusfont(id)
 			setchinesefont(id)
 			setjapanesefont(id)
