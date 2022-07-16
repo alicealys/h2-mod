@@ -37,7 +37,7 @@ namespace filesystem
 
 			filesystem::register_path(L".");
 			filesystem::register_path(L"h2-mod");
-			filesystem::register_path(L"cdata");
+			filesystem::register_path(L"" CLIENT_DATA_FOLDER);
 
 			localized_strings::clear();
 
