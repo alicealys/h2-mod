@@ -4,6 +4,7 @@
 #include "scheduler.hpp"
 #include "updater.hpp"
 #include "game/ui_scripting/execution.hpp"
+#include "console.hpp"
 
 #include "version.h"
 
@@ -57,9 +58,19 @@ namespace updater
 			std::string error{};
 			std::string current_file{};
 			std::vector<std::string> required_files{};
+			std::vector<std::string> garbage_files{};
 		};
 
 		utils::concurrency::container<update_data_t> update_data;
+
+		// remove this at some point
+		std::vector<std::string> old_data_files =
+		{
+			{"./data/ui_scripts"},
+			{"./data/polrus"},
+			{"./data/fonts"},
+			{"./data/localizedstrings"},
+		};
 
 		std::string select(const std::string& main, const std::string& develop)
 		{
@@ -172,6 +183,67 @@ namespace updater
 				data_ = {};
 			});
 		}
+
+		bool has_old_data_files()
+		{
+			bool has = false;
+			for (const auto& file : old_data_files)
+			{
+				if (utils::io::directory_exists(file))
+				{
+					has = true;
+				}
+			}
+
+			return has;
+		}
+
+		void delete_old_data_files()
+		{
+			for (const auto& file : old_data_files)
+			{
+				std::filesystem::remove_all(file);
+			}
+		}
+
+		std::vector<std::string> find_garbage_files(const std::vector<std::string>& update_files)
+		{
+			std::vector<std::string> garbage_files{};
+
+			if (!utils::io::directory_exists("cdata"))
+			{
+				return {};
+			}
+
+			const auto current_files = utils::io::list_files_recursively(CLIENT_DATA_FOLDER);
+			for (const auto& file : current_files)
+			{
+				bool found = false;
+				for (const auto& update_file : update_files)
+				{
+					const auto path_a = std::filesystem::path(file);
+					const auto path_b = std::filesystem::path(update_file);
+					const auto is_directory = utils::io::directory_exists(file);
+					const auto compare = path_a.compare(path_b);
+
+					if ((is_directory && compare == -1) || compare == 0)
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+				{
+#ifdef DEBUG
+					console::info("[Updater] Found extra file %s\n", file.data());
+#endif
+					garbage_files.push_back(file);
+				}
+			}
+
+			return garbage_files;
+		}
 	}
 
 	void relaunch()
@@ -231,7 +303,7 @@ namespace updater
 	{
 		return update_data.access<bool>([](update_data_t& data_)
 		{
-			return data_.required_files.size() > 0;
+			return data_.required_files.size() > 0 || data_.garbage_files.size() > 0 || has_old_data_files();
 		});
 	}
 
@@ -262,7 +334,7 @@ namespace updater
 	void cancel_update()
 	{
 #ifdef DEBUG
-		printf("[Updater] Cancelling update\n");
+		console::info("[Updater] Cancelling update\n");
 #endif
 
 		return update_data.access([](update_data_t& data_)
@@ -277,7 +349,7 @@ namespace updater
 		reset_data();
 
 #ifdef DEBUG
-		printf("[Updater] starting update check\n");
+		console::info("[Updater] starting update check\n");
 #endif
 
 		scheduler::once([]()
@@ -306,6 +378,7 @@ namespace updater
 			}
 
 			std::vector<std::string> required_files;
+			std::vector<std::string> update_files;
 
 			const auto files = j.GetArray();
 			for (const auto& file : files)
@@ -318,6 +391,8 @@ namespace updater
 				const auto name = file[0].GetString();
 				const auto sha = file[2].GetString();
 
+				update_files.push_back(name);
+
 				if (!check_file(name, sha))
 				{
 					if (get_binary_name() == name)
@@ -329,18 +404,21 @@ namespace updater
 					}
 
 #ifdef DEBUG
-					printf("[Updater] need file %s\n", name);
+					console::info("[Updater] need file %s\n", name);
 #endif
 
 					required_files.push_back(name);
 				}
 			}
 
-			update_data.access([&required_files](update_data_t& data_)
+			const auto garbage_files = find_garbage_files(update_files);
+
+			update_data.access([&](update_data_t& data_)
 			{
 				data_.check.done = true;
 				data_.check.success = true;
 				data_.required_files = required_files;
+				data_.garbage_files = garbage_files;
 			});
 
 			notify("update_check_done");
@@ -350,12 +428,24 @@ namespace updater
 	void start_update_download()
 	{
 #ifdef DEBUG
-		printf("[Updater] starting update download\n");
+		console::info("[Updater] starting update download\n");
 #endif
 
 		if (!is_update_check_done() || !get_update_check_status() || is_update_cancelled())
 		{
 			return;
+		}
+
+		delete_old_data_files();
+
+		const auto garbage_files = update_data.access<std::vector<std::string>>([](update_data_t& data_)
+		{
+			return data_.garbage_files;
+		});
+
+		for (const auto& file : garbage_files)
+		{
+			std::filesystem::remove_all(file);
 		}
 
 		scheduler::once([]()
@@ -375,7 +465,7 @@ namespace updater
 				});
 
 #ifdef DEBUG
-				printf("[Updater] downloading file %s\n", file.data());
+				console::info("[Updater] downloading file %s\n", file.data());
 #endif
 
 				const auto data = download_file(file);

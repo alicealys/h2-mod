@@ -1,5 +1,7 @@
 #pragma once
 
+#include "updater.hpp"
+
 namespace filesystem
 {
 	std::string read_file(const std::string& path);
