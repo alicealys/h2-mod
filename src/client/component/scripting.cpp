@@ -22,6 +22,8 @@ namespace scripting
 	std::unordered_map<std::string, std::unordered_map<std::string, const char*>> script_function_table;
 	utils::concurrency::container<shared_table_t> shared_table;
 
+	std::unordered_map<std::string, int> get_dvar_int_overrides;
+
 	namespace
 	{
 		utils::hook::detour vm_notify_hook;
@@ -79,6 +81,7 @@ namespace scripting
 
 		void clear_scheduled_notifies()
 		{
+			get_dvar_int_overrides.clear();
 			scheduled_notifies.access([](notify_list& list)
 			{
 				list.clear();
@@ -218,6 +221,20 @@ namespace scripting
 
 			scr_run_current_threads_hook.invoke<void>();
 		}
+
+		utils::hook::detour scr_get_dvar_int_hook;
+		void scr_get_dvar_int_stub()
+		{
+			const auto dvar = game::Scr_GetString(0);
+
+			if (get_dvar_int_overrides.find(dvar) != get_dvar_int_overrides.end())
+			{
+				game::Scr_AddInt(get_dvar_int_overrides[dvar]);
+				return;
+			}
+
+			scr_get_dvar_int_hook.invoke<void>();
+		}
 	}
 
 	class component final : public component_interface
@@ -240,6 +257,8 @@ namespace scripting
 			respawn_hook.create(0x1404B1E00, respawn_stub);
 
 			scr_run_current_threads_hook.create(0x1405C8370, scr_run_current_threads_stub);
+
+			scr_get_dvar_int_hook.create(0x1404F0730, scr_get_dvar_int_stub);
 
 			scheduler::loop([]()
 			{

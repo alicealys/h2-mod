@@ -111,6 +111,8 @@ namespace game
 	WEAK symbol<void(unsigned int id, scr_string_t stringValue, unsigned int paramcount)> Scr_NotifyId{0x1405C8240};
 	WEAK symbol<unsigned int(unsigned int threadId)> Scr_GetSelf{0x1405C57C0};
 	WEAK symbol<void()> Scr_ErrorInternal{0x1405C6EC0};
+	WEAK symbol<const char*(unsigned int index)> Scr_GetString{0x1405C7C20};
+	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x1405C8DB0};
 
