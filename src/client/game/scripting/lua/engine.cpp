@@ -69,6 +69,14 @@ namespace scripting::lua::engine
 		}
 	}
 
+	void handle_endon_conditions(const event& e)
+	{
+		for (auto& script : get_scripts())
+		{
+			script->handle_endon_conditions(e);
+		}
+	}
+
 	void run_frame()
 	{
 		for (auto& script : get_scripts())
