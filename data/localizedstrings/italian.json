@@ -1,5 +1,4 @@
 {
-    "MENU_MODS": "MODS",
     "MENU_MODS_DESC": "Abilita mod installate.",
     "LUA_MENU_MOD_DESC_DEFAULT": "Abilita &&1.",
     "LUA_MENU_MOD_DESC": "&&1\nAutore: &&2\nVersione: &&3",
