@@ -66,6 +66,8 @@ namespace scripting
 					e.arguments.emplace_back(*value);
 				}
 
+				lua::engine::handle_endon_conditions(e);
+
 				scheduled_notifies.access([&](notify_list& list)
 				{
 					list.push_back(e);
@@ -75,7 +77,7 @@ namespace scripting
 			vm_notify_hook.invoke<void>(notify_list_owner_id, string_value, top);
 		}
 
-		void clear_scheduler_notifies()
+		void clear_scheduled_notifies()
 		{
 			scheduled_notifies.access([](notify_list& list)
 			{
@@ -87,7 +89,7 @@ namespace scripting
 		{
 			client_spawn_hook.invoke<void>(client);
 			scr_auto_respawn->current.enabled = true;
-			clear_scheduler_notifies();
+			clear_scheduled_notifies();
 			lua::engine::start();
 		}
 
@@ -98,7 +100,7 @@ namespace scripting
 				canonical_string_table.clear();
 			}
 
-			clear_scheduler_notifies();
+			clear_scheduled_notifies();
 			lua::engine::stop();
 			g_shutdown_game_hook.invoke<void>(free_scripts);
 		}
@@ -177,7 +179,7 @@ namespace scripting
 			if (save_game != nullptr)
 			{
 				scr_auto_respawn->current.enabled = true;
-				clear_scheduler_notifies();
+				clear_scheduled_notifies();
 				lua::engine::start();
 			}
 			return result;
