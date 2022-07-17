@@ -65,7 +65,8 @@ LUI.MenuBuilder.registerType("mods_menu", function(a1)
 		exclusiveController = 0,
 		menu_width = 400,
 		menu_top_indent = LUI.MenuTemplate.spMenuOffset,
-		showTopRightSmallBar = true
+		showTopRightSmallBar = true,
+		uppercase_title = true
 	})
 
 	menu:AddButton("@LUA_MENU_WORKSHOP", function()
