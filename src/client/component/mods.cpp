@@ -12,6 +12,7 @@
 #include "mods.hpp"
 #include "mapents.hpp"
 #include "localized_strings.hpp"
+#include "loadscreen.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -32,6 +33,7 @@ namespace mods
 				materials::clear();
 				fonts::clear();
 				mapents::clear_dvars();
+				loadscreen::clear();
 			}
 
 			mapents::clear();

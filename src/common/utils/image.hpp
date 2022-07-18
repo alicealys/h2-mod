@@ -8,6 +8,7 @@ namespace utils
 	{
 	public:
 		image(const std::string& data);
+		image(const std::string& data_, int width_, int height_);
 
 		int get_width() const;
 		int get_height() const;

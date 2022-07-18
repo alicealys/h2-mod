@@ -1,8 +1,10 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 
-#include "game/game.hpp"
 #include "console.hpp"
+#include "loadscreen.hpp"
+
+#include "game/game.hpp"
 #include "game/dvars.hpp"
 
 #include <utils/hook.hpp>
@@ -59,6 +61,8 @@ namespace logger
 
 				console::error("Error: %s\n", buffer);
 			}
+
+			loadscreen::clear();
 
 			com_error_hook.invoke<void>(error, "%s", buffer);
 		}
