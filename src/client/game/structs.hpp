@@ -1211,6 +1211,16 @@ namespace game
 		char __pad0[0x8];
 	};
 
+	struct rectDef_s
+	{
+		float x;
+		float y;
+		float w;
+		float h;
+		int horzAlign;
+		int vertAlign;
+	};
+
 	namespace hks
 	{
 		struct lua_State;

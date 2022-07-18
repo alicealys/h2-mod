@@ -23,6 +23,9 @@ namespace game
 	WEAK symbol<char*(const unsigned int weapon, 
 		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x1403B9210};
 
+	WEAK symbol<void(ScreenPlacement* place, float x, float y, float w, float h, int horzAlign, int vertAlign, 
+		float t0, float s0, float t1, float s1, float* color, Material* material)> CL_DrawStretchPic{0x1403C9570};
+
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x14059A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x14059ABA0};
 
@@ -58,6 +61,7 @@ namespace game
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x14061A5C0};
 	WEAK symbol<void(const char* dvarName, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x14061A910};
 	WEAK symbol<void(const dvar_t* dvar, const char* value)> Dvar_SetString{0x14061ABF0};
+	WEAK symbol<void(const dvar_t* dvar, DvarSetSource source)> Dvar_Reset{0x140619FE0};
 
 	WEAK symbol<int(const char* fname)> generateHashValue{0x140343D20};
 
@@ -143,6 +147,8 @@ namespace game
 
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x1403E16A0};
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x1403E1660};
+	WEAK symbol<void(ScreenPlacement* scrPlace, float* x, float* y, float* w, float* h, 
+		int horzAlign, int vertAlign)> ScrPlace_ApplyRect{0x1403E0BF0};
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x1405BFBB0};
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x1405C0170};
@@ -162,6 +168,8 @@ namespace game
 
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x1405A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x140606080};
+	WEAK symbol<void(ScreenPlacement* scrPlace, const char* text, rectDef_s* rect, Font_s* font, float x, float y,
+		float scale, const float* color, int style, int textAlignMode, rectDef_s* textRect, char a12)> UI_DrawWrappedText{0x1406055E0};
 
 	WEAK symbol<void(pmove_t* move, trace_t*, const float*, const float*,
 		const Bounds*, int, int)> PM_playerTrace{0x14068F0A0};
