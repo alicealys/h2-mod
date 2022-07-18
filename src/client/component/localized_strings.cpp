@@ -130,14 +130,18 @@ namespace localized_strings
 
 			for (const auto& path : search_paths)
 			{
-				if (!try_load_file(path, language))
+				bool found_in_current_path = false;
+
+				if (try_load_file(path, "english"))
 				{
-					if (try_load_file(path, "english"))
-					{
-						found = true;
-						console::warn("[Localized strings] No valid language file found for '%s' in '%s', falling back to 'english'\n",
-							language, path.data());
-					}
+					found_in_current_path = true;
+					found = true;
+				}
+
+				if (language != "english"s && !try_load_file(path, language) && found_in_current_path)
+				{
+					console::warn("[Localized strings] No valid language file found for '%s' in '%s/localizedstrings/', falling back to 'english'\n",
+						language, path.data());
 				}
 				else
 				{
