@@ -240,7 +240,6 @@ namespace materials
 
 					auto width = image.get_width();
 					auto height = image.get_height();
-					auto size = image.get_size();
 
 					/*
 						int width;
