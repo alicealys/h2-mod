@@ -20,6 +20,7 @@ namespace loadscreen
 		game::dvar_t* cl_loadscreen_desc = nullptr;
 		game::dvar_t* cl_loadscreen_obj = nullptr;
 		game::dvar_t* cl_loadscreen_obj_icon = nullptr;
+		game::dvar_t* cl_enable_custom_loadscreen = nullptr;
 
 		utils::hook::detour ui_draw_loadbar_hook;
 
@@ -29,8 +30,23 @@ namespace loadscreen
 		float icon_yellow_color[4] = {0.86f, 0.81f, 0.34f, 1.f};
 		float icon_grey_color[4] = {0.6f, 0.6f, 0.6f, 1.f};
 
+		void draw_loadscreen_gradient()
+		{
+			const auto placement = game::ScrPlace_GetViewPlacement();
+			const auto gradient = game::Material_RegisterHandle("gradient");
+			const auto black = game::Material_RegisterHandle("black");
+
+			game::CL_DrawStretchPic(placement, -750, -200, 600, 800, 2, 1, 0.0f, 0.0f, 1.0f, 1.0f, white_color, black);
+			game::CL_DrawStretchPic(placement, -150, -200, 300, 800, 2, 1, 0.0f, 0.0f, 1.0f, 1.0f, white_color, gradient);
+		}
+
 		void draw_loadscreen_image()
 		{
+			if (*cl_loadscreen_image->current.string == 0)
+			{
+				return;
+			}
+
 			const auto material = game::Material_RegisterHandle(cl_loadscreen_image->current.string);
 			const auto placement = game::ScrPlace_GetViewPlacement();
 
@@ -159,18 +175,14 @@ namespace loadscreen
 
 		void draw_loadscreen()
 		{
-			if (!cl_disable_map_movies->current.enabled)
-			{
-				return;
-			}
-
 			if (cl_loadscreen_image == nullptr || cl_loadscreen_title == nullptr ||
-				cl_loadscreen_desc == nullptr || *cl_loadscreen_image->current.string == 0)
+				cl_loadscreen_desc == nullptr || !cl_enable_custom_loadscreen->current.enabled)
 			{
 				return;
 			}
 
 			draw_loadscreen_image();
+			draw_loadscreen_gradient();
 			draw_loadscreen_progress_bar();
 			draw_loadscreen_title();
 			draw_loadscreen_desc();
@@ -206,6 +218,7 @@ namespace loadscreen
 
 	void clear()
 	{
+		game::Dvar_Reset(cl_enable_custom_loadscreen, game::DVAR_SOURCE_INTERNAL);
 		game::Dvar_Reset(cl_disable_map_movies, game::DVAR_SOURCE_INTERNAL);
 		game::Dvar_Reset(cl_loadscreen_image, game::DVAR_SOURCE_INTERNAL);
 		game::Dvar_Reset(cl_loadscreen_title, game::DVAR_SOURCE_INTERNAL);
@@ -230,6 +243,8 @@ namespace loadscreen
 		{
 			// not registered, used in CL_StartLoading
 			cl_disable_map_movies = dvars::register_bool("cl_disableMapMovies", false, 0, "Disable map loading videos");
+
+			cl_enable_custom_loadscreen = dvars::register_bool("cl_enableCustomLoadscreen", false, 0, "Use custom loadscreen dvars");
 
 			// auto start the game if cl_disableMapMovies is enabled
 			utils::hook::jump(0x1405F46EA, utils::hook::assemble(ui_set_active_menu_stub), true);
