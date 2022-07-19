@@ -37,11 +37,11 @@ LUI.UIGenericButton.ButtonLabelFactory = function(data, ...)
 	return factory(data, ...)
 end
 
-local arabicfont = RegisterFont("fonts/arabic.ttf", 30)
-local koreanfont = RegisterFont("fonts/korean.ttf", 30)
+local arabicfont = RegisterFont("ara/fonts/default.otf", 30)
+local koreanfont = RegisterFont("kor/fonts/default.otf", 30)
 local polrusfont = RegisterFont("polrus/fonts/default.otf", 30)
-local japanesefont = RegisterFont("fonts/japanese.ttf", 30)
-local chinesefont = RegisterFont("fonts/chinese.ttf", 30)
+local japanesefont = RegisterFont("jpf/fonts/default.otf", 30)
+local chinesefont = RegisterFont("tch/fonts/default.otf", 30)
 
 local function setchinesefont(lang)
 	if (lang ~= CoD.Language.Traditional_chinese and lang ~= CoD.Language.Simplified_chinese) then
@@ -49,8 +49,8 @@ local function setchinesefont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = chinesefont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 22
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 17
+	overrideyoffset = 2
 end
 
 local function setjapanesefont(lang)
@@ -59,8 +59,8 @@ local function setjapanesefont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = japanesefont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 18
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 18.5
+	overrideyoffset = 1.5
 end
 
 local function setkoreanfont(lang)
@@ -69,8 +69,8 @@ local function setkoreanfont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = koreanfont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 25
-	overrideyoffset = 1
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 20
+	overrideyoffset = 1.5
 end
 
 local function setarabicfont(lang)
@@ -79,7 +79,7 @@ local function setarabicfont(lang)
 	end
 
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = arabicfont
-	LUI.MenuGenericButtons.ButtonLabelFont.Height = 28
+	LUI.MenuGenericButtons.ButtonLabelFont.Height = 17
 	overrideyoffset = 0
 end
 
@@ -117,7 +117,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 			setchinesefont(id)
 			setkoreanfont(id)
 			setarabicfont(id)
-		elseif (lang ~= CoD.Language.Arabic and lang ~= CoD.Language.Korean) then
+		elseif (lang ~= CoD.Language.Arabic or lang ~= CoD.Language.Korean) then
 			setpolrusfont(id)
 			setchinesefont(id)
 			setjapanesefont(id)
@@ -153,7 +153,12 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 	return menu
 end)
 
--- rus/pol patches
+-- global patch
+LUI.UIButtonText.IsOffsetedLanguage = function()
+	return false
+end
+
+-- rus/pol patch
 
 if (not Engine.InFrontend()) then
 	local weaponinfodef = LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"]
@@ -176,18 +181,10 @@ else
 	end
 end
 
-LUI.UIButtonText.IsOffsetedLanguage = function()
-	if Engine.IsRightToLeftLanguage() then
-		return true
-	elseif Engine.IsAsianLanguage() then
-		return true
-	else
-		return false
-	end
-end
+-- rus/pol/ara patch
 
 local lang = Engine.GetCurrentLanguage()
-if (lang == 5 or lang == 6 or lang == 17) then
+if (lang == 5 or lang == 6 or lang == 12 or lang == 17) then
 	local scale = function (size)
 		return size * 720 / 1080
 	end
