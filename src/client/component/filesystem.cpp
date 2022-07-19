@@ -26,7 +26,7 @@ namespace filesystem
 		{
 			static auto* loc_language = game::Dvar_FindVar("loc_language");
 			const auto id = loc_language->current.integer;
-			return id == 5 || id == 6 || id == 17;
+			return id == 5 || id == 6 || id == 12 || id == 17;
 		}
 
 		void fs_startup_stub(const char* name)
