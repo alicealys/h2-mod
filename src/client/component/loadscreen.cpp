@@ -215,6 +215,17 @@ namespace loadscreen
 	class component final : public component_interface
 	{
 	public:
+		void post_start() override
+		{
+			scheduler::loop([]()
+			{
+				if (in_loadscreen())
+				{
+					draw_loadscreen();
+				}
+			}, scheduler::pipeline::renderer);
+		}
+
 		void post_unpack() override
 		{
 			// not registered, used in CL_StartLoading
@@ -231,14 +242,6 @@ namespace loadscreen
 				cl_loadscreen_obj = dvars::register_string("cl_loadscreenObj", "", 0, "Loadscreen mission objective");
 				cl_loadscreen_obj_icon = dvars::register_string("cl_loadscreenObjIcon", "", 0, "Loadscreen mission objective icon");
 			}, scheduler::pipeline::main);
-
-			scheduler::loop([]()
-			{
-				if (in_loadscreen())
-				{
-					draw_loadscreen();
-				}
-			}, scheduler::pipeline::renderer);
 		}
 	};
 }
