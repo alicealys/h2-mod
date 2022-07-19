@@ -49,7 +49,7 @@ namespace scripting::lua::engine
 
 		load_generic_script();
 
-		for (const auto& path : filesystem::get_search_paths())
+		for (const auto& path : filesystem::get_search_paths_rev())
 		{
 			load_scripts(path + "/scripts/");
 		}

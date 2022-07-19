@@ -11,4 +11,5 @@ namespace filesystem
 	void unregister_path(const std::filesystem::path& path);
 
 	std::vector<std::string> get_search_paths();
+	std::vector<std::string> get_search_paths_rev();
 }
