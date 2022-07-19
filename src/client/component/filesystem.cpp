@@ -16,9 +16,9 @@ namespace filesystem
 	{
 		bool initialized = false;
 
-		std::vector<std::filesystem::path>& get_search_paths_internal()
+		std::deque<std::filesystem::path>& get_search_paths_internal()
 		{
-			static std::vector<std::filesystem::path> search_paths{};
+			static std::deque<std::filesystem::path> search_paths{};
 			return search_paths;
 		}
 
@@ -35,9 +35,9 @@ namespace filesystem
 
 			initialized = true;
 
+			filesystem::register_path(L"" CLIENT_DATA_FOLDER);
 			filesystem::register_path(L".");
 			filesystem::register_path(L"h2-mod");
-			filesystem::register_path(L"" CLIENT_DATA_FOLDER);
 
 			localized_strings::clear();
 
@@ -121,7 +121,7 @@ namespace filesystem
 			if (can_insert_path(path_))
 			{
 				console::info("[FS] Registering path '%s'\n", path_.generic_string().data());
-				get_search_paths_internal().push_back(path_);
+				get_search_paths_internal().push_front(path_);
 			}
 		}
 	}
@@ -159,6 +159,19 @@ namespace filesystem
 		for (const auto& path : get_search_paths_internal())
 		{
 			paths.push_back(path.generic_string());
+		}
+
+		return paths;
+	}
+
+	std::vector<std::string> get_search_paths_rev()
+	{
+		std::vector<std::string> paths{};
+		const auto& search_paths = get_search_paths_internal();
+
+		for (auto i = search_paths.rbegin(); i != search_paths.rend(); ++i)
+		{
+			paths.push_back(i->generic_string());
 		}
 
 		return paths;

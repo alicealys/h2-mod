@@ -125,7 +125,7 @@ namespace localized_strings
 		{
 			bool found = false;
 
-			const auto search_paths = filesystem::get_search_paths();
+			const auto search_paths = filesystem::get_search_paths_rev();
 			const auto language = game::SEH_GetCurrentLanguageName();
 
 			for (const auto& path : search_paths)
