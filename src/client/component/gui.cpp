@@ -6,6 +6,7 @@
 
 #include "scheduler.hpp"
 #include "gui.hpp"
+#include "console.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -175,8 +176,14 @@ namespace gui
 
 		void gui_on_frame()
 		{
+			if (!game::Sys_IsDatabaseReady2())
+			{
+				return;
+			}
+
 			if (!initialized)
 			{
+				console::info("[ImGui] Initializing\n");
 				initialize_gui_context();
 			}
 			else
@@ -212,7 +219,7 @@ namespace gui
 			a.mov(r8d, esi);
 			a.mov(edx, r15d);
 			a.mov(rcx, rdi);
-			a.call_aligned(rbx);
+			a.call(rbx);
 			a.mov(ecx, eax);
 
 			a.jmp(0x1407A14D1);
@@ -308,7 +315,8 @@ namespace gui
 
 		void post_unpack() override
 		{
-			utils::hook::jump(0x1407A14C4, utils::hook::assemble(dxgi_swap_chain_present_stub), true);
+			utils::hook::nop(0x1407A14BB, 9);
+			utils::hook::call(0x1407A14BE, gui_on_frame);
 			wnd_proc_hook.create(0x140650F10, wnd_proc_stub);
 
 			on_frame([]()
