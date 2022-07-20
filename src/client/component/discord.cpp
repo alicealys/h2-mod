@@ -44,7 +44,16 @@ namespace discord
 
 				if (details.has_value())
 				{
-					discord_presence.details = utils::string::va("%s", details.value().data());
+					const auto& details_ = details.value();
+					if (details_.starts_with("@") && details_.size() > 1)
+					{
+						const auto value = game::UI_SafeTranslateString(details_.substr(1).data());
+						discord_presence.details = value;
+					}
+					else
+					{
+						discord_presence.details = utils::string::va("%s", details_.data());
+					}
 				}
 				else
 				{
@@ -87,8 +96,7 @@ namespace discord
 			command::add("setdiscordstate", [](const command::params& params)
 			{
 				const std::string _state = params.join(1);
-
-				scheduler::once([_state]()
+				scheduler::once([=]()
 				{
 					state = _state;
 					update_discord();
