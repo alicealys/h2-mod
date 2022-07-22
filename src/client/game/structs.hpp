@@ -692,8 +692,37 @@ namespace game
 		unsigned int totalMsec;
 	};
 
+	struct StreamFile
+	{
+		void* handle;
+		__int64 length;
+		__int64 startOffset;
+		bool isPacked;
+	};
+
+	struct LoadedSoundInfo
+	{
+		char* data;
+		unsigned int sampleRate;
+		unsigned int dataByteCount;
+		unsigned int numSamples;
+		char channels;
+		char numBits;
+		char blockAlign;
+		short format;
+		int loadedSize;
+	}; static_assert(sizeof(LoadedSoundInfo) == 0x20);
+
+	struct LoadedSound
+	{
+		const char* name;
+		StreamFileName filename;
+		LoadedSoundInfo info;
+	}; static_assert(sizeof(LoadedSound) == 0x40);
+
 	union SoundFileRef
 	{
+		LoadedSound* loadSnd;
 		StreamedSound streamSnd;
 	};
 
@@ -709,9 +738,10 @@ namespace game
 		const char* aliasName;
 		char __pad0[24];
 		SoundFile* soundFile;
-		char __pad1[198];
-		// not gonna map this out...
+		char __pad1[216];
 	};
+
+	static_assert(sizeof(snd_alias_t) == 256);
 
 	struct snd_alias_list_t
 	{
@@ -841,6 +871,7 @@ namespace game
 		MapEnts* mapents;
 		AddonMapEnts* addon_mapents;
 		LocalizeEntry* localize;
+		snd_alias_list_t* sound;
 	};
 
 	struct XAsset
@@ -1165,7 +1196,14 @@ namespace game
 		FILESYSRESULT_ERROR = 0x2,
 	};
 
-	struct DB_IFileSysFile;
+	struct DB_IFileSysFile
+	{
+		void* file;
+		uint64_t last_read;
+		uint64_t bytes_read;
+	};
+
+	static_assert(sizeof(DB_IFileSysFile) == 24);
 
 	struct DB_FileSysInterface;
 
