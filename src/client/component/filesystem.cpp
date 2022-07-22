@@ -108,6 +108,21 @@ namespace filesystem
 		return false;
 	}
 
+	bool find_file(const std::string& path, std::string* real_path)
+	{
+		for (const auto& search_path : get_search_paths_internal())
+		{
+			const auto path_ = search_path / path;
+			if (utils::io::file_exists(path_.generic_string()))
+			{
+				*real_path = path_.generic_string();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	void register_path(const std::filesystem::path& path)
 	{
 		if (!initialized)
