@@ -45,7 +45,7 @@ namespace mapents
 			{"height", 488},
 			{"customangles", 9555},
 			{"speed", 997},
-			{"script_vehicle_anim", 40318},
+			{"lookahead", 600},
 
 			{"_color", 1398},
 			{"skycolor", 34255},
@@ -76,6 +76,12 @@ namespace mapents
 			{"script_moveoverride", 31299},
 			{"script_forcegoal", 31212},
 			{"script_ammo_max", 31036},
+			{"script_vehicleride", 31516},
+			{"script_idleanim", 31252},
+			{"script_chatgroup", 31092},
+			{"script_vehicle_anim", 40318},
+			{"script_vehicledetour", 31510},
+			{"script_vehiclegroupdelete", 31514},
 		};
 
 		std::unordered_map<unsigned int, game::scriptType_e> custom_fields;
