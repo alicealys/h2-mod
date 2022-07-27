@@ -45,7 +45,7 @@ namespace mapents
 			{"height", 488},
 			{"customangles", 9555},
 			{"speed", 997},
-			{"script_vehicle_anim", 40318},
+			{"lookahead", 600},
 
 			{"_color", 1398},
 			{"skycolor", 34255},
@@ -76,6 +76,18 @@ namespace mapents
 			{"script_moveoverride", 31299},
 			{"script_forcegoal", 31212},
 			{"script_ammo_max", 31036},
+			{"script_vehicleride", 31516},
+			{"script_idleanim", 31252},
+			{"script_chatgroup", 31092},
+			{"script_vehicle_anim", 40318},
+			{"script_vehicledetour", 31510},
+			{"script_vehiclegroupdelete", 31514},
+			{"script_flag_wait", 31197},
+			{"script_emptyspawner", 31161},
+			{"script_aigroup", 31025},
+			{"script_group", 31245},
+			{"script_index", 31259},
+			{"script_delay_post", 31122},
 		};
 
 		std::unordered_map<unsigned int, game::scriptType_e> custom_fields;
@@ -396,6 +408,11 @@ namespace mapents
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
 
 			add_field("script_specialops", game::SCRIPT_INTEGER);
+
+			for (const auto& key : keys)
+			{
+				scripting::token_map[key.first] = key.second;
+			}
 		}
 	};
 }
