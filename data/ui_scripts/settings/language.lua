@@ -15,7 +15,7 @@ game:addlocalizedstring("MENU_czech", "České")
 game:addlocalizedstring("MENU_spanishna", "Español (América Latina)") -- text only (English dubbing)
 game:addlocalizedstring("MENU_korean", "한국어")
 game:addlocalizedstring("MENU_english_safe", "English (Safe)")
-game:addlocalizedstring("MENU_russian_partial", "Русский (Английская озвучка)") -- text only (English dubbing)
+game:addlocalizedstring("MENU_russian_partial", "Русский (Англ. озвучка)") -- text only (English dubbing)
 
 LUI.addmenubutton("pc_controls", {
 	index = 4,
@@ -26,7 +26,7 @@ LUI.addmenubutton("pc_controls", {
 	end
 })
 
-local universalfont = RegisterFont("fonts/default.otf", 30)
+local universalfont = RegisterFont("fallback/fonts/default.otf", 30)
 
 local function setuniversalfont(lang)
 	LUI.MenuGenericButtons.ButtonLabelFont.Font = universalfont
@@ -54,13 +54,13 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 				language = languages[i].id
 			})
 		end, languages[i].id == Engine.GetCurrentLanguage(), true, nil, {
-			desc_text = languages[i].name
+			desc_text = Engine.Localize("LOCALE_" .. (languages[i].id))
 		})
 
 		overrideyoffset = nil
 
 		local label = button:getFirstDescendentById("text_label")
-		label:setText(Engine.ToUpperCase(Engine.Localize("LOCALE_" .. (languages[i].id))))
+		label:setText(Engine.ToUpperCase(languages[i].name))
 	end
 
 	LUI.Options.InitScrollingList(menu.list, nil, {

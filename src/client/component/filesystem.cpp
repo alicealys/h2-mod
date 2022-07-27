@@ -22,6 +22,13 @@ namespace filesystem
 			return search_paths;
 		}
 
+		bool is_fallback_lang()
+		{
+			static auto* loc_language = game::Dvar_FindVar("loc_language");
+			const auto id = loc_language->current.integer;
+			return id == 5 || id == 6 || id == 8 || id == 9 || id == 10 || id == 11 || id == 12 || id == 13 || id == 15 || id == 17;
+		}
+
 		bool is_polrus_lang()
 		{
 			static auto* loc_language = game::Dvar_FindVar("loc_language");
@@ -52,6 +59,11 @@ namespace filesystem
 
 			paths.push_back(path);
 			paths.push_back(path / code);
+
+			if (is_fallback_lang())
+			{
+				paths.push_back(path / "fallback");
+			}
 
 			if (is_polrus_lang())
 			{
