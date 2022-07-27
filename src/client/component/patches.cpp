@@ -90,6 +90,8 @@ namespace patches
 				game::DVAR_FLAG_SAVED, "The field of view angle in degrees for client 0");
 			cg_fovScale = dvars::register_float("cg_fovScale", 1.f, 0.1f, 2.f, 
 				game::DVAR_FLAG_SAVED, "Scale applied to the field of view");
+			
+			snd_musicDisabledForCustomSoundtrack = dvars::register_bool("snd_musicDisabledForCustomSoundtrack", 0, game::DVAR_FLAG_SAVED, "Disable all in-game music");
 
 			dvar_register_float_hook.create(game::Dvar_RegisterFloat.get(), dvar_register_float_stub);
 		}

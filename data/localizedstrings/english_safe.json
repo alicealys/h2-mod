@@ -55,6 +55,8 @@
     "LUA_MENU_R_FULLBRIGHT_DESC": "Change the fullbright mode",
     "LUA_MENU_MODE2": "No dynamic lighting",
     "LUA_MENU_MODE3": "Debug shader",
+    "LUA_MENU_INTRO": "Intro movie",
+    "LUA_MENU_INTRO_DESC": "Show or skip intro movie with companies' logos on startup.",
 
     "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK": "Github Page:",
     "MENU_SYSINFO_CUSTOMER_SUPPORT_URL": "https://github.com/fedddddd/h2-mod",
