@@ -343,7 +343,7 @@ namespace scripting
         {"glassradiusdamage", 0x191}, // 0x4F7620
         {"earthquake", 0x192}, // 0x4ED2F0
         {"getnumparts", 0x193}, // 0x4EDDA0
-        {"_func_194", 0x194}, // 0x50EEA0, eartquake func; args: (magnitude, duration, origin, radius)
+        {"objective_onentity", 0x194}, // 0x50EEA0
         {"iprintln", 0x19E}, // 0x504120
         {"iprintlnbold", 0x19F}, // 0x5041A0
         {"logstring", 0x1A0}, // 0x5071B0
