@@ -88,6 +88,8 @@ namespace mapents
 			{"script_group", 31245},
 			{"script_index", 31259},
 			{"script_delay_post", 31122},
+			{"script_killspawner", 31264},
+			{"script_goalvolume", 31238},
 		};
 
 		std::unordered_map<unsigned int, game::scriptType_e> custom_fields;
