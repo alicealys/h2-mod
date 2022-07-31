@@ -13,6 +13,7 @@
 #include "mapents.hpp"
 #include "localized_strings.hpp"
 #include "loadscreen.hpp"
+#include "sound.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -38,6 +39,7 @@ namespace mods
 
 			mapents::clear();
 			localized_strings::clear();
+			sound::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}

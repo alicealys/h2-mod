@@ -48,7 +48,7 @@ namespace filesystem
 		{
 			std::vector<std::filesystem::path> paths{};
 
-			const auto code = game::SEH_GetCurrentLanguageCode();
+			const auto code = game::SEH_GetCurrentLanguageName();
 
 			paths.push_back(path);
 			paths.push_back(path / code);
