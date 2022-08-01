@@ -8,6 +8,7 @@
 #include "filesystem.hpp"
 #include "console.hpp"
 #include "scheduler.hpp"
+#include "command.hpp"
 
 #include <utils/io.hpp>
 #include <utils/memory.hpp>
@@ -649,11 +650,11 @@ namespace sound
 		}
 	}
 
-	void dump_sound(game::snd_alias_list_t* asset)
+	bool dump_sound(game::snd_alias_list_t* asset)
 	{
 		if (asset == nullptr)
 		{
-			return;
+			return false;
 		}
 
 		rapidjson::Document j;
@@ -686,7 +687,7 @@ namespace sound
 			}
 			else
 			{
-				entry.AddMember("chainAliasName", rapidjson::Value{ rapidjson::kNullType }, j.GetAllocator());
+				entry.AddMember("chainAliasName", rapidjson::Value{rapidjson::kNullType}, j.GetAllocator());
 			}
 
 			if (snd_head->subtitle)
@@ -695,7 +696,7 @@ namespace sound
 			}
 			else
 			{
-				entry.AddMember("subtitle", rapidjson::Value{ rapidjson::kNullType }, j.GetAllocator());
+				entry.AddMember("subtitle", rapidjson::Value{rapidjson::kNullType}, j.GetAllocator());
 			}
 
 			if (snd_head->mixerGroup)
@@ -704,7 +705,7 @@ namespace sound
 			}
 			else
 			{
-				entry.AddMember("mixerGroup", rapidjson::Value{ rapidjson::kNullType }, j.GetAllocator());
+				entry.AddMember("mixerGroup", rapidjson::Value{rapidjson::kNullType}, j.GetAllocator());
 			}
 
 			if (snd_head->soundFile)
@@ -908,6 +909,7 @@ namespace sound
 		j.Accept(writer);
 
 		utils::io::write_file(path, std::string{buffer.GetString(), buffer.GetLength()}, false);
+		return true;
 	}
 
 	game::XAssetHeader find_sound(const char* name)
@@ -953,6 +955,32 @@ namespace sound
 			snd_is_music_playing_hook.create(0x1407C58A0, snd_is_music_playing_stub);
 
 			scheduler::once(clear, scheduler::pipeline::main);
+
+			command::add("dumpSoundAlias", [](const command::params& params)
+			{
+				if (params.size() < 2)
+				{
+					console::info("Usage: dumpSoundAlias <name>\n");
+					return;
+				}
+
+				const auto name = params.get(1);
+				const auto sound = game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND, name, false).sound;
+				if (sound == nullptr)
+				{
+					console::error("Sound %s does not exist\n", name);
+					return;
+				}
+
+				if (dump_sound(sound))
+				{
+					console::info("Sound dumped to dumps/sound/%s\n", name);
+				}
+				else
+				{
+					console::error("Failed to dump sound %s\n", name);
+				}
+			});
 		}
 	};
 }
