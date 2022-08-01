@@ -33,7 +33,7 @@ namespace filesystem
 		{
 			static auto* loc_language = game::Dvar_FindVar("loc_language");
 			const auto id = loc_language->current.integer;
-			return id == 5 || id == 6 || id == 12 || id == 17;
+			return id == 5 || id == 6 || id == 12 || id == 13 || id == 17;
 		}
 
 		void fs_startup_stub(const char* name)
@@ -58,8 +58,7 @@ namespace filesystem
 			const auto code = game::SEH_GetCurrentLanguageCode();
 
 			paths.push_back(path);
-			paths.push_back(path / code);
-
+			
 			if (is_fallback_lang())
 			{
 				paths.push_back(path / "fallback");
@@ -69,6 +68,8 @@ namespace filesystem
 			{
 				paths.push_back(path / "polrus");
 			}
+
+			paths.push_back(path / code);
 
 			return paths;
 		}

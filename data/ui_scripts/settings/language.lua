@@ -73,15 +73,23 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 	return menu
 end)
 
--- rus/pol patches
+-- global patch
+LUI.UIButtonText.IsOffsetedLanguage = function()
+	return false
+end
+
+-- pol/rus patch
 
 if (not Engine.InFrontend()) then
 	local weaponinfodef = LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"]
 	LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"] = function(...)
 		local rus = CoD.Language.Russian
 		CoD.Language.Russian = 1337
+		local pol = CoD.Language.Polish
+		CoD.Language.Polish = 1338
 		local res = weaponinfodef(...)
 		CoD.Language.Russian = rus
+		CoD.Language.Polish = pol
 		return res
 	end
 else
@@ -90,21 +98,19 @@ else
 	levelselectmenu.SetupInfoBoxLeftForArcadeMode = function(...)
 		local rus = CoD.Language.Russian
 		CoD.Language.Russian = 1337
+		local pol = CoD.Language.Polish
+		CoD.Language.Polish = 1338
 		local res = setupinfobox(...)
 		CoD.Language.Russian = rus
+		CoD.Language.Polish = pol
 		return res
 	end
 end
 
--- global patch
-LUI.UIButtonText.IsOffsetedLanguage = function()
-	return false
-end
-
--- ara/pol/ru patch
+-- ara/ces/pol/rus patch
 
 local lang = Engine.GetCurrentLanguage()
-if (lang == 5 or lang == 6 or lang == 12 or lang == 17) then
+if (lang == 5 or lang == 6 or lang == 12 or lang == 13 or lang == 17) then
 	local scale = function (size)
 		return size * 720 / 1080
 	end
