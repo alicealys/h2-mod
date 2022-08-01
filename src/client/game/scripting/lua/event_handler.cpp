@@ -40,13 +40,16 @@ namespace scripting::lua
 					continue;
 				}
 
-				if (!has_built_arguments)
+				if (!i->is_deleted)
 				{
-					has_built_arguments = true;
-					arguments = this->build_arguments(event);
-				}
+					if (!has_built_arguments)
+					{
+						has_built_arguments = true;
+						arguments = this->build_arguments(event);
+					}
 
-				handle_error(i->callback(sol::as_args(arguments)));
+					handle_error(i->callback(sol::as_args(arguments)));
+				}
 
 				if (i->is_volatile || i->is_deleted)
 				{
