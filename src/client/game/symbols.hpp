@@ -43,6 +43,7 @@ namespace game
 	WEAK symbol<DB_FileSysInterface*()> DB_FSInitialize{0x140272EC0};
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x140413D80};
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
+	WEAK symbol<XAssetEntry*(XAssetType type, XAssetHeader* header)> DB_LinkXAssetEntry1{0x140414900};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
