@@ -7,6 +7,7 @@
 #include "sound.hpp"
 #include "filesystem.hpp"
 #include "console.hpp"
+#include "scheduler.hpp"
 
 #include <utils/io.hpp>
 #include <utils/memory.hpp>
@@ -22,8 +23,9 @@ namespace sound
 	namespace
 	{
 		utils::memory::allocator sound_allocator;
-		using loaded_sound_map = std::unordered_map<std::string, game::snd_alias_list_t*>;
+		using loaded_sound_map = std::unordered_map<size_t, game::snd_alias_list_t*>;
 		utils::concurrency::container<loaded_sound_map, std::recursive_mutex> loaded_sounds;
+		std::hash<std::string_view> hasher;
 
 #define FATAL(...) \
 		throw std::runtime_error(utils::string::va(__VA_ARGS__)); \
@@ -496,52 +498,38 @@ namespace sound
 			return asset;
 		}
 
-		bool sound_exists(const std::string& name)
+		bool sound_exists(const char* name)
 		{
-			return loaded_sounds.access<bool>([&](loaded_sound_map& map)
-			{
-				const auto i = map.find(name);
-				if (i != map.end())
-				{
-					return true;
-				}
-
-				return find_sound(name.data()).sound != nullptr;
-			});
+			return sound::find_sound(name).sound != nullptr;
 		}
 
 		utils::hook::detour db_is_xasset_default_hook;
-		bool db_is_xasset_default_stub(game::XAssetType type, const char* name)
+		int db_is_xasset_default_stub(game::XAssetType type, const char* name)
 		{
-			if (type == game::ASSET_TYPE_SOUND)
+			if (type != game::ASSET_TYPE_SOUND)
 			{
-				const auto res = db_is_xasset_default_hook.invoke<bool>(type, name);
-				if (!res)
-				{
-					return res;
-				}
-
-				return !sound_exists(name);
+				return db_is_xasset_default_hook.invoke<bool>(type, name);
 			}
 
-			return db_is_xasset_default_hook.invoke<bool>(type, name);
+			const auto res = db_is_xasset_default_hook.invoke<bool>(type, name);
+			if (!res)
+			{
+				return res;
+			}
+
+			return !sound_exists(name);
 		}
 
 		utils::hook::detour db_xasset_exists_hook;
-		bool db_xasset_exists_stub(game::XAssetType type, const char* name)
+		int db_xasset_exists_stub(game::XAssetType type, const char* name)
 		{
-			if (type == game::ASSET_TYPE_SOUND)
+			const auto res = utils::hook::invoke<bool>(0x140417FD0, type, name);
+			if (res)
 			{
-				const auto res = db_xasset_exists_hook.invoke<bool>(type, name);
-				if (res)
-				{
-					return true;
-				}
-
-				return sound_exists(name);
+				return true;
 			}
 
-			return db_xasset_exists_hook.invoke<bool>(type, name);
+			return sound_exists(name);
 		}
 
 		utils::hook::detour scr_table_lookup_hook;
@@ -560,7 +548,7 @@ namespace sound
 			std::optional<int> new_value{};
 			loaded_sounds.access([&](loaded_sound_map& map)
 			{
-				const auto i = map.find(search_value);
+				const auto i = map.find(hasher(search_value));
 				if (i == map.end())
 				{
 					return;
@@ -608,6 +596,56 @@ namespace sound
 			}
 
 			return snd_is_music_playing_hook.invoke<bool>(a1);
+		}
+
+		void load_sound(const std::string& name, const std::string& path)
+		{
+			try
+			{
+				const auto data = utils::io::read_file(path);
+
+				rapidjson::Document j;
+				j.Parse(data.data());
+
+				console::info("[Sound] Loading sound %s\n", name.data());
+				const auto sound = parse_sound_alias_list(j);
+
+				const auto h = hasher(name.data());
+				loaded_sounds.access([&](loaded_sound_map& map)
+				{
+					map[h] = sound;
+				});
+			}
+			catch (const std::exception& e)
+			{
+				console::error("[Sound] Error loading sound %s: %s\n", name.data(), e.what());
+			}
+		}
+
+		void load_sounds()
+		{
+			const auto paths = filesystem::get_search_paths();
+			for (const auto& path : paths)
+			{
+				const auto dir = path + "/sounds";
+				if (!utils::io::directory_exists(dir))
+				{
+					continue;
+				}
+
+				const auto sound_files = utils::io::list_files(dir);
+				for (const auto& file : sound_files)
+				{
+					const auto last = file.find_last_of("\\/");
+					std::string name = file;
+					if (last != std::string::npos)
+					{
+						name = file.substr(last + 1);
+					}
+
+					load_sound(name, file);
+				}
+			}
 		}
 	}
 
@@ -874,52 +912,17 @@ namespace sound
 
 	game::XAssetHeader find_sound(const char* name)
 	{
-		bool found = false;
-		const auto res = loaded_sounds.access<game::XAssetHeader>([&](loaded_sound_map& map)
+		const auto hash = hasher(name);
+		return loaded_sounds.access<game::XAssetHeader>([&](loaded_sound_map& map)
 		{
-			const auto i = map.find(name);
+			const auto i = map.find(hash);
 			if (i != map.end())
 			{
-				found = true;
 				return static_cast<game::XAssetHeader>(i->second);
 			}
 
 			return static_cast<game::XAssetHeader>(nullptr);
 		});
-
-		if (found)
-		{
-			return res;
-		}
-
-		std::string path{};
-		if (!filesystem::find_file("sounds/"s + name, &path))//
-		{
-			return static_cast<game::XAssetHeader>(nullptr);
-		}
-
-		const auto data = utils::io::read_file(path);
-
-		rapidjson::Document j;
-		j.Parse(data.data());
-
-		try
-		{
-			console::info("[Sound] Loading sound %s\n", name);
-			const auto sound = parse_sound_alias_list(j);
-
-			loaded_sounds.access([&](loaded_sound_map& map)
-			{
-				map[name] = sound;
-			});
-
-			return static_cast<game::XAssetHeader>(sound);
-		}
-		catch (const std::exception& e)
-		{
-			console::error("[Sound] Error loading sound %s: %s\n", name, e.what());
-			return static_cast<game::XAssetHeader>(nullptr);
-		}
 	}
 
 	void clear()
@@ -929,6 +932,8 @@ namespace sound
 		{
 			map.clear();
 		});
+
+		load_sounds();
 	}
 
 	class component final : public component_interface
@@ -937,7 +942,7 @@ namespace sound
 		void post_unpack() override
 		{
 			db_is_xasset_default_hook.create(0x1404143C0, db_is_xasset_default_stub);
-			db_xasset_exists_hook.create(0x140417FD0, db_xasset_exists_stub);
+			utils::hook::call(0x140616DD1, db_xasset_exists_stub);
 			scr_table_lookup_hook.create(0x1404EFD40, scr_table_lookup_stub);
 
 			// remove raw/sound or raw/language/sound prefix when loading raw sounds
@@ -946,6 +951,8 @@ namespace sound
 
 			// fix playing non-existing music crashing
 			snd_is_music_playing_hook.create(0x1407C58A0, snd_is_music_playing_stub);
+
+			scheduler::once(clear, scheduler::pipeline::main);
 		}
 	};
 }
