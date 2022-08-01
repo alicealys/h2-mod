@@ -43,6 +43,7 @@ namespace game
 	WEAK symbol<DB_FileSysInterface*()> DB_FSInitialize{0x140272EC0};
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x140413D80};
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
+	WEAK symbol<XAssetEntry*(XAssetType type, XAssetHeader* header)> DB_LinkXAssetEntry1{0x140414900};
 
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
@@ -116,7 +117,9 @@ namespace game
 	WEAK symbol<unsigned int(unsigned int threadId)> Scr_GetSelf{0x1405C57C0};
 	WEAK symbol<void()> Scr_ErrorInternal{0x1405C6EC0};
 	WEAK symbol<const char*(unsigned int index)> Scr_GetString{0x1405C7C20};
+	WEAK symbol<int(unsigned int index)> Scr_GetInt{0x1405C7890};
 	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
+	WEAK symbol<void(const char* value)> Scr_AddString{0x1405C6A80};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x1405C8DB0};
 

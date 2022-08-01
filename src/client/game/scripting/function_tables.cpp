@@ -343,7 +343,7 @@ namespace scripting
         {"glassradiusdamage", 0x191}, // 0x4F7620
         {"earthquake", 0x192}, // 0x4ED2F0
         {"getnumparts", 0x193}, // 0x4EDDA0
-        {"_func_194", 0x194}, // 0x50EEA0, eartquake func; args: (magnitude, duration, origin, radius)
+        {"objective_onentity", 0x194}, // 0x50EEA0
         {"iprintln", 0x19E}, // 0x504120
         {"iprintlnbold", 0x19F}, // 0x5041A0
         {"logstring", 0x1A0}, // 0x5071B0
@@ -2028,6 +2028,72 @@ namespace scripting
         {"customangles", 9555},
         {"speed", 997},
         {"lookahead", 600},
+
+        // mapent keys
+        {"code_classname", 172},
+        {"classname", 170},
+        {"origin", 740},
+        {"model", 669},
+        {"spawnflags", 989},
+        {"target", 1191},
+        {"targetname", 1193},
+        {"count", 216},
+        {"rotation", 902},
+        {"animscript", 71},
+        {"script_linkname", 920},
+        {"script_noteworthy", 922},
+        {"angles", 65},
+        {"parentname", 749},
+        {"type", 1244},
+        {"owner", 743},
+        {"radius", 851},
+        {"height", 488},
+        {"customangles", 9555},
+        {"speed", 997},
+        {"lookahead", 600},
+
+        {"_color", 1398},
+        {"skycolor", 34255},
+        {"suncolor", 1049},
+        {"sundirection", 1050},
+        {"modelscale", 23881},
+        {"export", 13703},
+
+        {"script_flag", 31190},
+        {"script_flag_true", 31196},
+        {"script_stealth_function", 31462},
+        {"script_stealth", 31460},
+        {"script_deathflag", 31114},
+        {"script_forcespawn", 31214},
+        {"script_stealthgroup", 31463},
+        {"script_delay", 916},
+        {"script_color_allies", 31096},
+        {"script_patroller", 31391},
+        {"script_idlereach", 31253},
+        {"script_linkto", 31273},
+        {"script_animation", 31039},
+        {"script_startinghealth", 31454},
+        {"script_pet", 9},
+        {"script_goalheight", 31236},
+        {"script_parameters", 31388},
+        {"script_combatmode", 31102},
+        {"script_ammo_clip", 31034},
+        {"script_moveoverride", 31299},
+        {"script_forcegoal", 31212},
+        {"script_ammo_max", 31036},
+        {"script_vehicleride", 31516},
+        {"script_idleanim", 31252},
+        {"script_chatgroup", 31092},
         {"script_vehicle_anim", 40318},
+        {"script_vehicledetour", 31510},
+        {"script_vehiclegroupdelete", 31514},
+        {"script_flag_wait", 31197},
+        {"script_emptyspawner", 31161},
+        {"script_aigroup", 31025},
+        {"script_group", 31245},
+        {"script_index", 31259},
+        {"script_delay_post", 31122},
+        {"script_killspawner", 31264},
+        {"script_goalvolume", 31238},
     };
 }

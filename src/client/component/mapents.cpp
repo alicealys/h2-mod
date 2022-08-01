@@ -23,73 +23,6 @@ namespace mapents
 		game::dvar_t* addon_mapname = nullptr;
 		utils::memory::allocator allocator;
 
-		std::unordered_map<std::string, unsigned int> keys =
-		{
-			{"code_classname", 172},
-			{"classname", 170},
-			{"origin", 740},
-			{"model", 669},
-			{"spawnflags", 989},
-			{"target", 1191},
-			{"targetname", 1193},
-			{"count", 216},
-			{"rotation", 902},
-			{"animscript", 71},
-			{"script_linkname", 920},
-			{"script_noteworthy", 922},
-			{"angles", 65},
-			{"parentname", 749},
-			{"type", 1244},
-			{"owner", 743},
-			{"radius", 851},
-			{"height", 488},
-			{"customangles", 9555},
-			{"speed", 997},
-			{"lookahead", 600},
-
-			{"_color", 1398},
-			{"skycolor", 34255},
-			{"suncolor", 1049},
-			{"sundirection", 1050},
-			{"modelscale", 23881},
-			{"export", 13703},
-
-			{"script_flag", 31190},
-			{"script_flag_true", 31196},
-			{"script_stealth_function", 31462},
-			{"script_stealth", 31460},
-			{"script_deathflag", 31114},
-			{"script_forcespawn", 31214},
-			{"script_stealthgroup", 31463},
-			{"script_delay", 916},
-			{"script_color_allies", 31096},
-			{"script_patroller", 31391},
-			{"script_idlereach", 31253},
-			{"script_linkto", 31273},
-			{"script_animation", 31039},
-			{"script_startinghealth", 31454},
-			{"script_pet", 9},
-			{"script_goalheight", 31236},
-			{"script_parameters", 31388},
-			{"script_combatmode", 31102},
-			{"script_ammo_clip", 31034},
-			{"script_moveoverride", 31299},
-			{"script_forcegoal", 31212},
-			{"script_ammo_max", 31036},
-			{"script_vehicleride", 31516},
-			{"script_idleanim", 31252},
-			{"script_chatgroup", 31092},
-			{"script_vehicle_anim", 40318},
-			{"script_vehicledetour", 31510},
-			{"script_vehiclegroupdelete", 31514},
-			{"script_flag_wait", 31197},
-			{"script_emptyspawner", 31161},
-			{"script_aigroup", 31025},
-			{"script_group", 31245},
-			{"script_index", 31259},
-			{"script_delay_post", 31122},
-		};
-
 		std::unordered_map<unsigned int, game::scriptType_e> custom_fields;
 
 		unsigned int token_id_start = 0x16000;
@@ -236,13 +169,13 @@ namespace mapents
 				}
 
 				const auto key_ = key.substr(1, key.size() - 2);
-				if (keys.find(key_) == keys.end())
+				if (scripting::token_map.find(key_) == scripting::token_map.end())
 				{
 					console::warn("[addon_map_ents parser] Key '%s' not found, on line %i", key_.data(), line_index);
 					continue;
 				}
 
-				out_buffer.append(utils::string::va("%i \"%s\"\n", keys[key_], value.data()));
+				out_buffer.append(utils::string::va("%i \"%s\"\n", scripting::token_map[key_], value.data()));
 			}
 
 			return out_buffer;
@@ -340,7 +273,6 @@ namespace mapents
 		{
 			const auto id = token_id_start++;
 			custom_fields[id] = type;
-			keys[name] = id;
 			scripting::token_map[name] = id;
 		}
 
@@ -354,6 +286,48 @@ namespace mapents
 			}
 
 			return scr_find_field_hook.invoke<unsigned int>(name, type);
+		}
+
+		std::string replace_mapents_keys(const std::string& data)
+		{
+			std::string buffer{};
+			const auto lines = utils::string::split(data, '\n');
+
+			for (const auto& line : lines)
+			{
+				const auto _0 = gsl::finally([&]
+				{
+					buffer.append("\n");
+				});
+
+				if (line.starts_with("{") || line.starts_with("}"))
+				{
+					buffer.append(line);
+					continue;
+				}
+
+				const auto first_space = line.find_first_of(' ');
+				if (first_space == std::string::npos)
+				{
+					continue;
+				}
+
+				const auto id = static_cast<unsigned int>(std::atoi(line.substr(0, first_space).data()));
+				std::string key = std::to_string(id);
+				for (const auto& [token, value] : scripting::token_map)
+				{
+					if (value == id)
+					{
+						key = token;
+						break;
+					}
+				}
+
+				const auto new_line = key + line.substr(first_space);
+				buffer.append(new_line);
+			}
+
+			return buffer;
 		}
 	}
 
@@ -398,7 +372,8 @@ namespace mapents
 				}
 
 				const auto dest = utils::string::va("dumps/%s.ents", name);
-				const auto data = std::string(mapents->entityString, mapents->numEntityChars);
+				const auto str = std::string(mapents->entityString, mapents->numEntityChars);
+				const auto data = replace_mapents_keys(str);
 				utils::io::write_file(dest, data, false);
 				console::info("Mapents dumped to %s\n", dest);
 			});
@@ -408,11 +383,6 @@ namespace mapents
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
 
 			add_field("script_specialops", game::SCRIPT_INTEGER);
-
-			for (const auto& key : keys)
-			{
-				scripting::token_map[key.first] = key.second;
-			}
 		}
 	};
 }

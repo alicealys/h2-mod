@@ -1,16 +1,18 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
 
+#include "game/dvars.hpp"
+#include "game/game.hpp"
+
 #include "filesystem.hpp"
 #include "console.hpp"
 #include "command.hpp"
-
-#include "game/dvars.hpp"
-#include "game/game.hpp"
+#include "sound.hpp"
 
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
+#include <utils/flags.hpp>
 
 namespace database
 {
@@ -74,64 +76,13 @@ namespace database
 			return get_sound_file_name(file_index, packed_file_offset);
 		}
 
-		void* disk_fs_sound_file_open_stub(game::StreamFile* file, game::StreamedSound* sound)
-		{
-			const auto name = "sound/" + get_sound_file_name(sound);
-			std::string path{};
-
-			if (!filesystem::find_file(name, &path))
-			{
-				return open_sound_handle_hook.invoke<void*>(file, sound);
-			}
-
-			const auto disk_fs = reinterpret_cast<game::DB_FileSysInterface*>(0x140BEFDC0);
-			const auto handle = disk_fs->vftbl->OpenFile(disk_fs, game::SF_ZONE_REGION, path.data());
-			if (handle)
-			{
-				const auto size = disk_fs->vftbl->Size(disk_fs, handle);
-				file->isPacked = 0;
-				file->length = size;
-				file->handle = handle;
-			}
-			else
-			{
-				file->handle = nullptr;
-				file->length = 0;
-			}
-
-			file->startOffset = 0;
-			return 0;
-		}
-
-		thread_local game::StreamedSound current_sound{};
-
-		void* sound_file_open_stub(game::StreamFile* file, game::StreamedSound* sound)
-		{
-			if (db_filesysImpl->current.integer == 1)
-			{
-				return disk_fs_sound_file_open_stub(file, sound);
-			}
-			else
-			{
-				current_sound = *sound;
-				return open_sound_handle_hook.invoke<void*>(file, sound);
-			}
-		}
-
 		game::DB_IFileSysFile* bnet_fs_open_file_stub(game::DB_FileSysInterface* this_, int folder, const char* file)
 		{
-			const auto _0 = gsl::finally([]
-			{
-				current_sound = {};
-			});
-
 			std::string name = file;
 
-			bool is_sound = false;
-			if (name.starts_with("soundfile") && name.ends_with(".pak"))
+			if (name.ends_with(".flac"))
 			{
-				is_sound = true;
-				name = "sound/" + get_sound_file_name(&current_sound);
+				name = "sound/" + name;
 			}
 
 			if (name.ends_with(".bik"))
@@ -159,8 +110,6 @@ namespace database
 
 				bnet_file_handle_t bnet_handle{};
 				bnet_handle.stream = std::move(stream);
-				bnet_handle.offset = current_sound.filename.info.packed.offset;
-
 				bnet_file_handles[handle] = std::move(bnet_handle);
 				return handle;
 			}
@@ -350,6 +299,12 @@ namespace database
 			if (result->asset.type == game::ASSET_TYPE_SOUND)
 			{
 				const auto sound = result->asset.header.sound;
+
+				if (utils::flags::has_flag("dumpsoundaliases"))
+				{
+					sound::dump_sound(sound);
+				}
+
 				for (auto i = 0; i < sound->count; i++)
 				{
 					const auto alias = &sound->head[i];
@@ -423,7 +378,7 @@ namespace database
 				console::error("Error reading file %s\n", name);
 			}
 
-			std::vector<std::uint8_t> signature = {0x66, 0x4C, 0x61, 0x43, 0x00, 0x00, 0x00, 0x22};
+			std::vector<std::uint8_t> signature = {0x66, 0x4C, 0x61, 0x43};
 
 			const auto check_signature = [&](char* start)
 			{
@@ -491,9 +446,6 @@ namespace database
 			
 			db_fs_initialize_hook.create(game::DB_FSInitialize, db_fs_initialize_stub);
 
-			open_sound_handle_hook.create(0x1406233B0, sound_file_open_stub);
-			db_link_xasset_entry1_hook.create(0x140414900, db_link_xasset_entry1_stub);
-
 			// Allow bnet filesystem to also load files from disk
 			if (db_filesysImpl->current.integer == 0)
 			{
@@ -509,6 +461,13 @@ namespace database
 				bink_io_read_hook.create(0x1407191B0, bink_io_read_stub);
 				bink_io_seek_hook.create(0x140719200, bink_io_seek_stub);
 			}
+
+			if (!utils::flags::has_flag("sounddumputils"))
+			{
+				return;
+			}
+
+			db_link_xasset_entry1_hook.create(0x140414900, db_link_xasset_entry1_stub);
 
 			command::add("listSoundFiles", []()
 			{
