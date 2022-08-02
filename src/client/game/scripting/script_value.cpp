@@ -113,6 +113,15 @@ namespace scripting
 		this->value_ = variable;
 	}
 
+	script_value::script_value(const function_ptr& value)
+	{
+		game::VariableValue variable{};
+		variable.type = game::SCRIPT_FUNCTION;
+		variable.u.codePosValue = value.get_pos();
+
+		this->value_ = variable;
+	}
+
 	/***************************************************************
 	 * Integer
 	 **************************************************************/

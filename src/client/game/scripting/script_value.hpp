@@ -3,6 +3,7 @@
 #include "variable_value.hpp"
 #include "vector.hpp"
 #include "animation.hpp"
+#include "function.hpp"
 
 namespace scripting
 {
@@ -31,6 +32,7 @@ namespace scripting
 		script_value(const vector& value);
 
 		script_value(const animation& value);
+		script_value(const function_ptr& value);
 
 		template <typename T>
 		bool is() const;

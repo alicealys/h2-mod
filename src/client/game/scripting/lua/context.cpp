@@ -776,6 +776,14 @@ namespace scripting::lua
 			{
 				scripting::get_dvar_int_overrides.erase(dvar);
 			};
+
+			auto function_ptr_type = state.new_usertype<function_ptr>("functionptr", 
+				sol::constructors<function_ptr(const std::string&, const std::string&)>());
+
+			function_ptr_type["getpos"] = [](const function_ptr& ptr)
+			{
+				return reinterpret_cast<uint64_t>(ptr.get_pos());
+			};
 		}
 	}
 

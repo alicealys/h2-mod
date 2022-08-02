@@ -272,6 +272,11 @@ namespace scripting::lua
 			return {value.as<animation>()};
 		}
 
+		if (value.is<function_ptr>())
+		{
+			return {value.as<function_ptr>()};
+		}
+
 		if (value.is<sol::protected_function>())
 		{
 			return convert_function(value);
