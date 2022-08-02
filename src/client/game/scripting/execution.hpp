@@ -3,6 +3,7 @@
 #include "entity.hpp"
 #include "array.hpp"
 #include "animation.hpp"
+#include "function.hpp"
 #include "script_value.hpp"
 
 namespace scripting

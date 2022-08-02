@@ -144,7 +144,7 @@ namespace scripting
 			throw std::runtime_error("File '" + filename + "' not found");
 		};
 
-		const auto functions = scripting::script_function_table[filename];
+		const auto& functions = scripting::script_function_table[filename];
 		if (functions.find(function) == functions.end())
 		{
 			throw std::runtime_error("Function '" + function + "' in file '" + filename + "' not found");
