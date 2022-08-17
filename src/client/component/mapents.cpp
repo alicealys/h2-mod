@@ -276,6 +276,12 @@ namespace mapents
 			scripting::token_map[name] = id;
 		}
 
+		void add_field(const std::string& name, game::scriptType_e type, unsigned int id)
+		{
+			custom_fields[id] = type;
+			scripting::token_map[name] = id;
+		}
+
 		utils::hook::detour scr_find_field_hook;
 		unsigned int scr_find_field_stub(unsigned int name, game::scriptType_e* type)
 		{
@@ -382,7 +388,7 @@ namespace mapents
 			utils::hook::call(0x14058BD6B, should_load_addon_mapents);
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
 
-			add_field("script_specialops", game::SCRIPT_INTEGER);
+			add_field("script_specialops", game::SCRIPT_INTEGER, 0x20000);
 		}
 	};
 }
