@@ -44,7 +44,8 @@ namespace game
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x140413D80};
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
 	WEAK symbol<XAssetEntry*(XAssetType type, XAssetHeader* header)> DB_LinkXAssetEntry1{0x140414900};
-
+	WEAK symbol<bool(const char* zoneName)> DB_IsLocalized{0x1404141E0};
+	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x1405A75D0};
@@ -192,6 +193,7 @@ namespace game
 
 	WEAK symbol<const char*> g_assetNames{0x140BEF280};
 
+	WEAK symbol<int> g_compressor{0x142065E80};
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
