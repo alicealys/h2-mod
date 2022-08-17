@@ -57,6 +57,23 @@ namespace patches
 
 			return dvar_register_float_hook.invoke<game::dvar_t*>(hash, dvarName, value, min, max, flags);
 		}
+
+		void free_lui_memory()
+		{
+			utils::hook::invoke<void>(0x14032A540); // properly free lui memory
+		}
+
+		void vid_restart_stub_1()
+		{
+			free_lui_memory();
+			utils::hook::invoke<void>(0x1405A6480);
+		}
+
+		void vid_restart_stub_2()
+		{
+			free_lui_memory();
+			utils::hook::invoke<void>(0x1406B5290);
+		}
 	}
 
 	class component final : public component_interface
@@ -92,6 +109,10 @@ namespace patches
 				game::DVAR_FLAG_SAVED, "Scale applied to the field of view");
 
 			dvar_register_float_hook.create(game::Dvar_RegisterFloat.get(), dvar_register_float_stub);
+
+			// fix vid_restart crashing
+			utils::hook::call(0x1403D7413, vid_restart_stub_1);
+			utils::hook::jump(0x1403D7402, vid_restart_stub_2);
 		}
 	};
 }
