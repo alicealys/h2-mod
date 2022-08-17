@@ -71,6 +71,7 @@ namespace patches
 			}
 
 			return dvar_register_bool_hook.invoke<game::dvar_t*>(hash, name, value, flags);
+		}
 
 		void free_lui_memory()
 		{
