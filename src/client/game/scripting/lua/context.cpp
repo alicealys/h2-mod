@@ -12,6 +12,9 @@
 #include "../../../component/fastfiles.hpp"
 #include "../../../component/mods.hpp"
 #include "../../../component/localized_strings.hpp"
+#include "../../../component/scheduler.hpp"
+
+#include "game/ui_scripting/execution.hpp"
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -775,6 +778,14 @@ namespace scripting::lua
 			game_type["removedvarintoverride"] = [](const game&, const std::string& dvar)
 			{
 				scripting::get_dvar_int_overrides.erase(dvar);
+			};
+
+			game_type["luinotify"] = [](const game&, const std::string& name, const std::string& data)
+			{
+				::scheduler::once([=]()
+				{
+					ui_scripting::notify(name, {{"data", data}});
+				}, ::scheduler::pipeline::lui);
 			};
 
 			auto function_ptr_type = state.new_usertype<function_ptr>("functionptr", 
