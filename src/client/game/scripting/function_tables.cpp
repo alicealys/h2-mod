@@ -2052,13 +2052,17 @@ namespace scripting
         {"speed", 997},
         {"lookahead", 600},
 
+        // misc
         {"_color", 1398},
         {"skycolor", 34255},
         {"suncolor", 1049},
         {"sundirection", 1050},
         {"modelscale", 23881},
         {"export", 13703},
+        {"animation", 70},
+        {"spammed_model", 49508},
 
+        // script
         {"script_flag", 31190},
         {"script_flag_true", 31196},
         {"script_stealth_function", 31462},
@@ -2095,5 +2099,8 @@ namespace scripting
         {"script_delay_post", 31122},
         {"script_killspawner", 31264},
         {"script_goalvolume", 31238},
+        {"script_drone", 31152},
+        {"script_health", 31247},
+        {"script_friendname", 31217},
     };
 }
