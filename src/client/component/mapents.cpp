@@ -205,6 +205,16 @@ namespace mapents
 			return get_mapents_data().has_value();
 		}
 
+		bool should_load_addon_mapents_stub(const char* a1, void* a2)
+		{
+			if (should_load_addon_mapents())
+			{
+				return true;
+			}
+
+			return utils::hook::invoke<bool>(0x140609570, a1, a2); // Com_IsAddonMap
+		}
+
 		void try_parse_mapents(const std::string& path, const std::string& data, game::AddonMapEnts* mapents)
 		{
 			const auto parsed = parse_mapents(data);
@@ -231,6 +241,12 @@ namespace mapents
 
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
 		{
+			if (!should_load_addon_mapents())
+			{
+				printf("db_find_xasset_header_stub %s\n", name);
+				return game::DB_FindXAssetHeader(type, name, allow_create_default);
+			}
+
 			const auto _0 = gsl::finally(&mapents::clear_dvars);
 
 			const auto mapents = allocator.allocate<game::AddonMapEnts>();
@@ -324,7 +340,7 @@ namespace mapents
 				{
 					if (value == id)
 					{
-						key = token;
+						key = "\"" + token + "\"";
 						break;
 					}
 				}
@@ -385,7 +401,7 @@ namespace mapents
 			});
 
 			utils::hook::call(0x14058BDD3, db_find_xasset_header_stub);
-			utils::hook::call(0x14058BD6B, should_load_addon_mapents);
+			utils::hook::call(0x14058BD6B, should_load_addon_mapents_stub);
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
 
 			add_field("script_specialops", game::SCRIPT_INTEGER, 0x20000);
