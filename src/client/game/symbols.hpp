@@ -45,6 +45,9 @@ namespace game
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
 	WEAK symbol<XAssetEntry*(XAssetType type, XAssetHeader* header)> DB_LinkXAssetEntry1{0x140414900};
 	WEAK symbol<bool(const char* zoneName)> DB_IsLocalized{0x1404141E0};
+	WEAK symbol<size_t(XAssetType type)> DB_GetXAssetTypeSize{0x1403E40D0};
+	WEAK symbol<void(void* levelLoad, const char* name, 
+		const unsigned int allocFlags, const unsigned __int64 sizeEst)> DB_LevelLoadAddZone{0x1404145D0};
 	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
@@ -121,6 +124,7 @@ namespace game
 	WEAK symbol<int(unsigned int index)> Scr_GetInt{0x1405C7890};
 	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
 	WEAK symbol<void(const char* value)> Scr_AddString{0x1405C6A80};
+	WEAK symbol<void(const char* name)> Scr_LoadScript{0x1405BCEC0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x1405C8DB0};
 
@@ -191,7 +195,12 @@ namespace game
 
 	WEAK symbol<HWND> hWnd{0x14CCF81C0};
 
-	WEAK symbol<const char*> g_assetNames{0x140BEF280};
+	WEAK game::symbol<const char*> g_assetNames{0x140BEF280};
+
+	WEAK game::symbol<void*> g_assetPool{0x140BF3620};
+
+	WEAK game::symbol<unsigned int> g_zoneCount{0x1422F45F4};
+	WEAK game::symbol<unsigned short> g_zoneIndex{0x1422F8DC8};
 
 	WEAK symbol<int> g_compressor{0x142065E80};
 	WEAK symbol<int> g_poolSize{0x140BF2E40};

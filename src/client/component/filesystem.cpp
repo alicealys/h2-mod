@@ -4,11 +4,13 @@
 #include "filesystem.hpp"
 #include "console.hpp"
 #include "localized_strings.hpp"
+#include "mods.hpp"
 
 #include "game/game.hpp"
 
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
+#include <utils/flags.hpp>
 
 namespace filesystem
 {
@@ -38,6 +40,13 @@ namespace filesystem
 			filesystem::register_path(L"" CLIENT_DATA_FOLDER);
 			filesystem::register_path(L".");
 			filesystem::register_path(L"h2-mod");
+
+			const auto mod_path = utils::flags::get_flag("mod");
+			if (mod_path.has_value())
+			{
+				filesystem::register_path(mod_path.value());
+				mods::mod_path = mod_path.value();
+			}
 
 			localized_strings::clear();
 
@@ -122,6 +131,20 @@ namespace filesystem
 			if (utils::io::file_exists(path_.generic_string()))
 			{
 				*real_path = path_.generic_string();
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool exists(const std::string& path)
+	{
+		for (const auto& search_path : get_search_paths_internal())
+		{
+			const auto path_ = search_path / path;
+			if (utils::io::file_exists(path_.generic_string()))
+			{
 				return true;
 			}
 		}

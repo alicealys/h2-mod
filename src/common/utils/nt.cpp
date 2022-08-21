@@ -226,7 +226,7 @@ namespace utils::nt
 		return std::string(LPSTR(LockResource(handle)), SizeofResource(nullptr, res));
 	}
 
-	void relaunch_self(const std::string& extra_command_line)
+	void relaunch_self(const std::string& extra_command_line, bool override_command_line)
 	{
 		const utils::nt::library self;
 
@@ -243,7 +243,14 @@ namespace utils::nt
 		std::string command_line = GetCommandLineA();
 		if (!extra_command_line.empty())
 		{
-			command_line += " " + extra_command_line;
+			if (override_command_line)
+			{
+				command_line = extra_command_line;
+			}
+			else
+			{
+				command_line += " " + extra_command_line;
+			}
 		}
 
 		CreateProcessA(self.get_path().data(), command_line.data(), nullptr, nullptr, false, NULL, nullptr, current_dir,
