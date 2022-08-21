@@ -45,6 +45,13 @@ namespace database
 		game::dvar_t* db_filesysImpl = nullptr;
 		utils::hook::detour db_fs_initialize_hook;
 
+		std::unordered_map<std::string, std::string> file_search_folders =
+		{
+			{".flac", "sound/"},
+			{".bik", "video/"},
+			{".ff", "zone/"},
+		};
+
 		game::DB_FileSysInterface* db_fs_initialize_stub()
 		{
 			switch (db_filesysImpl->current.integer)
@@ -80,14 +87,17 @@ namespace database
 		{
 			std::string name = file;
 
-			if (name.ends_with(".flac"))
+			const auto search_path = [&](const std::string& ext, const std::string& path)
 			{
-				name = "sound/" + name;
-			}
+				if (name.ends_with(ext) && !filesystem::exists(name))
+				{
+					name = path + name;
+				}
+			};
 
-			if (name.ends_with(".bik"))
+			for (const auto& [ext, path] : file_search_folders)
 			{
-				name = "videos/" + name;
+				search_path(ext, path);
 			}
 
 			std::string path{};
@@ -97,7 +107,6 @@ namespace database
 			}
 
 			const auto handle = handle_allocator.allocate<game::DB_IFileSysFile>();
-			std::memset(handle, 0, sizeof(handle));
 
 			try
 			{
@@ -232,8 +241,31 @@ namespace database
 
 		bool bnet_fs_exists_stub(game::DB_FileSysInterface* this_, game::DB_IFileSysFile* handle, const char* filename)
 		{
-			std::string path{};
-			return filesystem::find_file(filename, &path) || bnet_fs_exists_hook.invoke<bool>(this_, handle, filename);
+			std::string name = filename;
+			const auto search_path = [&](const std::string& ext, const std::string& path)
+			{
+				if (!name.ends_with(ext))
+				{
+					return false;
+				}
+
+				return filesystem::exists(name) || filesystem::exists(path + name);
+			};
+
+			if (filesystem::exists(filename))
+			{
+				return true;
+			}
+
+			for (const auto& [ext, path] : file_search_folders)
+			{
+				if (search_path(ext, path))
+				{
+					return true;
+				}
+			}
+
+			return bnet_fs_exists_hook.invoke<bool>(this_, handle, filename);
 		}
 
 		uint64_t bink_io_read_stub(game::DB_IFileSysFile** handle, void* dest, uint64_t bytes)
@@ -291,133 +323,6 @@ namespace database
 				}
 			}
 		}
-
-		utils::hook::detour db_link_xasset_entry1_hook;
-		game::XAssetEntry* db_link_xasset_entry1_stub(game::XAssetType type, game::XAssetHeader* header)
-		{
-			const auto result = db_link_xasset_entry1_hook.invoke<game::XAssetEntry*>(type, header);
-			if (result->asset.type == game::ASSET_TYPE_SOUND)
-			{
-				const auto sound = result->asset.header.sound;
-
-				if (utils::flags::has_flag("dumpsoundaliases"))
-				{
-					sound::dump_sound(sound);
-				}
-
-				for (auto i = 0; i < sound->count; i++)
-				{
-					const auto alias = &sound->head[i];
-					if (alias->soundFile != nullptr && alias->soundFile->type == 2)
-					{
-						const auto file_index = alias->soundFile->u.streamSnd.filename.fileIndex;
-						const auto length = alias->soundFile->u.streamSnd.filename.info.packed.length;
-						const auto offset = alias->soundFile->u.streamSnd.filename.info.packed.offset;
-						const auto name = utils::string::va("%s.flac", alias->aliasName);
-
-						sound_files[file_index][offset] = name;
-						sound_sizes[name] = length;
-					}
-				}
-			}
-
-			return result;
-		}
-
-		void dump_flac_sound(const std::string& sound_name, unsigned short file_index, uint64_t start_offset, uint64_t size)
-		{
-			const auto name = utils::string::va("soundfile%i.pak", file_index);
-			const auto fs_interface = db_fs_initialize_stub();
-
-			const auto handle = fs_interface->vftbl->OpenFile(fs_interface, game::Sys_Folder::SF_PAKFILE, name);
-			if (handle == nullptr)
-			{
-				console::error("Sound file %s not found\n", name);
-				return;
-			}
-
-			const auto buffer = utils::memory::get_allocator()->allocate_array<char>(size);
-			const auto _0 = gsl::finally([&]()
-			{
-				utils::memory::get_allocator()->free(buffer);
-			});
-
-			const auto result = fs_interface->vftbl->Read(fs_interface, handle, start_offset, size, buffer);
-			if (result != game::FILESYSRESULT_SUCCESS)
-			{
-				console::error("Error reading file %s\n", name);
-			}
-
-			const auto path = utils::string::va("dumps/sound/%s", sound_name.data());
-			utils::io::write_file(path, std::string(buffer, size), false);
-			console::info("Sound dumped to %s\n", path);
-		}
-
-		void dump_sound_file(unsigned short file_index)
-		{
-			const auto name = utils::string::va("soundfile%i.pak", file_index);
-			const auto fs_interface = db_fs_initialize_stub();
-
-			const auto handle = fs_interface->vftbl->OpenFile(fs_interface, game::Sys_Folder::SF_PAKFILE, name);
-			if (handle == nullptr)
-			{
-				console::error("Sound file %s not found\n", name);
-				return;
-			}
-
-			const auto size = fs_interface->vftbl->Size(fs_interface, handle);
-			const auto buffer = utils::memory::get_allocator()->allocate_array<char>(size);
-			const auto _0 = gsl::finally([&]()
-			{
-				utils::memory::get_allocator()->free(buffer);
-			});
-
-			const auto result = fs_interface->vftbl->Read(fs_interface, handle, 0, size, buffer);
-			if (result != game::FILESYSRESULT_SUCCESS)
-			{
-				console::error("Error reading file %s\n", name);
-			}
-
-			std::vector<std::uint8_t> signature = {0x66, 0x4C, 0x61, 0x43};
-
-			const auto check_signature = [&](char* start)
-			{
-				for (auto i = 0; i < signature.size(); i++)
-				{
-					if (start[i] != signature[i])
-					{
-						return false;
-					}
-				}
-
-				return true;
-			};
-
-			const auto end = buffer + size - signature.size() - 1;
-			for (auto pos = buffer; pos < end;)
-			{
-				const auto start_pos = pos;
-				if (check_signature(start_pos))
-				{
-					++pos;
-
-					while (pos < end && !check_signature(pos))
-					{
-						++pos;
-					}
-
-					const auto flac_size = static_cast<size_t>(pos - start_pos);
-					std::string data{start_pos, flac_size};
-
-					const auto progress = static_cast<int>(100 * (static_cast<float>(start_pos - buffer) / static_cast<float>(end - buffer)));
-					const auto sound_name = get_sound_file_name(file_index, static_cast<uint64_t>(start_pos - buffer));
-					const auto path = utils::string::va("dumps/sound/%s", sound_name.data());
-
-					utils::io::write_file(path, data, false);
-					console::info("Sound dumped: %s (%i%%)\n", path, progress);
-				}
-			}
-		}
 	}
 
 	class component final : public component_interface
@@ -461,63 +366,6 @@ namespace database
 				bink_io_read_hook.create(0x1407191B0, bink_io_read_stub);
 				bink_io_seek_hook.create(0x140719200, bink_io_seek_stub);
 			}
-
-			if (!utils::flags::has_flag("sounddumputils"))
-			{
-				return;
-			}
-
-			db_link_xasset_entry1_hook.create(0x140414900, db_link_xasset_entry1_stub);
-
-			command::add("listSoundFiles", []()
-			{
-				for (const auto& packed : sound_files)
-				{
-					for (const auto& sound : packed.second)
-					{
-						console::info("soundfile%i.pak %s %llX", packed.first, sound.second.data(), sound.first);
-					}
-				}
-			});
-
-			command::add("dumpSoundFile", [](const command::params& params)
-			{
-				if (params.size() < 2)
-				{
-					console::info("Usage: dumpSoundFile <index>\n");
-					return;
-				}
-
-				const auto index = static_cast<unsigned short>(atoi(params.get(1)));
-				dump_sound_file(index);
-			});
-
-			command::add("dumpSound", [](const command::params& params)
-			{
-				if (params.size() < 2)
-				{
-					console::info("Usage: dumpSound <name>\n");
-					return;
-				}
-
-				const auto name = params.get(1);
-				for (const auto& packed : sound_files)
-				{
-					for (auto i = packed.second.begin(); i != packed.second.end();)
-					{
-						if (i->second != name)
-						{
-							++i;
-							continue;
-						}
-
-						const auto& sound_name = i->second;
-						const auto start_offset = i->first;
-						dump_flac_sound(sound_name, packed.first, start_offset, sound_sizes[sound_name]);
-						break;
-					}
-				}
-			});
 		}
 	};
 }

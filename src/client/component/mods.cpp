@@ -57,6 +57,17 @@ namespace mods
 				game::Com_Shutdown("");
 			}, scheduler::pipeline::main);
 		}
+
+		void full_restart(const std::string& arg)
+		{
+			utils::nt::relaunch_self(" -singleplayer "s.append(arg), true);
+			utils::nt::terminate();
+		}
+	}
+
+	bool mod_requires_restart(const std::string& path)
+	{
+		return utils::io::file_exists(path + "/mod.ff") || utils::io::file_exists(path + "/zone/mod.ff");
 	}
 
 	class component final : public component_interface
@@ -94,10 +105,20 @@ namespace mods
 				}
 
 				console::info("Loading mod %s\n", path);
-				filesystem::unregister_path(mod_path);
-				filesystem::register_path(path);
-				mod_path = path;
-				restart();
+
+				if (mod_requires_restart(mod_path) || mod_requires_restart(path))
+				{
+					// vid_restart is still broken :(
+					console::info("Restarting...\n");
+					full_restart("-mod "s + path);
+				}
+				else
+				{
+					filesystem::unregister_path(mod_path);
+					filesystem::register_path(path);
+					mod_path = path;
+					restart();
+				}
 			});
 
 			command::add("unloadmod", [](const command::params& params)
@@ -116,9 +137,18 @@ namespace mods
 				}
 
 				console::info("Unloading mod %s\n", mod_path.data());
-				filesystem::unregister_path(mod_path);
-				mod_path.clear();
-				restart();
+
+				if (mod_requires_restart(mod_path))
+				{
+					console::info("Restarting...\n");
+					full_restart("");
+				}
+				else
+				{
+					filesystem::unregister_path(mod_path);
+					mod_path.clear();
+					restart();
+				}
 			});
 
 			command::add("com_restart", []()

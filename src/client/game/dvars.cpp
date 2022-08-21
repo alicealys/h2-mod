@@ -3356,6 +3356,42 @@ namespace dvars
 			"Fontsize of the popup friendly names, in splitscreen.",
 		},
 		{
+			"fs_basegame",
+			"Base game name",
+		},
+		{
+			"fs_basepath",
+			"Base game path",
+		},
+		{
+			"fs_basepath_output",
+			"Base game path",
+		},
+		{
+			"fs_cdpath",
+			"CD path",
+		},
+		{
+			"fs_copyfiles",
+			"Copy all used files to another location",
+		},
+		{
+			"fs_debug",
+			"Enable file system debugging information",
+		},
+		{
+			"fs_game",
+			"Game data directory. Must be \"\" or a sub directory of 'mods/'.",
+		},
+		{
+			"fs_homepath",
+			"Game home path",
+		},
+		{
+			"fs_ignoreLocalized",
+			"Ignore localized assets",
+		},
+		{
 			"fx_alphaThreshold",
 			"Don't draw billboard sprites, oriented sprites or tails with alpha below this threshold (0-256).",
 		},
