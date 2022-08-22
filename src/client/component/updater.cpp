@@ -410,7 +410,7 @@ namespace updater
 					{
 						update_data.access([](update_data_t& data_)
 						{
-							data_.restart_required = true;//
+							data_.restart_required = true;
 						});
 					}
 
