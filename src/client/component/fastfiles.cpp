@@ -263,6 +263,12 @@ namespace fastfiles
 
 			if (is_builtin_map)
 			{
+				const auto name_ = "h2_mod_patch_"s + name;
+				if (fastfiles::exists(name_))
+				{
+					add_custom_level_load_zone(load, name_.data(), true, size_est);
+				}
+
 				game::DB_LevelLoadAddZone(load, name, alloc_flags, size_est);
 			}
 			else
