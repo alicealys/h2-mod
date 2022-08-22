@@ -358,6 +358,39 @@ namespace fastfiles
 					console::info("g_poolSize[%i]: %i // %s\n", i, game::g_poolSize[i], game::g_assetNames[i]);
 				}
 			});
+
+			command::add("poolUsages", []()
+			{
+				for (auto i = 0; i < game::ASSET_TYPE_COUNT; i++)
+				{
+					auto count = 0;
+					enum_assets(static_cast<game::XAssetType>(i), [&](game::XAssetHeader header)
+					{
+						count++;
+					}, true);
+
+					console::info("%i %s: %i / %i\n", i, game::g_assetNames[i], count, game::g_poolSize[i]);
+				}
+			});
+
+			command::add("poolUsage", [](const command::params& params)
+			{
+				if (params.size() < 2)
+				{
+					console::info("Usage: poolUsage <type>\n");
+					return;
+				}
+
+				const auto type = static_cast<game::XAssetType>(std::atoi(params.get(1)));
+
+				auto count = 0;
+				enum_assets(type, [&](game::XAssetHeader header)
+				{
+					count++;
+				}, true);
+
+				console::info("%i %s: %i / %i\n", type, game::g_assetNames[type], count, game::g_poolSize[type]);
+			});
 		}
 	};
 }
