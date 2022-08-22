@@ -212,6 +212,7 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_WEAPON, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
 		}
 
 		void add_custom_level_load_zone(void* load, const char* name, bool localized, const size_t size_est)
@@ -285,6 +286,7 @@ namespace fastfiles
 
 		return handle != nullptr;
 	}
+
 	void enum_assets(const game::XAssetType type, const std::function<void(game::XAssetHeader)>& callback, const bool includeOverride)
 	{
 		game::DB_EnumXAssets_Internal(type, static_cast<void(*)(game::XAssetHeader, void*)>([](game::XAssetHeader header, void* data)
