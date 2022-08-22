@@ -103,13 +103,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Remove old data files
-        run: ssh ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }} rm -rf ${{ env.FED_MASTER_PATH }}/h2-mod/cdata/*
+        run: ssh ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }} rm -rf ${{ env.FED_MASTER_PATH }}/h2-mod/*
 
       - name: Upload h2-mod binary
         run: rsync -avz h2-mod.exe ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }}:${{ env.FED_MASTER_PATH }}/h2-mod/
 
       - name: Upload data files
-        run: rsync -avz ./data/cdata/ ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }}:${{ env.FED_MASTER_PATH }}/h2-mod/cdata/
+        run: rsync -avz ./data/ ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }}:${{ env.FED_MASTER_PATH }}/h2-mod/
 
       - name: Publish changes
         run: ssh ${{ secrets.FED_MASTER_SSH_USER }}@${{ secrets.FED_MASTER_SSH_ADDRESS }} ${{ secrets.FED_MASTER_SSH_CHANGE_PUBLISH_COMMAND }}
