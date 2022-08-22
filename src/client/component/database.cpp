@@ -22,6 +22,7 @@ namespace database
 		{
 			std::unique_ptr<std::ifstream> stream;
 			uint64_t offset{};
+			std::string path;
 		};
 
 		std::unordered_map<game::DB_IFileSysFile*, bnet_file_handle_t> bnet_file_handles{};
@@ -159,6 +160,7 @@ namespace database
 
 				bnet_file_handle_t bnet_handle{};
 				bnet_handle.stream = std::move(stream);
+				bnet_handle.path = path;
 				bnet_file_handles[handle] = std::move(bnet_handle);
 				return handle;
 			}
@@ -372,6 +374,17 @@ namespace database
 					console::error("[Database] bink_io_seek_stub: %s\n", e.what());
 					return 0;
 				}
+			}
+		}
+	}
+
+	void close_fastfile_handles()
+	{
+		for (const auto& handle : bnet_file_handles)
+		{
+			if (handle.second.path.ends_with(".ff"))
+			{
+				handle.second.stream->close();
 			}
 		}
 	}
