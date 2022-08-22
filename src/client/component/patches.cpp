@@ -74,6 +74,11 @@ namespace patches
 			free_lui_memory();
 			utils::hook::invoke<void>(0x1406B5290);
 		}
+
+		game::dvar_t* register_snd_music_stub(int hash, const char* name, bool value, unsigned int /*flags*/)
+		{
+			return game::Dvar_RegisterBool(hash, name, value, game::DVAR_FLAG_SAVED);
+		}
 	}
 
 	class component final : public component_interface
@@ -113,6 +118,9 @@ namespace patches
 			// fix vid_restart crashing
 			utils::hook::call(0x1403D7413, vid_restart_stub_1);
 			utils::hook::jump(0x1403D7402, vid_restart_stub_2);
+
+			// make snd_musicDisabledForCustomSoundtrack saved
+			utils::hook::call(0x1405D05FB, register_snd_music_stub);
 		}
 	};
 }
