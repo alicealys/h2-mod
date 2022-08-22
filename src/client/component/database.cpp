@@ -49,7 +49,6 @@ namespace database
 		{
 			{".flac", "sound/"},
 			{".bik", "video/"},
-			{".ff", "zone/"},
 		};
 
 		game::DB_FileSysInterface* db_fs_initialize_stub()
@@ -65,22 +64,52 @@ namespace database
 			}
 		}
 
-		std::string get_sound_file_name(unsigned short file_index, uint64_t packed_file_offset)
+		// kinda sucks but whatever
+		std::optional<std::string> find_fastfile(const std::string& name)
 		{
-			if (sound_files.find(file_index) != sound_files.end() &&
-				sound_files[file_index].find(packed_file_offset) != sound_files[file_index].end())
+			std::string name_ = name;
+
+			if (game::DB_IsLocalized(name.data()))
 			{
-				return sound_files[file_index][packed_file_offset];
+				const auto language = game::SEH_GetCurrentLanguageName();
+				if (filesystem::exists(name))
+				{
+					return {name};
+				}
+
+				name_ = language + "/"s + name;
+				if (filesystem::exists(name_))
+				{
+					return {name_};
+				}
+
+				name_ = "zone/" + name;
+				if (filesystem::exists(name_))
+				{
+					return {name_};
+				}
+
+				name_ = "zone/"s + language + "/" + name;
+				if (filesystem::exists(name_))
+				{
+					return {name_};
+				}
+			}
+			else
+			{
+				if (filesystem::exists(name))
+				{
+					return {name};
+				}
+
+				name_ = "zone/" + name;
+				if (filesystem::exists(name_))
+				{
+					return {name_};
+				}
 			}
 
-			return utils::string::va("soundfile_%i_%llX.flac", file_index, packed_file_offset);
-		}
-
-		std::string get_sound_file_name(game::StreamedSound* sound)
-		{
-			const auto file_index = sound->filename.fileIndex;
-			const auto packed_file_offset = sound->filename.info.packed.offset;
-			return get_sound_file_name(file_index, packed_file_offset);
+			return {};
 		}
 
 		game::DB_IFileSysFile* bnet_fs_open_file_stub(game::DB_FileSysInterface* this_, int folder, const char* file)
@@ -95,9 +124,20 @@ namespace database
 				}
 			};
 
-			for (const auto& [ext, path] : file_search_folders)
+			if (name.ends_with(".ff"))
 			{
-				search_path(ext, path);
+				const auto found = find_fastfile(name);
+				if (found.has_value())
+				{
+					name = found.value();
+				}
+			}
+			else
+			{
+				for (const auto& [ext, path] : file_search_folders)
+				{
+					search_path(ext, path);
+				}
 			}
 
 			std::string path{};
@@ -257,11 +297,22 @@ namespace database
 				return true;
 			}
 
-			for (const auto& [ext, path] : file_search_folders)
+			if (name.ends_with(".ff"))
 			{
-				if (search_path(ext, path))
+				const auto found = find_fastfile(name);
+				if (found.has_value())
 				{
 					return true;
+				}
+			}
+			else
+			{
+				for (const auto& [ext, path] : file_search_folders)
+				{
+					if (search_path(ext, path))
+					{
+						return true;
+					}
 				}
 			}
 
