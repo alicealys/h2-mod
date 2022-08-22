@@ -209,6 +209,10 @@ namespace fastfiles
 			const auto xmodel_pool = reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODEL, 2>();
 			utils::hook::inject(0x140413D93, xmodel_pool + 8);
 
+			/*const auto image_pool = reallocate_asset_pool_multiplier<game::ASSET_TYPE_IMAGE, 2>();
+			utils::hook::inject(0x140413B45, image_pool + 8);
+			utils::hook::inject(0x140413B63, image_pool + 8);*/
+
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_WEAPON, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
