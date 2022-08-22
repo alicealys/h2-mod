@@ -5,6 +5,8 @@
 #include "updater.hpp"
 #include "game/ui_scripting/execution.hpp"
 #include "console.hpp"
+#include "command.hpp"
+#include "database.hpp"
 
 #include "version.h"
 
@@ -403,6 +405,15 @@ namespace updater
 						});
 					}
 
+					std::string name_ = name;
+					if (name_.ends_with(".ff"))
+					{
+						update_data.access([](update_data_t& data_)
+						{
+							data_.restart_required = true;//
+						});
+					}
+
 #ifdef DEBUG
 					console::info("[Updater] need file %s\n", name);
 #endif
@@ -445,7 +456,14 @@ namespace updater
 
 		for (const auto& file : garbage_files)
 		{
-			std::filesystem::remove_all(file);
+			try
+			{
+				std::filesystem::remove_all(file);
+			}
+			catch (...)
+			{
+				console::error("Failed to delete %s\n", file.data());
+			}
 		}
 
 		scheduler::once([]()
@@ -487,6 +505,14 @@ namespace updater
 
 			for (const auto& download : downloads)
 			{
+				update_data.access([](update_data_t& data_)
+				{
+					if (data_.restart_required)
+					{
+						database::close_fastfile_handles();
+					}
+				});
+
 				if (!write_file(download.name, download.data))
 				{
 					set_update_download_status(true, false, ERR_WRITE_FAIL + download.name);
