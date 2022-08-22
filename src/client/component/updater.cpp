@@ -240,6 +240,14 @@ namespace updater
 #ifdef DEBUG
 					console::info("[Updater] Found extra file %s\n", file.data());
 #endif
+					if (file.ends_with(".ff"))
+					{
+						update_data.access([](update_data_t& data_)
+						{
+							data_.restart_required = true;
+						});
+					}
+
 					garbage_files.push_back(file);
 				}
 			}
@@ -454,6 +462,14 @@ namespace updater
 			return data_.garbage_files;
 		});
 
+		update_data.access([](update_data_t& data_)
+		{
+			if (data_.restart_required)
+			{
+				database::close_fastfile_handles();
+			}
+		});
+
 		for (const auto& file : garbage_files)
 		{
 			try
@@ -505,14 +521,6 @@ namespace updater
 
 			for (const auto& download : downloads)
 			{
-				update_data.access([](update_data_t& data_)
-				{
-					if (data_.restart_required)
-					{
-						database::close_fastfile_handles();
-					}
-				});
-
 				if (!write_file(download.name, download.data))
 				{
 					set_update_download_status(true, false, ERR_WRITE_FAIL + download.name);
