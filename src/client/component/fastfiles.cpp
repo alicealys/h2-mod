@@ -168,14 +168,15 @@ namespace fastfiles
 		{
 			constexpr int asset_pool_sizes[] =
 			{
-				150, 1024, 16, 1, 128, 7000, 5248, 5120,
-				10624, 256, 49152, 12288, 12288, 72864,
-				512, 3072, 12000, 16000, 256, 64, 64, 64,
-				64, 10000, 1, 1, 1, 1, 1, 2, 1, 1, 32, 0,
-				128, 400, 0, 11500, 128, 360, 1, 2048, 4,
-				6, 0, 0, 0, 0, 1024, 768, 400, 128, 128,
-				24, 24, 24, 32, 128, 2, 0, 64, 384, 128,
-				1, 128, 64, 32, 32, 16, 32, 16
+				150, 1024, 16, 1, 128, 7000, 5248, 2560, 
+				10624, 256, 49152, 12288, 12288, 72864, 
+				512, 3072, 12000, 16000, 256, 64, 64,
+				64, 64, 10000, 1, 1, 1, 1, 1, 2, 1, 
+				1, 32, 0, 128, 400, 0, 11500, 128, 
+				360, 1, 2048, 4, 6, 0, 0, 0, 0, 1024, 
+				768, 400, 128, 128, 24, 24, 24, 32, 
+				128, 2, 0, 64, 384, 128, 1, 128, 64, 
+				32, 32, 16, 32, 16
 			};
 
 			return asset_pool_sizes[type];
@@ -206,8 +207,11 @@ namespace fastfiles
 
 		void reallocate_asset_pools()
 		{
-			const auto xmodel_pool = reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODEL, 2>();
-			utils::hook::inject(0x140413D93, xmodel_pool + 8);
+			//reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
+
+			// other arrays depend on the xmodel pool size, they also have to be reallocated
+			//const auto xmodel_pool = reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODEL, 2>();
+			//utils::hook::inject(0x140413D93, xmodel_pool + 8);
 
 			/*const auto image_pool = reallocate_asset_pool_multiplier<game::ASSET_TYPE_IMAGE, 2>();
 			utils::hook::inject(0x140413B45, image_pool + 8);
@@ -400,6 +404,20 @@ namespace fastfiles
 				}, true);
 
 				console::info("%i %s: %i / %i\n", type, game::g_assetNames[type], count, game::g_poolSize[type]);
+			});
+
+			command::add("assetCount", [](const command::params& params)
+			{
+				auto count = 0;
+				for (auto i = 0; i < game::ASSET_TYPE_COUNT; i++)
+				{
+					enum_assets(static_cast<game::XAssetType>(i), [&](game::XAssetHeader header)
+					{
+						count++;
+					}, true);
+				}
+
+				console::info("assets: %i / %i\n", count, 155000);
 			});
 		}
 	};
