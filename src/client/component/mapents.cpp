@@ -404,7 +404,7 @@ namespace mapents
 			utils::hook::call(0x14058BD6B, should_load_addon_mapents_stub);
 			utils::hook::call(0x1406B3384, cm_trigger_model_bounds_stub);
 
-			add_field("script_specialops", game::SCRIPT_INTEGER, 0x20000);
+			add_field("script_specialops", game::SCRIPT_INTEGER, 0xEFFF);
 		}
 	};
 }
