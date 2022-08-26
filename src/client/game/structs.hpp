@@ -59,7 +59,7 @@ namespace game
 
 	struct EntityState
 	{
-		char entityNum;
+		uint16_t entityNum;
 	};
 
 	enum scr_string_t
@@ -75,25 +75,33 @@ namespace game
 
 	struct gentity_s
 	{
-		EntityState s;
-		char __pad0[0x1B];
+		char __pad0[26];
 		vec3_t origin;
-		char __pad1[0x98];
+		char __pad1[100];
+		EntityState s;
+		char __pad2[50];
 		Bounds box;
-		char __pad2[0x4];
+		char __pad3[4];
 		Bounds absBox;
-		char __pad3[0x24];
+		char __pad4[36];
 		gclient_s* client;
-		char __pad4[0x30];
+		char __pad5[48];
 		scr_string_t script_classname;
-		char __pad5[0x18];
+		char __pad6[24];
 		char flags;
-		char __pad6[0x188];
+		char __pad7[395];
 	}; // size = 760
 
 	//auto a = sizeof(gentity_s);
 
 	static_assert(sizeof(gentity_s) == 760);
+	static_assert(offsetof(gentity_s, origin) == 28);
+	static_assert(offsetof(gentity_s, box) == 192);
+	static_assert(offsetof(gentity_s, absBox) == 220);
+	static_assert(offsetof(gentity_s, client) == 280);
+	static_assert(offsetof(gentity_s, script_classname) == 336);
+	static_assert(offsetof(gentity_s, flags) == 364);
+	static_assert(offsetof(gentity_s, s) == 140);
 
 	struct pathlink_s
 	{

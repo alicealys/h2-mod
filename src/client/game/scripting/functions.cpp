@@ -1,6 +1,8 @@
 #include <std_include.hpp>
 #include "functions.hpp"
 
+#include "../../component/gsc.hpp"
+
 #include <utils/string.hpp>
 
 namespace scripting
@@ -59,7 +61,7 @@ namespace scripting
 
 		script_function get_function_by_index(const unsigned index)
 		{
-			static const auto function_table = 0x14B153F90;
+			static const auto function_table = &gsc::func_table;
 			static const auto method_table = 0x14B155890;
 
 			if (index < 0x320)
