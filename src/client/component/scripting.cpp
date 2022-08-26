@@ -7,6 +7,8 @@
 #include "command.hpp"
 #include "scheduler.hpp"
 #include "scripting.hpp"
+#include "console.hpp"
+#include "gsc.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/functions.hpp"
@@ -15,14 +17,18 @@
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
+#include <utils/string.hpp>
 
 namespace scripting
 {
 	std::unordered_map<int, std::unordered_map<std::string, int>> fields_table;
 	std::unordered_map<std::string, std::unordered_map<std::string, const char*>> script_function_table;
+	std::unordered_map<std::string, std::vector<std::pair<std::string, const char*>>> script_function_table_sort;
 	utils::concurrency::container<shared_table_t> shared_table;
 
 	std::unordered_map<std::string, int> get_dvar_int_overrides;
+
+	std::string current_file;
 
 	namespace
 	{
@@ -45,8 +51,10 @@ namespace scripting
 
 		game::dvar_t* scr_auto_respawn = nullptr;
 
-		std::string current_file;
+		std::string current_scriptfile;
 		unsigned int current_file_id{};
+
+		std::vector<std::function<void(bool)>> shutdown_callbacks;
 
 		std::unordered_map<unsigned int, std::string> canonical_string_table;
 
@@ -100,7 +108,14 @@ namespace scripting
 		{
 			if (free_scripts)
 			{
+				script_function_table_sort.clear();
+				script_function_table.clear();
 				canonical_string_table.clear();
+			}
+
+			for (const auto& callback : shutdown_callbacks)
+			{
+				callback(free_scripts);
 			}
 
 			clear_scheduled_notifies();
@@ -122,6 +137,8 @@ namespace scripting
 
 		void process_script_stub(const char* filename)
 		{
+			current_scriptfile = filename;
+
 			const auto file_id = atoi(filename);
 			if (file_id)
 			{
@@ -148,6 +165,39 @@ namespace scripting
 			return result;
 		}
 
+		std::string get_token_single(unsigned int id)
+		{
+			if (canonical_string_table.find(id) != canonical_string_table.end())
+			{
+				return canonical_string_table[id];
+			}
+
+			return scripting::find_token_single(id);
+		}
+
+		void add_function_sort(unsigned int id, const char* pos)
+		{
+			std::string filename = current_file;
+			if (current_file_id)
+			{
+				filename = get_token_single(current_file_id);
+			}
+
+			if (script_function_table_sort.find(filename) == script_function_table_sort.end())
+			{
+				const auto script = gsc::find_script(game::ASSET_TYPE_SCRIPTFILE, current_scriptfile.data(), false);
+				if (script)
+				{
+					const auto end = &script->bytecode[script->bytecodeLen];
+					script_function_table_sort[filename].emplace_back("__end__", end);
+				}
+			}
+
+			const auto name = get_token_single(id);
+			auto& itr = script_function_table_sort[filename];
+			itr.insert(itr.end() - 1, {name, pos});
+		}
+
 		void add_function(const std::string& file, unsigned int id, const char* pos)
 		{
 			const auto function_names = scripting::get_token_names(id);
@@ -159,6 +209,8 @@ namespace scripting
 
 		void scr_set_thread_position_stub(unsigned int thread_name, const char* code_pos)
 		{
+			add_function_sort(thread_name, code_pos);
+
 			if (current_file_id)
 			{
 				const auto names = scripting::get_token_names(current_file_id);
@@ -235,6 +287,21 @@ namespace scripting
 
 			scr_get_dvar_int_hook.invoke<void>();
 		}
+	}
+
+	void on_shutdown(const std::function<void(bool)>& callback)
+	{
+		shutdown_callbacks.push_back(callback);
+	}
+
+	std::optional<std::string> get_canonical_string(const unsigned int id)
+	{
+		if (canonical_string_table.find(id) == canonical_string_table.end())
+		{
+			return {};
+		}
+
+		return {canonical_string_table[id]};
 	}
 
 	class component final : public component_interface
