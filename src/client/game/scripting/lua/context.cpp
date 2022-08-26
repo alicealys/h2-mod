@@ -533,18 +533,18 @@ namespace scripting::lua
 				const std::string function_name, const sol::protected_function& function)
 			{
 				const auto pos = get_function_pos(filename, function_name);
-				notifies::vm_execute_hooks[pos] = function;
+				notifies::set_lua_hook(pos, function);
 
 				auto detour = sol::table::create(function.lua_state());
 
 				detour["disable"] = [pos]()
 				{
-					notifies::vm_execute_hooks.erase(pos);
+					notifies::clear_hook(pos);
 				};
 
-				detour["enable"] = [pos, function]()
+				detour["enable"] = [&]()
 				{
-					notifies::vm_execute_hooks[pos] = function;
+					notifies::set_lua_hook(pos, function);
 				};
 
 				detour["invoke"] = [filename, function_name](const entity& entity, const sol::this_state s, sol::variadic_args va)

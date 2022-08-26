@@ -12,15 +12,23 @@
 
 namespace notifies
 {
-	std::unordered_map<const char*, sol::protected_function> vm_execute_hooks;
 	bool hook_enabled = true;
 
 	namespace
 	{
+		struct gsc_hook_t
+		{
+			bool is_lua_hook{};
+			const char* target_pos{};
+			sol::protected_function lua_function;
+		};
+
+		std::unordered_map<const char*, gsc_hook_t> vm_execute_hooks;
 		utils::hook::detour scr_entity_damage_hook;
 		std::vector<sol::protected_function> entity_damage_callbacks;
 
 		char empty_function[2] = {0x32, 0x34}; // CHECK_CLEAR_PARAMS, END
+		const char* target_function = nullptr;
 
 		unsigned int local_id_to_entity(unsigned int local_id)
 		{
@@ -43,21 +51,30 @@ namespace notifies
 			}
 
 			const auto& hook = vm_execute_hooks[pos];
-			const auto state = hook.lua_state();
-
-			const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
-
-			std::vector<sol::lua_value> args;
-
-			const auto top = game::scr_function_stack->top;
-
-			for (auto* value = top; value->type != game::SCRIPT_END; --value)
+			if (hook.is_lua_hook)
 			{
-				args.push_back(scripting::lua::convert(state, *value));
-			}
+				const auto& function = hook.lua_function;
+				const auto state = function.lua_state();
 
-			const auto result = hook(self, sol::as_args(args));
-			scripting::lua::handle_error(result);
+				const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
+
+				std::vector<sol::lua_value> args;
+
+				const auto top = game::scr_function_stack->top;
+
+				for (auto* value = top; value->type != game::SCRIPT_END; --value)
+				{
+					args.push_back(scripting::lua::convert(state, *value));
+				}
+
+				const auto result = function(self, sol::as_args(args));
+				scripting::lua::handle_error(result);
+				target_function = empty_function;
+			}
+			else
+			{
+				target_function = hook.target_pos;
+			}
 
 			return true;
 		}
@@ -89,7 +106,8 @@ namespace notifies
 			a.bind(replace);
 
 			a.popad64();
-			a.mov(r14, reinterpret_cast<char*>(empty_function));
+			a.mov(rax, qword_ptr(reinterpret_cast<int64_t>(&target_function)));
+			a.mov(r14, rax);
 			a.jmp(end);
 		}
 
@@ -184,12 +202,39 @@ namespace notifies
 		entity_damage_callbacks.clear();
 	}
 
+	void set_lua_hook(const char* pos, const sol::protected_function& callback)
+	{
+		gsc_hook_t hook;
+		hook.is_lua_hook = true;
+		hook.lua_function = callback;
+		vm_execute_hooks[pos] = hook;
+	}
+
+	void set_gsc_hook(const char* source, const char* target)
+	{
+		gsc_hook_t hook;
+		hook.is_lua_hook = false;
+		hook.target_pos = target;
+		vm_execute_hooks[source] = hook;
+	}
+
+	void clear_hook(const char* pos)
+	{
+		vm_execute_hooks.erase(pos);
+	}
+
+	size_t get_hook_count()
+	{
+		return vm_execute_hooks.size();
+	}
+
 	class component final : public component_interface
 	{
 	public:
 		void post_unpack() override
 		{
-			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
+			const auto a = utils::hook::assemble(vm_execute_stub);
+			utils::hook::jump(0x1405C90A5, a, true);
 
 			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
 		}

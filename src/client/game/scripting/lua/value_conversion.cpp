@@ -144,11 +144,10 @@ namespace scripting::lua
 		game::VariableValue convert_function(sol::lua_value value)
 		{
 			const auto function = value.as<sol::protected_function>();
-			const auto index = (char*)notifies::vm_execute_hooks.size() + 1;
+			const auto index = reinterpret_cast<char*>(notifies::get_hook_count() + 1);
+			notifies::set_lua_hook(index, function);
 
-			notifies::vm_execute_hooks[index] = function;
-
-			game::VariableValue func;
+			game::VariableValue func{};
 			func.type = game::SCRIPT_FUNCTION;
 			func.u.codePosValue = index;
 
