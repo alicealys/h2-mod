@@ -333,8 +333,7 @@ namespace fastfiles
 				{
 					add_custom_level_load_zone(load, lang_name.data(), false, size_est);
 				}
-
-				if (eng_name != lang_name && fastfiles::exists(eng_name))
+				else if (fastfiles::exists(eng_name))
 				{
 					add_custom_level_load_zone(load, eng_name.data(), false, size_est);
 				}
