@@ -2061,6 +2061,7 @@ namespace scripting
         {"export", 13703},
         {"animation", 70},
         {"spammed_model", 49508},
+        {"vehicletype", 1282},
 
         // script
         {"script_flag", 31190},
@@ -2102,5 +2103,11 @@ namespace scripting
         {"script_drone", 31152},
         {"script_health", 31247},
         {"script_friendname", 31217},
+        {"script_airspeed", 31027},
+        {"script_missiles", 31293},
+        {"script_spotlight", 31447},
+        {"script_team", 31474},
+        {"script_ai_invulnerable", 31024},
+        {"script_mp_style_helicopter", 31353},
     };
 }
