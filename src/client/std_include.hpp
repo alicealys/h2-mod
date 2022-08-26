@@ -1,6 +1,7 @@
 #pragma once
 
 #define BINARY_PAYLOAD_SIZE 0x12000000
+#define INJECT_HOST_AS_LIB
 
 #pragma warning(push)
 #pragma warning(disable: 4100)
