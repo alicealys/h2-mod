@@ -11,6 +11,7 @@
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
 #include <utils/flags.hpp>
+#include <utils/properties.hpp>
 
 namespace filesystem
 {
@@ -37,7 +38,7 @@ namespace filesystem
 
 			initialized = true;
 
-			filesystem::register_path(L"" CLIENT_DATA_FOLDER);
+			filesystem::register_path(utils::properties::get_appdata_path() / CLIENT_DATA_FOLDER);
 			filesystem::register_path(L".");
 			filesystem::register_path(L"h2-mod");
 
