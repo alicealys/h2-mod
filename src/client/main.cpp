@@ -7,6 +7,7 @@
 #include <utils/string.hpp>
 #include <utils/flags.hpp>
 #include <utils/io.hpp>
+#include <utils/properties.hpp>
 
 DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 {
@@ -59,7 +60,7 @@ void apply_aslr_patch(std::string* data)
 
 void get_aslr_patched_binary(std::string* binary, std::string* data)
 {
-	const auto patched_binary = "h2_sp_patched.exe"s;
+	const auto patched_binary = (utils::properties::get_appdata_path() / "bin/h2_sp64_bnet_ship.exe"s).generic_string();
 
 	try
 	{
@@ -127,6 +128,7 @@ FARPROC load_binary(const launcher::mode mode)
 void remove_crash_file()
 {
 	utils::io::remove_file("__h2Exe");
+	utils::io::remove_file("h2_sp_patched.exe"); // remove this at some point
 }
 
 void verify_version()
