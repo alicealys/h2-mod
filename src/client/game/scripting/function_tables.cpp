@@ -2109,5 +2109,9 @@ namespace scripting
         {"script_team", 31474},
         {"script_ai_invulnerable", 31024},
         {"script_mp_style_helicopter", 31353},
+        {"script_startingposition", 31455},
+        {"script_vehicle_selfremove", 31507},
+        {"script_stopnode", 31464},
+        {"script_unload", 31497},
     };
 }

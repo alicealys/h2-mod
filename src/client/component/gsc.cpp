@@ -9,6 +9,7 @@
 #include "scripting.hpp"
 #include "gsc.hpp"
 #include "scheduler.hpp"
+#include "fastfiles.hpp"
 
 #include "game/scripting/execution.hpp"
 #include "game/scripting/functions.hpp"
@@ -48,6 +49,30 @@ namespace gsc
 			return utils::hook::invoke<char*>(0x14061E680, size, 4, 1, 5);
 		}
 
+		bool read_scriptfile(const std::string& name, std::string* data)
+		{
+			if (filesystem::read_file(name, data))
+			{
+				return true;
+			}
+
+			const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_RAWFILE, name.data(), false);
+			if (asset.rawfile)
+			{
+				const auto len = game::DB_GetRawFileLen(asset.rawfile);
+				data->resize(len);
+				game::DB_GetRawBuffer(asset.rawfile, data->data(), len);
+				if (len > 0)
+				{
+					data->pop_back();
+				}
+
+				return true;
+			}
+
+			return false;
+		}
+
 		game::ScriptFile* load_custom_script(const char* file_name, const std::string& real_name)
 		{
 			if (loaded_scripts.find(real_name) != loaded_scripts.end())
@@ -56,7 +81,7 @@ namespace gsc
 			}
 
 			std::string source_buffer{};
-			if (!filesystem::read_file(real_name + ".gsc", &source_buffer))
+			if (!read_scriptfile(real_name + ".gsc", &source_buffer))
 			{
 				return nullptr;
 			}
@@ -104,6 +129,30 @@ namespace gsc
 			return script_file_ptr;
 		}
 
+		void load_script(const std::string& name)
+		{
+			if (!game::Scr_LoadScript(name.data()))
+			{
+				return;
+			}
+
+			const auto main_handle = game::Scr_GetFunctionHandle(name.data(),
+				xsk::gsc::h2::resolver::token_id("main"));
+			const auto init_handle = game::Scr_GetFunctionHandle(name.data(),
+				xsk::gsc::h2::resolver::token_id("init"));
+
+			if (main_handle)
+			{
+				console::info("Loaded '%s::main'\n", name.data());
+				main_handles[name] = main_handle;
+			}
+			else if (init_handle)
+			{
+				console::info("Loaded '%s::init'\n", name.data());
+				init_handles[name] = init_handle;
+			}
+		}
+
 		void load_scripts(const std::filesystem::path& root_dir)
 		{
 			std::filesystem::path script_dir = root_dir / "scripts";
@@ -124,26 +173,7 @@ namespace gsc
 				const auto relative = path.lexically_relative(root_dir).generic_string();
 				const auto base_name = relative.substr(0, relative.size() - 4);
 
-				if (!game::Scr_LoadScript(base_name.data()))
-				{
-					continue;
-				}
-
-				const auto main_handle = game::Scr_GetFunctionHandle(base_name.data(), 
-					xsk::gsc::h2::resolver::token_id("main"));
-				const auto init_handle = game::Scr_GetFunctionHandle(base_name.data(), 
-					xsk::gsc::h2::resolver::token_id("init"));
-
-				if (main_handle)
-				{
-					console::info("Loaded '%s::main'\n", base_name.data());
-					main_handles[base_name] = main_handle;
-				}
-				else if (init_handle)
-				{
-					console::info("Loaded '%s::init'\n", base_name.data());
-					init_handles[base_name] = init_handle;
-				}
+				load_script(base_name);
 			}
 		}
 
@@ -174,6 +204,17 @@ namespace gsc
 			utils::hook::invoke<void>(0x1404E1400, a1, a2);
 
 			clear();
+
+			fastfiles::enum_assets(game::ASSET_TYPE_RAWFILE, [](game::XAssetHeader header)
+			{
+				std::string name = header.scriptfile->name;
+
+				if (name.ends_with(".gsc") && name.starts_with("scripts/"))
+				{
+					const auto base_name = name.substr(0, name.size() - 4);
+					load_script(base_name);
+				}
+			}, true);
 
 			for (const auto& path : filesystem::get_search_paths())
 			{
