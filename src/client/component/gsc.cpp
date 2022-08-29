@@ -41,7 +41,7 @@ namespace gsc
 		std::unordered_map<std::string, unsigned int> main_handles;
 		std::unordered_map<std::string, unsigned int> init_handles;
 		std::unordered_map<std::string, game::ScriptFile*> loaded_scripts;
-		std::unordered_map<unsigned int, scripting::script_function> functions;
+		std::unordered_map<scripting::script_function, unsigned int> functions;
 		std::optional<std::string> gsc_error;
 
 		char* allocate_buffer(size_t size)
@@ -185,21 +185,6 @@ namespace gsc
 			loaded_scripts.clear();
 		}
 
-		void gscr_print_stub()
-		{
-			const auto num = game::Scr_GetNumParam();
-			std::string buffer{};
-
-			for (auto i = 0; i < num; i++)
-			{
-				const auto str = game::Scr_GetString(i);
-				buffer.append(str);
-				buffer.append("\t");
-			}
-
-			printf("%s\n", buffer.data());
-		}
-
 		void load_gametype_script_stub(void* a1, void* a2)
 		{
 			utils::hook::invoke<void>(0x1404E1400, a1, a2);
@@ -318,12 +303,10 @@ namespace gsc
 		bool force_error_print = false;
 		void* vm_error_stub(void* a1)
 		{
-			if (!developer_script->current.enabled || force_error_print)
+			if (!developer_script->current.enabled && !force_error_print)
 			{
 				return utils::hook::invoke<void*>(0x140614670, a1);
 			}
-
-			force_error_print = false;
 
 			console::warn("*********** script runtime error *************\n");
 
@@ -343,6 +326,9 @@ namespace gsc
 					opcode_id, error_str.data());
 			}
 
+			force_error_print = false;
+			gsc_error = {};
+
 			print_callstack();
 			console::warn("**********************************************\n");
 			return utils::hook::invoke<void*>(0x140614670, a1);
@@ -359,7 +345,7 @@ namespace gsc
 			utils::hook::invoke<void>(0x140509F20, a1, a2);
 			for (const auto& func : functions)
 			{
-				game::Scr_RegisterFunction(func.second, 0, func.first);
+				game::Scr_RegisterFunction(func.first, 0, func.second);
 			}
 		}
 
@@ -378,33 +364,54 @@ namespace gsc
 		auto function_id_start = 0x320;
 		void add_function(const std::string& name, scripting::script_function function)
 		{
-			const auto id = ++function_id_start;
-			scripting::function_map[name] = id;
-			functions[id] = function;
-		}
-
-		void set_gsc_error(const std::string& error)
-		{
-			force_error_print = true;
-			gsc_error = error;
-			game::Scr_ErrorInternal();
-		}
-
-		void assert_cmd()
-		{
-			const auto expr = get_argument(0).as<int>();
-			if (!expr)
+			if (scripting::function_map.find(name) != scripting::function_map.end())
 			{
-				set_gsc_error("assert fail");
+				const auto id = scripting::function_map[name];
+				functions[function] = id;
+			}
+			else
+			{
+				const auto id = ++function_id_start;
+				scripting::function_map[name] = id;
+				functions[function] = id;
 			}
 		}
 
-		void assertex_cmd()
+		void execute_custom_function(scripting::script_function function)
 		{
-			const auto expr = get_argument(0).as<int>();
-			if (!expr)
+			bool error = false;
+
+			try
 			{
-				set_gsc_error(get_argument(1).as<std::string>());
+				function({});
+			}
+			catch (const std::exception& e)
+			{
+				error = true;
+				force_error_print = true;
+				gsc_error = e.what();
+			}
+
+			if (error)
+			{
+				game::Scr_ErrorInternal();
+			}
+		}
+		
+		void vm_call_builtin_stub(scripting::script_function function)
+		{
+			bool custom = false;
+			{
+				custom = functions.find(function) != functions.end();
+			}
+
+			if (!custom)
+			{
+				function({});
+			}
+			else
+			{
+				execute_custom_function(function);
 			}
 		}
 	}
@@ -466,13 +473,6 @@ namespace gsc
 			utils::hook::call(0x1404C8F71, g_load_structs_stub);
 			utils::hook::call(0x1404C8F80, scr_load_level_stub);
 
-			// replace builtin print function
-			utils::hook::jump(0x1404EC640, gscr_print_stub);
-
-			// restore assert
-			utils::hook::jump(0x1404EC890, assert_cmd);
-			utils::hook::jump(0x1404EC920, assertex_cmd);
-
 			utils::hook::call(0x1405CB94F, vm_error_stub);
 
 			utils::hook::call(0x1405BC583, unknown_function_stub);
@@ -487,31 +487,59 @@ namespace gsc
 			utils::hook::inject(0x1405BCB78 + 3, &func_table);
 			utils::hook::set<uint32_t>(0x1405CA678 + 4, RVA(&func_table));
 
+			utils::hook::nop(0x1405CA683, 8);
+			utils::hook::call(0x1405CA683, vm_call_builtin_stub);
+
+			add_function("print", [](const game::scr_entref_t ref)
+			{
+				const auto num = game::Scr_GetNumParam();
+				std::string buffer{};
+
+				for (auto i = 0; i < num; i++)
+				{
+					const auto str = game::Scr_GetString(i);
+					buffer.append(str);
+					buffer.append("\t");
+				}
+
+				printf("%s\n", buffer.data());
+			});
+
+			add_function("assert", [](const game::scr_entref_t ref)
+			{
+				const auto expr = get_argument(0).as<int>();
+				if (!expr)
+				{
+					throw std::runtime_error("assert fail");
+				}
+			});
+
+			add_function("assertex", [](const game::scr_entref_t ref)
+			{
+				const auto expr = get_argument(0).as<int>();
+				if (!expr)
+				{
+					const auto error = get_argument(1).as<std::string>();
+					throw std::runtime_error(error);
+				}
+			});
+
 			add_function("replacefunc", [](const game::scr_entref_t ref)
 			{
-				try
+				const auto what = get_argument(0).get_raw();
+				const auto with = get_argument(1).get_raw();
+
+				if (what.type != game::SCRIPT_FUNCTION)
 				{
-					const auto what = get_argument(0).get_raw();
-					const auto with = get_argument(1).get_raw();
-
-					if (what.type != game::SCRIPT_FUNCTION)
-					{
-						set_gsc_error("replaceFunc: parameter 0 must be a function");
-						return;
-					}
-
-					if (with.type != game::SCRIPT_FUNCTION)
-					{
-						set_gsc_error("replaceFunc: parameter 1 must be a function");
-						return;
-					}
-
-					notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
+					throw std::runtime_error("replaceFunc: parameter 1 must be a function");
 				}
-				catch (const std::exception& e)
+
+				if (with.type != game::SCRIPT_FUNCTION)
 				{
-					set_gsc_error(utils::string::va("replaceFunc: %s", e.what()));
+					throw std::runtime_error("replaceFunc: parameter 2 must be a function");
 				}
+
+				notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
 			});
 
 			scripting::on_shutdown([](int free_scripts)
