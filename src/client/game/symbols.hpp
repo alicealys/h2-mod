@@ -49,6 +49,7 @@ namespace game
 	WEAK symbol<void(void* levelLoad, const char* name, 
 		const unsigned int allocFlags, const unsigned __int64 sizeEst)> DB_LevelLoadAddZone{0x1404145D0};
 	WEAK symbol<int(game::XAssetType type, const char* name)> DB_IsXAssetDefault{0x1404143C0};
+	WEAK symbol<int(game::XAssetType type, const char* name)> DB_XAssetExists{0x140417FD0};
 	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
