@@ -55,10 +55,12 @@ namespace gsc
 			{
 				return true;
 			}
-
-			const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_RAWFILE, name.data(), false);
-			if (asset.rawfile)
+			
+			const auto name_str = name.data();
+			if (game::DB_XAssetExists(game::ASSET_TYPE_RAWFILE, name_str) && 
+				!game::DB_IsXAssetDefault(game::ASSET_TYPE_RAWFILE, name_str))
 			{
+				const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_RAWFILE, name.data(), false);
 				const auto len = game::DB_GetRawFileLen(asset.rawfile);
 				data->resize(len);
 				game::DB_GetRawBuffer(asset.rawfile, data->data(), len);
@@ -275,15 +277,19 @@ namespace gsc
 		{
 			for (auto frame = game::scr_VmPub->function_frame; frame != game::scr_VmPub->function_frame_start; --frame)
 			{
+				const auto pos = frame == game::scr_VmPub->function_frame 
+					? game::scr_function_stack->pos 
+					: frame->fs.pos;
 				const auto function = find_function(frame->fs.pos);
+
 				if (function.has_value())
 				{
 					console::warn("\tat function \"%s\" in file \"%s.gsc\"", 
-						function.value().first.data(), function.value().second.data(), frame->fs.pos);
+						function.value().first.data(), function.value().second.data());
 				}
 				else
 				{
-					console::warn("\tat unknown location", frame->fs.pos);
+					console::warn("\tat unknown location %p", pos);
 				}
 			}
 		}
