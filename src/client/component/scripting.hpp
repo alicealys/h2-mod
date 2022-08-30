@@ -16,4 +16,5 @@ namespace scripting
 
 	void on_shutdown(const std::function<void(bool)>& callback);
 	std::optional<std::string> get_canonical_string(const unsigned int id);
+	std::string get_token_single(unsigned int id);
 }

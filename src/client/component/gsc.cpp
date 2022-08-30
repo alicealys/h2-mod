@@ -334,10 +334,70 @@ namespace gsc
 			return utils::hook::invoke<void*>(0x140614670, a1);
 		}
 
-		void unknown_function_stub()
+		std::string unknown_function_error{};
+		void get_unknown_function_error(const char* code_pos)
 		{
-			game::Com_Error(game::ERR_DROP, "LinkFile: unknown function in script '%s.gsc'", 
-				scripting::current_file.data());
+			const auto function = find_function(code_pos);
+			if (function.has_value())
+			{
+				const auto& pos = function.value();
+				unknown_function_error = utils::string::va(
+					"while processing function '%s' in script '%s':\nunknown script '%s'",
+					pos.first.data(), pos.second.data(), scripting::current_file.data()
+				);
+			}
+			else
+			{
+				unknown_function_error = utils::string::va(
+					"unknown script '%s'",
+					scripting::current_file.data()
+				);
+			}
+		}
+
+		unsigned int current_filename{};
+		std::string get_filename_name()
+		{
+			const auto filename_str = game::SL_ConvertToString(
+				static_cast<game::scr_string_t>(current_filename));
+			const auto id = std::atoi(filename_str);
+			if (id == 0)
+			{
+				return filename_str;
+			}
+
+			return scripting::get_token_single(id);
+		}
+
+
+		void get_unknown_function_error(unsigned int thread_name)
+		{
+			const auto filename = get_filename_name();
+			const auto name = scripting::get_token_single(thread_name);
+
+			unknown_function_error = utils::string::va(
+				"while processing script '%s':\nunknown function '%s::%s'",
+				scripting::current_file.data(), filename.data(), name.data()
+			);
+		}
+
+		void unknown_function_stub(const char* code_pos)
+		{
+			get_unknown_function_error(code_pos);
+			game::Com_Error(game::ERR_DROP, "script link error\n%s", 
+				unknown_function_error.data());
+		}
+
+		unsigned int find_variable_stub(unsigned int parent_id, unsigned int thread_name)
+		{
+			const auto res = game::FindVariable(parent_id, thread_name);
+			if (!res)
+			{
+				get_unknown_function_error(thread_name);
+				game::Com_Error(game::ERR_DROP, "script link error\n%s",
+					unknown_function_error.data());
+			}
+			return res;
 		}
 
 		void register_gsc_functions_stub(void* a1, void* a2)
@@ -412,6 +472,13 @@ namespace gsc
 				execute_custom_function(function);
 			}
 		}
+
+		utils::hook::detour scr_emit_function_hook;
+		void scr_emit_function_stub(unsigned int filename, unsigned int thread_name, char* code_pos)
+		{
+			current_filename = filename;
+			scr_emit_function_hook.invoke<void>(filename, thread_name, code_pos);
+		}
 	}
 
 	game::ScriptFile* find_script(game::XAssetType /*type*/, const char* name, int /*allow_create_default*/)
@@ -475,6 +542,8 @@ namespace gsc
 
 			utils::hook::call(0x1405BC583, unknown_function_stub);
 			utils::hook::call(0x1405BC5CF, unknown_function_stub);
+			utils::hook::call(0x1405BC6BA, find_variable_stub);
+			scr_emit_function_hook.create(0x1405BC5E0, scr_emit_function_stub);
 
 			utils::hook::call(0x1405BCBAB, register_gsc_functions_stub);
 			utils::hook::set<uint32_t>(0x1405BC7BC, 0x1000); // change builtin func count

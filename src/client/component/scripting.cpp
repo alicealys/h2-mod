@@ -165,22 +165,12 @@ namespace scripting
 			return result;
 		}
 
-		std::string get_token_single(unsigned int id)
-		{
-			if (canonical_string_table.find(id) != canonical_string_table.end())
-			{
-				return canonical_string_table[id];
-			}
-
-			return scripting::find_token_single(id);
-		}
-
 		void add_function_sort(unsigned int id, const char* pos)
 		{
 			std::string filename = current_file;
 			if (current_file_id)
 			{
-				filename = get_token_single(current_file_id);
+				filename = scripting::get_token_single(current_file_id);
 			}
 
 			if (script_function_table_sort.find(filename) == script_function_table_sort.end())
@@ -287,6 +277,16 @@ namespace scripting
 
 			scr_get_dvar_int_hook.invoke<void>();
 		}
+	}
+
+	std::string get_token_single(unsigned int id)
+	{
+		if (canonical_string_table.find(id) != canonical_string_table.end())
+		{
+			return canonical_string_table[id];
+		}
+
+		return scripting::find_token_single(id);
 	}
 
 	void on_shutdown(const std::function<void(bool)>& callback)
