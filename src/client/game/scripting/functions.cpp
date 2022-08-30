@@ -64,7 +64,7 @@ namespace scripting
 			static const auto function_table = &gsc::func_table;
 			static const auto method_table = 0x14B155890;
 
-			if (index < 0x320)
+			if (index < 0x1000)
 			{
 				return reinterpret_cast<script_function*>(function_table)[index - 1];
 			}
