@@ -356,9 +356,7 @@ namespace gsc
 				return {};
 			}
 
-			const auto value = &game::scr_VmPub->top[-index];
-			
-			return scripting::script_value(*value);
+			return game::scr_VmPub->top[-index];
 		}
 
 		auto function_id_start = 0x320;
@@ -379,7 +377,7 @@ namespace gsc
 
 		void execute_custom_function(scripting::script_function function)
 		{
-			bool error = false;
+			auto error = false;
 
 			try
 			{
@@ -400,7 +398,7 @@ namespace gsc
 		
 		void vm_call_builtin_stub(scripting::script_function function)
 		{
-			bool custom = false;
+			auto custom = false;
 			{
 				custom = functions.find(function) != functions.end();
 			}
