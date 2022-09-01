@@ -16,6 +16,10 @@
 
 #include "game/ui_scripting/execution.hpp"
 
+#include <xsk/gsc/types.hpp>
+#include <xsk/resolver.hpp>
+#include <xsk/utils/compression.hpp>
+
 #include <utils/string.hpp>
 #include <utils/io.hpp>
 #include <utils/nt.hpp>
@@ -336,9 +340,10 @@ namespace scripting::lua
 
 			auto entity_type = state.new_usertype<entity>("entity");
 
-			for (const auto& func : method_map)
+			for (const auto& func : xsk::gsc::h2::resolver::get_methods())
 			{
-				const auto name = utils::string::to_lower(func.first);
+				const auto func_name = std::string(func.first);
+				const auto name = utils::string::to_lower(func_name);
 				entity_type[name.data()] = [name](const entity& entity, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};
@@ -469,9 +474,10 @@ namespace scripting::lua
 			auto game_type = state.new_usertype<game>("game_");
 			state["game"] = game();
 
-			for (const auto& func : function_map)
+			for (const auto& func : xsk::gsc::h2::resolver::get_functions())
 			{
-				const auto name = utils::string::to_lower(func.first);
+				const auto func_name = std::string(func.first);
+				const auto name = utils::string::to_lower(func_name);
 				game_type[name] = [name](const game&, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};

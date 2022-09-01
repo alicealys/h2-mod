@@ -11,6 +11,10 @@
 #include "command.hpp"
 #include "game/scripting/functions.hpp"
 
+#include <xsk/gsc/types.hpp>
+#include <xsk/resolver.hpp>
+#include <xsk/utils/compression.hpp>
+
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 #include <utils/string.hpp>
@@ -169,13 +173,14 @@ namespace mapents
 				}
 
 				const auto key_ = key.substr(1, key.size() - 2);
-				if (scripting::token_map.find(key_) == scripting::token_map.end())
+				const auto id = xsk::gsc::h2::resolver::token_id(key_);
+				if (id == 0)
 				{
 					console::warn("[addon_map_ents parser] Key '%s' not found, on line %i", key_.data(), line_index);
 					continue;
 				}
 
-				out_buffer.append(utils::string::va("%i \"%s\"\n", scripting::token_map[key_], value.data()));
+				out_buffer.append(utils::string::va("%i \"%s\"\n", id, value.data()));
 			}
 
 			return out_buffer;
@@ -288,13 +293,13 @@ namespace mapents
 		{
 			const auto id = token_id_start++;
 			custom_fields[id] = type;
-			scripting::token_map[name] = id;
+			xsk::gsc::h2::resolver::add_token(name, static_cast<std::uint16_t>(id));
 		}
 
 		void add_field(const std::string& name, game::scriptType_e type, unsigned int id)
 		{
 			custom_fields[id] = type;
-			scripting::token_map[name] = id;
+			xsk::gsc::h2::resolver::add_token(name, static_cast<std::uint16_t>(id));
 		}
 
 		utils::hook::detour scr_find_field_hook;
@@ -334,15 +339,8 @@ namespace mapents
 				}
 
 				const auto id = static_cast<unsigned int>(std::atoi(line.substr(0, first_space).data()));
-				std::string key = std::to_string(id);
-				for (const auto& [token, value] : scripting::token_map)
-				{
-					if (value == id)
-					{
-						key = "\"" + token + "\"";
-						break;
-					}
-				}
+				const auto token = xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id));
+				const auto key = "\"" + token + "\"";
 
 				const auto new_line = key + line.substr(first_space);
 				buffer.append(new_line);
