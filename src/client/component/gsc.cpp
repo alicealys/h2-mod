@@ -428,15 +428,15 @@ namespace gsc
 		auto function_id_start = 0x320;
 		void add_function(const std::string& name, scripting::script_function function)
 		{
-			if (scripting::function_map.find(name) != scripting::function_map.end())
+			if (xsk::gsc::h2::resolver::find_function(name))
 			{
-				const auto id = scripting::function_map[name];
+				const auto id = xsk::gsc::h2::resolver::function_id(name);
 				functions[function] = id;
 			}
 			else
 			{
 				const auto id = ++function_id_start;
-				scripting::function_map[name] = id;
+				xsk::gsc::h2::resolver::add_function(name, static_cast<std::uint16_t>(id));
 				functions[function] = id;
 			}
 		}
@@ -511,25 +511,6 @@ namespace gsc
 		void post_unpack() override
 		{
 			developer_script = dvars::register_bool("developer_script", false, 0, "Print GSC errors");
-
-			// wait for other tokens to be added
-			scheduler::once([]()
-			{
-				for (const auto& function : scripting::function_map)
-				{
-					xsk::gsc::h2::resolver::add_function(function.first, static_cast<std::uint16_t>(function.second));
-				}
-
-				for (const auto& method : scripting::method_map)
-				{
-					xsk::gsc::h2::resolver::add_method(method.first, static_cast<std::uint16_t>(method.second));
-				}
-
-				for (const auto& token : scripting::token_map)
-				{
-					xsk::gsc::h2::resolver::add_token(token.first, static_cast<std::uint16_t>(token.second));
-				}
-			}, scheduler::pipeline::main);
 
 			utils::hook::call(0x1405C6177, find_script);
 			utils::hook::call(0x1405C6187, db_is_xasset_default);
