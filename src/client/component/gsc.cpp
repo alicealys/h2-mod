@@ -115,8 +115,8 @@ namespace gsc
 			const auto script = assembler->output_script();
 			script_file_ptr->bytecodeLen = static_cast<int>(script.size());
 
-			const auto buffer_size = script.size() + 1;
 			const auto script_size = script.size();
+			const auto buffer_size = script_size + stack.size() + 2;
 
 			const auto buffer = allocate_buffer(buffer_size);
 			std::memcpy(buffer, script.data(), script_size);

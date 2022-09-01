@@ -243,7 +243,6 @@ namespace mapents
 		{
 			if (!should_load_addon_mapents())
 			{
-				printf("db_find_xasset_header_stub %s\n", name);
 				return game::DB_FindXAssetHeader(type, name, allow_create_default);
 			}
 
