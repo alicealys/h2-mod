@@ -615,6 +615,24 @@ namespace gsc
 				notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
 			});
 
+			add_function("getsoundlength", [](const game::scr_entref_t ref)
+			{
+				const auto name = get_argument(0);
+				if (!name.is<std::string>())
+				{
+					throw std::runtime_error("getsoundlength: parameter 1 must be a string");
+				}
+
+				const auto name_str = name.as<std::string>();
+				const auto sound = game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND, name_str.data(), false).sound;
+				if (!sound || !sound->count || !sound->head->soundFile || sound->head->soundFile->type != game::SAT_STREAMED)
+				{
+					return game::Scr_AddInt(-1);
+				}
+
+				return game::Scr_AddInt(sound->head->soundFile->u.streamSnd.totalMsec);
+			});
+
 			scripting::on_shutdown([](int free_scripts)
 			{
 				if (free_scripts)
