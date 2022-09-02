@@ -335,7 +335,7 @@ namespace gsc
 			console::warn("*********** script runtime error *************\n");
 
 			const auto opcode_id = *reinterpret_cast<std::uint8_t*>(0x14BAA93E8);
-			if ((opcode_id >= 0x1A && opcode_id <= 0x20) || (opcode_id >= 0xA8 && opcode_id <= 0xAE))
+			if ((opcode_id >= 0x1A && opcode_id <= 0x20) || (opcode_id >= 0xA9 && opcode_id <= 0xAF))
 			{
 				builtin_call_error();
 			}
