@@ -248,7 +248,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("godmode %s",
 					game::g_entities[0].flags & game::FL_GODMODE
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("demigod", []()
@@ -262,7 +262,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("demigod mode %s",
 					game::g_entities[0].flags & game::FL_DEMI_GODMODE
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("notarget", []()
@@ -276,7 +276,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("notarget %s",
 					game::g_entities[0].flags & game::FL_NOTARGET
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("noclip", []()
@@ -290,7 +290,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("noclip %s",
 					game::g_entities[0].client->flags & 1
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("ufo", []()
@@ -302,7 +302,7 @@ namespace command
 
 				game::g_entities[0].client->flags ^= 2;
 				game::CG_GameMessage(
-					0, utils::string::va("ufo %s", game::g_entities[0].client->flags & 2 ? "^2on" : "^1off"));
+					0, utils::string::va("ufo %s", game::g_entities[0].client->flags & 2 ? "^2on" : "^1off"), 0);
 			});
 
 			add("give", [](const params& params)
@@ -314,7 +314,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::CG_GameMessage(0, "You did not specify a weapon name");
+					game::CG_GameMessage(0, "You did not specify a weapon name", 0);
 					return;
 				}
 
@@ -379,7 +379,7 @@ namespace command
 							}
 							else
 							{
-								game::CG_GameMessage(0, "Weapon does not exist");
+								game::CG_GameMessage(0, "Weapon does not exist", 0);
 							}
 						}
 					}
@@ -419,7 +419,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::CG_GameMessage(0, "You did not specify a weapon name");
+					game::CG_GameMessage(0, "You did not specify a weapon name", 0);
 					return;
 				}
 

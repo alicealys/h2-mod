@@ -9,6 +9,7 @@
 #include "scripting.hpp"
 #include "gsc.hpp"
 #include "scheduler.hpp"
+#include "fastfiles.hpp"
 
 #include "game/scripting/execution.hpp"
 #include "game/scripting/functions.hpp"
@@ -20,13 +21,11 @@
 #include <xsk/gsc/interfaces/compiler.hpp>
 #include <xsk/gsc/interfaces/assembler.hpp>
 #include <xsk/resolver.hpp>
-#include <xsk/utils/compression.hpp>
 #include <interface.hpp>
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
 #include <utils/string.hpp>
-#include <utils/compression.hpp>
 
 namespace gsc
 {
@@ -42,12 +41,38 @@ namespace gsc
 		std::unordered_map<std::string, unsigned int> main_handles;
 		std::unordered_map<std::string, unsigned int> init_handles;
 		std::unordered_map<std::string, game::ScriptFile*> loaded_scripts;
-		std::unordered_map<unsigned int, scripting::script_function> functions;
+		std::unordered_map<scripting::script_function, unsigned int> functions;
 		std::optional<std::string> gsc_error;
 
 		char* allocate_buffer(size_t size)
 		{
 			return utils::hook::invoke<char*>(0x14061E680, size, 4, 1, 5);
+		}
+
+		bool read_scriptfile(const std::string& name, std::string* data)
+		{
+			if (filesystem::read_file(name, data))
+			{
+				return true;
+			}
+			
+			const auto name_str = name.data();
+			if (game::DB_XAssetExists(game::ASSET_TYPE_RAWFILE, name_str) && 
+				!game::DB_IsXAssetDefault(game::ASSET_TYPE_RAWFILE, name_str))
+			{
+				const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_RAWFILE, name.data(), false);
+				const auto len = game::DB_GetRawFileLen(asset.rawfile);
+				data->resize(len);
+				game::DB_GetRawBuffer(asset.rawfile, data->data(), len);
+				if (len > 0)
+				{
+					data->pop_back();
+				}
+
+				return true;
+			}
+
+			return false;
 		}
 
 		game::ScriptFile* load_custom_script(const char* file_name, const std::string& real_name)
@@ -58,7 +83,7 @@ namespace gsc
 			}
 
 			std::string source_buffer{};
-			if (!filesystem::read_file(real_name + ".gsc", &source_buffer))
+			if (!read_scriptfile(real_name + ".gsc", &source_buffer))
 			{
 				return nullptr;
 			}
@@ -90,21 +115,45 @@ namespace gsc
 			const auto script = assembler->output_script();
 			script_file_ptr->bytecodeLen = static_cast<int>(script.size());
 
-			const auto compressed = xsk::utils::zlib::compress(stack);
-			const auto buffer_size = script.size() + compressed.size() + 1;
 			const auto script_size = script.size();
+			const auto buffer_size = script_size + stack.size() + 2;
 
 			const auto buffer = allocate_buffer(buffer_size);
 			std::memcpy(buffer, script.data(), script_size);
-			std::memcpy(&buffer[script_size], compressed.data(), compressed.size()); 
+			std::memcpy(&buffer[script_size], stack.data(), stack.size()); 
 
 			script_file_ptr->bytecode = &buffer[0];
 			script_file_ptr->buffer = &buffer[script.size()];
-			script_file_ptr->compressedLen = static_cast<int>(compressed.size());
+			script_file_ptr->compressedLen = 0;
 
 			loaded_scripts[real_name] = script_file_ptr;
 
 			return script_file_ptr;
+		}
+
+		void load_script(const std::string& name)
+		{
+			if (!game::Scr_LoadScript(name.data()))
+			{
+				return;
+			}
+
+			const auto main_handle = game::Scr_GetFunctionHandle(name.data(),
+				xsk::gsc::h2::resolver::token_id("main"));
+			const auto init_handle = game::Scr_GetFunctionHandle(name.data(),
+				xsk::gsc::h2::resolver::token_id("init"));
+
+			if (main_handle)
+			{
+				console::info("Loaded '%s::main'\n", name.data());
+				main_handles[name] = main_handle;
+			}
+
+			if (init_handle)
+			{
+				console::info("Loaded '%s::init'\n", name.data());
+				init_handles[name] = init_handle;
+			}
 		}
 
 		void load_scripts(const std::filesystem::path& root_dir)
@@ -127,26 +176,7 @@ namespace gsc
 				const auto relative = path.lexically_relative(root_dir).generic_string();
 				const auto base_name = relative.substr(0, relative.size() - 4);
 
-				if (!game::Scr_LoadScript(base_name.data()))
-				{
-					continue;
-				}
-
-				const auto main_handle = game::Scr_GetFunctionHandle(base_name.data(), 
-					xsk::gsc::h2::resolver::token_id("main"));
-				const auto init_handle = game::Scr_GetFunctionHandle(base_name.data(), 
-					xsk::gsc::h2::resolver::token_id("init"));
-
-				if (main_handle)
-				{
-					console::info("Loaded '%s::main'\n", base_name.data());
-					main_handles[base_name] = main_handle;
-				}
-				else if (init_handle)
-				{
-					console::info("Loaded '%s::init'\n", base_name.data());
-					init_handles[base_name] = init_handle;
-				}
+				load_script(base_name);
 			}
 		}
 
@@ -157,26 +187,22 @@ namespace gsc
 			loaded_scripts.clear();
 		}
 
-		void gscr_print_stub()
-		{
-			const auto num = game::Scr_GetNumParam();
-			std::string buffer{};
-
-			for (auto i = 0; i < num; i++)
-			{
-				const auto str = game::Scr_GetString(i);
-				buffer.append(str);
-				buffer.append("\t");
-			}
-
-			printf("%s\n", buffer.data());
-		}
-
 		void load_gametype_script_stub(void* a1, void* a2)
 		{
 			utils::hook::invoke<void>(0x1404E1400, a1, a2);
 
 			clear();
+
+			fastfiles::enum_assets(game::ASSET_TYPE_RAWFILE, [](game::XAssetHeader header)
+			{
+				std::string name = header.scriptfile->name;
+
+				if (name.ends_with(".gsc") && name.starts_with("scripts/"))
+				{
+					const auto base_name = name.substr(0, name.size() - 4);
+					load_script(base_name);
+				}
+			}, true);
 
 			for (const auto& path : filesystem::get_search_paths())
 			{
@@ -218,6 +244,18 @@ namespace gsc
 			return utils::hook::invoke<int>(0x1404143C0, type, name);
 		}
 
+		void db_get_raw_buffer_stub(const game::RawFile* rawfile, char* buf, const int size)
+		{
+			if (rawfile->len > 0 && rawfile->compressedLen == 0)
+			{
+				std::memset(buf, 0, size);
+				std::memcpy(buf, rawfile->buffer, std::min(rawfile->len, size));
+				return;
+			}
+
+			utils::hook::invoke<void>(0x140413C40, rawfile, buf, size);
+		}
+
 		std::optional<std::pair<std::string, std::string>> find_function(const char* pos)
 		{
 			for (const auto& file : scripting::script_function_table_sort)
@@ -239,15 +277,19 @@ namespace gsc
 		{
 			for (auto frame = game::scr_VmPub->function_frame; frame != game::scr_VmPub->function_frame_start; --frame)
 			{
+				const auto pos = frame == game::scr_VmPub->function_frame 
+					? game::scr_function_stack->pos 
+					: frame->fs.pos;
 				const auto function = find_function(frame->fs.pos);
+
 				if (function.has_value())
 				{
 					console::warn("\tat function \"%s\" in file \"%s.gsc\"", 
-						function.value().first.data(), function.value().second.data(), frame->fs.pos);
+						function.value().first.data(), function.value().second.data());
 				}
 				else
 				{
-					console::warn("\tat unknown location", frame->fs.pos);
+					console::warn("\tat unknown location %p", pos);
 				}
 			}
 		}
@@ -267,12 +309,10 @@ namespace gsc
 		bool force_error_print = false;
 		void* vm_error_stub(void* a1)
 		{
-			if (!developer_script->current.enabled || force_error_print)
+			if (!developer_script->current.enabled && !force_error_print)
 			{
 				return utils::hook::invoke<void*>(0x140614670, a1);
 			}
-
-			force_error_print = false;
 
 			console::warn("*********** script runtime error *************\n");
 
@@ -292,15 +332,78 @@ namespace gsc
 					opcode_id, error_str.data());
 			}
 
+			force_error_print = false;
+			gsc_error = {};
+
 			print_callstack();
 			console::warn("**********************************************\n");
 			return utils::hook::invoke<void*>(0x140614670, a1);
 		}
 
-		void unknown_function_stub()
+		std::string unknown_function_error{};
+		void get_unknown_function_error(const char* code_pos)
 		{
-			game::Com_Error(game::ERR_DROP, "LinkFile: unknown function in script '%s.gsc'", 
-				scripting::current_file.data());
+			const auto function = find_function(code_pos);
+			if (function.has_value())
+			{
+				const auto& pos = function.value();
+				unknown_function_error = utils::string::va(
+					"while processing function '%s' in script '%s':\nunknown script '%s'",
+					pos.first.data(), pos.second.data(), scripting::current_file.data()
+				);
+			}
+			else
+			{
+				unknown_function_error = utils::string::va(
+					"unknown script '%s'",
+					scripting::current_file.data()
+				);
+			}
+		}
+
+		unsigned int current_filename{};
+		std::string get_filename_name()
+		{
+			const auto filename_str = game::SL_ConvertToString(
+				static_cast<game::scr_string_t>(current_filename));
+			const auto id = std::atoi(filename_str);
+			if (id == 0)
+			{
+				return filename_str;
+			}
+
+			return scripting::get_token_single(id);
+		}
+
+
+		void get_unknown_function_error(unsigned int thread_name)
+		{
+			const auto filename = get_filename_name();
+			const auto name = scripting::get_token_single(thread_name);
+
+			unknown_function_error = utils::string::va(
+				"while processing script '%s':\nunknown function '%s::%s'",
+				scripting::current_file.data(), filename.data(), name.data()
+			);
+		}
+
+		void unknown_function_stub(const char* code_pos)
+		{
+			get_unknown_function_error(code_pos);
+			game::Com_Error(game::ERR_DROP, "script link error\n%s", 
+				unknown_function_error.data());
+		}
+
+		unsigned int find_variable_stub(unsigned int parent_id, unsigned int thread_name)
+		{
+			const auto res = game::FindVariable(parent_id, thread_name);
+			if (!res)
+			{
+				get_unknown_function_error(thread_name);
+				game::Com_Error(game::ERR_DROP, "script link error\n%s",
+					unknown_function_error.data());
+			}
+			return res;
 		}
 
 		void register_gsc_functions_stub(void* a1, void* a2)
@@ -308,7 +411,7 @@ namespace gsc
 			utils::hook::invoke<void>(0x140509F20, a1, a2);
 			for (const auto& func : functions)
 			{
-				game::Scr_RegisterFunction(func.second, 0, func.first);
+				game::Scr_RegisterFunction(func.first, 0, func.second);
 			}
 		}
 
@@ -319,24 +422,68 @@ namespace gsc
 				return {};
 			}
 
-			const auto value = &game::scr_VmPub->top[-index];
-			
-			return scripting::script_value(*value);
+			return game::scr_VmPub->top[-index];
 		}
 
 		auto function_id_start = 0x320;
 		void add_function(const std::string& name, scripting::script_function function)
 		{
-			const auto id = ++function_id_start;
-			scripting::function_map[name] = id;
-			functions[id] = function;
+			if (xsk::gsc::h2::resolver::find_function(name))
+			{
+				const auto id = xsk::gsc::h2::resolver::function_id(name);
+				functions[function] = id;
+			}
+			else
+			{
+				const auto id = ++function_id_start;
+				xsk::gsc::h2::resolver::add_function(name, static_cast<std::uint16_t>(id));
+				functions[function] = id;
+			}
 		}
 
-		void set_gsc_error(const std::string& error)
+		void execute_custom_function(scripting::script_function function)
 		{
-			force_error_print = true;
-			gsc_error = error;
-			game::Scr_ErrorInternal();
+			auto error = false;
+
+			try
+			{
+				function({});
+			}
+			catch (const std::exception& e)
+			{
+				error = true;
+				force_error_print = true;
+				gsc_error = e.what();
+			}
+
+			if (error)
+			{
+				game::Scr_ErrorInternal();
+			}
+		}
+		
+		void vm_call_builtin_stub(scripting::script_function function)
+		{
+			auto custom = false;
+			{
+				custom = functions.find(function) != functions.end();
+			}
+
+			if (!custom)
+			{
+				function({});
+			}
+			else
+			{
+				execute_custom_function(function);
+			}
+		}
+
+		utils::hook::detour scr_emit_function_hook;
+		void scr_emit_function_stub(unsigned int filename, unsigned int thread_name, char* code_pos)
+		{
+			current_filename = filename;
+			scr_emit_function_hook.invoke<void>(filename, thread_name, code_pos);
 		}
 	}
 
@@ -365,27 +512,11 @@ namespace gsc
 		{
 			developer_script = dvars::register_bool("developer_script", false, 0, "Print GSC errors");
 
-			// wait for other tokens to be added
-			scheduler::once([]()
-			{
-				for (const auto& function : scripting::function_map)
-				{
-					xsk::gsc::h2::resolver::add_function(function.first, static_cast<std::uint16_t>(function.second));
-				}
-
-				for (const auto& method : scripting::method_map)
-				{
-					xsk::gsc::h2::resolver::add_method(method.first, static_cast<std::uint16_t>(method.second));
-				}
-
-				for (const auto& token : scripting::token_map)
-				{
-					xsk::gsc::h2::resolver::add_token(token.first, static_cast<std::uint16_t>(token.second));
-				}
-			}, scheduler::pipeline::main);
-
 			utils::hook::call(0x1405C6177, find_script);
 			utils::hook::call(0x1405C6187, db_is_xasset_default);
+
+			// Loads scripts with an uncompressed stack
+			utils::hook::call(0x1405C61E0, db_get_raw_buffer_stub);
 
 			// load handles
 			utils::hook::call(0x1404E17B2, load_gametype_script_stub);
@@ -394,13 +525,12 @@ namespace gsc
 			utils::hook::call(0x1404C8F71, g_load_structs_stub);
 			utils::hook::call(0x1404C8F80, scr_load_level_stub);
 
-			// replace builtin print function
-			utils::hook::jump(0x1404EC640, gscr_print_stub);
-
 			utils::hook::call(0x1405CB94F, vm_error_stub);
 
 			utils::hook::call(0x1405BC583, unknown_function_stub);
 			utils::hook::call(0x1405BC5CF, unknown_function_stub);
+			utils::hook::call(0x1405BC6BA, find_variable_stub);
+			scr_emit_function_hook.create(0x1405BC5E0, scr_emit_function_stub);
 
 			utils::hook::call(0x1405BCBAB, register_gsc_functions_stub);
 			utils::hook::set<uint32_t>(0x1405BC7BC, 0x1000); // change builtin func count
@@ -411,31 +541,77 @@ namespace gsc
 			utils::hook::inject(0x1405BCB78 + 3, &func_table);
 			utils::hook::set<uint32_t>(0x1405CA678 + 4, RVA(&func_table));
 
+			utils::hook::nop(0x1405CA683, 8);
+			utils::hook::call(0x1405CA683, vm_call_builtin_stub);
+
+			add_function("print", [](const game::scr_entref_t ref)
+			{
+				const auto num = game::Scr_GetNumParam();
+				std::string buffer{};
+
+				for (auto i = 0; i < num; i++)
+				{
+					const auto str = game::Scr_GetString(i);
+					buffer.append(str);
+					buffer.append("\t");
+				}
+
+				printf("%s\n", buffer.data());
+			});
+
+			add_function("assert", [](const game::scr_entref_t ref)
+			{
+				const auto expr = get_argument(0).as<int>();
+				if (!expr)
+				{
+					throw std::runtime_error("assert fail");
+				}
+			});
+
+			add_function("assertex", [](const game::scr_entref_t ref)
+			{
+				const auto expr = get_argument(0).as<int>();
+				if (!expr)
+				{
+					const auto error = get_argument(1).as<std::string>();
+					throw std::runtime_error(error);
+				}
+			});
+
 			add_function("replacefunc", [](const game::scr_entref_t ref)
 			{
-				try
+				const auto what = get_argument(0).get_raw();
+				const auto with = get_argument(1).get_raw();
+
+				if (what.type != game::SCRIPT_FUNCTION)
 				{
-					const auto what = get_argument(0).get_raw();
-					const auto with = get_argument(1).get_raw();
-
-					if (what.type != game::SCRIPT_FUNCTION)
-					{
-						set_gsc_error("replaceFunc: parameter 0 must be a function");
-						return;
-					}
-
-					if (with.type != game::SCRIPT_FUNCTION)
-					{
-						set_gsc_error("replaceFunc: parameter 0 must be a function");
-						return;
-					}
-
-					notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
+					throw std::runtime_error("replaceFunc: parameter 1 must be a function");
 				}
-				catch (const std::exception& e)
+
+				if (with.type != game::SCRIPT_FUNCTION)
 				{
-					set_gsc_error(utils::string::va("replaceFunc: %s", e.what()));
+					throw std::runtime_error("replaceFunc: parameter 2 must be a function");
 				}
+
+				notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
+			});
+
+			add_function("getsoundlength", [](const game::scr_entref_t ref)
+			{
+				const auto name = get_argument(0);
+				if (!name.is<std::string>())
+				{
+					throw std::runtime_error("getsoundlength: parameter 1 must be a string");
+				}
+
+				const auto name_str = name.as<std::string>();
+				const auto sound = game::DB_FindXAssetHeader(game::ASSET_TYPE_SOUND, name_str.data(), false).sound;
+				if (!sound || !sound->count || !sound->head->soundFile || sound->head->soundFile->type != game::SAT_STREAMED)
+				{
+					return game::Scr_AddInt(-1);
+				}
+
+				return game::Scr_AddInt(sound->head->soundFile->u.streamSnd.totalMsec);
 			});
 
 			scripting::on_shutdown([](int free_scripts)

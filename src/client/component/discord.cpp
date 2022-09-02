@@ -17,6 +17,7 @@ namespace discord
 		DiscordRichPresence discord_presence;
 		std::string state;
 		std::optional<std::string> details{};
+		std::optional<std::string> image{};
 
 		void update_discord()
 		{
@@ -26,6 +27,7 @@ namespace discord
 			{
 				state = {};
 				details.reset();
+				image.reset();
 
 				discord_presence.details = game::UI_SafeTranslateString("MENU_MAIN_MENU");
 				discord_presence.state = "";
@@ -37,7 +39,17 @@ namespace discord
 			}
 			else
 			{
-				const auto map = game::Dvar_FindVar("mapname")->current.string;
+				static char map[0x1000] = {0};
+				if (image.has_value())
+				{
+					strncpy_s(map, image.value().data(), sizeof(map));
+				}
+				else
+				{
+					const auto mapname = game::Dvar_FindVar("mapname")->current.string;
+					strncpy_s(map, mapname, sizeof(map));
+				}
+				
 				const auto mapname = game::UI_SafeTranslateString(utils::string::va("PRESENCE_SP_%s", map));
 
 				discord_presence.largeImageKey = map;
@@ -109,6 +121,16 @@ namespace discord
 				scheduler::once([=]()
 				{
 					details = details_;
+					update_discord();
+				}, scheduler::pipeline::async);
+			});
+
+			command::add("setdiscordimage", [](const command::params& params)
+			{
+				const std::string image_ = params.join(1);
+				scheduler::once([=]()
+				{
+					image = image_;
 					update_discord();
 				}, scheduler::pipeline::async);
 			});
