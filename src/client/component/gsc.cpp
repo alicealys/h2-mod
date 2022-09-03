@@ -306,6 +306,24 @@ namespace gsc
 			}
 		}
 
+		void builtin_call_error()
+		{
+			const auto pos = game::scr_function_stack->pos;
+			const auto function_id = *reinterpret_cast<std::uint16_t*>(
+				reinterpret_cast<size_t>(pos - 2));
+
+			if (function_id > 0x1000)
+			{
+				console::warn("in call to builtin method \"%s\"",
+					xsk::gsc::h2::resolver::method_name(function_id).data());
+			}
+			else
+			{
+				console::warn("in call to builtin function \"%s\"", 
+					xsk::gsc::h2::resolver::function_name(function_id).data());
+			}
+		}
+
 		bool force_error_print = false;
 		void* vm_error_stub(void* a1)
 		{
@@ -317,19 +335,26 @@ namespace gsc
 			console::warn("*********** script runtime error *************\n");
 
 			const auto opcode_id = *reinterpret_cast<std::uint8_t*>(0x14BAA93E8);
-			const auto opcode = get_opcode_name(opcode_id);
-			const std::string error_str = gsc_error.has_value()
-				? utils::string::va(": %s", gsc_error.value().data())
-				: "";
-			if (opcode.has_value())
+			if ((opcode_id >= 0x1A && opcode_id <= 0x20) || (opcode_id >= 0xA9 && opcode_id <= 0xAF))
 			{
-				console::warn("while processing instruction %s%s\n", 
-					opcode.value().data(), error_str.data());
+				builtin_call_error();
 			}
 			else
 			{
-				console::warn("while processing instruction 0x%X%s\n", 
-					opcode_id, error_str.data());
+				const auto opcode = get_opcode_name(opcode_id);
+				const std::string error_str = gsc_error.has_value()
+					? utils::string::va(": %s", gsc_error.value().data())
+					: "";
+				if (opcode.has_value())
+				{
+					console::warn("while processing instruction %s%s\n",
+						opcode.value().data(), error_str.data());
+				}
+				else
+				{
+					console::warn("while processing instruction 0x%X%s\n",
+						opcode_id, error_str.data());
+				}
 			}
 
 			force_error_print = false;
