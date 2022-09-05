@@ -41,6 +41,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 	})
 
 	local languages = Engine.GetSupportedLanguages()
+	local originalfont = LUI.MenuGenericButtons.ButtonLabelFont.Font
 
 	for i = 1, #languages do
 		local id = languages[i].id
@@ -62,6 +63,8 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 		local label = button:getFirstDescendentById("text_label")
 		label:setText(Engine.ToUpperCase(languages[i].name))
 	end
+
+	LUI.MenuGenericButtons.ButtonLabelFont.Font = originalfont
 
 	LUI.Options.InitScrollingList(menu.list, nil, {
 		rows = 10
