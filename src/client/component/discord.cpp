@@ -37,9 +37,14 @@ namespace discord
 			}
 			else
 			{
-				const auto map = game::Dvar_FindVar("mapname")->current.string;
+				const char* base_mapname = nullptr;
+				auto* map = game::Dvar_FindVar("mapname")->current.string;
+				if (game::Com_IsAddonMap(map, &base_mapname))
+				{
+					map = base_mapname;
+				}
+				
 				const auto mapname = game::UI_SafeTranslateString(utils::string::va("PRESENCE_SP_%s", map));
-
 				discord_presence.largeImageKey = map;
 
 				if (details.has_value())

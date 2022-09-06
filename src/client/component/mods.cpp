@@ -93,7 +93,7 @@ namespace mods
 				if (!game::Com_InFrontend())
 				{
 					console::error("Cannot load mod while in-game!\n");
-					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
+					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!", 0);
 					return;
 				}
 
@@ -132,7 +132,7 @@ namespace mods
 				if (!game::Com_InFrontend())
 				{
 					console::error("Cannot unload mod while in-game!\n");
-					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!");
+					game::CG_GameMessage(0, "^1Cannot unload mod while in-game!", 0);
 					return;
 				}
 

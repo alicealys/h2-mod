@@ -152,7 +152,7 @@ namespace notifies
 		}
 
 		void scr_entity_damage_stub(game::gentity_s* self, game::gentity_s* inflictor, game::gentity_s* attacker, const float* vDir, const float* vPoint, 
-			int damage, int dflags, const unsigned int hitLoc, const unsigned int weapon, bool isAlternate, unsigned int a11, const int meansOfDeath, unsigned int a13, unsigned int a14)
+			int damage, int dflags, const unsigned int meansOfDeath, const unsigned int weapon, bool isAlternate, unsigned int a11, const int hitLoc, unsigned int a13, unsigned int a14)
 		{
 			{
 				const std::string _hitLoc = reinterpret_cast<const char**>(0x140BF4AA0)[hitLoc];
@@ -187,7 +187,8 @@ namespace notifies
 				}
 			}
 
-			scr_entity_damage_hook.invoke<void>(self, inflictor, attacker, vDir, vPoint, damage, dflags, hitLoc, weapon, isAlternate, a11, meansOfDeath, a13, a14);
+			scr_entity_damage_hook.invoke<void>(self,inflictor, attacker, vDir, vPoint, damage, dflags, 
+				meansOfDeath, weapon, isAlternate, a11, hitLoc, a13, a14);
 		}
 	}
 
@@ -233,8 +234,7 @@ namespace notifies
 	public:
 		void post_unpack() override
 		{
-			const auto a = utils::hook::assemble(vm_execute_stub);
-			utils::hook::jump(0x1405C90A5, a, true);
+			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
 
 			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
 		}

@@ -18,7 +18,7 @@ namespace game
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x14059A050};
 
-	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x14037F450};
+	WEAK symbol<void(int localClientNum, const char* message, int style)> CG_GameMessage{0x14037F450};
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x14037F1B0};
 	WEAK symbol<char*(const unsigned int weapon, 
 		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x1403B9210};
@@ -33,6 +33,7 @@ namespace game
 	WEAK symbol<void(char const* finalMessage)> Com_Shutdown{0x1405A62C0};
 	WEAK symbol<void()> Com_Quit_f{0x1405A50D0};
 	WEAK symbol<bool()> Com_InFrontend{0x140328BD0};
+	WEAK symbol<bool(const char* mapName, const char** pBaseMapName)> Com_IsAddonMap{0x140609570};
 	WEAK symbol<void()> Quit{0x1405A52A0};
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
@@ -48,6 +49,8 @@ namespace game
 	WEAK symbol<size_t(XAssetType type)> DB_GetXAssetTypeSize{0x1403E40D0};
 	WEAK symbol<void(void* levelLoad, const char* name, 
 		const unsigned int allocFlags, const unsigned __int64 sizeEst)> DB_LevelLoadAddZone{0x1404145D0};
+	WEAK symbol<int(game::XAssetType type, const char* name)> DB_IsXAssetDefault{0x1404143C0};
+	WEAK symbol<int(game::XAssetType type, const char* name)> DB_XAssetExists{0x140417FD0};
 	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};

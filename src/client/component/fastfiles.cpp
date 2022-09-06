@@ -110,9 +110,7 @@ namespace fastfiles
 			if (localized)
 			{
 				const auto language = game::SEH_GetCurrentLanguageCode();
-				try_load_zone(language + "_"s + name, false);
-
-				if (language != "eng"s)
+				if (!try_load_zone(language + "_"s + name, false) && language != "eng"s)
 				{
 					try_load_zone("eng_" + name, false);
 				}
@@ -319,6 +317,7 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
 		}
 
 		void add_custom_level_load_zone(void* load, const char* name, bool localized, const size_t size_est)
@@ -326,16 +325,11 @@ namespace fastfiles
 			if (localized)
 			{
 				const auto language = game::SEH_GetCurrentLanguageCode();
-				const auto eng_name = "eng_"s + name;
 				const auto lang_name = language +  "_"s + name;
 
 				if (fastfiles::exists(lang_name))
 				{
 					add_custom_level_load_zone(load, lang_name.data(), false, size_est);
-				}
-				else if (fastfiles::exists(eng_name))
-				{
-					add_custom_level_load_zone(load, eng_name.data(), false, size_est);
 				}
 			}
 
