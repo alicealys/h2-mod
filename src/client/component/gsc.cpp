@@ -308,17 +308,25 @@ namespace gsc
 
 		std::string get_file_real_name(const std::string& name)
 		{
+			std::string result;
+
 			if (utils::string::is_clean_number(name))
 			{
 				const auto id = static_cast<std::uint16_t>(std::stoi(name));
 				if (id)
 				{
-					return xsk::gsc::h2::resolver::token_name(id);
+					result = xsk::gsc::h2::resolver::token_name(id);
 				}
 			}
 
-			return {name};
-}
+			if (result.find(".gsc") == std::string::npos)
+			{
+				result.append(".gsc");
+			}
+
+			return result;
+
+		}
 
 		void builtin_call_error()
 		{
@@ -549,7 +557,7 @@ namespace gsc
 			// Allow custom scripts to include other custom scripts
 			xsk::gsc::h2::resolver::init([](const auto& include_name) -> std::vector<std::uint8_t>
 			{
-				const auto real_name = include_name + ".gsc";
+				const auto real_name = get_file_real_name(include_name);
 
 				std::string file_buffer;
 				if (!read_scriptfile(real_name, &file_buffer) || file_buffer.empty())
