@@ -315,6 +315,20 @@ namespace gsc
 			}
 		}
 
+		std::string get_file_real_name(const std::string& name)
+		{
+			if (utils::string::is_clean_number(name))
+			{
+				const auto id = static_cast<std::uint16_t>(std::stoi(name));
+				if (id)
+				{
+					return xsk::gsc::h2::resolver::token_name(id);
+				}
+			}
+
+			return {name};
+		}
+
 		bool force_error_print = false;
 		void* vm_error_stub(void* a1)
 		{
@@ -411,12 +425,7 @@ namespace gsc
 
 	game::ScriptFile* find_script(game::XAssetType /*type*/, const char* name, int /*allow_create_default*/)
 	{
-		std::string real_name = name;
-		const auto id = static_cast<std::uint16_t>(std::atoi(name));
-		if (id)
-		{
-			real_name = xsk::gsc::h2::resolver::token_name(id);
-		}
+		const auto real_name = get_file_real_name(name);
 
 		const auto script = load_custom_script(name, real_name);
 		if (script)
@@ -452,6 +461,23 @@ namespace gsc
 					xsk::gsc::h2::resolver::add_token(token.first, static_cast<std::uint16_t>(token.second));
 				}
 			}, scheduler::pipeline::main);
+
+			// Allow custom scripts to include other custom scripts
+			xsk::gsc::h2::resolver::init([](const auto& include_name) -> std::vector<std::uint8_t>
+			{
+				const auto real_name = include_name + ".gsc";
+
+				std::string file_buffer;
+				if (!read_scriptfile(real_name, &file_buffer) || file_buffer.empty())
+				{
+					throw std::runtime_error(std::format("could not load gsc file '{}'", real_name));
+				}
+
+				std::vector<std::uint8_t> result;
+				result.assign(file_buffer.begin(), file_buffer.end());
+
+				return result;
+			});
 
 			utils::hook::call(0x1405C6177, find_script);
 			utils::hook::call(0x1405C6187, db_is_xasset_default);

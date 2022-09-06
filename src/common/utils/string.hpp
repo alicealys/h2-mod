@@ -103,5 +103,7 @@ namespace utils::string
 
 	std::string truncate(const std::string& text, const size_t length, const std::string& end);
 
+	bool is_clean_number(const std::string& a);
+
 	bool strstr_lower(const char* a, const char* b);
 }
