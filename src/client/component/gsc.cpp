@@ -537,6 +537,23 @@ namespace gsc
 		{
 			developer_script = dvars::register_bool("developer_script", false, 0, "Print GSC errors");
 
+			// Allow custom scripts to include other custom scripts
+			xsk::gsc::h2::resolver::init([](const auto& include_name)
+			{
+				const auto real_name = include_name + ".gsc";
+
+				std::string file_buffer;
+				if (!read_scriptfile(real_name, &file_buffer) || file_buffer.empty())
+				{
+					throw std::runtime_error(std::format("could not load gsc file '{}'", real_name));
+				}
+
+				std::vector<std::uint8_t> result;
+				result.assign(file_buffer.begin(), file_buffer.end());
+
+				return result;
+			});
+
 			utils::hook::call(0x1405C6177, find_script);
 			utils::hook::call(0x1405C6187, db_is_xasset_default);
 
