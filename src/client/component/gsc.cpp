@@ -195,7 +195,7 @@ namespace gsc
 
 			fastfiles::enum_assets(game::ASSET_TYPE_RAWFILE, [](game::XAssetHeader header)
 			{
-				std::string name = header.scriptfile->name;
+				std::string name = header.rawfile->name;
 
 				if (name.ends_with(".gsc") && name.starts_with("scripts/"))
 				{
