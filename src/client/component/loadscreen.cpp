@@ -92,7 +92,7 @@ namespace loadscreen
 		void draw_loadscreen_title()
 		{
 			auto x = -20.f;
-			auto y = 290.f;
+			auto y = 288.f;
 			auto h = 24.f;
 			auto w = 0.f;
 

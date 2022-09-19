@@ -7,6 +7,7 @@
 #include "game/scripting/lua/value_conversion.hpp"
 #include "game/scripting/lua/error.hpp"
 #include "notifies.hpp"
+#include "scripting.hpp"
 
 #include <utils/hook.hpp>
 
@@ -199,7 +200,18 @@ namespace notifies
 
 	void clear_callbacks()
 	{
-		vm_execute_hooks.clear();
+		for (auto i = vm_execute_hooks.begin(); i != vm_execute_hooks.end();)
+		{
+			if (i->second.is_lua_hook)
+			{
+				i = vm_execute_hooks.erase(i);
+			}
+			else
+			{
+				++i;
+			}
+		}
+
 		entity_damage_callbacks.clear();
 	}
 
@@ -237,6 +249,14 @@ namespace notifies
 			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
 
 			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
+
+			scripting::on_shutdown([](bool free_scripts)
+			{
+				if (free_scripts)
+				{
+					vm_execute_hooks.clear();
+				}
+			});
 		}
 	};
 }

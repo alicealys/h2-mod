@@ -197,7 +197,8 @@ namespace scripting
 	template <>
 	bool script_value::is<const char*>() const
 	{
-		return this->get_raw().type == game::SCRIPT_STRING;
+		const auto type = this->get_raw().type;
+		return type == game::SCRIPT_STRING || type == game::SCRIPT_ISTRING;
 	}
 
 	template <>
@@ -215,7 +216,8 @@ namespace scripting
 	template <>
 	std::string script_value::get() const
 	{
-		return this->get<const char*>();
+		const auto localized = this->get_raw().type == game::SCRIPT_ISTRING;
+		return (localized ? "&"s : ""s) + this->get<const char*>();
 	}
 
 	/***************************************************************
