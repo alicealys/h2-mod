@@ -380,21 +380,20 @@ namespace mapents
 					return;
 				}
 
-				static const auto mapname = game::Dvar_FindVar("mapname");
-				const auto name = utils::string::va("maps/%s.d3dbsp", mapname->current.string);
-				const auto mapents = game::DB_FindXAssetHeader(game::ASSET_TYPE_MAP_ENTS, 
-					name, false).mapents;
-				if (mapents == nullptr)
+				fastfiles::enum_assets(game::ASSET_TYPE_MAP_ENTS, [](game::XAssetHeader header)
 				{
-					console::info("Failed to dump mapents\n");
-					return;
-				}
+					if (header.mapents == nullptr)
+					{
+						console::info("Failed to dump mapents\n");
+						return;
+					}
 
-				const auto dest = utils::string::va("dumps/%s.ents", name);
-				const auto str = std::string(mapents->entityString, mapents->numEntityChars);
-				const auto data = replace_mapents_keys(str);
-				utils::io::write_file(dest, data, false);
-				console::info("Mapents dumped to %s\n", dest);
+					const auto dest = utils::string::va("dumps/%s.ents", header.mapents->name);
+					const auto str = std::string(header.mapents->entityString, header.mapents->numEntityChars);
+					const auto data = replace_mapents_keys(str);
+					utils::io::write_file(dest, data, false);
+					console::info("Mapents dumped to %s\n", dest);
+				}, true);
 			});
 
 			utils::hook::call(0x14058BDD3, db_find_xasset_header_stub);
