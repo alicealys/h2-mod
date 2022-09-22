@@ -58,8 +58,6 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 			desc_text = Engine.Localize("LOCALE_" .. (languages[i].id))
 		})
 
-		overrideyoffset = nil
-
 		local label = button:getFirstDescendentById("text_label")
 		label:setText(Engine.ToUpperCase(languages[i].name))
 	end
