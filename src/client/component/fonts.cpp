@@ -34,7 +34,8 @@ namespace fonts
 			"subtitle",
 			"timer",
 			"nameplate",
-			"bank"
+			"bank",
+			"bankshadow",
 		};
 
 		struct font_data_t
@@ -120,7 +121,7 @@ namespace fonts
 
 		game::Font_s* ui_get_font_handle_stub(void* a1, int font_index)
 		{
-			if (font_index == 12 && bank_font != nullptr)
+			if ((font_index == 12 || font_index == 13) && bank_font != nullptr)
 			{
 				return bank_font;
 			}
@@ -149,6 +150,11 @@ namespace fonts
 				return 12;
 			}
 
+			if (hudelem_font_index == 13)
+			{
+				return 13;
+			}
+
 			return current;
 		}
 
@@ -167,6 +173,27 @@ namespace fonts
 			a.lea(r8, qword_ptr(rsp, 0x98));
 
 			a.jmp(0x14037B39E);
+		}
+
+		void get_hud_elem_text_style_stub(utils::hook::assembler& a)
+		{
+			const auto set_style = a.newLabel();
+			const auto loc_14037AF98 = a.newLabel();
+			a.mov(eax, dword_ptr(rdi, 4));
+			a.cmp(eax, 13); // 13 => bankshadow index
+			a.jz(set_style);
+
+			a.cmp(eax, 9);
+			a.jnz(loc_14037AF98);
+			a.mov(edx, 0x400);
+			a.jmp(0x14037AFA5);
+
+			a.bind(set_style);
+			a.mov(edx, 4); // 4 => shadowed style
+			a.jmp(0x14037AFA5);
+
+			a.bind(loc_14037AF98);
+			a.jmp(0x14037AF98);
 		}
 	}
 
@@ -200,12 +227,14 @@ namespace fonts
 			utils::hook::call(0x140747096, db_find_xasset_header_stub);
 
 			// add fonts/bank.ttf to hud elem fonts
-			// make font index 12 => bank.ttf
+			// make font index 12, 13 => bank.ttf
 			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);
 			ui_get_font_handle_hook.create(0x1406058F0, ui_get_font_handle_stub);
 			utils::hook::jump(0x14037B390, utils::hook::assemble(get_hud_elem_info_stub), true);
 			utils::hook::inject(0x1404C17A6, hudelem_fonts);
-			utils::hook::set(0x1404C17B7, 13); // 13 hud elem fonts
+			utils::hook::set(0x1404C17B7, 14); // 14 hud elem fonts
+			// make bankshadow have text style 4 (dropshadow)
+			utils::hook::jump(0x14037AF89, utils::hook::assemble(get_hud_elem_text_style_stub), true);
 
 			command::add("dumpFont", [](const command::params& params)
 			{
