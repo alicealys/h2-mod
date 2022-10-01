@@ -140,15 +140,7 @@ namespace fonts
 
 		void* ui_asset_cache_stub()
 		{
-			if (!game::Com_InFrontend())
-			{
-				bank_font = game::R_RegisterFont("fonts/bank.ttf", 32);
-			}
-			else
-			{
-				bank_font = nullptr;
-			}
-
+			bank_font = game::R_RegisterFont("fonts/bank.ttf", 32);
 			return ui_asset_cache_hook.invoke<void*>();
 		}
 
@@ -248,7 +240,7 @@ namespace fonts
 			}
 
 			data_.fonts.clear();
-			utils::hook::set<int>(0x14EE3ACB8, 0); // reset registered font count
+			*reinterpret_cast<int*>(0x14EE3ACB8) = 0; // reset registered font count
 		});
 	}
 

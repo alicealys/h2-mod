@@ -306,7 +306,7 @@ namespace gsc
 			}
 		}
 
-		void builtin_call_error()
+		void builtin_call_error(const std::string& error)
 		{
 			const auto pos = game::scr_function_stack->pos;
 			const auto function_id = *reinterpret_cast<std::uint16_t*>(
@@ -314,13 +314,13 @@ namespace gsc
 
 			if (function_id > 0x1000)
 			{
-				console::warn("in call to builtin method \"%s\"",
-					xsk::gsc::h2::resolver::method_name(function_id).data());
+				console::warn("in call to builtin method \"%s\"%s",
+					xsk::gsc::h2::resolver::method_name(function_id).data(), error.data());
 			}
 			else
 			{
-				console::warn("in call to builtin function \"%s\"", 
-					xsk::gsc::h2::resolver::function_name(function_id).data());
+				console::warn("in call to builtin function \"%s\"%s",
+					xsk::gsc::h2::resolver::function_name(function_id).data(), error.data());
 			}
 		}
 
@@ -335,25 +335,26 @@ namespace gsc
 			console::warn("*********** script runtime error *************\n");
 
 			const auto opcode_id = *reinterpret_cast<std::uint8_t*>(0x14BAA93E8);
+			const std::string error = gsc_error.has_value()
+				? utils::string::va(": %s", gsc_error.value().data())
+				: "";
+
 			if ((opcode_id >= 0x1A && opcode_id <= 0x20) || (opcode_id >= 0xA9 && opcode_id <= 0xAF))
 			{
-				builtin_call_error();
+				builtin_call_error(error);
 			}
 			else
 			{
 				const auto opcode = get_opcode_name(opcode_id);
-				const std::string error_str = gsc_error.has_value()
-					? utils::string::va(": %s", gsc_error.value().data())
-					: "";
 				if (opcode.has_value())
 				{
 					console::warn("while processing instruction %s%s\n",
-						opcode.value().data(), error_str.data());
+						opcode.value().data(), error.data());
 				}
 				else
 				{
 					console::warn("while processing instruction 0x%X%s\n",
-						opcode_id, error_str.data());
+						opcode_id, error.data());
 				}
 			}
 
@@ -627,12 +628,12 @@ namespace gsc
 
 				if (what.type != game::SCRIPT_FUNCTION)
 				{
-					throw std::runtime_error("replaceFunc: parameter 1 must be a function");
+					throw std::runtime_error("parameter 1 must be a function");
 				}
 
 				if (with.type != game::SCRIPT_FUNCTION)
 				{
-					throw std::runtime_error("replaceFunc: parameter 2 must be a function");
+					throw std::runtime_error("parameter 2 must be a function");
 				}
 
 				notifies::set_gsc_hook(what.u.codePosValue, with.u.codePosValue);
@@ -643,7 +644,7 @@ namespace gsc
 				const auto name = get_argument(0);
 				if (!name.is<std::string>())
 				{
-					throw std::runtime_error("getsoundlength: parameter 1 must be a string");
+					throw std::runtime_error("parameter 1 must be a string");
 				}
 
 				const auto name_str = name.as<std::string>();
