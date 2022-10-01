@@ -107,7 +107,6 @@ namespace patches
 			gscr_set_save_dvar_hook.create(0x140504C60, &gscr_set_save_dvar_stub);
 
 			// Make cg_fov and cg_fovscale saved dvars
-
 			cg_fov = dvars::register_float("cg_fov", 65.f, 40.f, 200.f, 
 				game::DVAR_FLAG_SAVED, "The field of view angle in degrees for client 0");
 			cg_fovScale = dvars::register_float("cg_fovScale", 1.f, 0.1f, 2.f, 
