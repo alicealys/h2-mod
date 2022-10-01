@@ -31,6 +31,7 @@ namespace console
 			HANDLE kill_event;
 			char buffer[512]{};
 			int cursor;
+			std::deque<std::string> history;
 			std::int32_t history_index = -1;
 		} con{};
 
@@ -180,18 +181,16 @@ namespace console
 			{
 			case VK_UP:
 			{
-				const auto& history = game_console::get_history();
-
-				if (++con.history_index >= history.size())
+				if (++con.history_index >= con.history.size())
 				{
-					con.history_index = static_cast<int>(history.size()) - 1;
+					con.history_index = static_cast<int>(con.history.size()) - 1;
 				}
 
 				clear();
 
 				if (con.history_index != -1)
 				{
-					strncpy_s(con.buffer, history.at(con.history_index).data(), sizeof(con.buffer));
+					strncpy_s(con.buffer, con.history.at(con.history_index).data(), sizeof(con.buffer));
 					con.cursor = static_cast<int>(strlen(con.buffer));
 				}
 
@@ -200,8 +199,6 @@ namespace console
 			}
 			case VK_DOWN:
 			{
-				const auto& history = game_console::get_history();
-
 				if (--con.history_index < -1)
 				{
 					con.history_index = -1;
@@ -211,7 +208,7 @@ namespace console
 
 				if (con.history_index != -1)
 				{
-					strncpy_s(con.buffer, history.at(con.history_index).data(), sizeof(con.buffer));
+					strncpy_s(con.buffer, con.history.at(con.history_index).data(), sizeof(con.buffer));
 					con.cursor = static_cast<int>(strlen(con.buffer));
 				}
 
@@ -240,26 +237,24 @@ namespace console
 			}
 			case VK_RETURN:
 			{
-				auto& history = game_console::get_history();
-
 				if (con.history_index != -1)
 				{
-					const auto itr = history.begin() + con.history_index;
+					const auto itr = con.history.begin() + con.history_index;
 
 					if (*itr == con.buffer)
 					{
-						history.erase(history.begin() + con.history_index);
+						con.history.erase(con.history.begin() + con.history_index);
 					}
 				}
 
 				if (con.buffer[0])
 				{
-					history.push_front(con.buffer);
+					con.history.push_front(con.buffer);
 				}
 
-				if (history.size() > 10)
+				if (con.history.size() > 10)
 				{
-					history.erase(history.begin() + 10);
+					con.history.erase(con.history.begin() + 10);
 				}
 
 				con.history_index = -1;

@@ -202,9 +202,9 @@ namespace gui::script_console
 					}
 
 					history.push_front(input);
-					if (history.size() > 10)
+					if (history.size() > 50)
 					{
-						history.erase(history.begin() + 10);
+						history.erase(history.begin() + 50);
 					}
 
 					ImGui::SetKeyboardFocusHere(-1);
