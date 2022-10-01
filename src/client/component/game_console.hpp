@@ -13,7 +13,4 @@ namespace game_console
 	void execute(const char* cmd);
 	void clear_console();
 	void add(const std::string& cmd);
-
-	std::deque<std::string>& get_output();
-	std::deque<std::string>& get_history();
 }
