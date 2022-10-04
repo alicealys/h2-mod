@@ -7,7 +7,6 @@
 #include "filesystem.hpp"
 #include "console.hpp"
 #include "command.hpp"
-#include "sound.hpp"
 
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
