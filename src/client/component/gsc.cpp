@@ -19,7 +19,10 @@
 
 #include <xsk/gsc/types.hpp>
 #include <xsk/gsc/interfaces/compiler.hpp>
+#include <xsk/gsc/interfaces/decompiler.hpp>
 #include <xsk/gsc/interfaces/assembler.hpp>
+#include <xsk/gsc/interfaces/disassembler.hpp>
+#include <xsk/utils/compression.hpp>
 #include <xsk/resolver.hpp>
 #include <interface.hpp>
 
@@ -36,7 +39,9 @@ namespace gsc
 		game::dvar_t* developer_script = nullptr;
 
 		auto compiler = ::gsc::compiler();
+		auto decompiler = ::gsc::decompiler();
 		auto assembler = ::gsc::assembler();
+		auto disassembler = ::gsc::disassembler();
 
 		std::unordered_map<std::string, unsigned int> main_handles;
 		std::unordered_map<std::string, unsigned int> init_handles;
@@ -511,6 +516,41 @@ namespace gsc
 			current_filename = filename;
 			scr_emit_function_hook.invoke<void>(filename, thread_name, code_pos);
 		}
+
+		std::string get_script_file_name(const std::string& name)
+		{
+			const auto id = xsk::gsc::h2::resolver::token_id(name);
+			if (id == 0)
+			{
+				return name;
+			}
+
+			return std::to_string(id);
+		}
+
+		std::vector<std::uint8_t> decompile_scriptfile(const std::string& name)
+		{
+			const auto scriptfile = game::DB_FindXAssetHeader(game::ASSET_TYPE_SCRIPTFILE, name.data(), false).scriptfile;
+			if (scriptfile == nullptr)
+			{
+				throw std::runtime_error(std::format("couldn't load scriptfile {}", name));
+			}
+
+			console::info("Decompiling scriptfile %s\n", name.data());
+
+			std::vector<std::uint8_t> stack{scriptfile->buffer, scriptfile->buffer + scriptfile->len};
+			std::vector<std::uint8_t> bytecode{scriptfile->bytecode, scriptfile->bytecode + scriptfile->bytecodeLen};
+			
+			auto decompressed_stack = xsk::utils::zlib::decompress(stack, static_cast<int>(stack.size()));
+
+			disassembler->disassemble(name, bytecode, decompressed_stack);
+			auto output = disassembler->output();
+
+			decompiler->decompile(name, output);
+			const auto data = decompiler->output();
+
+			return std::vector<std::uint8_t>{data.begin(), data.end()};
+		}
 	}
 
 	game::ScriptFile* find_script(game::XAssetType /*type*/, const char* name, int /*allow_create_default*/)
@@ -546,7 +586,15 @@ namespace gsc
 				std::string file_buffer;
 				if (!read_scriptfile(real_name, &file_buffer) || file_buffer.empty())
 				{
-					throw std::runtime_error(std::format("could not load gsc file '{}'", real_name));
+					const auto name = get_script_file_name(include_name);
+					if (game::DB_XAssetExists(game::ASSET_TYPE_SCRIPTFILE, name.data()))
+					{
+						return decompile_scriptfile(name);
+					}
+					else
+					{
+						throw std::runtime_error(std::format("could not load gsc file '{}'", real_name));
+					}
 				}
 
 				std::vector<std::uint8_t> result;
@@ -661,6 +709,7 @@ namespace gsc
 			{
 				if (free_scripts)
 				{
+					xsk::gsc::h2::resolver::cleanup();
 					clear();
 				}
 			});
