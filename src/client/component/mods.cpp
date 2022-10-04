@@ -7,13 +7,10 @@
 #include "console.hpp"
 #include "scheduler.hpp"
 #include "filesystem.hpp"
-#include "materials.hpp"
 #include "fonts.hpp"
 #include "mods.hpp"
-#include "mapents.hpp"
 #include "localized_strings.hpp"
 #include "loadscreen.hpp"
-#include "sound.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -31,15 +28,11 @@ namespace mods
 		{
 			if (release_assets)
 			{
-				materials::clear();
 				fonts::clear();
-				mapents::clear_dvars();
 				loadscreen::clear();
 			}
 
-			mapents::clear();
 			localized_strings::clear();
-			sound::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}
