@@ -528,28 +528,27 @@ namespace gsc
 			return std::to_string(id);
 		}
 
-		std::vector<std::uint8_t> decompile_scriptfile(const std::string& name)
+		std::vector<std::uint8_t> decompile_scriptfile(const std::string& name, const std::string& real_name)
 		{
-			const auto scriptfile = game::DB_FindXAssetHeader(game::ASSET_TYPE_SCRIPTFILE, name.data(), false).scriptfile;
+			const auto* scriptfile = game::DB_FindXAssetHeader(game::ASSET_TYPE_SCRIPTFILE, name.data(), false).scriptfile;
 			if (scriptfile == nullptr)
 			{
-				throw std::runtime_error(std::format("couldn't load scriptfile {}", name));
+				throw std::runtime_error(std::format("couldn't load scriptfile '{}'", real_name));
 			}
 
-			console::info("Decompiling scriptfile %s\n", name.data());
+			console::info("Decompiling scriptfile '%s'\n", real_name.data());
 
 			std::vector<std::uint8_t> stack{scriptfile->buffer, scriptfile->buffer + scriptfile->len};
 			std::vector<std::uint8_t> bytecode{scriptfile->bytecode, scriptfile->bytecode + scriptfile->bytecodeLen};
 			
-			auto decompressed_stack = xsk::utils::zlib::decompress(stack, static_cast<int>(stack.size()));
+			auto decompressed_stack = xsk::utils::zlib::decompress(stack, static_cast<std::uint32_t>(stack.size()));
 
 			disassembler->disassemble(name, bytecode, decompressed_stack);
 			auto output = disassembler->output();
 
 			decompiler->decompile(name, output);
-			const auto data = decompiler->output();
 
-			return std::vector<std::uint8_t>{data.begin(), data.end()};
+			return decompiler->output();
 		}
 	}
 
@@ -589,11 +588,11 @@ namespace gsc
 					const auto name = get_script_file_name(include_name);
 					if (game::DB_XAssetExists(game::ASSET_TYPE_SCRIPTFILE, name.data()))
 					{
-						return decompile_scriptfile(name);
+						return decompile_scriptfile(name, real_name);
 					}
 					else
 					{
-						throw std::runtime_error(std::format("could not load gsc file '{}'", real_name));
+						throw std::runtime_error(std::format("couldn't load gsc file '{}'", real_name));
 					}
 				}
 
