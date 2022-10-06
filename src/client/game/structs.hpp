@@ -1024,6 +1024,16 @@ namespace game
 		int freeFlags;
 	};
 
+	struct LevelLoad
+	{
+		XZoneInfo info[24];
+		unsigned __int64 sizeEstimate[24];
+		char names[24][64];
+		unsigned int numZones;
+		unsigned int loadPhaseCount[3];
+		unsigned int numPhases;
+	};
+
 	struct scr_entref_t
 	{
 		unsigned short entnum;
