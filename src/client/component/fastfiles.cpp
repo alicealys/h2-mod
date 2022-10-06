@@ -100,10 +100,7 @@ namespace fastfiles
 			if (localized)
 			{
 				const auto language = game::SEH_GetCurrentLanguageCode();
-				if (!try_load_zone(language + "_"s + name, false) && language != "eng"s)
-				{
-					try_load_zone("eng_" + name, false);
-				}
+				try_load_zone(language + "_"s + name, false);
 			}
 
 			if (!fastfiles::exists(name))
@@ -310,30 +307,26 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
 		}
 
-		void add_custom_level_load_zone(void* load, const char* name, bool localized, const size_t size_est)
+		void add_custom_level_load_zone(game::LevelLoad* load, const char* name, const size_t size_est)
 		{
-			if (localized)
-			{
-				const auto language = game::SEH_GetCurrentLanguageCode();
-				const auto lang_name = language +  "_"s + name;
+			const auto language = game::SEH_GetCurrentLanguageCode();
+			const auto lang_name = language + "_"s + name;
 
-				if (fastfiles::exists(lang_name))
-				{
-					add_custom_level_load_zone(load, lang_name.data(), false, size_est);
-				}
+			if (fastfiles::exists(lang_name))
+			{
+				game::DB_LevelLoadAddZone(load, lang_name.data(), game::DB_ZONE_GAME | game::DB_ZONE_CUSTOM, size_est);
 			}
 
 			game::DB_LevelLoadAddZone(load, name, game::DB_ZONE_GAME | game::DB_ZONE_CUSTOM, size_est);
 		}
 
-		void db_load_level_add_custom_zone_stub(void* load, const char* name, const unsigned int alloc_flags,
+		void db_load_level_add_custom_zone_stub(game::LevelLoad* load, const char* name, const unsigned int alloc_flags,
 			const size_t size_est)
 		{
-			//add_custom_level_load_zone(load, name, true, size_est);
-			try_load_zone(name, true, true);
+			add_custom_level_load_zone(load, name, size_est);
 		}
 
-		void db_load_level_add_map_zone_stub(void* load, const char* name, const unsigned int alloc_flags,
+		void db_load_level_add_map_zone_stub(game::LevelLoad* load, const char* name, const unsigned int alloc_flags,
 			const size_t size_est)
 		{
 			auto is_builtin_map = false;
@@ -351,15 +344,20 @@ namespace fastfiles
 				const auto name_ = "h2_mod_patch_"s + name;
 				if (fastfiles::exists(name_))
 				{
-					add_custom_level_load_zone(load, name_.data(), true, size_est);
+					add_custom_level_load_zone(load, name_.data(), size_est);
 				}
 
 				game::DB_LevelLoadAddZone(load, name, alloc_flags, size_est);
 			}
 			else
 			{
-				add_custom_level_load_zone(load, name, true, size_est);
+				add_custom_level_load_zone(load, name, size_est);
 			}
+		}
+
+		void db_load_xassets_stub(game::XZoneInfo* info, unsigned int zone_count, game::DBSyncMode sync_mode)
+		{
+			game::DB_LoadXAssets(info, zone_count, game::DB_LOAD_ASYNC);
 		}
 	}
 
@@ -430,6 +428,9 @@ namespace fastfiles
 			utils::hook::call(0x140412854, db_load_level_add_custom_zone_stub);
 			utils::hook::call(0x14041282D, db_load_level_add_custom_zone_stub);
 			utils::hook::call(0x14041287C, db_load_level_add_custom_zone_stub);
+
+			// Load assets from 2nd phase (common_specialops, addon map) with DB_LOAD_SYNC
+			utils::hook::call(0x140414EA1, db_load_xassets_stub);
 
 			command::add("loadzone", [](const command::params& params)
 			{
