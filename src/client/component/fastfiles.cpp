@@ -16,6 +16,12 @@ namespace fastfiles
 
 	namespace
 	{
+		template <size_t Bits>
+		struct bit_array
+		{
+			char data[Bits / 8]{};
+		};
+
 		utils::hook::detour db_try_load_x_file_internal_hook;
 		utils::hook::detour db_find_xasset_header;
 
@@ -195,7 +201,7 @@ namespace fastfiles
 		void reallocate_xmodel_pool()
 		{
 			// array used for DB_GetAllXAssetOfType, not big enough if many assets are added
-			static game::XAssetHeader assets[0x100000]{};
+			static game::XAssetHeader assets[0x10000]{};
 			utils::hook::inject(0x1403E2AB7, &assets);
 			utils::hook::inject(0x1403E2AC3, &assets);
 			utils::hook::inject(0x1403E2ACF, &assets);
@@ -204,102 +210,179 @@ namespace fastfiles
 			const auto xmodel_pool = reallocate_asset_pool<game::ASSET_TYPE_XMODEL, xmodel_pool_size>();
 			utils::hook::inject(0x140413D93, xmodel_pool + 8);
 
-			// table 1
-			static int xmodel_table_1[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x14041E0C2 + 4, RVA(&xmodel_table_1[0]));
-			utils::hook::inject(0x14041E7F6 + 3, &xmodel_table_1[0]);
-			utils::hook::set<uint32_t>(0x140420797 + 4, RVA(&xmodel_table_1[0]));
-			utils::hook::inject(0x1404228F6 + 3, &xmodel_table_1[0]);
-			utils::hook::inject(0x14042290E + 3, &xmodel_table_1[0]);
-			utils::hook::set<uint32_t>(0x140710280 + 4, RVA(&xmodel_table_1[0]));
+			utils::hook::set(0x1403E30E0 + 3, xmodel_pool_size);
+
+			// not the actual struct
+			static struct
+			{
+				int array_1[xmodel_pool_size];
+				int array_2[xmodel_pool_size];
+				int array_3[xmodel_pool_size];
+				int array_4[xmodel_pool_size];
+				int array_5[xmodel_pool_size];
+				bit_array<xmodel_pool_size> bit_array_1;
+				bit_array<xmodel_pool_size> bit_array_2;
+				bit_array<xmodel_pool_size> bit_array_3;
+				int unk_array[xmodel_pool_size * 6];
+			} xmodel_data{};
+
+			// array 1
+			utils::hook::set<uint32_t>(0x14041E0C2 + 4, RVA(&xmodel_data.array_1));
+			utils::hook::inject(0x14041E7F6 + 3, &xmodel_data.array_1);
+			utils::hook::set<uint32_t>(0x140420797 + 4, RVA(&xmodel_data.array_1));
+			utils::hook::inject(0x1404228F6 + 3, &xmodel_data.array_1);
+			utils::hook::inject(0x14042290E + 3, &xmodel_data.array_1);
+			utils::hook::set<uint32_t>(0x140710280 + 4, RVA(&xmodel_data.array_1));
 
 			// everything below doesnt seem to change anything
-			// table 2
-			static int xmodel_table_2[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x14041E2FA + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::set<uint32_t>(0x1404207BC + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::inject(0x140422AE1 + 3, &xmodel_table_2[0]);
-			utils::hook::set<uint32_t>(0x140422B20 + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::inject(0x140422B8D + 3, &xmodel_table_2[0]);
-			utils::hook::set<uint32_t>(0x140422BC7 + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::inject(0x140422C41 + 3, &xmodel_table_2[0]);
-			utils::hook::set<uint32_t>(0x140422CE0 + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::set<uint32_t>(0x140422D16 + 4, RVA(&xmodel_table_2[0]));
-			utils::hook::set<uint32_t>(0x140723BAE + 5, RVA(&xmodel_table_2[0]));
-			utils::hook::set<uint32_t>(0x140723BCC + 5, RVA(&xmodel_table_2[0]));
-			utils::hook::inject(0x140728332 + 3, &xmodel_table_2[0]);
 
-			// table 3
-			static int xmodel_table_3[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x1404207D4 + 4, RVA(&xmodel_table_3[0]));
-			utils::hook::set<uint32_t>(0x140724BA3 + 5, RVA(&xmodel_table_3[0]));
-			utils::hook::set<uint32_t>(0x140724BC1 + 5, RVA(&xmodel_table_3[0]));
+			// array 2
+			utils::hook::set<uint32_t>(0x14041E2FA + 4, RVA(&xmodel_data.array_2));
+			utils::hook::set<uint32_t>(0x1404207BC + 4, RVA(&xmodel_data.array_2));
+			utils::hook::inject(0x140422AE1 + 3, &xmodel_data.array_2);
+			utils::hook::set<uint32_t>(0x140422B20 + 4, RVA(&xmodel_data.array_2));
+			utils::hook::inject(0x140422B8D + 3, &xmodel_data.array_2);
+			utils::hook::set<uint32_t>(0x140422BC7 + 4, RVA(&xmodel_data.array_2));
+			utils::hook::inject(0x140422C41 + 3, &xmodel_data.array_2);
+			utils::hook::set<uint32_t>(0x140422CE0 + 4, RVA(&xmodel_data.array_2));
+			utils::hook::set<uint32_t>(0x140422D16 + 4, RVA(&xmodel_data.array_2));
+			utils::hook::set<uint32_t>(0x140723BAE + 6, RVA(&xmodel_data.array_2));
+			utils::hook::set<uint32_t>(0x140723BCC + 6, RVA(&xmodel_data.array_2));
+			utils::hook::inject(0x140728332 + 3, &xmodel_data.array_2);
 
-			// table 4
-			static int xmodel_table_4[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x1404207C8 + 4, RVA(&xmodel_table_4[0]));
-			utils::hook::inject(0x140422888 + 3, &xmodel_table_4[0]);
-			utils::hook::inject(0x14041EAC0 + 3, reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_4[0]) + 0x10));
+			// array 3
+			utils::hook::set<uint32_t>(0x1404207D4 + 4, RVA(&xmodel_data.array_3));
+			utils::hook::set<uint32_t>(0x140724BA3 + 5, RVA(&xmodel_data.array_3));
+			utils::hook::set<uint32_t>(0x140724BC1 + 5, RVA(&xmodel_data.array_3));
 
-			// table 5
-			static int xmodel_table_5[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x1404205BC + 4, RVA(&xmodel_table_5[0]));
-			utils::hook::set<uint32_t>(0x14042062D + 4, RVA(&xmodel_table_5[0]));
-			utils::hook::inject(0x140420A35 + 3, &xmodel_table_5[0]);
+			// array 4
+			utils::hook::set<uint32_t>(0x1404207C8 + 4, RVA(&xmodel_data.array_4));
+			utils::hook::inject(0x140422888 + 3, &xmodel_data.array_4);
+			utils::hook::inject(0x14041EAC0 + 3, reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_data.array_4) + 0x10));
 
-			// hash table 1
-			static int xmodel_hash_table_1[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x1404207AA + 4, RVA(&xmodel_hash_table_1[0]));
-			utils::hook::inject(0x1404208DE + 3, &xmodel_hash_table_1[0]);
-			utils::hook::inject(0x140422535 + 2, &xmodel_hash_table_1[0]);
+			// array 5
+			utils::hook::set<uint32_t>(0x1404205BC + 4, RVA(&xmodel_data.array_5));
+			utils::hook::set<uint32_t>(0x14042062D + 4, RVA(&xmodel_data.array_5));
+			utils::hook::inject(0x140420A35 + 3, &xmodel_data.array_5);
 
-			// hash table 2
-			static int xmodel_hash_table_2[xmodel_pool_size]{};
-			utils::hook::inject(0x1403E2A8E + 3, &xmodel_hash_table_2[0]);
-			utils::hook::inject(0x1403E2FD9 + 3, &xmodel_hash_table_2[0]);
-			utils::hook::inject(0x1403E37C5 + 3, &xmodel_hash_table_2[0]);
+			// bit array 1
+			utils::hook::set<uint32_t>(0x1404207AA + 4, RVA(&xmodel_data.bit_array_1));
+			utils::hook::inject(0x1404208DE + 3, &xmodel_data.bit_array_1);
+			utils::hook::inject(0x140422535 + 2, &xmodel_data.bit_array_1);
 
-			// hash table 2
-			static int xmodel_hash_table_3[xmodel_pool_size]{};
-			utils::hook::inject(0x1403E2A8E + 3, &xmodel_hash_table_3[0]);
-			utils::hook::inject(0x1403E2FD9 + 3, &xmodel_hash_table_3[0]);
-			utils::hook::inject(0x1403E37C5 + 3, &xmodel_hash_table_3[0]);
+			// bit array 2
+			utils::hook::inject(0x1403E2A8E + 3, &xmodel_data.bit_array_2);
+			utils::hook::inject(0x1403E2FD9 + 3, &xmodel_data.bit_array_2);
+			utils::hook::inject(0x1403E37C5 + 3, &xmodel_data.bit_array_2);
 
-			// hash table 3
-			static int xmodel_hash_table_4[xmodel_pool_size]{};
-			utils::hook::set<uint32_t>(0x1404207B4 + 4, RVA(&xmodel_hash_table_4[0]));
-			utils::hook::inject(0x140422AD7 + 3, &xmodel_hash_table_4[0]);
-			utils::hook::set<uint32_t>(0x140422B18 + 4, RVA(&xmodel_hash_table_4[0]));
-			utils::hook::inject(0x140422B83 + 3, &xmodel_hash_table_4[0]);
-			utils::hook::set<uint32_t>(0x140422BBF + 4, RVA(&xmodel_hash_table_4[0]));
-			utils::hook::inject(0x140422C37 + 3, &xmodel_hash_table_4[0]);
-			utils::hook::inject(0x140422C97 + 3, &xmodel_hash_table_4[0]);
-			utils::hook::set<uint32_t>(0x140422CD8 + 4, RVA(&xmodel_hash_table_4[0]));
-			utils::hook::set<uint32_t>(0x140422D0E + 4, RVA(&xmodel_hash_table_4[0]));
+			// bit array 3
+			utils::hook::set<uint32_t>(0x1404207B4 + 4, RVA(&xmodel_data.bit_array_3));
+			utils::hook::inject(0x140422AD7 + 3, &xmodel_data.bit_array_3);
+			utils::hook::set<uint32_t>(0x140422B18 + 4, RVA(&xmodel_data.bit_array_3));
+			utils::hook::inject(0x140422B83 + 3, &xmodel_data.bit_array_3);
+			utils::hook::set<uint32_t>(0x140422BBF + 4, RVA(&xmodel_data.bit_array_3));
+			utils::hook::inject(0x140422C37 + 3, &xmodel_data.bit_array_3);
+			utils::hook::inject(0x140422C97 + 3, &xmodel_data.bit_array_3);
+			utils::hook::set<uint32_t>(0x140422CD8 + 4, RVA(&xmodel_data.bit_array_3));
+			utils::hook::set<uint32_t>(0x140422D0E + 4, RVA(&xmodel_data.bit_array_3));
 
-			// seems to fix some issues but causes models to load slowly, probably not done correctly
-			static int xmodel_table_7[xmodel_pool_size * 6]{};
-			utils::hook::set<uint32_t>(0x1404205AF + 3, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0)));
-			utils::hook::set<uint32_t>(0x140420752 + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0)));
+			// unk arrays
+			utils::hook::set<uint32_t>(0x1404205AF + 3, RVA(&xmodel_data.unk_array));
+			utils::hook::set<uint32_t>(0x140420752 + 4, RVA(&xmodel_data.unk_array));
 
-			utils::hook::set<uint32_t>(0x1404205A7 + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x14042065B + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x14042068D + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x1404206AF + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x1404206F0 + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x140420720 + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
-			utils::hook::set<uint32_t>(0x14042075F + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 8)));
+			utils::hook::set<uint32_t>(0x1404205A7 + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x14042065B + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x14042068D + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x1404206AF + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x1404206F0 + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x140420720 + 4, RVA(&xmodel_data.unk_array) + 8);
+			utils::hook::set<uint32_t>(0x14042075F + 4, RVA(&xmodel_data.unk_array) + 8);
 
-			utils::hook::set<uint32_t>(0x14041EE9B + 4, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0x10)));
-			utils::hook::set<uint32_t>(0x1404205A0 + 3, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0x10)));
-			utils::hook::set<uint32_t>(0x14042060D + 5, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0x10)));
-			utils::hook::set<uint32_t>(0x140420618 + 3, RVA(reinterpret_cast<void*>(reinterpret_cast<size_t>(&xmodel_table_7) + 0x10)));
+			utils::hook::set<uint32_t>(0x14041EE9B + 4, RVA(&xmodel_data.unk_array) + 0x10);
+			utils::hook::set<uint32_t>(0x1404205A0 + 3, RVA(&xmodel_data.unk_array) + 0x10);
+			utils::hook::set<uint32_t>(0x14042060D + 5, RVA(&xmodel_data.unk_array) + 0x10);
+			utils::hook::set<uint32_t>(0x140420618 + 3, RVA(&xmodel_data.unk_array) + 0x10);
+
+			// replace indirect refs
+
+			const auto xmodel_unk_ptr = 0x14417B980;
+			const auto replace_offset = [](const size_t ptr, const void* arr, const int64_t off = 0)
+			{
+				const auto offset = reinterpret_cast<int64_t>(arr) - xmodel_unk_ptr + off;
+				utils::hook::set<int32_t>(ptr, static_cast<int32_t>(offset));
+			};
+
+			// array 1 -> no refs
+
+			// 0xAEB80 -> array 2
+			replace_offset(0x14041E530 + 6, &xmodel_data.array_2);
+			replace_offset(0x14041E50D + 6, &xmodel_data.array_2);
+			replace_offset(0x140422F15 + 4, &xmodel_data.array_2);
+			replace_offset(0x1404CBE64 + 6, &xmodel_data.array_2);
+			replace_offset(0x1404CBE7B + 6, &xmodel_data.array_2);
+			replace_offset(0x140723075 + 5, &xmodel_data.array_2);
+			replace_offset(0x140723062 + 5, &xmodel_data.array_2);
+			replace_offset(0x1404225E2 + 6, &xmodel_data.array_2);
+			replace_offset(0x140422607 + 4, &xmodel_data.array_2);
+
+			// 0xA8380 -> array 3
+			replace_offset(0x1404225EC + 6, &xmodel_data.array_3);
+			replace_offset(0x140422613 + 4, &xmodel_data.array_3);
+
+			// array 4 -> no refs
+
+			// 0xA5B80 -> array 5
+			replace_offset(0x140420351 + 4, &xmodel_data.array_5);
+			replace_offset(0x140420359 + 6, &xmodel_data.array_5);
+			replace_offset(0x140420363 + 4, &xmodel_data.array_5);
+			replace_offset(0x14042036E + 6, &xmodel_data.array_5);
+			replace_offset(0x1404203F7 + 4, &xmodel_data.array_5);
+			replace_offset(0x1404203FF + 4, &xmodel_data.array_5);
+
+			// 0xA5A00 -> bit array 1
+			replace_offset(0x1404203A7 + 4, &xmodel_data.bit_array_2);
+			replace_offset(0x1404203BC + 4, &xmodel_data.bit_array_2);
+			replace_offset(0x140420880 + 3, &xmodel_data.bit_array_2);
+			replace_offset(0x14042258D + 4, &xmodel_data.bit_array_2);
+
+			// bit array 2 -> no refs
+
+			// 0xE1800 -> bit array 3
+			replace_offset(0x140422F0B + 4, &xmodel_data.bit_array_3);
+			replace_offset(0x140422659 + 4, &xmodel_data.bit_array_3);
+			replace_offset(0x140422669 + 4, &xmodel_data.bit_array_3);
+
+			// 0x96A00 -> unk_array + 0
+			replace_offset(0x140420301 + 5, &xmodel_data.unk_array);
+			replace_offset(0x14042030E + 5, &xmodel_data.unk_array);
+			replace_offset(0x140420321 + 5, &xmodel_data.unk_array);
+			replace_offset(0x14042033E + 5, &xmodel_data.unk_array);
+			replace_offset(0x1404203D1 + 5, &xmodel_data.unk_array);
+			replace_offset(0x1404203DA + 5, &xmodel_data.unk_array);
+			replace_offset(0x14042089C + 3, &xmodel_data.unk_array);
+			replace_offset(0x1404225C8 + 4, &xmodel_data.unk_array);
+			replace_offset(0x1403E309A + 4, &xmodel_data.unk_array);
+
+			// 0x96A08 -> unk_array + 8
+			replace_offset(0x1404208A3 + 4, &xmodel_data.unk_array, 8);
+			replace_offset(0x1403E30A6 + 4, &xmodel_data.unk_array, 8);
+			replace_offset(0x1404225D5 + 4, &xmodel_data.unk_array, 8);
+
+			// 0x96A10 -> unk_array + 0x10
+			replace_offset(0x140420317 + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x14042032A + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x140420334 + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x140420347 + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x1404203E3 + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x1404203ED + 6, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x14042261F + 4, &xmodel_data.unk_array, 0x10);
+			replace_offset(0x140422649 + 6, &xmodel_data.unk_array, 0x10);
 		}
 
 		void reallocate_asset_pools()
 		{
-			//reallocate_xmodel_pool();
-			//reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
+			reallocate_xmodel_pool();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_WEAPON, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
