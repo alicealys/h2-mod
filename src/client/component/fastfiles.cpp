@@ -234,8 +234,6 @@ namespace fastfiles
 			utils::hook::inject(0x14042290E + 3, &xmodel_data.array_1);
 			utils::hook::set<uint32_t>(0x140710280 + 4, RVA(&xmodel_data.array_1));
 
-			// everything below doesnt seem to change anything
-
 			// array 2
 			utils::hook::set<uint32_t>(0x14041E2FA + 4, RVA(&xmodel_data.array_2));
 			utils::hook::set<uint32_t>(0x1404207BC + 4, RVA(&xmodel_data.array_2));
