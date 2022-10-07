@@ -40,6 +40,34 @@ namespace loadscreen
 			game::CL_DrawStretchPic(placement, -150, -200, 300, 800, 2, 1, 0.0f, 0.0f, 1.0f, 1.0f, white_color, gradient);
 		}
 
+		void draw_image(const float x, const float y, const float w, const float h, 
+			game::Material* mat)
+		{
+			game::rectangle rect{};
+			rect.p0.x = x;
+			rect.p0.y = 0;
+			rect.p0.f2 = 0.f;
+			rect.p0.f3 = 1.f;
+
+			rect.p1.x = x + w;
+			rect.p1.y = 0;
+			rect.p1.f2 = 0.f;
+			rect.p1.f3 = 1.f;
+
+			rect.p2.x = x + w;
+			rect.p2.y = 0 + h;
+			rect.p2.f2 = 0.f;
+			rect.p2.f3 = 1.f;
+
+			rect.p3.x = x;
+			rect.p3.y = 0 + h;
+			rect.p3.f2 = 0.f;
+			rect.p3.f3 = 1.f;
+
+			game::R_DrawRectangle(&rect, 0.f, 0.f, 1.f, 1.f,
+				white_color, mat);
+		}
+
 		void draw_loadscreen_image()
 		{
 			if (*cl_loadscreen_image->current.string == 0)
@@ -48,31 +76,16 @@ namespace loadscreen
 			}
 
 			const auto material = game::Material_RegisterHandle(cl_loadscreen_image->current.string);
+			const auto black = game::Material_RegisterHandle("black");
 			const auto placement = game::ScrPlace_GetViewPlacement();
 
-			game::rectangle rect{};
-			rect.p0.x = 0;
-			rect.p0.y = 0;
-			rect.p0.f2 = 0.f;
-			rect.p0.f3 = 1.f;
+			const auto h = placement->realViewportSize[1];
+			const auto real_w = placement->realViewportSize[0];
+			const auto w = h * 16 / 9;
+			const auto x = real_w / 2 - w / 2;
 
-			rect.p1.x = 0 + placement->realViewportSize[0];
-			rect.p1.y = 0;
-			rect.p1.f2 = 0.f;
-			rect.p1.f3 = 1.f;
-
-			rect.p2.x = 0 + placement->realViewportSize[0];
-			rect.p2.y = 0 + placement->realViewportSize[1];
-			rect.p2.f2 = 0.f;
-			rect.p2.f3 = 1.f;
-
-			rect.p3.x = 0;
-			rect.p3.y = 0 + placement->realViewportSize[1];
-			rect.p3.f2 = 0.f;
-			rect.p3.f3 = 1.f;
-
-			game::R_DrawRectangle(&rect, 0.f, 0.f, 1.f, 1.f,
-				white_color, material);
+			draw_image(0, 0, real_w, h, black);
+			draw_image(x, 0, w, h, material);
 		}
 
 		void draw_loadscreen_progress_bar()
