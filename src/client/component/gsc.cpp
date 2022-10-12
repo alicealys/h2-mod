@@ -626,7 +626,6 @@ namespace gsc
 			utils::hook::set<uint32_t>(0x1405BC7BC, 0x1000); // change builtin func count
 
 #define RVA(ptr) static_cast<uint32_t>(reinterpret_cast<size_t>(ptr) - 0x140000000)
-			std::memcpy(&func_table, reinterpret_cast<void*>(0x14B153F90), 0x1900);
 			utils::hook::set<uint32_t>(0x1405BC7C2 + 4, RVA(&func_table));
 			utils::hook::inject(0x1405BCB78 + 3, &func_table);
 			utils::hook::set<uint32_t>(0x1405CA678 + 4, RVA(&func_table));
