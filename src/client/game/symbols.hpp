@@ -91,7 +91,7 @@ namespace game
 	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
 		G_GivePlayerWeapon{0x14051B660};
 	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x1404C4110};
-	WEAK symbol<void(int clientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
+	WEAK symbol<void(int localClientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
 	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x14036F310};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x140620660};
@@ -101,15 +101,15 @@ namespace game
 
 	WEAK symbol<const char*(int, int, int)> Key_KeynumToString{0x1403D32D0};
 
-	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
-	WEAK symbol<bool(int clientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
-	WEAK symbol<bool(int clientNum, int lui_event_cache, hks::lua_State* s)> LUI_BeginCachedEvent{0x1403153E0};
+	WEAK symbol<void(int localClientNum, const char* menuName, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
+	WEAK symbol<bool(int localClientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
+	WEAK symbol<bool(int localClientNum, int lui_event_cache, hks::lua_State* s)> LUI_BeginCachedEvent{0x1403153E0};
 	WEAK symbol<void(const char* name, int value, hks::lua_State* s)> LUI_SetTableInt{0x140320060};
 	WEAK symbol<void(const char* name, const char* value, hks::lua_State* s)> LUI_SetTableString{0x1403201F0};
 	WEAK symbol<void(hks::lua_State* s)> LUI_EndEvent{0x140316890};
 	WEAK symbol<void()> LUI_EnterCriticalSection{0x140316980};
 	WEAK symbol<void()> LUI_LeaveCriticalSection{0x14031BC20};
-	WEAK symbol<bool(int clientNum, const char* menu)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
+	WEAK symbol<bool(int localClientNum, const char* menuName)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x140759BA0};
 
@@ -273,6 +273,6 @@ namespace game
 		WEAK symbol<int(lua_State* s, const char* what, lua_Debug* ar)> hksi_lua_getinfo{0x1402DD1F0};
 		WEAK symbol<int(lua_State* s, int level, lua_Debug* ar)> hksi_lua_getstack{0x1402DD4C0};
 		WEAK symbol<void(lua_State* s, const char* fmt, ...)> hksi_luaL_error{0x1402E3E40};
-		WEAK symbol<const char*> typenames{0x140BE9F50};
+		WEAK symbol<const char*> s_compilerTypeName{0x140BE9F50};
 	}
 }
