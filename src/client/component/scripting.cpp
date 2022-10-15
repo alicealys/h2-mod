@@ -4,10 +4,8 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "command.hpp"
 #include "scheduler.hpp"
 #include "scripting.hpp"
-#include "console.hpp"
 #include "gsc.hpp"
 
 #include "game/scripting/event.hpp"
@@ -17,7 +15,6 @@
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
-#include <utils/string.hpp>
 
 namespace scripting
 {
