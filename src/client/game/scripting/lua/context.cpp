@@ -3,22 +3,20 @@
 #include "error.hpp"
 #include "value_conversion.hpp"
 
-#include "../execution.hpp"
-#include "../functions.hpp"
+#include "game/scripting/execution.hpp"
 
-#include "../../../component/notifies.hpp"
-#include "../../../component/scripting.hpp"
-#include "../../../component/command.hpp"
-#include "../../../component/fastfiles.hpp"
-#include "../../../component/mods.hpp"
-#include "../../../component/localized_strings.hpp"
-#include "../../../component/scheduler.hpp"
+#include "component/notifies.hpp"
+#include "component/scripting.hpp"
+#include "component/command.hpp"
+#include "component/fastfiles.hpp"
+#include "component/mods.hpp"
+#include "component/localized_strings.hpp"
+#include "component/scheduler.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 
 #include <xsk/gsc/types.hpp>
 #include <xsk/resolver.hpp>
-#include <xsk/utils/compression.hpp>
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -342,8 +340,7 @@ namespace scripting::lua
 
 			for (const auto& func : xsk::gsc::h2::resolver::get_methods())
 			{
-				const auto func_name = std::string(func.first);
-				const auto name = utils::string::to_lower(func_name);
+				const auto name = std::string(func.first);
 				entity_type[name.data()] = [name](const entity& entity, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};
@@ -476,8 +473,7 @@ namespace scripting::lua
 
 			for (const auto& func : xsk::gsc::h2::resolver::get_functions())
 			{
-				const auto func_name = std::string(func.first);
-				const auto name = utils::string::to_lower(func_name);
+				const auto name = std::string(func.first);
 				game_type[name] = [name](const game&, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};

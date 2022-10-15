@@ -5,7 +5,6 @@
 
 #include <xsk/gsc/types.hpp>
 #include <xsk/resolver.hpp>
-#include <xsk/utils/compression.hpp>
 
 #include <utils/string.hpp>
 
