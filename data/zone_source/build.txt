@@ -11,13 +11,16 @@ h2_mod_patch_dc_whitehouse
 ita_h2_mod_common
 jpf_h2_mod_common
 jpp_h2_mod_common
+jpp_h2_mod_patch_af_caves
 kor_h2_mod_common
 pol_h2_mod_common
 por_h2_mod_common
 rup_h2_mod_common
+rup_h2_mod_patch_af_caves
 rus_h2_mod_common
 rus_h2_mod_patch_dc_whitehouse
 sch_h2_mod_common
 sna_h2_mod_common
+sna_h2_mod_patch_af_caves
 spa_h2_mod_common
 tch_h2_mod_common

@@ -1,23 +1,23 @@
 {
-    "aliasName": "afcaves_nkl_goodluck",
+    "aliasName": "afcaves_nkl_waitforyou",
     "count": 1,
     "head": [
         {
-            "aliasName": "afcaves_nkl_goodluck",
+            "aliasName": "afcaves_nkl_waitforyou",
             "secondaryAliasName": null,
             "chainAliasName": null,
-            "subtitle": "SUBTITLE_AFCAVES_NKL_GOODLUCK23",
+            "subtitle": "SUBTITLE_AFCAVES_NKL_WAITFORYOU21",
             "mixerGroup": null,
             "soundfile": {
                 "type": 2,
                 "exists": true,
-                "totalMsec": 4568,
+                "totalMsec": 4051,
                 "isLocalized": true,
                 "isStreamed": true,
                 "fileIndex": 0,
                 "raw": {
                     "dir": "voiceovers/afcaves",
-                    "name": "afcaves_nkl_2_3_r"
+                    "name": "afcaves_nkl_2_1_r"
                 }
             },
             "flags": 2097562,
