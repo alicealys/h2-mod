@@ -10,6 +10,7 @@
 #include "gsc.hpp"
 #include "scheduler.hpp"
 #include "fastfiles.hpp"
+#include "command.hpp"
 
 #include "game/scripting/execution.hpp"
 #include "game/scripting/functions.hpp"
@@ -109,7 +110,18 @@ namespace gsc
 			}
 
 			auto assembly = compiler->output();
-			assembler->assemble(real_name, assembly);
+
+			try
+			{
+				assembler->assemble(real_name, assembly);
+			}
+			catch (const std::exception& e)
+			{
+				console::error("*********** script compile error *************\n");
+				console::error("failed to assemble '%s':\n%s", real_name.data(), e.what());
+				console::error("**********************************************\n");
+				return nullptr;
+			}
 
 			const auto script_file_ptr = reinterpret_cast<game::ScriptFile*>(allocate_buffer(sizeof(game::ScriptFile)));
 			script_file_ptr->name = file_name;
@@ -701,6 +713,12 @@ namespace gsc
 				}
 
 				return game::Scr_AddInt(sound->head->soundFile->u.streamSnd.totalMsec);
+			});
+
+			add_function("executecommand", [](const game::scr_entref_t ref)
+			{
+				const auto cmd = get_argument(0).as<std::string>();
+				command::execute(cmd);
 			});
 
 			scripting::on_shutdown([](int free_scripts)

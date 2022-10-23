@@ -20,6 +20,8 @@ namespace dvars
 	game::dvar_t* jump_ladderPushVel = nullptr;
 	game::dvar_t* jump_spreadAdd = nullptr;
 
+	game::dvar_t* pm_bouncing = nullptr;
+
 	game::dvar_t* r_fullbright = nullptr;
 
 	game::dvar_t* cg_legacyCrashHandling = nullptr;

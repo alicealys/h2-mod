@@ -87,6 +87,30 @@ namespace gameplay
 			a.jmp(0x14067AE1A);
 
 		}
+
+		void pm_bouncing_stub_mp(utils::hook::assembler& a)
+		{
+			const auto no_bounce = a.newLabel();
+			const auto loc_140691518 = a.newLabel();
+
+			a.push(rax);
+
+			a.mov(rax, qword_ptr(reinterpret_cast<int64_t>(&dvars::pm_bouncing)));
+			a.mov(al, byte_ptr(rax, 0x10));
+			a.cmp(byte_ptr(rbp, -0x5D), al);
+
+			a.pop(rax);
+			a.jz(no_bounce);
+			a.jmp(0x140691481);
+
+			a.bind(no_bounce);
+			a.cmp(dword_ptr(rsp, 0x44), 0);
+			a.jnz(loc_140691518);
+			a.jmp(0x14069146F);
+
+			a.bind(loc_140691518);
+			a.jmp(0x140691518);
+		}
 	}
 
 	class component final : public component_interface
@@ -102,6 +126,10 @@ namespace gameplay
 				game::DVAR_FLAG_REPLICATED, "The velocity of a jump off of a ladder");
 			dvars::jump_spreadAdd = dvars::register_float("jump_spreadAdd", 64.0f, 0.0f, 512.0f, 
 				game::DVAR_FLAG_REPLICATED, "The amount of spread scale to add as a side effect of jumping");
+
+			dvars::pm_bouncing = dvars::register_bool("pm_bouncing", false,
+				game::DVAR_FLAG_REPLICATED, "Enable bouncing");
+			utils::hook::jump(0x14069145E, utils::hook::assemble(pm_bouncing_stub_mp), true);
 
 			// Influence PM_JitterPoint code flow so the trace->startsolid checks are 'ignored' 
 			pm_player_trace_hook.create(0x14068F0A0, &pm_player_trace_stub);
