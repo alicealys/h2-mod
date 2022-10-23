@@ -430,6 +430,12 @@ namespace fastfiles
 				}
 			}
 
+			const std::string name_ = name;
+			if (name_.starts_with("mp_"))
+			{
+				add_custom_level_load_zone(load, "common_mp", 0x40000);
+			}
+
 			if (is_builtin_map)
 			{
 				const auto name_ = "h2_mod_patch_"s + name;
@@ -449,6 +455,18 @@ namespace fastfiles
 		void db_load_xassets_stub(game::XZoneInfo* info, unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
 			game::DB_LoadXAssets(info, zone_count, game::DB_LOAD_ASYNC);
+		}
+
+		void db_find_aipaths_stub(game::XAssetType type, const char* name, int allow_create_default)
+		{
+			if (game::DB_XAssetExists(type, name))
+			{
+				game::DB_FindXAssetHeader(type, name, allow_create_default);
+			}
+			else
+			{
+				console::warn("No aipaths found for this map\n");
+			}
 		}
 	}
 
@@ -525,6 +543,11 @@ namespace fastfiles
 
 			// Load assets from 2nd phase (common_specialops, addon map) with DB_LOAD_SYNC
 			utils::hook::call(0x140414EA1, db_load_xassets_stub);
+
+			// Allow loading mp maps
+			utils::hook::set(0x140609630, 0xC300B0);
+			// Don't sys_error if aipaths are missing
+			utils::hook::call(0x140522299, db_find_aipaths_stub);
 
 			command::add("loadzone", [](const command::params& params)
 			{

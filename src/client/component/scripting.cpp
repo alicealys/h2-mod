@@ -7,6 +7,7 @@
 #include "scheduler.hpp"
 #include "scripting.hpp"
 #include "gsc.hpp"
+#include "console.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/functions.hpp"
@@ -274,6 +275,17 @@ namespace scripting
 
 			scr_get_dvar_int_hook.invoke<void>();
 		}
+
+		void* get_spawn_point_stub()
+		{
+			const auto spawn_point = utils::hook::invoke<void*>(0x1404B1670);
+			if (spawn_point == nullptr)
+			{
+				console::warn("No spawnpoint found for this map, using (0, 0, 0)\n");
+				return &game::g_entities[0];
+			}
+			return spawn_point;
+		}
 	}
 
 	std::string get_token_single(unsigned int id)
@@ -323,6 +335,8 @@ namespace scripting
 			scr_run_current_threads_hook.create(0x1405C8370, scr_run_current_threads_stub);
 
 			scr_get_dvar_int_hook.create(0x1404F0730, scr_get_dvar_int_stub);
+
+			utils::hook::call(0x1404B07D2, get_spawn_point_stub);
 
 			scheduler::loop([]()
 			{
