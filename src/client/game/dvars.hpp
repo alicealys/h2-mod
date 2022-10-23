@@ -28,6 +28,8 @@ namespace dvars
 	extern game::dvar_t* jump_ladderPushVel;
 	extern game::dvar_t* jump_spreadAdd;
 
+	extern game::dvar_t* pm_bouncing;
+
 	extern game::dvar_t* r_fullbright;
 
 	extern game::dvar_t* cg_legacyCrashHandling;
