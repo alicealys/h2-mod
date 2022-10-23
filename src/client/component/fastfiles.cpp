@@ -430,8 +430,8 @@ namespace fastfiles
 				}
 			}
 
-			const std::string name_ = name;
-			if (name_.starts_with("mp_"))
+			const std::string mapname = name;
+			if (mapname.starts_with("mp_"))
 			{
 				add_custom_level_load_zone(load, "common_mp", 0x40000);
 			}
