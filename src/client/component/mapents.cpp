@@ -44,6 +44,12 @@ namespace mapents
 				}
 
 				const auto id = static_cast<unsigned int>(std::atoi(line.substr(0, first_space).data()));
+				if (id == 0) // 0 "key" "value"
+				{
+					buffer.append(line);
+					continue;
+				}
+
 				const auto token = xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id));
 				const auto key = "\"" + token + "\"";
 
