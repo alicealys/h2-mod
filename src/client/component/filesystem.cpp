@@ -86,15 +86,11 @@ namespace filesystem
 
 		bool can_insert_path(const std::filesystem::path& path)
 		{
-			for (const auto& path_ : get_search_paths_internal())
+			const auto& paths = get_search_paths_internal();
+			return std::ranges::none_of(paths.cbegin(), paths.cend(), [path](const auto& elem)
 			{
-				if (path_ == path)
-				{
-					return false;
-				}
-			}
-
-			return true;
+				return elem == path;
+			});
 		}
 
 		const char* sys_default_install_path_stub()
