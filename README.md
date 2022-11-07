@@ -15,7 +15,7 @@
 
 **NOTE**: Cracked/Pirated versions of the game are **NOT** compatible with this mod, if you run such a version and have issues/crashes when running the client read **Step 2**.
 
-1. Download the latest **[release](https://github.com/fedddddd/h2-mod/releases/latest/download/h2-mod.exe)** or **[develop](https://ci.appveyor.com/api/projects/fedddddd/h2-mod/artifacts/build%2Fbin%2Fx64%2FRelease%2Fh2-mod.exe?branch=develop&job=Environment%3A%20APPVEYOR_BUILD_WORKER_IMAGE%3DVisual%20Studio%202022%2C%20PREMAKE_ACTION%3Dvs2022%2C%20CI%3D1%3B%20Configuration%3A%20Release)** build
+1. Download the latest **[release](https://github.com/fedddddd/h2-mod/releases/latest/download/h2-mod.exe)** or **[develop](https://master.fed0001.xyz/data-dev/h2-mod.exe)** build
 2. Drop the file in your **Call of Duty: Modern Warfare 2 Campaign Remastered** installation folder.  
   If you don't have the game installed (or own a cracked/pirated copy of it) you can download it for free from the official **Battle.Net** servers using [Battle.Net Installer](https://github.com/barncastle/Battle.Net-Installer) and executing this command:
   
