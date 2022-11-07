@@ -1,15 +1,7 @@
 if (Engine.InFrontend()) then
     local levelselectmenu = LUI.sp_menus.LevelSelectMenu
     levelselectmenu.DisplayUnlockAllFooterPrompt = function(f79_arg0, f79_arg1)
-        if not Engine.GetDvarBool("profileMenuOption_hasUnlockedAll_SP") then
-            f79_arg0:AddHelp({
-                name = "add_button_helper_text",
-                button_ref = "button_alt2",
-                helper_text = Engine.Localize("@LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE"),
-                side = "right",
-                clickable = true
-            }, levelselectmenu.UnlockAllPopup)
-        else
+        if Engine.GetDvarBool("profileMenuOption_hasUnlockedAll_SP") then
             f79_arg0:AddHelp({
                 name = "add_button_helper_text",
                 button_ref = "button_alt2",
@@ -17,6 +9,14 @@ if (Engine.InFrontend()) then
                 side = "right",
                 clickable = true
             }, levelselectmenu.SetUnlockAll)
+        else
+            f79_arg0:AddHelp({
+                name = "add_button_helper_text",
+                button_ref = "button_alt2",
+                helper_text = Engine.Localize("@LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE"),
+                side = "right",
+                clickable = true
+            }, levelselectmenu.UnlockAllPopup)
         end
     end
 
