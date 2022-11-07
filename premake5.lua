@@ -227,10 +227,12 @@ targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 
 configurations {"Debug", "Release"}
 
-architecture "x64"
+language "C++"
+cppdialect "C++20"
+
+architecture "x86_64"
 platforms "x64"
 
-buildoptions "/std:c++latest"
 systemversion "latest"
 symbols "On"
 staticruntime "On"
@@ -255,7 +257,7 @@ filter {}
 filter "configurations:Release"
 	optimize "Size"
 	buildoptions {"/GL"}
-	linkoptions { "/IGNORE:4702", "/LTCG" }
+	linkoptions {"/IGNORE:4702", "/LTCG"}
 	defines {"NDEBUG"}
 	flags {"FatalCompileWarnings"}
 filter {}
@@ -321,13 +323,3 @@ resincludedirs {"$(ProjectDir)src"}
 
 group "Dependencies"
 dependencies.projects()
-
-rule "ProtobufCompiler"
-display "Protobuf compiler"
-location "./build"
-fileExtension ".proto"
-buildmessage "Compiling %(Identity) with protoc..."
-buildcommands {'@echo off', 'path "$(SolutionDir)\\..\\tools"',
-			   'if not exist "$(ProjectDir)\\src\\proto" mkdir "$(ProjectDir)\\src\\proto"',
-			   'protoc --error_format=msvs -I=%(RelativeDir) --cpp_out=src\\proto %(Identity)'}
-buildoutputs {'$(ProjectDir)\\src\\proto\\%(Filename).pb.cc', '$(ProjectDir)\\src\\proto\\%(Filename).pb.h'}

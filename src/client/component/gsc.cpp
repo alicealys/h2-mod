@@ -50,9 +50,9 @@ namespace gsc
 		std::unordered_map<scripting::script_function, unsigned int> functions;
 		std::optional<std::string> gsc_error;
 
-		char* allocate_buffer(size_t size)
+		char* allocate_buffer(std::uint32_t size)
 		{
-			return utils::hook::invoke<char*>(0x14061E680, size, 4, 1, 5);
+			return static_cast<char*>(game::PMem_AllocFromSource_NoDebug(size, 4, 1, 5));
 		}
 
 		bool read_scriptfile(const std::string& name, std::string* data)
@@ -135,7 +135,7 @@ namespace gsc
 			const auto script_size = script.size();
 			const auto buffer_size = script_size + stack.size() + 2;
 
-			const auto buffer = allocate_buffer(buffer_size);
+			const auto buffer = allocate_buffer(static_cast<std::uint32_t>(buffer_size));
 			std::memcpy(buffer, script.data(), script_size);
 			std::memcpy(&buffer[script_size], stack.data(), stack.size()); 
 
