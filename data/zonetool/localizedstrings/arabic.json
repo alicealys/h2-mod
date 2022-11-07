@@ -16,5 +16,8 @@
     "LOCALE_14": "الإسبانية (أمريكا اللاتينية)",
     "LOCALE_15": "الكورية",
     "LOCALE_16": "اللغة الإنجليزية (آمنة)",
-    "LOCALE_17": "(جزئي) الروسية"
+    "LOCALE_17": "(جزئي) الروسية",
+
+    "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": ".ﻡﺎﻬﻤﻟﺍ ﻊﻴﻤﺟ ﺢﺘﻓ",
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "ﺢﺘﻔﻟﺍ ءﺎﻐﻟﺇ"
 }
