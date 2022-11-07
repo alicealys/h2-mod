@@ -16,5 +16,8 @@
     "LOCALE_14": "スペイン語(南米)",
     "LOCALE_15": "韓国語",
     "LOCALE_16": "英語(検閲)",
-    "LOCALE_17": "ロシア語(一部)"
+    "LOCALE_17": "ロシア語(一部)",
+
+    "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "全ミッションをアンロック",
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "アンロックをキャンセル"
 }

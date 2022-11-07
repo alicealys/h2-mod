@@ -24,6 +24,9 @@
     "UPDATER_POPUP_RESTART_POPUP_TEXT": "Update requires restart",
     "UPDATER_POPUP_CHECKING_FOR_UPDATES": "Checking for updates...",
 
+    "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "Unlock All Missions and Intel",
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Cancel Unlock All Missions",
+
     "MENU_MODS_DESC": "Load installed mods.",
     "LUA_MENU_MOD_DESC_DEFAULT": "Load &&1.",
     "LUA_MENU_MOD_DESC": "&&1\nAuthor: &&2\nVersion: &&3",

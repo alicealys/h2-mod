@@ -16,5 +16,8 @@
     "LOCALE_14": "西班牙语（拉丁美洲)",
     "LOCALE_15": "韩语",
     "LOCALE_16": "英语 (审查制度)",
-    "LOCALE_17": "俄语（拉丁美洲)"
+    "LOCALE_17": "俄语（拉丁美洲)",
+
+    "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "解锁全部任务",
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "取消解锁"
 }
