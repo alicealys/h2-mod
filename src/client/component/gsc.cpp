@@ -10,6 +10,7 @@
 #include "gsc.hpp"
 #include "scheduler.hpp"
 #include "fastfiles.hpp"
+#include "command.hpp"
 
 #include "game/scripting/execution.hpp"
 #include "game/scripting/functions.hpp"
@@ -49,9 +50,9 @@ namespace gsc
 		std::unordered_map<scripting::script_function, unsigned int> functions;
 		std::optional<std::string> gsc_error;
 
-		char* allocate_buffer(size_t size)
+		char* allocate_buffer(std::uint32_t size)
 		{
-			return utils::hook::invoke<char*>(0x14061E680, size, 4, 1, 5);
+			return static_cast<char*>(game::PMem_AllocFromSource_NoDebug(size, 4, 1, 5));
 		}
 
 		bool read_scriptfile(const std::string& name, std::string* data)
@@ -109,7 +110,18 @@ namespace gsc
 			}
 
 			auto assembly = compiler->output();
-			assembler->assemble(real_name, assembly);
+
+			try
+			{
+				assembler->assemble(real_name, assembly);
+			}
+			catch (const std::exception& e)
+			{
+				console::error("*********** script compile error *************\n");
+				console::error("failed to assemble '%s':\n%s", real_name.data(), e.what());
+				console::error("**********************************************\n");
+				return nullptr;
+			}
 
 			const auto script_file_ptr = reinterpret_cast<game::ScriptFile*>(allocate_buffer(sizeof(game::ScriptFile)));
 			script_file_ptr->name = file_name;
@@ -123,7 +135,7 @@ namespace gsc
 			const auto script_size = script.size();
 			const auto buffer_size = script_size + stack.size() + 2;
 
-			const auto buffer = allocate_buffer(buffer_size);
+			const auto buffer = allocate_buffer(static_cast<std::uint32_t>(buffer_size));
 			std::memcpy(buffer, script.data(), script_size);
 			std::memcpy(&buffer[script_size], stack.data(), stack.size()); 
 
@@ -701,6 +713,12 @@ namespace gsc
 				}
 
 				return game::Scr_AddInt(sound->head->soundFile->u.streamSnd.totalMsec);
+			});
+
+			add_function("executecommand", [](const game::scr_entref_t ref)
+			{
+				const auto cmd = get_argument(0).as<std::string>();
+				command::execute(cmd);
 			});
 
 			scripting::on_shutdown([](int free_scripts)

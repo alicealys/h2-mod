@@ -16,5 +16,8 @@
     "LOCALE_14": "Español (América Latina)",
     "LOCALE_15": "Coreano",
     "LOCALE_16": "Inglés (censura)",
-    "LOCALE_17": "Ruso (parcial)"
+    "LOCALE_17": "Ruso (parcial)",
+
+    "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "Desbloquear todas las misiones",
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Cancelar desbloqueo"
 }

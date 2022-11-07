@@ -1,5 +1,6 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
+#include "game/dvars.hpp"
 #include "fastfiles.hpp"
 
 #include "command.hpp"
@@ -16,6 +17,8 @@ namespace fastfiles
 
 	namespace
 	{
+		game::dvar_t* db_print_default_assets = nullptr;
+
 		template <size_t Bits>
 		struct bit_array
 		{
@@ -41,18 +44,25 @@ namespace fastfiles
 			const auto result = db_find_xasset_header.invoke<game::XAssetHeader>(type, name, allow_create_default);
 			const auto diff = game::Sys_Milliseconds() - start;
 
+			if (db_print_default_assets->current.enabled && game::DB_IsXAssetDefault(type, name))
+			{
+				console::warn("Waited %i msec for default asset \"%s\" of type \"%s\"\n", 
+					diff, name, game::g_assetNames[type]);
+			}
+
 			if (diff > 100)
 			{
+				const auto missing = result.data == nullptr;
 				console::print(
-					result.data == nullptr
+					missing
 						? console::con_type_error
 						: console::con_type_warning,
-					"Waited %i msec for %sasset \"%s\", of type \"%s\"\n", 
-					diff, 
-					result.data == nullptr 
-						? "missing " 
-						: "", 
-					name, 
+					"Waited %i msec for %sasset \"%s\" of type \"%s\"\n",
+					diff,
+					missing
+						? "missing "
+						: "",
+					name,
 					game::g_assetNames[type]
 				);
 			}
@@ -143,7 +153,7 @@ namespace fastfiles
 			{
 				96, 88, 128, 56, 40, 216, 56, 696,
 				624, 32, 32, 32, 32, 32, 2112, 2032,
-				104, 32, 24, 1520, 152, 152, 16, 64,
+				104, 32, 24, 152, 152, 152, 16, 64,
 				640, 40, 16, 136, 24, 296, 176, 2896,
 				48, 0, 24, 200, 88, 16, 144, 3848,
 				56, 72, 16, 16, 0, 0, 0, 0, 24,
@@ -420,6 +430,12 @@ namespace fastfiles
 				}
 			}
 
+			const std::string mapname = name;
+			if (mapname.starts_with("mp_"))
+			{
+				add_custom_level_load_zone(load, "common_mp", 0x40000);
+			}
+
 			if (is_builtin_map)
 			{
 				const auto name_ = "h2_mod_patch_"s + name;
@@ -439,6 +455,18 @@ namespace fastfiles
 		void db_load_xassets_stub(game::XZoneInfo* info, unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
 			game::DB_LoadXAssets(info, zone_count, game::DB_LOAD_ASYNC);
+		}
+
+		void db_find_aipaths_stub(game::XAssetType type, const char* name, int allow_create_default)
+		{
+			if (game::DB_XAssetExists(type, name))
+			{
+				game::DB_FindXAssetHeader(type, name, allow_create_default);
+			}
+			else
+			{
+				console::warn("No aipaths found for this map\n");
+			}
 		}
 	}
 
@@ -484,6 +512,9 @@ namespace fastfiles
 	public:
 		void post_unpack() override
 		{
+			db_print_default_assets = dvars::register_bool("db_printDefaultAssets", 
+				false, game::DVAR_FLAG_SAVED, "Print default asset usage");
+
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
 			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
 
@@ -504,7 +535,7 @@ namespace fastfiles
 
 			reallocate_asset_pools();
 
-			// only load extra zones with addon maps & common_specialops & common_survival & custom maps if the exist
+			// only load extra zones with addon maps & common_specialops & common_survival & custom maps if they exist
 			utils::hook::call(0x1404128B0, db_load_level_add_map_zone_stub);
 			utils::hook::call(0x140412854, db_load_level_add_custom_zone_stub);
 			utils::hook::call(0x14041282D, db_load_level_add_custom_zone_stub);
@@ -512,6 +543,11 @@ namespace fastfiles
 
 			// Load assets from 2nd phase (common_specialops, addon map) with DB_LOAD_SYNC
 			utils::hook::call(0x140414EA1, db_load_xassets_stub);
+
+			// Allow loading mp maps
+			utils::hook::set(0x140609630, 0xC300B0);
+			// Don't sys_error if aipaths are missing
+			utils::hook::call(0x140522299, db_find_aipaths_stub);
 
 			command::add("loadzone", [](const command::params& params)
 			{

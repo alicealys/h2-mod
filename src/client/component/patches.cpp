@@ -89,9 +89,9 @@ namespace patches
 			// Fix startup crashes
 			utils::hook::set(0x140633080, 0xC301B0);
 			utils::hook::set(0x140272F70, 0xC301B0);
-			utils::hook::jump(0x140046148, sub_46148, true);
+			utils::hook::jump(0x140046148, sub_46148);
 
-			utils::hook::jump(0x14064EF10, quit_stub, true);
+			utils::hook::jump(0x1408B1CD0, quit_stub);
 
 			// Unlock fps in main menu
 			utils::hook::set<BYTE>(0x1403D8E1B, 0xEB);
