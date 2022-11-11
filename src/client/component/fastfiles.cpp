@@ -18,6 +18,7 @@ namespace fastfiles
 	namespace
 	{
 		game::dvar_t* db_print_default_assets = nullptr;
+		game::dvar_t* db_print_loaded_assets = nullptr;
 
 		template <size_t Bits>
 		struct bit_array
@@ -27,6 +28,7 @@ namespace fastfiles
 
 		utils::hook::detour db_try_load_x_file_internal_hook;
 		utils::hook::detour db_find_xasset_header;
+		utils::hook::detour load_xasset_header_hook;
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -468,6 +470,18 @@ namespace fastfiles
 				console::warn("No aipaths found for this map\n");
 			}
 		}
+
+		void load_xasset_header_stub(void* a1)
+		{
+			if (db_print_loaded_assets->current.enabled)
+			{
+				const auto type = **reinterpret_cast<int**>(0x14224F608);
+				const auto type_name = game::g_assetNames[type];
+				console::info("Loading asset type \"%s\"\n", type_name);
+			}
+
+			load_xasset_header_hook.invoke<void>(a1);
+		}
 	}
 
 	bool exists(const std::string& zone)
@@ -515,6 +529,9 @@ namespace fastfiles
 			db_print_default_assets = dvars::register_bool("db_printDefaultAssets", 
 				false, game::DVAR_FLAG_SAVED, "Print default asset usage");
 
+			db_print_loaded_assets = dvars::register_bool("db_printLoadedAssets",
+				false, game::DVAR_FLAG_NONE, "Print asset types being loaded");
+
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
 			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
 
@@ -548,6 +565,8 @@ namespace fastfiles
 			utils::hook::set(0x140609630, 0xC300B0);
 			// Don't sys_error if aipaths are missing
 			utils::hook::call(0x140522299, db_find_aipaths_stub);
+
+			load_xasset_header_hook.create(0x140400790, load_xasset_header_stub);
 
 			command::add("loadzone", [](const command::params& params)
 			{
