@@ -20,8 +20,10 @@ namespace renderer
 		{
 			switch (dvars::r_fullbright->current.integer)
 			{
+			case 4:
+				return 53; // wireframe
 			case 3:
-				return 3;
+				return 3; // debug
 			case 2:
 				return 13;
 			default:
@@ -32,9 +34,9 @@ namespace renderer
 		void gfxdrawmethod()
 		{
 			game::gfxDrawMethod->drawScene = game::GFX_DRAW_SCENE_STANDARD;
-			game::gfxDrawMethod->baseTechType = dvars::r_fullbright->current.enabled ? get_fullbright_technique() : game::TECHNIQUE_LIT;
-			game::gfxDrawMethod->emissiveTechType = dvars::r_fullbright->current.enabled ? get_fullbright_technique() : game::TECHNIQUE_EMISSIVE;
-			game::gfxDrawMethod->forceTechType = dvars::r_fullbright->current.enabled ? get_fullbright_technique() : 254;
+			game::gfxDrawMethod->baseTechType = dvars::r_fullbright->current.integer ? get_fullbright_technique() : game::TECHNIQUE_LIT;
+			game::gfxDrawMethod->emissiveTechType = dvars::r_fullbright->current.integer ? get_fullbright_technique() : game::TECHNIQUE_EMISSIVE;
+			game::gfxDrawMethod->forceTechType = dvars::r_fullbright->current.integer ? get_fullbright_technique() : 254;
 		}
 
 		void r_init_draw_method_stub()
@@ -61,7 +63,7 @@ namespace renderer
 	public:
 		void post_unpack() override
 		{
-			dvars::r_fullbright = dvars::register_int("r_fullbright", 0, 0, 3, game::DVAR_FLAG_SAVED, "Fullbright method");
+			dvars::r_fullbright = dvars::register_int("r_fullbright", 0, 0, 4, game::DVAR_FLAG_SAVED, "Fullbright method");
 
 			r_init_draw_method_hook.create(0x14072F950, &r_init_draw_method_stub);
 			r_update_front_end_dvar_options_hook.create(0x14076EE70, &r_update_front_end_dvar_options_stub);
