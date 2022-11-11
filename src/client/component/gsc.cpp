@@ -46,13 +46,52 @@ namespace gsc
 
 		std::unordered_map<std::string, unsigned int> main_handles;
 		std::unordered_map<std::string, unsigned int> init_handles;
-		std::unordered_map<std::string, game::ScriptFile*> loaded_scripts;
+
 		std::unordered_map<scripting::script_function, unsigned int> functions;
 		std::optional<std::string> gsc_error;
 
-		char* allocate_buffer(std::uint32_t size)
+		utils::memory::allocator scriptfile_allocator;
+		std::unordered_map<std::string, game::ScriptFile*> loaded_scripts;
+
+		struct
 		{
-			return static_cast<char*>(game::PMem_AllocFromSource_NoDebug(size, 4, 1, 5));
+			char* buf = nullptr;
+			char* pos = nullptr;
+			unsigned int size = 0x1000000;
+		} script_memory;
+
+		char* allocate_buffer(size_t size)
+		{
+			if (script_memory.buf == nullptr)
+			{
+				script_memory.buf = game::PMem_AllocFromSource_NoDebug(script_memory.size, 4, 1, game::PMEM_SOURCE_SCRIPT);
+				script_memory.pos = script_memory.buf;
+			}
+
+			if (script_memory.pos + size > script_memory.buf + script_memory.size)
+			{
+				game::Com_Error(game::ERR_FATAL, "Out of custom script memory");
+			}
+
+			const auto pos = script_memory.pos;
+			script_memory.pos += size;
+			return pos;
+		}
+
+		void free_script_memory()
+		{
+			game::PMem_PopFromSource_NoDebug(script_memory.buf, script_memory.size, 4, 1, game::PMEM_SOURCE_SCRIPT);
+			script_memory.buf = nullptr;
+			script_memory.pos = nullptr;
+		}
+
+		void clear()
+		{
+			main_handles.clear();
+			init_handles.clear();
+			loaded_scripts.clear();
+			scriptfile_allocator.clear();
+			free_script_memory();
 		}
 
 		bool read_scriptfile(const std::string& name, std::string* data)
@@ -123,7 +162,7 @@ namespace gsc
 				return nullptr;
 			}
 
-			const auto script_file_ptr = reinterpret_cast<game::ScriptFile*>(allocate_buffer(sizeof(game::ScriptFile)));
+			const auto script_file_ptr = scriptfile_allocator.allocate<game::ScriptFile>();
 			script_file_ptr->name = file_name;
 
 			const auto stack = assembler->output_stack();
@@ -132,15 +171,12 @@ namespace gsc
 			const auto script = assembler->output_script();
 			script_file_ptr->bytecodeLen = static_cast<int>(script.size());
 
-			const auto script_size = script.size();
-			const auto buffer_size = script_size + stack.size() + 2;
+			script_file_ptr->buffer = game::Hunk_AllocateTempMemoryHigh(stack.size() + 1);
+			std::memcpy(script_file_ptr->buffer, stack.data(), stack.size());
 
-			const auto buffer = allocate_buffer(static_cast<std::uint32_t>(buffer_size));
-			std::memcpy(buffer, script.data(), script_size);
-			std::memcpy(&buffer[script_size], stack.data(), stack.size()); 
+			script_file_ptr->bytecode = allocate_buffer(script.size() + 1);
+			std::memcpy(script_file_ptr->bytecode, script.data(), script.size());
 
-			script_file_ptr->bytecode = &buffer[0];
-			script_file_ptr->buffer = &buffer[script.size()];
 			script_file_ptr->compressedLen = 0;
 
 			loaded_scripts[real_name] = script_file_ptr;
@@ -197,18 +233,9 @@ namespace gsc
 			}
 		}
 
-		void clear()
-		{
-			main_handles.clear();
-			init_handles.clear();
-			loaded_scripts.clear();
-		}
-
 		void load_gametype_script_stub(void* a1, void* a2)
 		{
 			utils::hook::invoke<void>(0x1404E1400, a1, a2);
-
-			clear();
 
 			fastfiles::enum_assets(game::ASSET_TYPE_RAWFILE, [](game::XAssetHeader header)
 			{
@@ -562,6 +589,27 @@ namespace gsc
 
 			return decompiler->output();
 		}
+
+		void pmem_init_stub()
+		{
+			utils::hook::invoke<void>(0x14061EC80);
+
+			const auto type_0 = &game::g_scriptmem[0];
+			const auto type_1 = &game::g_scriptmem[1];
+
+			const auto size_0 = 0x200000; // default size
+			const auto size_1 = 0x200000 + script_memory.size;
+
+			const auto block = reinterpret_cast<char*>(VirtualAlloc(NULL, size_0 + size_1, MEM_RESERVE, PAGE_READWRITE));
+
+			type_0->buf = block;
+			type_0->size = size_0;
+
+			type_1->buf = block + size_0;
+			type_1->size = size_1;
+
+			utils::hook::set<uint32_t>(0x14061EC72, size_0 + size_1);
+		}
 	}
 
 	game::ScriptFile* find_script(game::XAssetType /*type*/, const char* name, int /*allow_create_default*/)
@@ -644,6 +692,9 @@ namespace gsc
 
 			utils::hook::nop(0x1405CA683, 8);
 			utils::hook::call(0x1405CA683, vm_call_builtin_stub);
+
+			// Increase script memory
+			utils::hook::call(0x1405A4798, pmem_init_stub);
 
 			add_function("print", [](const game::scr_entref_t ref)
 			{

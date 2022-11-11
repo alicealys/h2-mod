@@ -94,6 +94,8 @@ namespace game
 	WEAK symbol<void(int localClientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
 	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x14036F310};
 
+	WEAK symbol<char*(const size_t size)> Hunk_AllocateTempMemoryHigh{0x140614790};
+
 	WEAK symbol<char*(char* string)> I_CleanStr{0x140620660};
 
 	WEAK symbol<char*(GfxImage* image, uint32_t width, uint32_t height, uint32_t depth, uint32_t mipCount, 
@@ -133,7 +135,10 @@ namespace game
 	WEAK symbol<unsigned int(int handle, unsigned int paramcount)> Scr_ExecThread{0x1405C6F40};
 	WEAK symbol<unsigned int(void* func, int type, unsigned int name)> Scr_RegisterFunction{0x1405BC7B0};
 
-	WEAK symbol<void*(unsigned int size, unsigned int alignment, unsigned int type, int source)> PMem_AllocFromSource_NoDebug{0x14061E680};
+	WEAK symbol<char*(unsigned int size, unsigned int alignment, 
+		unsigned int type, int source)> PMem_AllocFromSource_NoDebug{0x14061E680};
+	WEAK symbol<int(char* buf, unsigned int size, unsigned int alignment, 
+		unsigned int type, int source)> PMem_PopFromSource_NoDebug{0x14061EDF0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x1405C8DB0};
 
@@ -236,6 +241,8 @@ namespace game
 	WEAK symbol<int> g_script_error_level{0x14BA9CC24};
 	WEAK symbol<jmp_buf> g_script_error{0x14BA9CD40};
 	WEAK symbol<scr_classStruct_t> g_classMap{0x140BF95C0};
+
+	WEAK symbol<physical_memory> g_scriptmem{0x14CC9FEC0};
 
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0x14B617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14BA9EE40};
