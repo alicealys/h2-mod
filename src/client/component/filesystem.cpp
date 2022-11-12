@@ -52,8 +52,7 @@ namespace filesystem
 			const auto mod_path = utils::flags::get_flag("mod");
 			if (mod_path.has_value())
 			{
-				filesystem::register_path(mod_path.value());
-				mods::mod_path = mod_path.value();
+				mods::set_mod(mod_path.value());
 			}
 
 			localized_strings::clear();
