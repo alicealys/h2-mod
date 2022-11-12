@@ -34,6 +34,25 @@ namespace utils::string
 		return elems;
 	}
 
+	std::vector<std::string> split_lines(const std::string& s)
+	{
+		std::stringstream ss(s);
+		std::string item;
+		std::vector<std::string> elems;
+
+		while (std::getline(ss, item, '\n'))
+		{
+			if (item.ends_with('\r'))
+			{
+				item.pop_back();
+			}
+
+			elems.push_back(item); // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
+		}
+
+		return elems;
+	}
+
 	std::string to_lower(std::string text)
 	{
 		std::transform(text.begin(), text.end(), text.begin(), [](const unsigned char input)

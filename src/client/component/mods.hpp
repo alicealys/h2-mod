@@ -2,7 +2,14 @@
 
 namespace mods
 {
-	extern std::string mod_path;
+	struct mod_zone
+	{
+		std::string name;
+		unsigned int alloc_flags;
+	};
 
 	bool mod_requires_restart(const std::string& path);
+	void set_mod(const std::string& path);
+	std::optional<std::string> get_mod();
+	std::vector<mod_zone> get_mod_zones();
 }
