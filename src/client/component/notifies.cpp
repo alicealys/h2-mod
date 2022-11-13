@@ -250,9 +250,9 @@ namespace notifies
 
 			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
 
-			scripting::on_shutdown([](bool free_scripts, bool /*post_shutdown*/)
+			scripting::on_shutdown([](bool free_scripts, bool post_shutdown)
 			{
-				if (free_scripts)
+				if (free_scripts && !post_shutdown)
 				{
 					vm_execute_hooks.clear();
 				}
