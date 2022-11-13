@@ -772,9 +772,9 @@ namespace gsc
 				command::execute(cmd);
 			});
 
-			scripting::on_shutdown([](int free_scripts)
+			scripting::on_shutdown([](bool free_scripts, bool post_shutdown)
 			{
-				if (free_scripts)
+				if (free_scripts && post_shutdown)
 				{
 					xsk::gsc::h2::resolver::cleanup();
 					clear();
