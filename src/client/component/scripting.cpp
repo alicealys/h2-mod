@@ -52,7 +52,7 @@ namespace scripting
 		std::string current_scriptfile;
 		unsigned int current_file_id{};
 
-		std::vector<std::function<void(bool)>> shutdown_callbacks;
+		std::vector<std::function<void(bool, bool)>> shutdown_callbacks;
 
 		std::unordered_map<unsigned int, std::string> canonical_string_table;
 
@@ -113,12 +113,17 @@ namespace scripting
 
 			for (const auto& callback : shutdown_callbacks)
 			{
-				callback(free_scripts);
+				callback(free_scripts, false);
 			}
 
 			clear_scheduled_notifies();
 			lua::engine::stop();
 			g_shutdown_game_hook.invoke<void>(free_scripts);
+
+			for (const auto& callback : shutdown_callbacks)
+			{
+				callback(free_scripts, true);
+			}
 		}
 	
 		void scr_add_class_field_stub(unsigned int classnum, game::scr_string_t name, unsigned int canonicalString, unsigned int offset)
@@ -298,7 +303,7 @@ namespace scripting
 		return scripting::find_token_single(id);
 	}
 
-	void on_shutdown(const std::function<void(bool)>& callback)
+	void on_shutdown(const std::function<void(bool, bool)>& callback)
 	{
 		shutdown_callbacks.push_back(callback);
 	}

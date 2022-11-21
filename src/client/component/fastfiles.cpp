@@ -6,10 +6,12 @@
 #include "command.hpp"
 #include "console.hpp"
 #include "localized_strings.hpp"
+#include "mods.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
 #include <utils/string.hpp>
+#include <utils/io.hpp>
 
 namespace fastfiles
 {
@@ -18,6 +20,7 @@ namespace fastfiles
 	namespace
 	{
 		game::dvar_t* db_print_default_assets = nullptr;
+		game::dvar_t* db_print_loaded_assets = nullptr;
 
 		template <size_t Bits>
 		struct bit_array
@@ -27,6 +30,7 @@ namespace fastfiles
 
 		utils::hook::detour db_try_load_x_file_internal_hook;
 		utils::hook::detour db_find_xasset_header;
+		utils::hook::detour load_xasset_header_hook;
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -111,7 +115,7 @@ namespace fastfiles
 			a.jmp(0x140415E29);
 		}
 
-		bool try_load_zone(std::string name, bool localized, bool game = false)
+		bool try_load_zone(const std::string& name, bool localized, bool game = false)
 		{
 			if (localized)
 			{
@@ -132,6 +136,19 @@ namespace fastfiles
 			return true;
 		}
 
+		void load_mod_zones()
+		{
+			try_load_zone("mod", true);
+			const auto mod_zones = mods::get_mod_zones();
+			for (const auto& zone : mod_zones)
+			{
+				if (zone.alloc_flags & game::DB_ZONE_COMMON)
+				{
+					try_load_zone(zone.name, true);
+				}
+			}
+		}
+
 		void load_post_gfx_and_ui_and_common_zones(game::XZoneInfo* zoneInfo, 
 			unsigned int zoneCount, game::DBSyncMode syncMode)
 		{
@@ -144,7 +161,7 @@ namespace fastfiles
 
 			game::DB_LoadXAssets(zoneInfo, zoneCount, syncMode);
 
-			try_load_zone("mod", true);
+			load_mod_zones();
 		}
 
 		constexpr unsigned int get_asset_type_size(const game::XAssetType type)
@@ -417,6 +434,37 @@ namespace fastfiles
 			add_custom_level_load_zone(load, name, size_est);
 		}
 
+		void add_mod_zones(game::LevelLoad* load)
+		{
+			const auto mod_zones = mods::get_mod_zones();
+			for (const auto& zone : mod_zones)
+			{
+				if (zone.alloc_flags & game::DB_ZONE_GAME)
+				{
+					add_custom_level_load_zone(load, zone.name.data(), 0x40000);
+				}
+			}
+		}
+
+		void db_decide_level_load_stub(utils::hook::assembler& a)
+		{
+			const auto loc_140412859 = a.newLabel();
+
+			a.pushad64();
+			a.mov(rcx, rbx);
+			a.call_aligned(add_mod_zones);
+			a.popad64();
+
+			a.mov(rcx, rdi);
+			a.call_aligned(0x140609650);
+			a.test(al, al);
+			a.jz(loc_140412859);
+			a.jmp(0x140412817);
+
+			a.bind(loc_140412859);
+			a.jmp(0x140412859);
+		}
+
 		void db_load_level_add_map_zone_stub(game::LevelLoad* load, const char* name, const unsigned int alloc_flags,
 			const size_t size_est)
 		{
@@ -468,6 +516,18 @@ namespace fastfiles
 				console::warn("No aipaths found for this map\n");
 			}
 		}
+
+		void load_xasset_header_stub(void* a1)
+		{
+			if (db_print_loaded_assets->current.enabled)
+			{
+				const auto type = **reinterpret_cast<int**>(0x14224F608);
+				const auto type_name = game::g_assetNames[type];
+				console::info("Loading asset type \"%s\"\n", type_name);
+			}
+
+			load_xasset_header_hook.invoke<void>(a1);
+		}
 	}
 
 	bool exists(const std::string& zone)
@@ -515,6 +575,9 @@ namespace fastfiles
 			db_print_default_assets = dvars::register_bool("db_printDefaultAssets", 
 				false, game::DVAR_FLAG_SAVED, "Print default asset usage");
 
+			db_print_loaded_assets = dvars::register_bool("db_printLoadedAssets",
+				false, game::DVAR_FLAG_NONE, "Print asset types being loaded");
+
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
 			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
 
@@ -537,9 +600,12 @@ namespace fastfiles
 
 			// only load extra zones with addon maps & common_specialops & common_survival & custom maps if they exist
 			utils::hook::call(0x1404128B0, db_load_level_add_map_zone_stub);
-			utils::hook::call(0x140412854, db_load_level_add_custom_zone_stub);
 			utils::hook::call(0x14041282D, db_load_level_add_custom_zone_stub);
+			utils::hook::call(0x140412854, db_load_level_add_custom_zone_stub);
 			utils::hook::call(0x14041287C, db_load_level_add_custom_zone_stub);
+
+			// Load custom mod zones with DB_ZONE_GAME alloc flag
+			utils::hook::jump(0x14041280B, utils::hook::assemble(db_decide_level_load_stub), true);
 
 			// Load assets from 2nd phase (common_specialops, addon map) with DB_LOAD_SYNC
 			utils::hook::call(0x140414EA1, db_load_xassets_stub);
@@ -548,6 +614,8 @@ namespace fastfiles
 			utils::hook::set(0x140609630, 0xC300B0);
 			// Don't sys_error if aipaths are missing
 			utils::hook::call(0x140522299, db_find_aipaths_stub);
+
+			load_xasset_header_hook.create(0x140400790, load_xasset_header_stub);
 
 			command::add("loadzone", [](const command::params& params)
 			{

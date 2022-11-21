@@ -231,7 +231,8 @@ namespace ui_scripting
 
 			game_type["getloadedmod"] = [](const game&)
 			{
-				return mods::mod_path;
+				const auto& path = mods::get_mod();
+				return path.value_or("");
 			};
 
 			game_type["addlocalizedstring"] = [](const game&, const std::string& string,

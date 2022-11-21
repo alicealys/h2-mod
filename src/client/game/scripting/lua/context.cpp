@@ -761,7 +761,8 @@ namespace scripting::lua
 
 			game_type["getloadedmod"] = [](const game&)
 			{
-				return mods::mod_path;
+				const auto& mod = mods::get_mod();
+				return mod.value_or("");
 			};
 
 			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
