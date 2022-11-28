@@ -127,6 +127,7 @@ namespace game
 	WEAK symbol<void()> Scr_ErrorInternal{0x1405C6EC0};
 	WEAK symbol<const char*(unsigned int index)> Scr_GetString{0x1405C7C20};
 	WEAK symbol<int(unsigned int index)> Scr_GetInt{0x1405C7890};
+	WEAK symbol<float(unsigned int index)> Scr_GetFloat{0x1405C7730};
 	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
 	WEAK symbol<void(const char* value)> Scr_AddString{0x1405C6A80};
 	WEAK symbol<unsigned int(const char* name)> Scr_LoadScript{0x1405BCEC0};
