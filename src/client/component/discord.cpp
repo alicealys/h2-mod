@@ -59,7 +59,13 @@ namespace discord
 					map = "museum";
 				}
 				
-				const auto mapname = game::UI_SafeTranslateString(utils::string::va("PRESENCE_SP_%s", map));
+				const auto key = utils::string::va("PRESENCE_SP_%s", map);
+				const char* mapname = map;
+				if (game::DB_XAssetExists(game::ASSET_TYPE_LOCALIZE, key) && !game::DB_IsXAssetDefault(game::ASSET_TYPE_LOCALIZE, key))
+				{
+					mapname = game::UI_SafeTranslateString(key);
+				}
+
 				discord_presence.largeImageKey = map;
 
 				if (details.has_value())
