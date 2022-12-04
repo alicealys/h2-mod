@@ -112,6 +112,11 @@ namespace database
 			return {};
 		}
 
+		bool is_zone_file(const std::string& file)
+		{
+			return file.ends_with(".ff") || file.ends_with(".pak");
+		}
+
 		game::DB_IFileSysFile* bnet_fs_open_file_stub(game::DB_FileSysInterface* this_, int folder, const char* file)
 		{
 			std::string name = file;
@@ -124,7 +129,7 @@ namespace database
 				}
 			};
 
-			if (name.ends_with(".ff"))
+			if (is_zone_file(name))
 			{
 				const auto found = find_fastfile(name);
 				if (found.has_value())
