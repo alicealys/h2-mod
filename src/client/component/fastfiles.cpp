@@ -415,7 +415,7 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
 		}
 
-		void add_custom_level_load_zone(game::LevelLoad* load, const char* name, const size_t size_est)
+		void add_custom_level_load_zone(game::LevelLoad* load, const std::string& name, const size_t size_est)
 		{
 			const auto language = game::SEH_GetCurrentLanguageCode();
 			const auto lang_name = language + "_"s + name;
@@ -425,7 +425,7 @@ namespace fastfiles
 				game::DB_LevelLoadAddZone(load, lang_name.data(), game::DB_ZONE_GAME | game::DB_ZONE_CUSTOM, size_est);
 			}
 
-			game::DB_LevelLoadAddZone(load, name, game::DB_ZONE_GAME | game::DB_ZONE_CUSTOM, size_est);
+			game::DB_LevelLoadAddZone(load, name.data(), game::DB_ZONE_GAME | game::DB_ZONE_CUSTOM, size_est);
 		}
 
 		void db_load_level_add_custom_zone_stub(game::LevelLoad* load, const char* name, const unsigned int alloc_flags,
@@ -479,9 +479,16 @@ namespace fastfiles
 			}
 
 			const std::string mapname = name;
-			if (mapname.starts_with("mp_"))
+
+			if (mapname.starts_with("mp_") && fastfiles::exists("common_mp"))
 			{
 				add_custom_level_load_zone(load, "common_mp", 0x40000);
+			}
+
+			const auto path_fastfile = mapname + "_path"s;
+			if (fastfiles::exists(path_fastfile))
+			{
+				add_custom_level_load_zone(load, path_fastfile, 0x40000);
 			}
 
 			if (is_builtin_map)
@@ -489,7 +496,7 @@ namespace fastfiles
 				const auto name_ = "h2_mod_patch_"s + name;
 				if (fastfiles::exists(name_))
 				{
-					add_custom_level_load_zone(load, name_.data(), size_est);
+					add_custom_level_load_zone(load, name_, size_est);
 				}
 
 				game::DB_LevelLoadAddZone(load, name, alloc_flags, size_est);
