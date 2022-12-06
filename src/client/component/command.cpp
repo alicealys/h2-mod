@@ -464,6 +464,60 @@ namespace command
 					}
 				}, scheduler::pipeline::server);
 			});
+
+			add("setviewpos", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				scripting::vector origin
+				(
+					static_cast<float>(std::atof(params.get(1))),
+					static_cast<float>(std::atof(params.get(2))),
+					static_cast<float>(std::atof(params.get(3)))
+				);
+
+				scheduler::once([=]()
+				{
+					try
+					{
+						const scripting::entity player{game::Scr_GetEntityId(0, 0)};
+						player.call("setorigin", {origin});
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
+			});
+
+			add("setviewang", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				scripting::vector angles
+				(
+					static_cast<float>(std::atof(params.get(1))),
+					static_cast<float>(std::atof(params.get(2))),
+					static_cast<float>(std::atof(params.get(3)))
+				);
+
+				scheduler::once([=]()
+				{
+					try
+					{
+						const scripting::entity player{game::Scr_GetEntityId(0, 0)};
+						player.call("setplayerangles", {angles});
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
+			});
 		}
 	};
 }
