@@ -246,6 +246,11 @@ namespace ui_scripting
 				language::set(language);
 			};
 
+			game_type["fastfileexists"] = [](const game&, const std::string& name)
+			{
+				return fastfiles::exists(name);
+			};
+
 			lua["Engine"]["SetLanguage"] = [](const int index)
 			{
 				language::set_from_index(index);

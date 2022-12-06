@@ -46,27 +46,27 @@ namespace discord
 			else
 			{
 				const char* base_mapname = nullptr;
-				auto* map = game::Dvar_FindVar("mapname")->current.string;
+				auto* mapname = game::Dvar_FindVar("mapname")->current.string;
+				auto* map_image = game::Dvar_FindVar("mapname")->current.string;
 				auto* museum_mode = game::Dvar_FindVar("ui_char_museum_mode")->current.string;
 
-				if (game::Com_IsAddonMap(map, &base_mapname))
+				if (game::Com_IsAddonMap(mapname, &base_mapname))
 				{
-					map = base_mapname;
+					map_image = base_mapname;
 				}
 
 				if (museum_mode == "free"s)
 				{
-					map = "museum";
+					map_image = "museum";
 				}
 				
-				const auto key = utils::string::va("PRESENCE_SP_%s", map);
-				const char* mapname = map;
+				const auto key = utils::string::va("PRESENCE_SP_%s", mapname);
 				if (game::DB_XAssetExists(game::ASSET_TYPE_LOCALIZE, key) && !game::DB_IsXAssetDefault(game::ASSET_TYPE_LOCALIZE, key))
 				{
 					mapname = game::UI_SafeTranslateString(key);
 				}
 
-				discord_presence.largeImageKey = map;
+				discord_presence.largeImageKey = map_image;
 
 				if (details.has_value())
 				{
