@@ -39,10 +39,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     createdivider(menu, "@LUA_MENU_UPDATES")
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "cg_auto_update", 
-        "@LUA_MENU_AUTO_UPDATE", 
-        "@LUA_MENU_AUTO_UPDATE_DESC", 
+        menu,
+        "cg_auto_update",
+        "@LUA_MENU_AUTO_UPDATE",
+        "@LUA_MENU_AUTO_UPDATE_DESC",
         {
             {
                 text = "@LUA_MENU_ENABLED",
@@ -64,10 +64,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     createdivider(menu, "@LUA_MENU_DRAWING")
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "cg_drawFPS", 
-        "@LUA_MENU_DRAW_FPS", 
-        "@LUA_MENU_DRAW_FPS_DESC", 
+        menu,
+        "cg_drawFPS",
+        "@LUA_MENU_DRAW_FPS",
+        "@LUA_MENU_DRAW_FPS_DESC",
         {
             {
                 text = "@LUA_MENU_DISABLED",
@@ -85,10 +85,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     )
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "cg_drawSpeed", 
-        "@LUA_MENU_DRAW_SPEED", 
-        "@LUA_MENU_DRAW_SPEED_DESC", 
+        menu,
+        "cg_drawSpeed",
+        "@LUA_MENU_DRAW_SPEED",
+        "@LUA_MENU_DRAW_SPEED_DESC",
         {
             {
                 text = "@LUA_MENU_ENABLED",
@@ -102,9 +102,9 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     )
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "cg_speedGraph", 
-        "@LUA_MENU_DRAW_SPEEDGRAPH", 
+        menu,
+        "cg_speedGraph",
+        "@LUA_MENU_DRAW_SPEEDGRAPH",
         "@LUA_MENU_DRAW_SPEEDGRAPH_DESC",
         {
             {
@@ -121,10 +121,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     createdivider(menu, "@LUA_MENU_RENDERING")
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "r_fullbright", 
-        "@LUA_MENU_R_FULLBRIGHT", 
-        "@LUA_MENU_R_FULLBRIGHT_DESC", 
+        menu,
+        "r_fullbright",
+        "@LUA_MENU_R_FULLBRIGHT",
+        "@LUA_MENU_R_FULLBRIGHT_DESC",
         {
             {
                 text = "@LUA_MENU_DISABLED",
@@ -148,10 +148,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     createdivider(menu, "@LUA_MENU_AUDIO_OPTIONS")
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "snd_musicDisabledForCustomSoundtrack", 
-        "@LUA_MENU_MUSIC", 
-        "@LUA_MENU_MUSIC_DESC", 
+        menu,
+        "snd_musicDisabledForCustomSoundtrack",
+        "@LUA_MENU_MUSIC",
+        "@LUA_MENU_MUSIC_DESC",
         {
             {
                 text = "@LUA_MENU_DISABLED",
@@ -167,10 +167,10 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     createdivider(menu, "@MENU_GAME_BEGINNING")
 
     LUI.Options.CreateOptionButton(
-        menu, 
-        "intro", 
-        "@LUA_MENU_INTRO", 
-        "@LUA_MENU_INTRO_DESC", 
+        menu,
+        "intro",
+        "@LUA_MENU_INTRO",
+        "@LUA_MENU_INTRO_DESC",
         {
             {
                 text = "@LUA_MENU_DISABLED",
@@ -189,4 +189,22 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     menu:AddBackButton()
 
     return menu
+end
+
+if not Engine.InFrontend() then
+    LUI.MenuTemplate.AddVignette = function(f36_arg0)
+        if not LUI.FlowManager.IsMenuTopmost(Engine.GetLuiRoot(), "advanced_video") then
+            local f36_local0 = CoD.CreateState(0, 0, 0, 0, CoD.AnchorTypes.All)
+            f36_local0.material = RegisterMaterial("h1_ui_bg_vignette")
+            local self = LUI.UIImage.new(f36_local0)
+            self:setupFullWindowElement()
+            f36_arg0:addElement(self)
+        end
+    end
+    LUI.MenuTemplate.InitInGameBkg = function(f38_arg0, f38_arg1, f38_arg2, f38_arg3)
+        LUI.MenuTemplate.AddDarken(f38_arg0, f38_arg1, f38_arg3, 0.55)
+        if not Engine.IsMultiplayer() and not LUI.FlowManager.IsMenuTopmost(Engine.GetLuiRoot(), "advanced_video") then
+            LUI.MenuTemplate.AddWorldBlur(f38_arg0, f38_arg1)
+        end
+    end
 end
