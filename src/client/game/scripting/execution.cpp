@@ -80,6 +80,12 @@ namespace scripting
 	                           const std::vector<script_value>& arguments)
 	{
 		const auto entref = entity.get_entity_reference();
+		const auto ent_id = entity.get_entity_id();
+
+		if (!is_entity_variable(entref, ent_id))
+		{
+			return {};
+		}
 
 		const auto is_method_call = *reinterpret_cast<const int*>(&entref) != -1;
 		const auto function = find_function(name, !is_method_call);

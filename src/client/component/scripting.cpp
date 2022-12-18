@@ -47,6 +47,8 @@ namespace scripting
 
 		utils::hook::detour scr_run_current_threads_hook;
 
+		utils::hook::detour scr_delete_hook;
+
 		game::dvar_t* scr_auto_respawn = nullptr;
 
 		std::string current_scriptfile;
@@ -291,6 +293,17 @@ namespace scripting
 			}
 			return spawn_point;
 		}
+
+		void scr_delete_stub(game::scr_entref_t ref)
+		{
+			if (ref.entnum == 0 && ref.classnum == 0)
+			{
+				console::warn("Script tried to delete entity 0\n");
+				return;
+			}
+
+			scr_delete_hook.invoke<void>(ref);
+		}
 	}
 
 	std::string get_token_single(unsigned int id)
@@ -340,6 +353,8 @@ namespace scripting
 			scr_run_current_threads_hook.create(0x1405C8370, scr_run_current_threads_stub);
 
 			scr_get_dvar_int_hook.create(0x1404F0730, scr_get_dvar_int_stub);
+
+			scr_delete_hook.create(0x1404F0460, scr_delete_stub);
 
 			utils::hook::call(0x1404B07D2, get_spawn_point_stub);
 
