@@ -17,6 +17,8 @@
     "LOCALE_15": "Coreano",
     "LOCALE_16": "Inglese (sicuro)",
     "LOCALE_17": "Russo (parziale)",
+    "LUA_MENU_FALLBACK_DISABLE": "Ripristina caratteri predefiniti",
+    "LUA_MENU_FALLBACK_ENABLE": "Usare caratteri di h2-mod",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "Sblocca tutte le missioni",
     "LUA_MENU_CANCEL_UNLOCK_CAPS": "Annulla sblocco",

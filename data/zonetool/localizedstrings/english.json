@@ -17,6 +17,8 @@
     "LOCALE_15": "Korean",
     "LOCALE_16": "English (Safe)",
     "LOCALE_17": "Russian (Partial)",
+    "LUA_MENU_FALLBACK_DISABLE": "Apply built-in fonts",
+    "LUA_MENU_FALLBACK_ENABLE": "Apply h2-mod fonts",
 
     "UPDATER_POPUP_NO_UPDATES_AVAILABLE": "No updates available",
     "UPDATER_POPUP_AVAILABLE_UPDATE_TEXT": "An update is available, proceed with installation?",

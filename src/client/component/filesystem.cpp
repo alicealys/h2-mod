@@ -67,15 +67,18 @@ namespace filesystem
 			const auto code = game::SEH_GetCurrentLanguageName();
 
 			paths.push_back(path);
-			
-			if (is_fallback_lang())
-			{
-				paths.push_back(path / "fallback");
-			}
 
-			if (is_polrus_lang())
+			if (!::utils::io::file_exists("players2/default/disable_fallback_fonts"))
 			{
-				paths.push_back(path / "polrus");
+				if (is_fallback_lang())
+				{
+					paths.push_back(path / "fallback");
+				}
+
+				if (is_polrus_lang())
+				{
+					paths.push_back(path / "polrus");
+				}
 			}
 
 			paths.push_back(path / code);

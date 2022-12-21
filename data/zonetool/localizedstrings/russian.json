@@ -17,6 +17,8 @@
     "LOCALE_15": "Корейский",
     "LOCALE_16": "Английский цензурный",
     "LOCALE_17": "Русский (английская озвучка)",
+    "LUA_MENU_FALLBACK_DISABLE": "Вернуться к встроенным шрифтам",
+    "LUA_MENU_FALLBACK_ENABLE": "Применить шрифты от h2-mod",
 
     "UPDATER_POPUP_NO_UPDATES_AVAILABLE": "У вас установлены все последние обновления",
     "UPDATER_POPUP_AVAILABLE_UPDATE_TEXT": "Доступно обновление клиента игры,\nначать установку сейчас?",

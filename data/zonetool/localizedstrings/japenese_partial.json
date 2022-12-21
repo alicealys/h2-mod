@@ -17,6 +17,8 @@
     "LOCALE_15": "韓国語",
     "LOCALE_16": "英語(検閲)",
     "LOCALE_17": "ロシア語(一部)",
+    "LUA_MENU_FALLBACK_DISABLE": "デフォルトに戻す",
+    "LUA_MENU_FALLBACK_ENABLE": "h2-mod フォントを使用します",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "全ミッションをアンロック",
     "LUA_MENU_CANCEL_UNLOCK_CAPS": "アンロックをキャンセル"
