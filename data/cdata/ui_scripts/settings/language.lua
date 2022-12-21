@@ -33,8 +33,7 @@ local function setuniversalfont(lang)
 end
 
 local fallbackoff = "players2/default/disable_fallback_fonts"
-local boolean
-does_fallbackoff_exist = io.fileexists(fallbackoff)
+local does_fallbackoff_exist = io.fileexists(fallbackoff)
 
 local function fontspopup()
     LUI.FlowManager.RequestAddMenu(nil, "generic_yesno_popup", false, nil, true, {
@@ -93,8 +92,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 
     local languages_without_fallback = {0, 1, 2, 3, 4, 7, 14, 16}
     local lang = Engine.GetCurrentLanguage()
-    local boolean
-    language_is_include = false
+    local language_is_include = false
 
     for i = 1, #languages_without_fallback do
         if lang == languages_without_fallback[i] then
