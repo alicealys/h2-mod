@@ -32,23 +32,21 @@ local function setuniversalfont(lang)
     LUI.MenuGenericButtons.ButtonLabelFont.Font = universalfont
 end
 
-local fallbackoff = "players2/default/disable_fallback_fonts"
-local does_fallbackoff_exist = io.fileexists(fallbackoff)
+local usenewfallback = Engine.GetDvarBool("r_fontFallbackMod")
 
-local function fontspopup()
-    LUI.FlowManager.RequestAddMenu(nil, "generic_yesno_popup", false, nil, true, {
+local function togglefallbackfonts()
+    Engine.SetDvarBool("r_fontFallbackMod", not Engine.GetDvarBool("r_fontFallbackMod"))
+
+    Engine.ExecNow("profile_menuDvarsFinish")
+    Engine.Exec("updategamerprofile")
+
+    LUI.FlowManager.RequestAddMenu(nil, "generic_confirmation_popup", false, nil, true, {
         popup_title = Engine.Localize("@MENU_CCS_RESTART_CONFIRMATION_TITLE"),
         message_text = Engine.Localize("@MENU_HDR_REBOOT_DESC"),
-        yes_action = function()
-            if does_fallbackoff_exist then
-                io.removefile(fallbackoff)
-            else
-                io.writefile(fallbackoff, "", false)
-            end
+        button_text = Engine.Localize( "@MENU_CCS_RESTART_BUTTON_LABEL"),
+        confirmation_action = function()
             updater.relaunch()
-        end,
-        yes_text = Engine.Localize("@LUA_MENU_YES"),
-        no_text = Engine.Localize("@LUA_MENU_NO")
+        end
     })
 end
 
@@ -90,34 +88,35 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 
     LUI.Options.AddOptionTextInfo(menu)
 
-    local languages_without_fallback = {0, 1, 2, 3, 4, 7, 14, 16}
+    local languageswithoutfallback = {0, 1, 2, 3, 4, 7, 14, 16}
     local lang = Engine.GetCurrentLanguage()
-    local language_is_include = false
+    local languageisincluded = false
 
-    for i = 1, #languages_without_fallback do
-        if lang == languages_without_fallback[i] then
-            language_is_include = true
+    for i = 1, #languageswithoutfallback do
+        if lang == languageswithoutfallback[i] then
+            languageisincluded = true
             break
         end
     end
 
-    if language_is_include == false then
-        if does_fallbackoff_exist then
-            menu:AddHelp({
-                name = "add_button_helper_text",
-                button_ref = "button_alt2",
-                helper_text = Engine.Localize("@LUA_MENU_FALLBACK_ENABLE"),
-                side = "right",
-                clickable = true
-            }, fontspopup)
-        else
+    if languageisincluded == false then
+        usenewfallback = Engine.GetDvarBool("r_fontFallbackMod")
+        if usenewfallback then
             menu:AddHelp({
                 name = "add_button_helper_text",
                 button_ref = "button_alt2",
                 helper_text = Engine.Localize("@LUA_MENU_FALLBACK_DISABLE"),
                 side = "right",
                 clickable = true
-            }, fontspopup)
+            }, togglefallbackfonts)
+        else
+            menu:AddHelp({
+                name = "add_button_helper_text",
+                button_ref = "button_alt2",
+                helper_text = Engine.Localize("@LUA_MENU_FALLBACK_ENABLE"),
+                side = "right",
+                clickable = true
+            }, togglefallbackfonts)
         end
     end
 
@@ -128,13 +127,13 @@ end)
 
 -- rup patch
 local lang = Engine.GetCurrentLanguage()
-if lang == 17 and does_fallbackoff_exist then
+if lang == 17 and not usenewfallback then
     LUI.UIButtonText.IsOffsetedLanguage = function()
         return true
     end
 end
 
-if not does_fallbackoff_exist then
+if usenewfallback then
     -- global patch
     LUI.UIButtonText.IsOffsetedLanguage = function()
         return false

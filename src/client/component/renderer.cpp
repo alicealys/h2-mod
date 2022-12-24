@@ -63,6 +63,7 @@ namespace renderer
 	public:
 		void post_unpack() override
 		{
+			dvars::r_fontFallbackMod = dvars::register_bool("r_fontFallbackMod", true, game::DVAR_FLAG_SAVED, "Use fallback fonts");
 			dvars::r_fullbright = dvars::register_int("r_fullbright", 0, 0, 4, game::DVAR_FLAG_SAVED, "Fullbright method");
 
 			r_init_draw_method_hook.create(0x14072F950, &r_init_draw_method_stub);

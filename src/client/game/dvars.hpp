@@ -30,6 +30,8 @@ namespace dvars
 
 	extern game::dvar_t* pm_bouncing;
 
+	extern game::dvar_t* r_fontFallbackMod;
+
 	extern game::dvar_t* r_fullbright;
 
 	extern game::dvar_t* cg_legacyCrashHandling;

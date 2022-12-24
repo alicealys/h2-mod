@@ -7,6 +7,7 @@
 #include "mods.hpp"
 
 #include "game/game.hpp"
+#include "game/dvars.hpp"
 
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
@@ -68,7 +69,7 @@ namespace filesystem
 
 			paths.push_back(path);
 
-			if (!::utils::io::file_exists("players2/default/disable_fallback_fonts"))
+			if (dvars::r_fontFallbackMod->current.enabled)
 			{
 				if (is_fallback_lang())
 				{
