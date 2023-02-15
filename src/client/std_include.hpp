@@ -87,6 +87,11 @@
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/stringbuffer.h>
 
+#pragma warning(push)
+#pragma warning(disable: 4459)
+#include <json.hpp>
+#pragma warning(pop)
+
 #include <asmjit/core/jitruntime.h>
 #include <asmjit/x86/x86assembler.h>
 

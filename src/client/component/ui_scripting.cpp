@@ -142,21 +142,106 @@ namespace ui_scripting
 			}
 		}
 
+		template <typename R>
+		std::function<R(const std::string& str)> 
+			safe_io_func(const std::function<R(const std::string& str)>& func)
+		{
+			return [func](const std::string& path)
+			{
+				const auto safe_path = filesystem::get_safe_path(path);
+				return func(safe_path);
+			};
+		}
+
+		script_value json_to_lua(const nlohmann::json& json)
+		{
+			if (json.is_object())
+			{
+				table object;
+				for (const auto& [key, value] : json.items())
+				{
+					object[key] = json_to_lua(value);
+				}
+			}
+
+			if (json.is_array())
+			{
+				table array;
+				auto index = 1;
+				for (const auto& value : json.array())
+				{
+					array[index++] = json_to_lua(value);
+				}
+			}
+
+			if (json.is_boolean())
+			{
+				return json.get<bool>();
+			}
+
+			if (json.is_number_integer())
+			{
+				return json.get<int>();
+			}
+
+			if (json.is_number_float())
+			{
+				return json.get<float>();
+			}
+
+			if (json.is_string())
+			{
+				return json.get<std::string>();
+			}
+
+			return {};
+		}
+
+		nlohmann::json lua_to_json(const script_value& value)
+		{
+			if (value.is<bool>())
+			{
+				return value.as<bool>();
+			}
+			
+			if (value.is<int>())
+			{
+				return value.as<int>();
+			}
+
+			if (value.is<float>())
+			{
+				return value.as<float>();
+			}
+
+			if (value.is<std::string>())
+			{
+				return value.as<std::string>();
+			}
+			
+			if (value.get_raw().t == game::hks::TNIL)
+			{
+				return {};
+			}
+
+			throw std::runtime_error("lua value must be of primitive type (boolean, integer, float, string)");
+		}
+
 		void setup_functions()
 		{
 			const auto lua = get_globals();
 
-			lua["io"]["fileexists"] = utils::io::file_exists;
-			lua["io"]["writefile"] = utils::io::write_file;
-			lua["io"]["movefile"] = utils::io::move_file;
-			lua["io"]["filesize"] = utils::io::file_size;
-			lua["io"]["createdirectory"] = utils::io::create_directory;
-			lua["io"]["directoryexists"] = utils::io::directory_exists;
-			lua["io"]["directoryisempty"] = utils::io::directory_is_empty;
-			lua["io"]["listfiles"] = utils::io::list_files;
-			lua["io"]["removefile"] = utils::io::remove_file;
-			lua["io"]["removedirectory"] = utils::io::remove_directory;
-			lua["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+			lua["io"]["fileexists"] = safe_io_func<bool>(utils::io::file_exists);
+			lua["io"]["writefile"] = filesystem::safe_write_file;
+			lua["io"]["filesize"] = safe_io_func<size_t>(utils::io::file_size);
+			lua["io"]["createdirectory"] = safe_io_func<bool>(utils::io::create_directory);
+			lua["io"]["directoryexists"] = safe_io_func<bool>(utils::io::directory_exists);
+			lua["io"]["directoryisempty"] = safe_io_func<bool>(utils::io::directory_is_empty);
+			lua["io"]["listfiles"] = safe_io_func<std::vector<std::string>>(utils::io::list_files);
+			lua["io"]["removefile"] = safe_io_func<bool>(utils::io::remove_file);
+			lua["io"]["removedirectory"] = safe_io_func<bool>(utils::io::remove_directory);
+			lua["io"]["readfile"] = safe_io_func<std::string>(
+				static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
 
 			using game = table;
 			auto game_type = game();
@@ -320,6 +405,85 @@ namespace ui_scripting
 
 			updater_table["getlasterror"] = updater::get_last_error;
 			updater_table["getcurrentfile"] = updater::get_current_file;
+
+			auto mods_table = table();
+			lua["mods"] = mods_table;
+
+			mods_table["getloaded"] = []() -> script_value
+			{
+				const auto& mod = mods::get_mod();
+				if (mod.has_value())
+				{
+					return mod.value();
+				}
+
+				return {};
+			};
+
+			mods_table["getlist"] = mods::get_mod_list;
+			mods_table["getinfo"] = [](const std::string& mod)
+			{
+				table info_table{};
+				const auto info = mods::get_mod_info(mod);
+				const auto has_value = info.has_value();
+				info_table["isvalid"] = has_value;
+
+				if (!has_value)
+				{
+					return info_table;
+				}
+
+				const auto& map = info.value();
+				for (const auto& [key, value] : map.items())
+				{
+					info_table[key] = json_to_lua(value);
+				}
+
+				return info_table;
+			};
+			
+			auto mods_stats_table = table();
+			mods_table["stats"] = mods_stats_table;
+			
+			mods_stats_table["set"] = [](const std::string& key, const script_value& value)
+			{
+				const auto json_value = lua_to_json(value);
+				mods::get_current_stats()[key] = json_value;
+				mods::write_mod_stats();
+			};
+			
+			mods_stats_table["get"] = [](const std::string& key)
+			{
+				return json_to_lua(mods::get_current_stats());
+			};
+
+			mods_stats_table["mapset"] = [](const std::string& mapname,
+				const std::string& key, const script_value& value)
+			{
+				const auto json_value = lua_to_json(value);
+				auto& stats = mods::get_current_stats();
+				stats["maps"][mapname][key] = json_value;
+				mods::write_mod_stats();
+			};
+
+			mods_stats_table["mapget"] = [](const std::string& mapname,
+				const std::string& key)
+			{
+				auto& stats = mods::get_current_stats();
+				return json_to_lua(stats["maps"][mapname][key]);
+			};
+
+			mods_stats_table["save"] = mods::write_mod_stats;
+			mods_stats_table["getall"] = []()
+			{
+				return json_to_lua(mods::get_current_stats());
+			};
+
+			mods_stats_table["setfromjson"] = [](const std::string& data)
+			{
+				const auto json = nlohmann::json::parse(data);
+				mods::get_current_stats() = json;
+			};
 		}
 
 		void start()
@@ -488,6 +652,11 @@ namespace ui_scripting
 				game::hks::hksi_luaL_error(state, current_error.data());
 			}
 
+			return 0;
+		}
+
+		int removed_function_stub(game::hks::lua_State* /*state*/)
+		{
 			return 0;
 		}
 	}

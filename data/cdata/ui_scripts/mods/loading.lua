@@ -39,24 +39,22 @@ LUI.addmenubutton("main_campaign", {
 })
 
 function getmodname(path)
-	local name = path
-	game:addlocalizedstring(name, name)
-	local desc = Engine.Localize("LUA_MENU_MOD_DESC_DEFAULT", name)
-	local infofile = path .. "/info.json"
+	local modinfo = mods.getinfo(path)
 
-	if (io.fileexists(infofile)) then
-		pcall(function()
-			local data = json.decode(io.readfile(infofile))
-			game:addlocalizedstring(data.description, data.description)
-			game:addlocalizedstring(data.author, data.author)
-			game:addlocalizedstring(data.version, data.version)
-			desc = Engine.Localize("@LUA_MENU_MOD_DESC", 
-				data.description, data.author, data.version)
-			name = data.name
-		end)
+	if (not modinfo.isvalid) then
+		game:addlocalizedstring(path, path)
+		local desc = Engine.Localize("LUA_MENU_MOD_DESC_DEFAULT", path)
+
+		return path, desc
+	else
+		game:addlocalizedstring(modinfo.name, modinfo.name)
+		game:addlocalizedstring(modinfo.description, modinfo.description)
+		game:addlocalizedstring(modinfo.author, modinfo.author)
+		game:addlocalizedstring(modinfo.version, modinfo.version)
+		local desc = Engine.Localize("@LUA_MENU_MOD_DESC", 
+			modinfo.description, modinfo.author, modinfo.version)
+		return modinfo.name, desc
 	end
-
-	return name, desc
 end
 
 LUI.MenuBuilder.registerType("mods_menu", function(a1)
@@ -69,13 +67,13 @@ LUI.MenuBuilder.registerType("mods_menu", function(a1)
 		uppercase_title = true
 	})
 
-	menu:AddButton("@LUA_MENU_WORKSHOP", function()
+	--[[menu:AddButton("@LUA_MENU_WORKSHOP", function()
 		if (LUI.MenuBuilder.m_types_build["mods_workshop_menu"]) then
 			LUI.FlowManager.RequestAddMenu(nil, "mods_workshop_menu")
 		end
 	end, nil, true, nil, {
 		desc_text = Engine.Localize("@LUA_MENU_WORKSHOP_DESC")
-	})
+	})--]]
 
 	local modfolder = game:getloadedmod()
 	if (modfolder ~= "") then
@@ -91,21 +89,21 @@ LUI.MenuBuilder.registerType("mods_menu", function(a1)
 
 	createdivider(menu, Engine.Localize("@LUA_MENU_AVAILABLE_MODS"))
 
-	if (io.directoryexists("mods")) then
-		local mods = io.listfiles("mods/")
-		for i = 1, #mods do
-			if (io.directoryexists(mods[i]) and not io.directoryisempty(mods[i])) then
-				local name, desc = getmodname(mods[i])
+	local contentpresent = false
 
-				if (mods[i] ~= modfolder) then
-					game:addlocalizedstring(name, name)
-					menu:AddButton(name, function()
-						Engine.Exec("loadmod " .. mods[i])
-					end, nil, true, nil, {
-						desc_text = desc
-					})
-				end
-			end
+	local mods = mods.getlist()
+	for i = 1, #mods do
+		contentpresent = true
+
+		local name, desc = getmodname(mods[i])
+
+		if (mods[i] ~= modfolder) then
+			game:addlocalizedstring(name, name)
+			menu:AddButton(name, function()
+				Engine.Exec("loadmod " .. mods[i])
+			end, nil, true, nil, {
+				desc_text = desc
+			})
 		end
 	end
 	
@@ -116,7 +114,10 @@ LUI.MenuBuilder.registerType("mods_menu", function(a1)
 
 	LUI.Options.InitScrollingList(menu.list, nil)
 	menu:CreateBottomDivider()
-	menu.optionTextInfo = LUI.Options.AddOptionTextInfo(menu)
+
+	if (contentpresent) then
+		menu.optionTextInfo = LUI.Options.AddOptionTextInfo(menu)
+	end
 
 	return menu
 end)

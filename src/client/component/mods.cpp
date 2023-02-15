@@ -16,6 +16,9 @@
 #include <utils/io.hpp>
 #include <utils/string.hpp>
 
+#define MOD_FOLDER "mods"
+#define MOD_STATS_FOLDER "players2/modstats"
+
 namespace mods
 {
 	namespace
@@ -123,6 +126,97 @@ namespace mods
 				mod_info.zone_info.zones.emplace_back(values[1], alloc_flags);
 			}
 		}
+
+		std::optional<std::string> get_mod_basename()
+		{
+			const auto mod = get_mod();
+			if (!mod.has_value())
+			{
+				return {};
+			}
+
+			const auto& value = mod.value();
+			const auto last_index = value.find_last_of('/');
+			const auto basename = value.substr(last_index + 1);
+			return {basename};
+		}
+
+		nlohmann::json default_mod_stats()
+		{
+			nlohmann::json json;
+			json["maps"] = {};
+			return json;
+		}
+
+		nlohmann::json verify_mod_stats(nlohmann::json& json)
+		{
+			if (!json.is_object())
+			{
+				json = {};
+			}
+
+			if (!json.contains("maps") || !json["maps"].is_object())
+			{
+				json["maps"] = {};
+			}
+
+			return json;
+		}
+
+		nlohmann::json parse_mod_stats()
+		{
+			const auto name = get_mod_basename();
+			if (!name.has_value())
+			{
+				return default_mod_stats();
+			}
+
+			const auto& name_value = name.value();
+			const auto stat_file = MOD_STATS_FOLDER "/" + name_value + ".json";
+			if (!utils::io::file_exists(stat_file))
+			{
+				return default_mod_stats();
+			}
+
+			const auto data = utils::io::read_file(stat_file);
+			try
+			{
+				auto json = nlohmann::json::parse(data);
+				return verify_mod_stats(json);
+			}
+			catch (const std::exception& e)
+			{
+				console::error("Failed to parse json mod stat file \"%s.json\": %s", 
+					name_value.data(), e.what());
+			}
+
+			return default_mod_stats();
+		}
+
+		void initialize_stats()
+		{
+			get_current_stats() = parse_mod_stats();
+		}
+	}
+
+	nlohmann::json& get_current_stats()
+	{
+		static nlohmann::json stats;
+		stats = verify_mod_stats(stats);
+		return stats;
+	}
+
+	void write_mod_stats()
+	{
+		const auto name = get_mod_basename();
+		if (!name.has_value())
+		{
+			return;
+		}
+
+		const auto& name_value = name.value();
+		const auto stat_file = MOD_STATS_FOLDER "/" + name_value + ".json";
+		utils::io::write_file(stat_file, get_current_stats().dump(), false);
 	}
 
 	bool mod_requires_restart(const std::string& path)
@@ -139,6 +233,8 @@ namespace mods
 			filesystem::unregister_path(mod_info.path.value());
 		}
 
+		write_mod_stats();
+		initialize_stats();
 		mod_info.path = path;
 		filesystem::register_path(path);
 		parse_mod_zones();
@@ -165,14 +261,63 @@ namespace mods
 		return mod_info.path;
 	}
 
+	std::vector<std::string> get_mod_list()
+	{
+		if (!utils::io::directory_exists(MOD_FOLDER))
+		{
+			return {};
+		}
+
+		std::vector<std::string> mod_list;
+
+		const auto files = utils::io::list_files(MOD_FOLDER);
+		for (const auto& file : files)
+		{
+			if (!utils::io::directory_exists(file) || utils::io::directory_is_empty(file))
+			{
+				continue;
+			}
+
+			mod_list.push_back(file);
+		}
+
+		return mod_list;
+	}
+
+	std::optional<nlohmann::json> get_mod_info(const std::string& name)
+	{
+		const auto info_file = name + "/info.json";
+		if (!utils::io::directory_exists(name) || !utils::io::file_exists(info_file))
+		{
+			return {};
+		}
+
+		std::unordered_map<std::string, std::string> info;
+		const auto data = utils::io::read_file(info_file);
+		try
+		{
+			return {nlohmann::json::parse(data)};
+		}
+		catch (const std::exception&)
+		{
+		}
+
+		return {};
+	}
+
 	class component final : public component_interface
 	{
 	public:
 		void post_unpack() override
 		{
-			if (!utils::io::directory_exists("mods"))
+			if (!utils::io::directory_exists(MOD_FOLDER))
 			{
-				utils::io::create_directory("mods");
+				utils::io::create_directory(MOD_FOLDER);
+			}
+
+			if (!utils::io::directory_exists(MOD_STATS_FOLDER))
+			{
+				utils::io::create_directory(MOD_STATS_FOLDER);
 			}
 
 			db_release_xassets_hook.create(0x140416A80, db_release_xassets_stub);
