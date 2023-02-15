@@ -91,7 +91,7 @@ namespace ui_scripting
 	class script_value
 	{
 	public:
-		script_value() = default;
+		script_value();
 		script_value(const game::hks::HksObject& value);
 
 		script_value(int value);
@@ -134,6 +134,19 @@ namespace ui_scripting
 		script_value(F f)
 			: script_value(function(f))
 		{
+		}
+
+		template <typename F>
+		script_value(const std::optional<F> optional)
+		{
+			if (optional.has_value())
+			{
+				script_value::script_value(optional.value());
+			}
+			else
+			{
+				script_value::script_value();
+			}
 		}
 
 		bool operator==(const script_value& other) const;
@@ -225,6 +238,11 @@ namespace ui_scripting
 				args.push_back(this->values_[i]);
 			}
 			return args;
+		}
+
+		operator script_value() const
+		{
+			return this->value_;
 		}
 
 		template <typename T>

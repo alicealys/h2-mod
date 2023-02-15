@@ -14,4 +14,7 @@ namespace filesystem
 
 	std::vector<std::string> get_search_paths();
 	std::vector<std::string> get_search_paths_rev();
+
+	std::string get_safe_path(const std::filesystem::path& path);
+	bool safe_write_file(const std::string& file, const std::string& data, bool append = false);
 }

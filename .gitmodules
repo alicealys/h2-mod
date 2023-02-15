@@ -46,3 +46,6 @@
 [submodule "deps/gsc-tool-h2"]
 	path = deps/gsc-tool-h2
 	url = https://github.com/fedddddd/gsc-tool-h2.git
+[submodule "deps/json"]
+	path = deps/json
+	url = https://github.com/nlohmann/json.git

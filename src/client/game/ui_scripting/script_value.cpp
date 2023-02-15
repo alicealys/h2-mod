@@ -79,6 +79,13 @@ namespace ui_scripting
 	 * Constructors
 	 **************************************************************/
 
+	script_value::script_value()
+	{
+		game::hks::HksObject nil{};
+		nil.t = game::hks::TNIL;
+		this->value_ = nil;
+	}
+
 	script_value::script_value(const game::hks::HksObject& value)
 		: value_(value)
 	{

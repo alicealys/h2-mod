@@ -97,6 +97,23 @@ namespace filesystem
 			static auto current_path = std::filesystem::current_path().string();
 			return current_path.data();
 		}
+
+		bool is_parent_path(const std::filesystem::path& parent, const std::filesystem::path& child)
+		{
+			std::filesystem::path iter = child;
+
+			while (iter != iter.parent_path())
+			{
+				if (iter == parent)
+				{
+					return true;
+				}
+
+				iter = iter.parent_path();
+			}
+
+			return false;
+		}
 	}
 
 	std::string read_file(const std::string& path)
@@ -228,6 +245,50 @@ namespace filesystem
 		}
 
 		return paths;
+	}
+
+	void check_path(const std::filesystem::path& path)
+	{
+		if (path.generic_string().find("..") != std::string::npos)
+		{
+			throw std::runtime_error("directory traversal is not allowed");
+		}
+	}
+
+	std::string get_safe_path(const std::filesystem::path& path)
+	{
+		check_path(path);
+		const auto absolute = std::filesystem::weakly_canonical(path);
+
+		static std::vector<std::filesystem::path> allowed_directories =
+		{
+			{std::filesystem::weakly_canonical("mods")},
+			{std::filesystem::weakly_canonical("h2-mod")},
+			{std::filesystem::weakly_canonical("players2/default")},
+		};
+
+		auto is_allowed = false;
+		for (const auto& dir : allowed_directories)
+		{
+			if (is_parent_path(dir, absolute))
+			{
+				is_allowed = true;
+				break;
+			}
+		}
+
+		if (!is_allowed)
+		{
+			throw std::runtime_error(std::format("Disallowed access to directory \"{}\"", path.generic_string()));
+		}
+
+		return path.generic_string();
+	}
+
+	bool safe_write_file(const std::string& file, const std::string& data, bool append)
+	{
+		const auto path = filesystem::get_safe_path(file);
+		return utils::io::write_file(path, data, append);
 	}
 
 	class component final : public component_interface
