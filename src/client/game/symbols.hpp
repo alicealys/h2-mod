@@ -92,9 +92,14 @@ namespace game
 		G_GivePlayerWeapon{0x14051B660};
 	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x1404C4110};
 	WEAK symbol<void(int localClientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
+	WEAK symbol<void(trace_t* results, const float* start, const float* end, 
+		const Bounds* bounds, int passEntityNum, int contentmask)> G_TraceCapsule{0x1404CBFE0};
+	WEAK symbol<void(int* hitNum, const float* start, const float* end, 
+		int passEntityNum, int passEntityNum1, int contentmask)> G_SightTrace{0x1404CBCA0};
 	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x14036F310};
 
 	WEAK symbol<char*(const size_t size)> Hunk_AllocateTempMemoryHigh{0x140614790};
+	WEAK symbol<char*(const size_t size, const size_t alignment)> Hunk_AllocAlignInternal{0x140613D80};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x140620660};
 
@@ -198,6 +203,12 @@ namespace game
 		const Bounds*, int, int)> PM_playerTrace{0x14068F0A0};
 	WEAK symbol<void(pmove_t*, trace_t*, const float*, const float*,
 		const Bounds*, int, int)> PM_trace{0x14068F1D0};
+
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_WalkMove{0x14068EBB0};
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_AirMove{0x140686BF0};
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_GroundTrace{0x140689AA0};
+
+	WEAK symbol<float(float*)> Vec2Normalize{0x140611D80};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14089EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x1408EC2E0};

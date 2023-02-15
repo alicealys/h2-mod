@@ -505,19 +505,19 @@ namespace gui::debug
 
 		void get_pathnode_origin(game::pathnode_t* node, float* out)
 		{
-			out[0] = node->vLocalOrigin[0];
-			out[1] = node->vLocalOrigin[1];
-			out[2] = node->vLocalOrigin[2];
+			out[0] = node->constant.vLocalOrigin[0];
+			out[1] = node->constant.vLocalOrigin[1];
+			out[2] = node->constant.vLocalOrigin[2];
 
 			game::PathNode_WorldifyPosFromParent(node, out);
 		}
 
 		void draw_node_links(game::pathnode_t* node, float* origin)
 		{
-			for (unsigned int i = 0; i < node->totalLinkCount; i++)
+			for (unsigned int i = 0; i < node->constant.totalLinkCount; i++)
 			{
 				float linked_origin[3] = {};
-				const auto num = node->Links[i].nodeNum;
+				const auto num = node->constant.Links[i].nodeNum;
 				const auto linked = &game::pathData->nodes[num];
 
 				get_pathnode_origin(linked, linked_origin);
