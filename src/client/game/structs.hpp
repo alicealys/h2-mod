@@ -103,41 +103,180 @@ namespace game
 	static_assert(offsetof(gentity_s, flags) == 364);
 	static_assert(offsetof(gentity_s, s) == 140);
 
-	struct pathlink_s
+	struct pathnode_yaworient_t
 	{
-		char __pad0[0x4];
-		unsigned __int16 nodeNum;
-		char __pad[0x6];
+		float fLocalAngle;
+		float localForward[2];
 	};
 
-	static_assert(sizeof(pathlink_s) == 12);
+	union $3936EE84564F75EDA6DCBAC77A545FC8
+	{
+		pathnode_yaworient_t yaw_orient;
+		float angles[3];
+	};
+
+	union PathNodeParentUnion
+	{
+		scr_string_t name;
+		unsigned short index;
+	};
+
+	enum nodeType
+	{
+		NODE_ERROR = 0x0,
+		NODE_PATHNODE = 0x1,
+		NODE_NEGOTIATION_BEGIN = 0x13,
+		NODE_NEGOTIATION_END = 0x14
+	};
+
+	enum PathNodeErrorCode : std::int32_t
+	{
+		PNERR_NONE = 0x0,
+		PNERR_INSOLID = 0x1,
+		PNERR_FLOATING = 0x2,
+		PNERR_NOLINK = 0x3,
+		PNERR_DUPLICATE = 0x4,
+		PNERR_NOSTANCE = 0x5,
+		PNERR_INVALIDDOOR = 0x6,
+		PNERR_NOANGLES = 0x7,
+		PNERR_BADPLACEMENT = 0x8,
+		NUM_PATH_NODE_ERRORS = 0x9,
+	};
+
+	union $5F11B9753862CE791E23553F99FA1738
+	{
+		float minUseDistSq;
+		PathNodeErrorCode error;
+	};
+
+	struct pathlink_s
+	{
+		float fDist;
+		unsigned short nodeNum;
+		unsigned char disconnectCount;
+		unsigned char negotiationLink;
+		unsigned char flags;
+		unsigned char ubBadPlaceCount[3];
+	};
+
+	struct pathnode_constant_t
+	{
+		unsigned short type;
+		unsigned int spawnflags;
+		scr_string_t targetname;
+		scr_string_t script_linkName;
+		scr_string_t script_noteworthy;
+		scr_string_t target;
+		scr_string_t animscript;
+		int animscriptfunc;
+		float vLocalOrigin[3];
+		$3936EE84564F75EDA6DCBAC77A545FC8 ___u9;
+		PathNodeParentUnion parent;
+		$5F11B9753862CE791E23553F99FA1738 ___u11;
+		short wOverlapNode[2];
+		char __pad0[4];
+		unsigned short totalLinkCount;
+		pathlink_s* Links;
+		scr_string_t unk;
+		char __pad1[4];
+	};
+
+	struct SentientHandle
+	{
+		unsigned short number;
+		unsigned short infoIndex;
+	};
+
+	struct pathnode_dynamic_t
+	{
+		SentientHandle pOwner;
+		int iFreeTime;
+		int iValidTime[3];
+		short wLinkCount;
+		short wOverlapCount;
+		short turretEntNumber;
+		unsigned char userCount;
+		unsigned char hasBadPlaceLink;
+		int spreadUsedTime[2];
+		short flags;
+		short dangerousCount;
+		int recentUseProxTime;
+	};
+
+	union $73F238679C0419BE2C31C6559E8604FC
+	{
+		float nodeCost;
+		int linkIndex;
+	};
+
+	struct pathnode_t;
+	struct pathnode_transient_t
+	{
+		int iSearchFrame;
+		pathnode_t* pNextOpen;
+		pathnode_t* pPrevOpen;
+		pathnode_t* pParent;
+		float fCost;
+		float fHeuristic;
+		$73F238679C0419BE2C31C6559E8604FC ___u6;
+	};
 
 	struct pathnode_t
 	{
-		unsigned __int16 type;
-		unsigned int spawnflags;
-		unsigned int targetname;
-		unsigned int script_linkName;
-		unsigned int script_noteworthy;
-		unsigned int target;
-		unsigned int animscript;
-		int animscriptfunc;
-		float vLocalOrigin[0x3];
-		char __pad0[0x1C];
-		unsigned __int16 totalLinkCount;
-		char __pad1[0x2];
-		pathlink_s* Links;
-		char __pad2[0x68];
-	}; // size = 192
+		pathnode_constant_t constant;
+		pathnode_dynamic_t dynamic;
+		pathnode_transient_t transient;
+	};
 
-	static_assert(sizeof(pathnode_t) == 192);
+	struct pathnode_tree_nodes_t
+	{
+		int nodeCount;
+		unsigned short* nodes;
+	};
+
+	struct pathnode_tree_t;
+	union pathnode_tree_info_t
+	{
+		pathnode_tree_t* child[2];
+		pathnode_tree_nodes_t s;
+	};
+
+	struct pathnode_tree_t
+	{
+		int axis;
+		float dist;
+		pathnode_tree_info_t u;
+	};
+
+	struct PathDynamicNodeGroup
+	{
+		unsigned short parentIndex;
+		int nodeTreeCount;
+		pathnode_tree_t* nodeTree;
+	};
 
 	struct PathData
 	{
 		const char* name;
 		unsigned int nodeCount;
 		pathnode_t* nodes;
-		// ... 
+		bool parentIndexResolved;
+		unsigned short version;
+		int visBytes;
+		unsigned char* pathVis;
+		int nodeTreeCount;
+		pathnode_tree_t* nodeTree;
+		int dynamicNodeGroupCount;
+		PathDynamicNodeGroup* dynamicNodeGroups;
+		int exposureBytes;
+		unsigned char* pathExposure;
+		int noPeekVisBytes;
+		unsigned char* pathNoPeekVis;
+		int zoneCount;
+		int zonesBytes;
+		unsigned char* pathZones;
+		int dynStatesBytes;
+		unsigned char* pathDynStates;
 	};
 
 	struct GfxImage;
@@ -1293,16 +1432,96 @@ namespace game
 		const char* name;
 	};
 
+
+	struct playerState_s
+	{
+		char __pad0[48];
+		unsigned short gravity;
+		char __pad1[34];
+		int pm_flags;
+		char __pad2[40];
+		vec3_t origin;
+		vec3_t velocity;
+	};
+
+	static_assert(offsetof(playerState_s, origin) == 128);
+
+	struct SprintState_s
+	{
+		int sprintButtonUpRequired;
+		int sprintDelay;
+		int lastSprintStart;
+		int lastSprintEnd;
+		int sprintStartMaxLength;
+	};
+
+	struct usercmd_s
+	{
+		int serverTime;
+		int buttons;
+		char __pad0[20];
+		char forwardmove;
+		char rightmove;
+		char __pad1[2];
+		float unk_float;
+		char __pad2[28];
+	};
+
 	struct pmove_t
 	{
+		playerState_s* ps;
+		usercmd_s cmd;
+		usercmd_s oldcmd;
+		int tracemask;
+		int numtouch;
+		int touchents[32];
+		Bounds bounds;
+		char __pad0[28];
+		char handler;
+		char __pad1[0x180];
 	};
+
+	//static_assert(sizeof(pmove_t) == 328);
+	static_assert(offsetof(pmove_t, handler) == 324);
+	static_assert(offsetof(pmove_t, bounds) == 272);
+	static_assert(offsetof(pmove_t, tracemask) == 136);
 
 	struct trace_t
 	{
-		char __pad0[0x29];
-		bool allsolid; // Confirmed in CM_PositionTestCapsuleInTriangle
-		bool startsolid; // Confirmed in PM_JitterPoint
+		float fraction;
+		float normal[3];
+		int surfaceFlags;
+		int contents;
+		int hitType;
+		unsigned short hitId;
+		char __pad1[11];
+		bool allsolid;
+		bool startsolid;
+		bool walkable;
+		char __pad0[8];
 	};
+
+	struct pml_t
+	{
+		float forward[3];
+		float right[3];
+		float up[3];
+		float frametime;
+		int msec;
+		int walking;
+		int groundPlane;
+		trace_t groundTrace;
+		float previous_origin[3];
+		float previous_velocity[3];
+		float wishdir[3];
+		float platformUp[3];
+		float impactSpeed;
+		int flinch;
+	};
+
+	static_assert(offsetof(pml_t, frametime) == 36);
+	static_assert(offsetof(pml_t, groundTrace) == 52);
+	static_assert(offsetof(pml_t, flinch) == 156);
 
 	enum Sys_Folder : std::int32_t
 	{
