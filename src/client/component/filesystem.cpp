@@ -5,6 +5,7 @@
 #include "console.hpp"
 #include "localized_strings.hpp"
 #include "mods.hpp"
+#include "language.hpp"
 
 #include "game/game.hpp"
 
@@ -23,20 +24,6 @@ namespace filesystem
 		{
 			static std::deque<std::filesystem::path> search_paths{};
 			return search_paths;
-		}
-
-		bool is_fallback_lang()
-		{
-			static auto* loc_language = game::Dvar_FindVar("loc_language");
-			const auto id = loc_language->current.integer;
-			return id == 5 || id == 6 || id == 8 || id == 9 || id == 10 || id == 11 || id == 12 || id == 13 || id == 15 || id == 17;
-		}
-
-		bool is_polrus_lang()
-		{
-			static auto* loc_language = game::Dvar_FindVar("loc_language");
-			const auto id = loc_language->current.integer;
-			return id == 5 || id == 6 || id == 12 || id == 13 || id == 17;
 		}
 
 		void fs_startup_stub(const char* name)
@@ -68,12 +55,12 @@ namespace filesystem
 
 			paths.push_back(path);
 			
-			if (is_fallback_lang())
+			if (language::is_non_latin())
 			{
 				paths.push_back(path / "fallback");
 			}
 
-			if (is_polrus_lang())
+			if (language::is_polrus() || language::is_arabic())
 			{
 				paths.push_back(path / "polrus");
 			}

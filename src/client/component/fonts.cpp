@@ -5,6 +5,7 @@
 #include "console.hpp"
 #include "filesystem.hpp"
 #include "command.hpp"
+#include "language.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
@@ -138,9 +139,21 @@ namespace fonts
 			return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
 		}
 
+		game::Font_s* get_bank_font()
+		{
+			if (language::is_asian())
+			{
+				return game::R_RegisterFont("fonts/defaultBold.otf", 32);
+			}
+			else
+			{
+				return game::R_RegisterFont("fonts/bank.ttf", 32);
+			}
+		}
+
 		void* ui_asset_cache_stub()
 		{
-			bank_font = game::R_RegisterFont("fonts/bank.ttf", 32);
+			bank_font = get_bank_font();
 			return ui_asset_cache_hook.invoke<void*>();
 		}
 
