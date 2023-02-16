@@ -118,15 +118,11 @@ namespace ui_scripting
 
         arguments call(const arguments& arguments) const;
 
-        arguments operator()(const arguments& arguments) const;
-
         template<class ...T>
         arguments operator()(T... arguments) const
         {
             return this->call({arguments...});
         }
-
-        arguments operator()() const;
 
         game::hks::cclosure* ptr;
         game::hks::HksObjectType type;

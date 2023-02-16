@@ -342,14 +342,4 @@ namespace ui_scripting
     {
         return call_script_function(*this, arguments);
     }
-
-    arguments function::operator()(const arguments& arguments) const
-    {
-        return this->call(arguments);
-    }
-
-    arguments function::operator()() const
-    {
-        return this->call({});
-    }
 }
