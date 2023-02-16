@@ -12,8 +12,11 @@
 #include "component/mods.hpp"
 #include "component/localized_strings.hpp"
 #include "component/scheduler.hpp"
+#include "component/filesystem.hpp"
 
 #include "game/ui_scripting/execution.hpp"
+
+#include "lualib.h"
 
 #include <xsk/gsc/types.hpp>
 #include <xsk/resolver.hpp>
@@ -39,6 +42,22 @@ namespace scripting::lua
 			);
 		}
 
+		void remove_unsafe_functions(sol::state& state)
+		{
+			state["package"]["searchers"][3] = sol::lua_value{state, sol::lua_nil};
+			state["package"]["searchers"][4] = sol::lua_value{state, sol::lua_nil};
+
+			state["os"]["execute"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["exit"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["getenv"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["remove"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["rename"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["setlocale"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["tmpname"] = sol::lua_value{state, sol::lua_nil};
+
+			state["package"]["loadlib"] = sol::lua_value{state, sol::lua_nil};
+		}
+
 		void setup_json(sol::state& state)
 		{
 			const auto json = state.safe_script(json_script, &sol::script_pass_on_error);
@@ -48,15 +67,18 @@ namespace scripting::lua
 
 		void setup_io(sol::state& state)
 		{
-			state["io"]["fileexists"] = utils::io::file_exists;
-			state["io"]["writefile"] = utils::io::write_file;
-			state["io"]["filesize"] = utils::io::file_size;
-			state["io"]["createdirectory"] = utils::io::create_directory;
-			state["io"]["directoryexists"] = utils::io::directory_exists;
-			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
-			state["io"]["listfiles"] = utils::io::list_files;
-			state["io"]["copyfolder"] = utils::io::copy_folder;
-			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+			state["io"] = sol::table::create(state.lua_state());
+			state["io"]["fileexists"] = filesystem::safe_io_func<bool>(utils::io::file_exists);
+			state["io"]["writefile"] = filesystem::safe_write_file;
+			state["io"]["filesize"] = filesystem::safe_io_func<size_t>(utils::io::file_size);
+			state["io"]["createdirectory"] = filesystem::safe_io_func<bool>(utils::io::create_directory);
+			state["io"]["directoryexists"] = filesystem::safe_io_func<bool>(utils::io::directory_exists);
+			state["io"]["directoryisempty"] = filesystem::safe_io_func<bool>(utils::io::directory_is_empty);
+			state["io"]["listfiles"] = filesystem::safe_io_func<std::vector<std::string>>(utils::io::list_files);
+			state["io"]["removefile"] = filesystem::safe_io_func<bool>(utils::io::remove_file);
+			state["io"]["removedirectory"] = filesystem::safe_io_func<bool>(utils::io::remove_directory);
+			state["io"]["readfile"] = filesystem::safe_io_func<std::string>(
+				static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
 		}
 
 		void setup_vector_type(sol::state& state)
@@ -807,7 +829,6 @@ namespace scripting::lua
 	{
 		this->state_.open_libraries(sol::lib::base,
 		                            sol::lib::package,
-		                            sol::lib::io,
 		                            sol::lib::string,
 		                            sol::lib::os,
 		                            sol::lib::math,
@@ -830,6 +851,7 @@ namespace scripting::lua
 			return this->folder_;
 		};
 
+		remove_unsafe_functions(this->state_);
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
