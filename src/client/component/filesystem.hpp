@@ -17,4 +17,15 @@ namespace filesystem
 
 	std::string get_safe_path(const std::filesystem::path& path);
 	bool safe_write_file(const std::string& file, const std::string& data, bool append = false);
+
+	template <typename R>
+	std::function<R(const std::string& str)>
+		safe_io_func(const std::function<R(const std::string& str)>& func)
+	{
+		return [func](const std::string& path)
+		{
+			const auto safe_path = filesystem::get_safe_path(path);
+			return func(safe_path);
+		};
+	}
 }

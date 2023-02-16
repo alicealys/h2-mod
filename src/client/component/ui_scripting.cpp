@@ -142,17 +142,6 @@ namespace ui_scripting
 			}
 		}
 
-		template <typename R>
-		std::function<R(const std::string& str)> 
-			safe_io_func(const std::function<R(const std::string& str)>& func)
-		{
-			return [func](const std::string& path)
-			{
-				const auto safe_path = filesystem::get_safe_path(path);
-				return func(safe_path);
-			};
-		}
-
 		script_value json_to_lua(const nlohmann::json& json)
 		{
 			if (json.is_object())
@@ -231,16 +220,17 @@ namespace ui_scripting
 		{
 			const auto lua = get_globals();
 
-			lua["io"]["fileexists"] = safe_io_func<bool>(utils::io::file_exists);
+			lua["io"] = table();
+			lua["io"]["fileexists"] = filesystem::safe_io_func<bool>(utils::io::file_exists);
 			lua["io"]["writefile"] = filesystem::safe_write_file;
-			lua["io"]["filesize"] = safe_io_func<size_t>(utils::io::file_size);
-			lua["io"]["createdirectory"] = safe_io_func<bool>(utils::io::create_directory);
-			lua["io"]["directoryexists"] = safe_io_func<bool>(utils::io::directory_exists);
-			lua["io"]["directoryisempty"] = safe_io_func<bool>(utils::io::directory_is_empty);
-			lua["io"]["listfiles"] = safe_io_func<std::vector<std::string>>(utils::io::list_files);
-			lua["io"]["removefile"] = safe_io_func<bool>(utils::io::remove_file);
-			lua["io"]["removedirectory"] = safe_io_func<bool>(utils::io::remove_directory);
-			lua["io"]["readfile"] = safe_io_func<std::string>(
+			lua["io"]["filesize"] = filesystem::safe_io_func<size_t>(utils::io::file_size);
+			lua["io"]["createdirectory"] = filesystem::safe_io_func<bool>(utils::io::create_directory);
+			lua["io"]["directoryexists"] = filesystem::safe_io_func<bool>(utils::io::directory_exists);
+			lua["io"]["directoryisempty"] = filesystem::safe_io_func<bool>(utils::io::directory_is_empty);
+			lua["io"]["listfiles"] = filesystem::safe_io_func<std::vector<std::string>>(utils::io::list_files);
+			lua["io"]["removefile"] = filesystem::safe_io_func<bool>(utils::io::remove_file);
+			lua["io"]["removedirectory"] = filesystem::safe_io_func<bool>(utils::io::remove_directory);
+			lua["io"]["readfile"] = filesystem::safe_io_func<std::string>(
 				static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
 
 			using game = table;
@@ -683,6 +673,29 @@ namespace ui_scripting
 			hks_package_require_hook.create(0x1402B4DA0, hks_package_require_stub);
 			hks_start_hook.create(0x140328BE0, hks_start_stub);
 			hks_shutdown_hook.create(0x1403203B0, hks_shutdown_stub);
+
+			// remove unsafe functions
+			utils::hook::nop(0x1402D885A, 1);
+			utils::hook::jump(0x14031E700, 0x1402D86E0);
+
+			utils::hook::jump(0x1402BFCC0, removed_function_stub); // io
+			utils::hook::jump(0x14017EE60, removed_function_stub); // profile
+			utils::hook::jump(0x1402C0150, removed_function_stub); // os
+			utils::hook::jump(0x14017F730, removed_function_stub); // serialize
+			utils::hook::jump(0x1402C0FF0, removed_function_stub); // hks
+			utils::hook::jump(0x14017EC60, removed_function_stub); // debug
+			utils::hook::nop(0x1402BFC48, 5); // coroutine
+
+			utils::hook::jump(0x1402B7FD0, removed_function_stub);
+			utils::hook::jump(0x1402B7C40, removed_function_stub);
+			utils::hook::jump(0x1402BAC30, removed_function_stub);
+
+			utils::hook::jump(0x1402B5480, removed_function_stub);
+			utils::hook::jump(0x1402C2030, removed_function_stub);
+			utils::hook::jump(0x1402C2180, removed_function_stub);
+
+			utils::hook::jump(0x1402B6F70, removed_function_stub);
+			utils::hook::jump(0x1402BD890, removed_function_stub);
 		}
 	};
 }
