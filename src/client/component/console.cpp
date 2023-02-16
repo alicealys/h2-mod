@@ -54,6 +54,11 @@ namespace console
 		template <typename... Args>
 		int invoke_printf(const char* fmt, Args&&... args)
 		{
+			if (printf_hook.get_original() == nullptr)
+			{
+				return printf(fmt, std::forward<Args>(args)...);
+			}
+
 			return printf_hook.invoke<int>(fmt, std::forward<Args>(args)...);
 		}
 
@@ -336,10 +341,13 @@ namespace console
 			ShowWindow(GetConsoleWindow(), SW_HIDE);
 		}
 
-		void post_unpack() override
+		void post_start() override
 		{
 			printf_hook.create(printf, printf_stub);
+		}
 
+		void post_unpack() override
+		{
 			ShowWindow(GetConsoleWindow(), SW_SHOW);
 			SetConsoleTitle("H2-Mod");
 
