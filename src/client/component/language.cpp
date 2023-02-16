@@ -35,7 +35,6 @@ namespace language
 			game::LANGUAGE_RUSSIAN_PARTIAL,
 		};
 
-
 		std::unordered_set<game::language_t> asian_languages =
 		{
 			game::LANGUAGE_JAPANESE_FULL,

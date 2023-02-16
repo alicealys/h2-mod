@@ -171,7 +171,7 @@ namespace gsc
 			const auto script = assembler->output_script();
 			script_file_ptr->bytecodeLen = static_cast<int>(script.size());
 
-			script_file_ptr->buffer = game::Hunk_AllocateTempMemoryHigh(stack.size() + 1);
+			script_file_ptr->buffer = scriptfile_allocator.allocate_array<char>(stack.size() + 1);
 			std::memcpy(script_file_ptr->buffer, stack.data(), stack.size());
 
 			script_file_ptr->bytecode = allocate_buffer(script.size() + 1);
