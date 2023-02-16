@@ -62,18 +62,18 @@ namespace ui_scripting
 		}
 	}
 
-	class hks_object
+	class hks_reference
 	{
 	public:
-		hks_object() = default;
-		hks_object(const game::hks::HksObject& value);
-		hks_object(const hks_object& other) noexcept;
-		hks_object(hks_object&& other) noexcept;
+		hks_reference() = default;
+		hks_reference(const game::hks::HksObject& value);
+		hks_reference(const hks_reference& other) noexcept;
+		hks_reference(hks_reference&& other) noexcept;
 
-		hks_object& operator=(const hks_object& other) noexcept;
-		hks_object& operator=(hks_object&& other) noexcept;
+		hks_reference& operator=(const hks_reference& other) noexcept;
+		hks_reference& operator=(hks_reference&& other) noexcept;
 
-		~hks_object();
+		~hks_reference();
 
 		const game::hks::HksObject& get() const;
 
@@ -180,7 +180,7 @@ namespace ui_scripting
 		{
 			if (!this->is<T>())
 			{
-				const auto hks_typename = game::hks::s_compilerTypeName[this->get_raw().t + 2];
+				const auto hks_typename = game::hks::s_compilerTypeName[this->get_type() + 2];
 				const auto typename_ = get_typename<T>();
 
 				throw std::runtime_error(utils::string::va("%s expected, got %s", 
@@ -196,9 +196,10 @@ namespace ui_scripting
 			return this->as<T>();
 		}
 
+		const game::hks::HksObjectType get_type() const;
 		const game::hks::HksObject& get_raw() const;
 
-		hks_object value_{};
+		hks_reference value_{};
 
 	private:
 		template <typename T>
