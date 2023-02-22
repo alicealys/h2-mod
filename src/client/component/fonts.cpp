@@ -6,6 +6,7 @@
 #include "filesystem.hpp"
 #include "command.hpp"
 #include "language.hpp"
+#include "config.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
@@ -45,6 +46,60 @@ namespace fonts
 			std::unordered_map<std::string, game::TTF*> fonts;
 			std::unordered_map<std::string, std::string> raw_fonts;
 		};
+
+		struct font_replacement
+		{
+			game::language_t language;
+			std::string font;
+			std::string replacement;
+		};
+
+		game::StringTable* get_font_replacements()
+		{
+			if (!game::DB_XAssetExists(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv"))
+			{
+				return nullptr;
+			}
+
+			return game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv", false).stringTable;
+		}
+
+		std::string get_font_replacement(const std::string& name)
+		{
+			const auto table = get_font_replacements();
+			if (table == nullptr)
+			{
+				return name;
+			}
+
+			const auto current_language = language::current();
+			const std::string language_str = game::languages[current_language].name;
+
+			for (auto row = 0; row < table->rowCount; row++)
+			{
+				if (table->columnCount < 3)
+				{
+					continue;
+				}
+				
+				const auto row_values = &table->values[(row * table->columnCount)];
+				const auto lang = row_values[0].string;
+				if (lang != language_str)
+				{
+					continue;
+				}
+
+				const auto font = row_values[1].string;
+				const auto replacement = row_values[2].string;
+
+				if (font == name)
+				{
+					return replacement;
+				}
+			}
+
+			return name;
+		}
 
 		utils::concurrency::container<font_data_t> font_data;
 
@@ -108,10 +163,11 @@ namespace fonts
 
 		game::TTF* db_find_xasset_header_stub(game::XAssetType type, const char* name, int create_default)
 		{
-			auto result = try_load_font(name);
+			const auto name_ = get_font_replacement(name);
+			auto result = try_load_font(name_);
 			if (result == nullptr)
 			{
-				result = game::DB_FindXAssetHeader(type, name, create_default).ttf;
+				result = game::DB_FindXAssetHeader(type, name_.data(), create_default).ttf;
 			}
 			return result;
 		}

@@ -149,6 +149,16 @@ namespace fastfiles
 			}
 		}
 
+		void load_pre_gfx_zones(game::XZoneInfo* zoneInfo,
+			unsigned int zoneCount, game::DBSyncMode syncMode)
+		{
+			// code_pre_gfx
+
+			try_load_zone("h2_mod_pre_gfx", true);
+
+			game::DB_LoadXAssets(zoneInfo, zoneCount, syncMode);
+		}
+
 		void load_post_gfx_and_ui_and_common_zones(game::XZoneInfo* zoneInfo, 
 			unsigned int zoneCount, game::DBSyncMode syncMode)
 		{
@@ -156,7 +166,6 @@ namespace fastfiles
 			// ui_mp
 			// common_mp
 
-			try_load_zone("h2_mod_ui", true);
 			try_load_zone("h2_mod_common", true);
 
 			game::DB_LoadXAssets(zoneInfo, zoneCount, syncMode);
@@ -602,6 +611,8 @@ namespace fastfiles
 
 			// load our custom ui and common zones
 			utils::hook::call(0x14074E22A, load_post_gfx_and_ui_and_common_zones);
+			utils::hook::call(0x1405A46FD, load_pre_gfx_zones);
+			utils::hook::call(0x1405A4959, load_pre_gfx_zones);
 
 			reallocate_asset_pools();
 
