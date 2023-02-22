@@ -8,6 +8,9 @@
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
+#include <utils/string.hpp>
+
+#define OLD_LANGUAGE_FILE "players2/default/language"
 
 namespace language
 {
@@ -27,20 +30,25 @@ namespace language
 			{game::LANGUAGE_RUSSIAN_PARTIAL},
 		};
 
-		std::unordered_set<game::language_t> cyrillic_languages =
+		std::unordered_set<game::language_t> polish_russian_languages =
 		{
-			game::LANGUAGE_RUSSIAN,
-			game::LANGUAGE_POLISH,
-			game::LANGUAGE_CZECH,
-			game::LANGUAGE_RUSSIAN_PARTIAL,
+			{game::LANGUAGE_RUSSIAN},
+			{game::LANGUAGE_POLISH},
+			{game::LANGUAGE_CZECH},
+			{game::LANGUAGE_RUSSIAN_PARTIAL},
 		};
 
 		std::unordered_set<game::language_t> asian_languages =
 		{
-			game::LANGUAGE_JAPANESE_FULL,
-			game::LANGUAGE_JAPANESE_PARTIAL,
-			game::LANGUAGE_TRADITIONAL_CHINESE,
-			game::LANGUAGE_SIMPLIFIED_CHINESE,
+			{game::LANGUAGE_JAPANESE_FULL},
+			{game::LANGUAGE_JAPANESE_PARTIAL},
+			{game::LANGUAGE_TRADITIONAL_CHINESE},
+			{game::LANGUAGE_SIMPLIFIED_CHINESE},
+		};
+
+		std::unordered_set<game::language_t> custom_languages =
+		{
+			{game::LANGUAGE_CZECH},
 		};
 
 		const char* get_loc_language_string()
@@ -58,6 +66,40 @@ namespace language
 		}
 	}
 
+	std::string get_default_language()
+	{
+		return "english";
+	}
+
+	bool is_valid_language(const std::string& name)
+	{
+		const auto lower = utils::string::to_lower(name);
+		for (auto i = 0; i < game::LANGUAGE_COUNT; i++)
+		{
+			const auto a = game::languages[i].name;
+			const auto b = game::languages[i].is_supported;
+			if (game::languages[i].name == lower)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	bool is_custom_language(const std::string& name)
+	{
+		for (const auto& language : custom_languages)
+		{
+			if (game::languages[language].name == name || game::languages[language].shortname == name)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	game::language_t current()
 	{
 		static auto* loc_language = game::Dvar_FindVar("loc_language");
@@ -71,7 +113,7 @@ namespace language
 
 	bool is_polrus()
 	{
-		return cyrillic_languages.contains(current());
+		return polish_russian_languages.contains(current());
 	}
 
 	bool is_arabic()
@@ -91,7 +133,7 @@ namespace language
 
 	void set_from_index(const int index)
 	{
-		if (index < 0 || index > 17)
+		if (index < 0 || index >= game::LANGUAGE_COUNT)
 		{
 			return;
 		}
@@ -107,9 +149,16 @@ namespace language
 		{
 			utils::hook::call(0x14060AFFB, get_loc_language_string);
 
-			for (auto i = 0; i < 17; i++)
+			if (utils::io::file_exists(OLD_LANGUAGE_FILE))
 			{
-				game::languages[i].is_supported = 1;
+				const auto lang = utils::io::read_file(OLD_LANGUAGE_FILE);
+				config::set("language", lang);
+				utils::io::remove_file(OLD_LANGUAGE_FILE);
+			}
+
+			for (const auto& language : custom_languages)
+			{
+				game::languages[language].is_supported = 1;
 			}
 		}
 	};

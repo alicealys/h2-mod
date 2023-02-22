@@ -7,6 +7,7 @@
 #include "filesystem.hpp"
 #include "console.hpp"
 #include "command.hpp"
+#include "language.hpp"
 
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
@@ -116,25 +117,6 @@ namespace database
 			return file.ends_with(".ff") || file.ends_with(".pak");
 		}
 
-		std::unordered_set<game::language_t> unsuppored_languages =
-		{
-			{game::LANGUAGE_CZECH}
-		};
-
-		bool is_unsupported_language(const std::string& name)
-		{
-			for (auto i = 0; i < 17; i++)
-			{
-				if ((game::languages[i].name == name || game::languages[i].shortname == name) && 
-					unsuppored_languages.contains(static_cast<game::language_t>(i)))
-				{
-					return true;
-				}
-			}
-
-			return false;
-		}
-
 		bool is_loc_folder(game::Sys_Folder folder)
 		{
 			return folder == game::SF_PAKFILE_LOC || folder == game::SF_ZONE_LOC || folder == game::SF_VIDEO_LOC;
@@ -160,7 +142,7 @@ namespace database
 				{
 					const auto loc = name.substr(0, 3);
 					const auto found = find_fastfile(name);
-					if (is_unsupported_language(loc) && !found.has_value())
+					if (language::is_custom_language(loc) && !found.has_value())
 					{
 						name = "eng" + name.substr(3);
 						file_ = name;
@@ -421,7 +403,7 @@ namespace database
 		utils::hook::detour sys_set_folder_hook;
 		void sys_set_folder_stub(game::Sys_Folder folder, const char* path)
 		{
-			if (is_loc_folder(folder) && is_unsupported_language(path))
+			if (is_loc_folder(folder) && language::is_custom_language(path))
 			{
 				path = "english";
 			}
