@@ -171,6 +171,11 @@ namespace fonts
 				result = game::DB_FindXAssetHeader(type, name_.data(), 0).ttf;
 			}
 
+			if (result == nullptr && (name != name_))
+			{
+				console::error("Couldn't find replacement font \"%s\" for \"%s\"\n", name_.data(), name);
+			}
+
 			if (result == nullptr)
 			{
 				result = game::DB_FindXAssetHeader(type, name, create_default).ttf;
