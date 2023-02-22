@@ -482,17 +482,8 @@ namespace ui_scripting
 			config_table["get"] = [](const std::string& key, const variadic_args& va)
 				-> script_value
 			{
-				const auto default_value = va.size() >= 1 ? va[0] : script_value();
-				const auto value = config::get<nlohmann::json>(key);
-
-				if (value.has_value())
-				{
-					return json_to_lua(value.value());
-				}
-				else
-				{
-					return default_value;
-				}
+				const auto value = config::get_raw(key);
+				return json_to_lua(value);
 			};
 
 			config_table["getstring"] = [](const std::string& key, const variadic_args& va)

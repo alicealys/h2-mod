@@ -32,7 +32,7 @@ namespace config
 
 		std::unordered_map<std::string, field_definition_t> field_definitions =
 		{
-			{define_field("language", config::field_type::string, language::get_default_language(), language::is_valid_language)},
+			{define_field("language", field_type::string, language::get_default_language(), language::is_valid_language)},
 		};
 	}
 	
@@ -59,6 +59,28 @@ namespace config
 		}
 
 		return value;
+	}
+
+	nlohmann::json get_default_value(const std::string& key)
+	{
+		const auto iter = field_definitions.find(key);
+		if (iter == field_definitions.end())
+		{
+			return {};
+		}
+
+		return iter->second.default_value;
+	}
+
+	nlohmann::json get_raw(const std::string& key)
+	{
+		const auto cfg = read_config();
+		if (!cfg.is_object() || !cfg.contains(key))
+		{
+			return get_default_value(key);
+		}
+
+		return validate_config_field(key, cfg[key]);
 	}
 
 	void write_config(const nlohmann::json& json)
