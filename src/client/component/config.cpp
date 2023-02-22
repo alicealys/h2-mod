@@ -7,8 +7,9 @@
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
+#include <utils/properties.hpp>
 
-#define CONFIG_FILE "players2/default/h2_mod.json"
+#define OLD_CONFIG_FILE "players2/default/h2_mod.json"
 
 namespace config
 {
@@ -34,6 +35,11 @@ namespace config
 		{
 			{define_field("language", field_type::string, language::get_default_language(), language::is_valid_language)},
 		};
+
+		std::string get_config_file_path()
+		{
+			return (utils::properties::get_appdata_path() / "config.json").generic_string();
+		}
 	}
 	
 	nlohmann::json validate_config_field(const std::string& key, const nlohmann::json& value)
@@ -87,8 +93,9 @@ namespace config
 	{
 		try
 		{
+			const auto path = get_config_file_path();
 			const auto str = json.dump(4);
-			utils::io::write_file(CONFIG_FILE, str, false);
+			utils::io::write_file(path, str, false);
 		}
 		catch (const std::exception& e)
 		{
@@ -98,20 +105,21 @@ namespace config
 
 	nlohmann::json read_config()
 	{
-		if (!utils::io::file_exists(CONFIG_FILE))
+		const auto path = get_config_file_path();
+		if (!utils::io::file_exists(path))
 		{
 			return {};
 		}
 
 		try
 		{
-			const auto data = utils::io::read_file(CONFIG_FILE);
+			const auto data = utils::io::read_file(path);
 			return nlohmann::json::parse(data);
 		}
 		catch (const std::exception& e)
 		{
 			console::error("Failed to parse config file: %s\n", e.what());
-			utils::io::write_file(CONFIG_FILE, "{}", false);
+			utils::io::write_file(path, "{}", false);
 		}
 
 		return {};
@@ -122,7 +130,12 @@ namespace config
 	public:
 		void post_unpack() override
 		{
-
+			if (utils::io::file_exists(OLD_CONFIG_FILE))
+			{
+				const auto data = utils::io::read_file(OLD_CONFIG_FILE);
+				utils::io::write_file(get_config_file_path(), data);
+				utils::io::remove_file(OLD_CONFIG_FILE);
+			}
 		}
 	};
 }
