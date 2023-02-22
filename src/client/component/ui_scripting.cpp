@@ -15,6 +15,7 @@
 #include "updater.hpp"
 #include "console.hpp"
 #include "language.hpp"
+#include "config.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -285,7 +286,7 @@ namespace ui_scripting
 				const auto type = static_cast<::game::XAssetType>(type_index);
 				fastfiles::enum_assets(type, [type, &table_, &index](const ::game::XAssetHeader header)
 				{
-					const auto asset = ::game::XAsset{ type, header };
+					const auto asset = ::game::XAsset{type, header};
 					const std::string asset_name = ::game::DB_GetXAssetName(&asset);
 					table_[index++] = asset_name;
 				}, true);
@@ -473,6 +474,110 @@ namespace ui_scripting
 			{
 				const auto json = nlohmann::json::parse(data);
 				mods::get_current_stats() = json;
+			};
+
+			auto config_table = table();
+			lua["config"] = config_table;
+
+			config_table["get"] = [](const std::string& key, const variadic_args& va)
+				-> script_value
+			{
+				const auto default_value = va.size() >= 1 ? va[0] : script_value();
+				const auto value = config::get<nlohmann::json>(key);
+
+				if (value.has_value())
+				{
+					return json_to_lua(value.value());
+				}
+				else
+				{
+					return default_value;
+				}
+			};
+
+			config_table["getstring"] = [](const std::string& key, const variadic_args& va)
+				-> script_value
+			{
+				const auto default_value = va.size() >= 1 ? va[0] : script_value("");
+				const auto value = config::get<nlohmann::json>(key);
+
+				if (!value.has_value())
+				{
+					return default_value;
+				}
+
+				const auto& json = value.value();
+				if (!json.is_string())
+				{
+					return default_value;
+				}
+
+				return json.get<std::string>();
+			};
+
+			config_table["getint"] = [](const std::string& key, const variadic_args& va)
+				-> script_value
+			{
+				const auto default_value = va.size() >= 1 ? va[0] : script_value(0);
+				const auto value = config::get<nlohmann::json>(key);
+
+				if (!value.has_value())
+				{
+					return default_value;
+				}
+
+				const auto& json = value.value();
+				if (!json.is_number_integer())
+				{
+					return default_value;
+				}
+
+				return json.get<int>();
+			};
+
+			config_table["getfloat"] = [](const std::string& key, const variadic_args& va)
+				-> script_value
+			{
+				const auto default_value = va.size() >= 1 ? va[0] : script_value(0.f);
+				const auto value = config::get<nlohmann::json>(key);
+
+				if (!value.has_value())
+				{
+					return default_value;
+				}
+
+				const auto& json = value.value();
+				if (!json.is_number())
+				{
+					return default_value;
+				}
+
+				return json.get<float>();
+			};
+
+			config_table["getbool"] = [](const std::string& key, const variadic_args& va)
+				-> script_value
+			{
+				const auto default_value = va.size() >= 1 ? va[0] : script_value(false);
+				const auto value = config::get<nlohmann::json>(key);
+
+				if (!value.has_value())
+				{
+					return default_value;
+				}
+
+				const auto& json = value.value();
+				if (!json.is_boolean())
+				{
+					return default_value;
+				}
+
+				return json.get<bool>();
+			};
+
+			config_table["set"] = [](const std::string& key, const script_value& value)
+			{
+				config::set(key, lua_to_json(value));
 			};
 		}
 
