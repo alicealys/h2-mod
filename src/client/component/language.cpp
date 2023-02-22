@@ -76,8 +76,6 @@ namespace language
 		const auto lower = utils::string::to_lower(name);
 		for (auto i = 0; i < game::LANGUAGE_COUNT; i++)
 		{
-			const auto a = game::languages[i].name;
-			const auto b = game::languages[i].is_supported;
 			if (game::languages[i].name == lower)
 			{
 				return true;
