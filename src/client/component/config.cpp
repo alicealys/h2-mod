@@ -15,7 +15,6 @@ namespace config
 {
 	namespace
 	{
-		using validate_type_callback_t = std::function<bool(const field_value&)>;
 		using validate_callback_t = std::function<bool(const field_value&)>;
 
 		struct field_definition_t
