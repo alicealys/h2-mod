@@ -1592,7 +1592,8 @@ namespace game
 		const char* prefix1;
 		const char* prefix2;
 		const char* prefix3;
-		char __pad0[0x8];
+		char is_supported;
+		char __pad0[0x7];
 	};
 
 	enum language_t
