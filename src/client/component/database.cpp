@@ -64,7 +64,6 @@ namespace database
 			}
 		}
 
-		// kinda sucks but whatever
 		std::optional<std::string> find_fastfile(const std::string& name)
 		{
 			std::string name_ = name;
@@ -117,9 +116,35 @@ namespace database
 			return file.ends_with(".ff") || file.ends_with(".pak");
 		}
 
-		game::DB_IFileSysFile* bnet_fs_open_file_stub(game::DB_FileSysInterface* this_, int folder, const char* file)
+		std::unordered_set<game::language_t> unsuppored_languages =
+		{
+			{game::LANGUAGE_CZECH}
+		};
+
+		bool is_unsupported_language(const std::string& name)
+		{
+			for (auto i = 0; i < 17; i++)
+			{
+				if ((game::languages[i].name == name || game::languages[i].shortname == name) && 
+					unsuppored_languages.contains(static_cast<game::language_t>(i)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		bool is_loc_folder(game::Sys_Folder folder)
+		{
+			return folder == game::SF_PAKFILE_LOC || folder == game::SF_ZONE_LOC || folder == game::SF_VIDEO_LOC;
+		}
+
+		game::DB_IFileSysFile* bnet_fs_open_file_stub(game::DB_FileSysInterface* this_, 
+			game::Sys_Folder folder, const char* file)
 		{
 			std::string name = file;
+			std::string file_ = file;
 
 			const auto search_path = [&](const std::string& ext, const std::string& path)
 			{
@@ -131,6 +156,17 @@ namespace database
 
 			if (is_zone_file(name))
 			{
+				if (is_loc_folder(folder))
+				{
+					const auto loc = name.substr(0, 3);
+					const auto found = find_fastfile(name);
+					if (is_unsupported_language(loc) && !found.has_value())
+					{
+						name = "eng" + name.substr(3);
+						file_ = name;
+					}
+				}
+
 				const auto found = find_fastfile(name);
 				if (found.has_value())
 				{
@@ -148,7 +184,7 @@ namespace database
 			std::string path{};
 			if (!filesystem::find_file(name, &path))
 			{
-				return bnet_fs_open_file_hook.invoke<game::DB_IFileSysFile*>(this_, folder, file);
+				return bnet_fs_open_file_hook.invoke<game::DB_IFileSysFile*>(this_, folder, file_.data());
 			}
 
 			const auto handle = handle_allocator.allocate<game::DB_IFileSysFile>();
@@ -288,6 +324,7 @@ namespace database
 		bool bnet_fs_exists_stub(game::DB_FileSysInterface* this_, game::DB_IFileSysFile* handle, const char* filename)
 		{
 			std::string name = filename;
+
 			const auto search_path = [&](const std::string& ext, const std::string& path)
 			{
 				if (!name.ends_with(ext))
@@ -303,7 +340,7 @@ namespace database
 				return true;
 			}
 
-			if (name.ends_with(".ff"))
+			if (is_zone_file(name))
 			{
 				const auto found = find_fastfile(name);
 				if (found.has_value())
@@ -380,6 +417,17 @@ namespace database
 				}
 			}
 		}
+
+		utils::hook::detour sys_set_folder_hook;
+		void sys_set_folder_stub(game::Sys_Folder folder, const char* path)
+		{
+			if (is_loc_folder(folder) && is_unsupported_language(path))
+			{
+				path = "english";
+			}
+
+			sys_set_folder_hook.invoke<void>(folder, path);
+		}
 	}
 
 	void close_fastfile_handles()
@@ -434,6 +482,8 @@ namespace database
 				bink_io_read_hook.create(0x1407191B0, bink_io_read_stub);
 				bink_io_seek_hook.create(0x140719200, bink_io_seek_stub);
 			}
+
+			sys_set_folder_hook.create(0x140623830, sys_set_folder_stub);
 		}
 	};
 }

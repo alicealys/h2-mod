@@ -106,6 +106,11 @@ namespace language
 		void post_unpack() override
 		{
 			utils::hook::call(0x14060AFFB, get_loc_language_string);
+
+			for (auto i = 0; i < 17; i++)
+			{
+				game::languages[i].is_supported = 1;
+			}
 		}
 	};
 }
