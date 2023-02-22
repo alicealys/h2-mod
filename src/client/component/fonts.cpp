@@ -120,7 +120,7 @@ namespace fonts
 			utils::memory::get_allocator()->free(font);
 		}
 
-		game::TTF* load_font(const std::string& name)
+		game::TTF* load_font(const std::string& name, const std::string& original_name)
 		{
 			return font_data.access<game::TTF*>([&](font_data_t& data_) -> game::TTF*
 			{
@@ -140,18 +140,18 @@ namespace fonts
 					return nullptr;
 				}
 
-				const auto material = create_font(name, data);
+				const auto material = create_font(original_name, data);
 				data_.fonts[name] = material;
 
 				return material;
 			});
 		}
 
-		game::TTF* try_load_font(const std::string& name)
+		game::TTF* try_load_font(const std::string& name, const std::string& original_name)
 		{
 			try
 			{
-				return load_font(name);
+				return load_font(name, original_name);
 			}
 			catch (const std::exception& e)
 			{
@@ -164,7 +164,7 @@ namespace fonts
 		game::TTF* db_find_xasset_header_stub(game::XAssetType type, const char* name, int create_default)
 		{
 			const auto name_ = get_font_replacement(name);
-			auto result = try_load_font(name_);
+			auto result = try_load_font(name_, name);
 
 			if (result == nullptr)
 			{
