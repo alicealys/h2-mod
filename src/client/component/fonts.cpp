@@ -47,14 +47,9 @@ namespace fonts
 			std::unordered_map<std::string, std::string> raw_fonts;
 		};
 
-		struct font_replacement
-		{
-			game::language_t language;
-			std::string font;
-			std::string replacement;
-		};
+		utils::memory::allocator font_allocator;
 
-		game::StringTable* get_font_replacements()
+		game::StringTable* get_font_replacements_table()
 		{
 			if (!game::DB_XAssetExists(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv"))
 			{
@@ -64,16 +59,36 @@ namespace fonts
 			return game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv", false).stringTable;
 		}
 
-		std::string get_font_replacement(const std::string& name)
+		struct font_replacement
 		{
-			const auto table = get_font_replacements();
+			const char* target_font;
+			const char* new_font;
+		};
+
+		std::vector<font_replacement>& get_font_replacements()
+		{
+			static std::vector<font_replacement> replacements = {};
+			return replacements;
+		}
+
+		void load_font_replacements()
+		{
+			static auto loaded = false;
+			if (loaded)
+			{
+				return;
+			}
+
+			loaded = true;
+			auto& replacements = get_font_replacements();
+
+			const auto table = get_font_replacements_table();
 			if (table == nullptr)
 			{
-				return name;
+				return;
 			}
 
 			const auto current_language = language::current();
-			const std::string language_str = game::languages[current_language].name;
 
 			for (auto row = 0; row < table->rowCount; row++)
 			{
@@ -81,20 +96,30 @@ namespace fonts
 				{
 					continue;
 				}
-				
+
 				const auto row_values = &table->values[(row * table->columnCount)];
 				const auto lang = row_values[0].string;
-				if (lang != language_str)
+				if (std::strcmp(lang, game::languages[current_language].name))
 				{
 					continue;
 				}
 
-				const auto font = row_values[1].string;
-				const auto replacement = row_values[2].string;
+				const auto font = utils::memory::get_allocator()->duplicate_string(row_values[1].string);
+				const auto replacement = utils::memory::get_allocator()->duplicate_string(row_values[2].string);
+				replacements.emplace_back(font, replacement);
+			}
 
-				if (font == name)
+			return;
+		}
+
+		const char* get_font_replacement(const char* name)
+		{
+			const auto& replacements = get_font_replacements();
+			for (const auto& replacement : replacements)
+			{
+				if (!std::strcmp(name, replacement.target_font))
 				{
-					return replacement;
+					return replacement.new_font;
 				}
 			}
 
@@ -115,12 +140,12 @@ namespace fonts
 
 		void free_font(game::TTF* font)
 		{
-			utils::memory::get_allocator()->free(font->buffer);
-			utils::memory::get_allocator()->free(font->name);
-			utils::memory::get_allocator()->free(font);
+			font_allocator.free(font->buffer);
+			font_allocator.free(font->name);
+			font_allocator.free(font);
 		}
 
-		game::TTF* load_font(const std::string& name, const std::string& original_name)
+		game::TTF* load_font(const std::string& name)
 		{
 			return font_data.access<game::TTF*>([&](font_data_t& data_) -> game::TTF*
 			{
@@ -140,18 +165,18 @@ namespace fonts
 					return nullptr;
 				}
 
-				const auto material = create_font(original_name, data);
+				const auto material = create_font(name, data);
 				data_.fonts[name] = material;
 
 				return material;
 			});
 		}
 
-		game::TTF* try_load_font(const std::string& name, const std::string& original_name)
+		game::TTF* try_load_font(const std::string& name)
 		{
 			try
 			{
-				return load_font(name, original_name);
+				return load_font(name);
 			}
 			catch (const std::exception& e)
 			{
@@ -163,25 +188,27 @@ namespace fonts
 
 		game::TTF* db_find_xasset_header_stub(game::XAssetType type, const char* name, int create_default)
 		{
-			const auto name_ = get_font_replacement(name);
-			auto result = try_load_font(name_, name);
-
-			if (result == nullptr)
-			{
-				result = game::DB_FindXAssetHeader(type, name_.data(), 0).ttf;
-			}
-
-			if (result == nullptr && (name != name_))
-			{
-				console::error("Couldn't find replacement font \"%s\" for \"%s\"\n", name_.data(), name);
-			}
-
+			auto result = try_load_font(name);
 			if (result == nullptr)
 			{
 				result = game::DB_FindXAssetHeader(type, name, create_default).ttf;
 			}
 
 			return result;
+		}
+
+		utils::hook::detour r_register_font_hook;
+		void* r_register_font_stub(const char* name, int size)
+		{
+			const auto name_ = get_font_replacement(name);
+			return r_register_font_hook.invoke<void*>(name_, size);
+		}
+
+		utils::hook::detour cl_init_renderer_hook;
+		void* cl_init_renderer_stub()
+		{
+			load_font_replacements();
+			return cl_init_renderer_hook.invoke<void*>();
 		}
 
 		game::Font_s* bank_font = nullptr;
@@ -320,6 +347,7 @@ namespace fonts
 				free_font(font.second);
 			}
 
+			font_allocator.clear();
 			data_.fonts.clear();
 			*reinterpret_cast<int*>(0x14EE3ACB8) = 0; // reset registered font count
 		});
@@ -331,6 +359,8 @@ namespace fonts
 		void post_unpack() override
 		{
 			utils::hook::call(0x140747096, db_find_xasset_header_stub);
+			r_register_font_hook.create(0x140746FE0, r_register_font_stub);
+			cl_init_renderer_hook.create(0x1403D5AA0, cl_init_renderer_stub);
 
 			// add custom fonts to hud elem fonts
 			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);
