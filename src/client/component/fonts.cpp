@@ -165,10 +165,17 @@ namespace fonts
 		{
 			const auto name_ = get_font_replacement(name);
 			auto result = try_load_font(name_);
+
 			if (result == nullptr)
 			{
-				result = game::DB_FindXAssetHeader(type, name_.data(), create_default).ttf;
+				result = game::DB_FindXAssetHeader(type, name_.data(), 0).ttf;
 			}
+
+			if (result == nullptr)
+			{
+				result = game::DB_FindXAssetHeader(type, name, create_default).ttf;
+			}
+
 			return result;
 		}
 
