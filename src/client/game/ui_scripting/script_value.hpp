@@ -136,23 +136,13 @@ namespace ui_scripting
 		{
 		}
 
-		template <typename F>
-		script_value(const std::optional<F> optional)
+		template <typename T>
+		script_value(const std::optional<T>& optional)
+			: script_value(optional.has_value() ? script_value(optional.value()) : script_value())
 		{
-			if (optional.has_value())
-			{
-				script_value::script_value(optional.value());
-			}
-			else
-			{
-				script_value::script_value();
-			}
 		}
 
 		bool operator==(const script_value& other) const;
-
-		arguments operator()() const;
-		arguments operator()(const arguments& arguments) const;
 
 		template<class ...T>
 		arguments operator()(T... arguments) const
