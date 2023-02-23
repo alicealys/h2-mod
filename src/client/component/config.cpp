@@ -66,7 +66,7 @@ namespace config
 		return value;
 	}
 
-	nlohmann::json get_default_value(const std::string& key)
+	std::optional<nlohmann::json> get_default_value(const std::string& key)
 	{
 		const auto iter = field_definitions.find(key);
 		if (iter == field_definitions.end())
@@ -74,7 +74,7 @@ namespace config
 			return {};
 		}
 
-		return iter->second.default_value;
+		return {iter->second.default_value};
 	}
 
 	nlohmann::json get_raw(const std::string& key)
@@ -82,7 +82,13 @@ namespace config
 		const auto cfg = read_config();
 		if (!cfg.is_object() || !cfg.contains(key))
 		{
-			return get_default_value(key);
+			const auto default_value = get_default_value(key);
+			if (default_value.has_value())
+			{
+				return default_value.value();
+			}
+
+			return {};
 		}
 
 		return validate_config_field(key, cfg[key]);

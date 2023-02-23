@@ -9,7 +9,7 @@ namespace config
 	void write_config(const nlohmann::json& json);
 
 	nlohmann::json validate_config_field(const std::string& key, const field_value& value);
-	nlohmann::json get_default_value(const std::string& key);
+	std::optional<nlohmann::json> get_default_value(const std::string& key);
 
 	template <typename T>
 	std::optional<T> get(const std::string& key)
@@ -17,6 +17,12 @@ namespace config
 		const auto cfg = read_config();
 		if (!cfg.is_object() || !cfg.contains(key))
 		{
+			const auto default_value = get_default_value(key);
+			if (default_value.has_value())
+			{
+				return {default_value.value()};
+			}
+
 			return {};
 		}
 
