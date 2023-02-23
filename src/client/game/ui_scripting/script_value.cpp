@@ -437,16 +437,6 @@ namespace ui_scripting
 		return this->get_raw().v.native == other.get_raw().v.native;
 	}
 
-	arguments script_value::operator()() const
-	{
-		return this->as<function>()();
-	}
-
-	arguments script_value::operator()(const arguments& arguments) const
-	{
-		return this->as<function>()(arguments);
-	}
-
 	function_argument::function_argument(const arguments& args, const script_value& value, const int index)
 		: values_(args)
 		  , value_(value)
