@@ -54,17 +54,6 @@ namespace filesystem
 			const auto code = game::SEH_GetCurrentLanguageName();
 
 			paths.push_back(path);
-			
-			if (language::is_non_latin())
-			{
-				paths.push_back(path / "fallback");
-			}
-
-			if (language::is_slavic() || language::is_arabic())
-			{
-				paths.push_back(path / "slavic");
-			}
-
 			paths.push_back(path / code);
 
 			return paths;
