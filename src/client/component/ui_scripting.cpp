@@ -236,7 +236,7 @@ namespace ui_scripting
 
 			auto language_table = table();
 			language_table["isnonlatin"] = language::is_non_latin;
-			language_table["ispolrus"] = language::is_polrus;
+			language_table["isslavic"] = language::is_slavic;
 			language_table["isarabic"] = language::is_arabic;
 			language_table["isasian"] = language::is_asian;
 
