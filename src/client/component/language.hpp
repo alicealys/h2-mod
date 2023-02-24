@@ -13,7 +13,7 @@ namespace language
 
 	game::language_t current();
 	bool is_non_latin();
-	bool is_polrus();
+	bool is_slavic();
 	bool is_arabic();
 	bool is_asian();
 }

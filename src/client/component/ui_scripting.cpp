@@ -234,6 +234,14 @@ namespace ui_scripting
 			lua["io"]["readfile"] = filesystem::safe_io_func<std::string>(
 				static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
 
+			auto language_table = table();
+			language_table["isnonlatin"] = language::is_non_latin;
+			language_table["isslavic"] = language::is_slavic;
+			language_table["isarabic"] = language::is_arabic;
+			language_table["isasian"] = language::is_asian;
+
+			lua["language"] = language_table;
+
 			using game = table;
 			auto game_type = game();
 			lua["game"] = game_type;
