@@ -83,7 +83,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 
     LUI.Options.AddOptionTextInfo(menu)
 
-    if language.isnonlatin() and config.get("language") ~= "czech" then
+    if (language.isnonlatin() and not language.iscustom()) then
         if (config.get("disable_custom_fonts")) then
             menu:AddHelp({
                 name = "add_button_helper_text",
