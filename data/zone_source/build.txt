@@ -8,6 +8,7 @@ fra_h2_mod_common
 h2_mod_common
 h2_mod_patch_af_caves
 h2_mod_patch_dc_whitehouse
+h2_mod_pre_gfx
 ita_h2_mod_common
 jpf_h2_mod_common
 jpp_h2_mod_common
@@ -24,4 +25,3 @@ sna_h2_mod_common
 sna_h2_mod_patch_af_caves
 spa_h2_mod_common
 tch_h2_mod_common
-h2_mod_pre_gfx
