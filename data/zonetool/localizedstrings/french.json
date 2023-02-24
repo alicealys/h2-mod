@@ -17,6 +17,8 @@
     "LOCALE_15": "Coréen",
     "LOCALE_16": "Anglais (sécuritaire)",
     "LOCALE_17": "Russe (partiel)",
+    "LUA_MENU_FALLBACK_DISABLE": "Restaurer les polices par défaut",
+    "LUA_MENU_FALLBACK_ENABLE": "Utiliser les polices de h2-mod",
 
     "UPDATER_POPUP_NO_UPDATES_AVAILABLE": "Aucune mise à jour disponible",
     "MENU_CCS_NEW_PATCH_NOTICE": "Une mise à jour est disponible,\npoursuivre l'installation ?",

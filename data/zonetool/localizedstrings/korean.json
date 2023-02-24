@@ -17,6 +17,8 @@
     "LOCALE_15": "한국어",
     "LOCALE_16": "영어(검열)",
     "LOCALE_17": "러시아어(일부)",
+    "LUA_MENU_FALLBACK_DISABLE": "기본 글꼴로 되돌리기",
+    "LUA_MENU_FALLBACK_ENABLE": "h2-mod 글꼴 사용",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "모든 임무 잠금 해제",
     "LUA_MENU_CANCEL_UNLOCK_CAPS": "잠금 해제 취소"

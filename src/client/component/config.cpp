@@ -32,6 +32,7 @@ namespace config
 
 		std::unordered_map<std::string, field_definition_t> field_definitions =
 		{
+			{define_field("disable_custom_fonts", field_type::boolean, false)},
 			{define_field("language", field_type::string, language::get_default_language(), language::is_valid_language)},
 		};
 
