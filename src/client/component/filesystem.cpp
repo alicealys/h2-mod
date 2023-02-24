@@ -60,9 +60,9 @@ namespace filesystem
 				paths.push_back(path / "fallback");
 			}
 
-			if (language::is_polrus() || language::is_arabic())
+			if (language::is_slavic() || language::is_arabic())
 			{
-				paths.push_back(path / "polrus");
+				paths.push_back(path / "slavic");
 			}
 
 			paths.push_back(path / code);

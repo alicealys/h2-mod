@@ -30,7 +30,7 @@ namespace language
 			{game::LANGUAGE_RUSSIAN_PARTIAL},
 		};
 
-		std::unordered_set<game::language_t> polish_russian_languages =
+		std::unordered_set<game::language_t> slavic_languages =
 		{
 			{game::LANGUAGE_RUSSIAN},
 			{game::LANGUAGE_POLISH},
@@ -44,6 +44,7 @@ namespace language
 			{game::LANGUAGE_JAPANESE_PARTIAL},
 			{game::LANGUAGE_TRADITIONAL_CHINESE},
 			{game::LANGUAGE_SIMPLIFIED_CHINESE},
+			{game::LANGUAGE_KOREAN},
 		};
 
 		std::unordered_set<game::language_t> custom_languages =
@@ -109,9 +110,9 @@ namespace language
 		return non_latin_languages.contains(current());
 	}
 
-	bool is_polrus()
+	bool is_slavic()
 	{
-		return polish_russian_languages.contains(current());
+		return slavic_languages.contains(current());
 	}
 
 	bool is_arabic()

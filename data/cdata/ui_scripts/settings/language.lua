@@ -59,7 +59,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
 
         local lang = Engine.GetCurrentLanguage()
 
-        if language.isasian or not language.isnonlatin() or not config.get("disable_custom_fonts") then
+        if language.isasian() or not language.isnonlatin() or not config.get("disable_custom_fonts") then
             setuniversalfont(id)
         end
 
@@ -108,7 +108,7 @@ LUI.MenuBuilder.registerType("choose_language_menu", function(a1)
     return menu
 end)
 
--- rup patch
+-- fix for Y-offset in button text (russian_partial, default font)
 if config.get("language") == "russian_partial" and config.get("disable_custom_fonts") then
     LUI.UIButtonText.IsOffsetedLanguage = function()
         return true
@@ -116,12 +116,12 @@ if config.get("language") == "russian_partial" and config.get("disable_custom_fo
 end
 
 if not (config.get("disable_custom_fonts")) then
-    -- global patch
+    -- fix for Y-offset in button text (global patch, custom font)
     LUI.UIButtonText.IsOffsetedLanguage = function()
         return false
     end
 
-    -- pol/rus patch
+    -- fix for ammo counter (polish/russian)
     if not Engine.InFrontend() then
         local weaponinfodef = LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"]
         LUI.MenuBuilder.m_definitions["WeaponInfoHudDef"] = function(...)
@@ -149,8 +149,8 @@ if not (config.get("disable_custom_fonts")) then
         end
     end
 
-    -- ara/pol/rus patch
-    if language.ispolrus() or language.isarabic() then
+    -- fix for ammo counter (global patch)
+    if language.isnonlatin() then
         local scale = function(size)
             return size * 720 / 1080
         end
@@ -169,10 +169,12 @@ if not (config.get("disable_custom_fonts")) then
             Font = RegisterFont("fonts/mix_gothic.ttf", 105),
             Height = 64
         }
-
-        CoD.TextSettings.H2TitleFont = {
-            Font = RegisterFont("fonts/mix_gothic.ttf", 56),
-            Height = scale(56)
-        }
+        -- forced gothic font for headers (arabic/slavic)
+        if language.isslavic() or language.isarabic() then
+            CoD.TextSettings.H2TitleFont = {
+                Font = RegisterFont("fonts/mix_gothic.ttf", 56),
+                Height = scale(56)
+            }
+        end
     end
 end
