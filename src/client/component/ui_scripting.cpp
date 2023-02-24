@@ -239,6 +239,7 @@ namespace ui_scripting
 			language_table["isslavic"] = language::is_slavic;
 			language_table["isarabic"] = language::is_arabic;
 			language_table["isasian"] = language::is_asian;
+			language_table["iscustom"] = language::is_custom;
 
 			lua["language"] = language_table;
 

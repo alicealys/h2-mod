@@ -16,4 +16,5 @@ namespace language
 	bool is_slavic();
 	bool is_arabic();
 	bool is_asian();
+	bool is_custom();
 }

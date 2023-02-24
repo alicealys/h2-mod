@@ -125,6 +125,11 @@ namespace language
 		return asian_languages.contains(current());
 	}
 
+	bool is_custom()
+	{
+		return custom_languages.contains(current());
+	}
+
 	void set(const std::string& lang)
 	{
 		config::set("language", lang);
