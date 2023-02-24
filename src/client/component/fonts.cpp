@@ -82,6 +82,12 @@ namespace fonts
 			loaded = true;
 			auto& replacements = get_font_replacements();
 
+			const auto disabled = config::get<bool>("disable_custom_fonts");
+			if (disabled.has_value() && disabled.value() && language::current() != game::LANGUAGE_CZECH)
+			{
+				return;
+			}
+
 			const auto table = get_font_replacements_table();
 			if (table == nullptr)
 			{
