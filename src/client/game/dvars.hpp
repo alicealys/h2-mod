@@ -36,6 +36,8 @@ namespace dvars
 
 	extern game::dvar_t* g_enableElevators;
 
+	extern game::dvar_t** cg_draw_2d;
+
 	extern std::vector<dvar_info> dvar_list;
 
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain);

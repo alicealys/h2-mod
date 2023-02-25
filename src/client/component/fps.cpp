@@ -265,11 +265,12 @@ namespace fps
 				average))
 				+ 9.313225746154785e-10);
 
+			const auto font = fps_font;
 			const auto fps_string = utils::string::va("%i", fps);
-			const auto x = screen_max[0] - 15.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, fps_font);
+			const auto x = screen_max[0] - 10.f - game::R_TextWidth(fps_string, 0x7FFFFFFF, font);
+			const auto color = fps >= 60 ? fps_color_good : (fps >= 30 ? fps_color_ok : fps_color_bad);
 
-			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, fps_font, x, 35.f, 1.0f, 1.0f, 0.0f,
-				fps >= 60 ? fps_color_good : (fps >= 30 ? fps_color_ok : fps_color_bad), 1);
+			game::R_AddCmdDrawText(fps_string, 0x7FFFFFFF, font, x, 30.f, 1.0f, 1.0f, 0.0f, color, 1);
 		}
 
 		void draw_pos()
@@ -335,6 +336,11 @@ namespace fps
 
 		void draw()
 		{
+			if (*dvars::cg_draw_2d && !(*dvars::cg_draw_2d)->current.enabled)
+			{
+				return;
+			}
+
 			check_resize();
 			draw_fps();
 
