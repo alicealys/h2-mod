@@ -67,5 +67,24 @@
     "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK": "Github Page:",
     "MENU_SYSINFO_CUSTOMER_SUPPORT_URL": "https://github.com/fedddddd/h2-mod",
     "MENU_SYSINFO_DONATION_LINK": "Donation link:",
-    "MENU_SYSINFO_DONATION_URL": "https://paypal.me/fedecek"
+    "MENU_SYSINFO_DONATION_URL": "https://paypal.me/fedecek",
+
+    "MENU_ENGLISH": "English",
+    "MENU_FRENCH": "Français",
+    "MENU_GERMAN": "Deutsch",
+    "MENU_ITALIAN": "Italiano",
+    "MENU_SPANISH": "Español",
+    "MENU_RUSSIAN": "Русский",
+    "MENU_POLISH": "Polski",
+    "MENU_PORTUGUESE": "Português",
+    "MENU_JAPANESE_FULL": "日本語",
+    "MENU_JAPANESE_PARTIAL": "日本語(一部)",
+    "MENU_TRADITIONAL_CHINESE": "繁體中文",
+    "MENU_SIMPLIFIED_CHINESE": "简体中文",
+    "MENU_ARABIC": "ةيبرعلا",
+    "MENU_CZECH": "Čeština",
+    "MENU_SPANISHNA": "Español (América Latina)",
+    "MENU_KOREAN": "한국어",
+    "MENU_ENGLISH_SAFE": "English (Safe)",
+    "MENU_RUSSIAN_PARTIAL": "Русский (Англ. озвучка)"
 }
