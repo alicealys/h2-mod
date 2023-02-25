@@ -60,4 +60,4 @@ This project is based on [IW6x](https://github.com/XLabsProject/iw6x-client) and
 * [JariKCoding](https://github.com/JariKCoding/CoDLuaDecompiler)
 * [xensik](https://github.com/xensik/gsc-tool/)
 * [ZoneTool](https://github.com/ZoneTool/zonetool)
-* [quaK](https://github.com/skkuull/h1-zonetool)
+* [quaK](https://github.com/Joelrau)
