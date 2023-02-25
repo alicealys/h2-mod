@@ -86,5 +86,14 @@
     "MENU_SPANISHNA": "Español (América Latina)",
     "MENU_KOREAN": "한국어",
     "MENU_ENGLISH_SAFE": "English (Safe)",
-    "MENU_RUSSIAN_PARTIAL": "Русский (Англ. озвучка)"
+    "MENU_RUSSIAN_PARTIAL": "Русский (Англ. озвучка)",
+    
+    "MENU_CREDITS_1": "momo5502",
+    "MENU_CREDITS_2": "Vlad",
+    "MENU_CREDITS_3": "Future",
+    "MENU_CREDITS_4": "JariKCoding",
+    "MENU_CREDITS_5": "netadr",
+    "MENU_CREDITS_6": "quaK",
+    "MENU_CREDITS_7": "xensik",
+    "MENU_CREDITS_8": "ZoneTool"
 }
