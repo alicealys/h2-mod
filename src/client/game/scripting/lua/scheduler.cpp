@@ -51,7 +51,7 @@ namespace scripting::lua
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
-				const auto now = std::chrono::high_resolution_clock::now();
+				const auto now = *game::gameTime;
 				const auto diff = now - i->last_call;
 
 				if (diff < i->delay)
@@ -105,8 +105,8 @@ namespace scripting::lua
 		task task;
 		task.is_volatile = is_volatile;
 		task.callback = callback;
-		task.delay = delay;
-		task.last_call = std::chrono::steady_clock::now();
+		task.delay = static_cast<int>(delay.count());
+		task.last_call = *game::gameTime;
 		task.id = id;
 		task.is_deleted = false;
 

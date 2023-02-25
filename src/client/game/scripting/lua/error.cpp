@@ -2,7 +2,7 @@
 #include "error.hpp"
 #include "../execution.hpp"
 
-#include "component/game_console.hpp"
+#include "component/console.hpp"
 
 namespace scripting::lua
 {
@@ -26,12 +26,12 @@ namespace scripting::lua
 		{
 			try
 			{
-				game_console::print(game_console::con_type_error, "************** Script execution error **************\n");
+				console::error("************** Script execution error **************\n");
 
 				const sol::error err = result;
-				game_console::print(game_console::con_type_error, "%s\n", err.what());
+				console::error("%s\n", err.what());
 
-				game_console::print(game_console::con_type_error, "****************************************************\n");
+				console::error("****************************************************\n");
 
 				notify_error();
 			}

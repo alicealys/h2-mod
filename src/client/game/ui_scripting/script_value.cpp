@@ -6,22 +6,22 @@
 
 namespace ui_scripting
 {
-	hks_object::hks_object(const game::hks::HksObject& value)
+	hks_reference::hks_reference(const game::hks::HksObject& value)
 	{
 		this->assign(value);
 	}
 
-	hks_object::hks_object(const hks_object& other) noexcept
+	hks_reference::hks_reference(const hks_reference& other) noexcept
 	{
 		this->operator=(other);
 	}
 
-	hks_object::hks_object(hks_object&& other) noexcept
+	hks_reference::hks_reference(hks_reference&& other) noexcept
 	{
 		this->operator=(std::move(other));
 	}
 
-	hks_object& hks_object::operator=(const hks_object& other) noexcept
+	hks_reference& hks_reference::operator=(const hks_reference& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -32,7 +32,7 @@ namespace ui_scripting
 		return *this;
 	}
 
-	hks_object& hks_object::operator=(hks_object&& other) noexcept
+	hks_reference& hks_reference::operator=(hks_reference&& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -44,17 +44,17 @@ namespace ui_scripting
 		return *this;
 	}
 
-	hks_object::~hks_object()
+	hks_reference::~hks_reference()
 	{
 		this->release();
 	}
 
-	const game::hks::HksObject& hks_object::get() const
+	const game::hks::HksObject& hks_reference::get() const
 	{
 		return this->value_;
 	}
 
-	void hks_object::assign(const game::hks::HksObject& value)
+	void hks_reference::assign(const game::hks::HksObject& value)
 	{
 		this->value_ = value;
 
@@ -66,7 +66,7 @@ namespace ui_scripting
 		state->m_apistack.top = top;
 	}
 
-	void hks_object::release()
+	void hks_reference::release()
 	{
 		if (this->ref_)
 		{
@@ -78,6 +78,13 @@ namespace ui_scripting
 	/***************************************************************
 	 * Constructors
 	 **************************************************************/
+
+	script_value::script_value()
+	{
+		game::hks::HksObject nil{};
+		nil.t = game::hks::TNIL;
+		this->value_ = nil;
+	}
 
 	script_value::script_value(const game::hks::HksObject& value)
 		: value_(value)
@@ -215,7 +222,7 @@ namespace ui_scripting
 	bool script_value::is<int>() const
 	{
 		const auto number = this->get_raw().v.number;
-		return this->get_raw().t == game::hks::TNUMBER && static_cast<int>(number) == number;
+		return this->get_type() == game::hks::TNUMBER && static_cast<int>(number) == number;
 	}
 
 	template <>
@@ -243,7 +250,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<long long>() const
 	{
-		return this->get_raw().t == game::hks::TUI64;
+		return this->get_type() == game::hks::TUI64;
 	}
 
 	template <>
@@ -271,7 +278,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<bool>() const
 	{
-		return this->get_raw().t == game::hks::TBOOLEAN;
+		return this->get_type() == game::hks::TBOOLEAN;
 	}
 
 	template <>
@@ -287,7 +294,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<float>() const
 	{
-		return this->get_raw().t == game::hks::TNUMBER;
+		return this->get_type() == game::hks::TNUMBER;
 	}
 
 	template <>
@@ -315,7 +322,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<const char*>() const
 	{
-		return this->get_raw().t == game::hks::TSTRING;
+		return this->get_type() == game::hks::TSTRING;
 	}
 
 	template <>
@@ -343,7 +350,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<lightuserdata>() const
 	{
-		return this->get_raw().t == game::hks::TLIGHTUSERDATA;
+		return this->get_type() == game::hks::TLIGHTUSERDATA;
 	}
 
 	template <>
@@ -359,7 +366,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<userdata>() const
 	{
-		return this->get_raw().t == game::hks::TUSERDATA;
+		return this->get_type() == game::hks::TUSERDATA;
 	}
 
 	template <>
@@ -375,7 +382,7 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<table>() const
 	{
-		return this->get_raw().t == game::hks::TTABLE;
+		return this->get_type() == game::hks::TTABLE;
 	}
 
 	template <>
@@ -391,19 +398,24 @@ namespace ui_scripting
 	template <>
 	bool script_value::is<function>() const
 	{
-		return this->get_raw().t == game::hks::TIFUNCTION
-			|| this->get_raw().t == game::hks::TCFUNCTION;
+		return this->get_type() == game::hks::TIFUNCTION
+			|| this->get_type() == game::hks::TCFUNCTION;
 	}
 
 	template <>
 	function script_value::get() const
 	{
-		return {this->get_raw().v.cClosure, this->get_raw().t};
+		return {this->get_raw().v.cClosure, this->get_type()};
 	}
 
 	/***************************************************************
 	 *
 	 **************************************************************/
+
+	const game::hks::HksObjectType script_value::get_type() const
+	{
+		return this->value_.get().t;
+	}
 
 	const game::hks::HksObject& script_value::get_raw() const
 	{
@@ -412,27 +424,17 @@ namespace ui_scripting
 
 	bool script_value::operator==(const script_value& other) const
 	{
-		if (this->get_raw().t != other.get_raw().t)
+		if (this->get_type() != other.get_type())
 		{
 			return false;
 		}
 
-		if (this->get_raw().t == game::hks::TSTRING)
+		if (this->get_type() == game::hks::TSTRING)
 		{
 			return this->get<std::string>() == other.get<std::string>();
 		}
 
 		return this->get_raw().v.native == other.get_raw().v.native;
-	}
-
-	arguments script_value::operator()() const
-	{
-		return this->as<function>()();
-	}
-
-	arguments script_value::operator()(const arguments& arguments) const
-	{
-		return this->as<function>()(arguments);
 	}
 
 	function_argument::function_argument(const arguments& args, const script_value& value, const int index)

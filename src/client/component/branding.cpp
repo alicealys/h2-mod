@@ -1,11 +1,12 @@
 #include <std_include.hpp>
 #include "loader/component_loader.hpp"
+
+#include "game/game.hpp"
+#include "game/dvars.hpp"
+
 #include "localized_strings.hpp"
 #include "scheduler.hpp"
 #include "command.hpp"
-#include "game/game.hpp"
-
-#include "game/ui_scripting/execution.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -17,18 +18,35 @@ namespace branding
 	{
 		float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
 
-		int get_build_number_stub(game::hks::lua_State* s)
+		utils::hook::detour ui_get_formatted_build_number_hook;
+
+		const char* ui_get_formatted_build_number_stub()
 		{
-			ui_scripting::push_value(VERSION);
-			return 1;
+			const auto* const build_num = ui_get_formatted_build_number_hook.invoke<const char*>();
+			return utils::string::va("%s (%s)", VERSION, build_num);
 		}
 
 		void draw()
 		{
-			const auto font = game::R_RegisterFont("fonts/defaultBold.otf", 22);
-			game::R_AddCmdDrawText("h2-mod", 0x7FFFFFFF, font, 15.f,
-				15.f + static_cast<float>(font->pixelHeight),
-				1.f, 1.f, 0.f, color, 0);
+			const auto font = game::R_RegisterFont("fonts/fira_mono_bold.ttf", 22);
+			if (!font)
+			{
+				return;
+			}
+
+			const auto placement = game::ScrPlace_GetViewPlacement();
+
+			game::rectDef_s rect{};
+			rect.x = 0;
+			rect.y = 0;
+			rect.w = 500;
+			rect.horzAlign = 1;
+			rect.vertAlign = 0;
+
+			game::rectDef_s text_rect{};
+
+			game::UI_DrawWrappedText(placement, "h2-mod", &rect, font,
+				5.f, 13.f, 0.20f, color, 0, 0, &text_rect, 0);
 		}
 	}
 
@@ -40,12 +58,8 @@ namespace branding
 			scheduler::loop(draw, scheduler::pipeline::renderer);
 
 			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
-			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_LINK", "Github Page:");
-			localized_strings::override("MENU_SYSINFO_CUSTOMER_SUPPORT_URL", "https://github.com/fedddddd/h2-mod");
-			localized_strings::override("MENU_SYSINFO_DONATION_LINK", "Donation Link:");
-			localized_strings::override("MENU_SYSINFO_DONATION_URL", "https://paypal.me/fedecek");
 
-			utils::hook::jump(0x14033D550, get_build_number_stub, true);
+			ui_get_formatted_build_number_hook.create(0x1406057D0, ui_get_formatted_build_number_stub);
 		}
 	};
 }

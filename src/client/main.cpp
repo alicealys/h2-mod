@@ -7,6 +7,7 @@
 #include <utils/string.hpp>
 #include <utils/flags.hpp>
 #include <utils/io.hpp>
+#include <utils/properties.hpp>
 
 DECLSPEC_NORETURN void WINAPI exit_hook(const int code)
 {
@@ -39,6 +40,47 @@ launcher::mode detect_mode_from_arguments()
 	return launcher::mode::none;
 }
 
+void apply_aslr_patch(std::string* data)
+{
+	// sp binary
+	if (data->size() != 0xE1E0C8)
+	{
+		throw std::runtime_error("File size mismatch, bad game files");
+	}
+
+	auto* dos_header = reinterpret_cast<PIMAGE_DOS_HEADER>(&data->at(0));
+	auto* nt_headers = reinterpret_cast<PIMAGE_NT_HEADERS>(&data->at(dos_header->e_lfanew));
+	auto* optional_header = &nt_headers->OptionalHeader;
+
+	if (optional_header->DllCharacteristics & IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE)
+	{
+		optional_header->DllCharacteristics &= ~(IMAGE_DLLCHARACTERISTICS_DYNAMIC_BASE);
+	}
+}
+
+void get_aslr_patched_binary(std::string* binary, std::string* data)
+{
+	const auto patched_binary = (utils::properties::get_appdata_path() / "bin/h2_sp64_bnet_ship.exe"s).generic_string();
+
+	try
+	{
+		apply_aslr_patch(data);
+		if (!utils::io::file_exists(patched_binary) && !utils::io::write_file(patched_binary, *data, false))
+		{
+			throw std::runtime_error("Could not write file");
+		}
+	}
+	catch (const std::exception& e)
+	{
+		throw std::runtime_error(
+			utils::string::va("Could not create aslr patched binary for %s! %s",
+			binary->data(), e.what())
+		);
+	}
+
+	*binary = patched_binary;
+}
+
 FARPROC load_binary(const launcher::mode mode)
 {
 	loader loader;
@@ -62,21 +104,10 @@ FARPROC load_binary(const launcher::mode mode)
 		return component_loader::load_import(library, function);
 	});
 
-	std::string binary;
-	switch (mode)
+	std::string binary = "MW2CR.exe";
+	if (!utils::io::file_exists(binary))
 	{
-	case launcher::mode::singleplayer:
-		binary = "MW2CR.exe";
-
-		if (!utils::io::file_exists(binary))
-		{
-			binary = "h2_sp64_bnet_ship.exe";
-		}
-
-		break;
-	case launcher::mode::none:
-	default:
-		throw std::runtime_error("Invalid game mode!");
+		binary = "h2_sp64_bnet_ship.exe";
 	}
 
 	std::string data;
@@ -87,12 +118,17 @@ FARPROC load_binary(const launcher::mode mode)
 			binary.data()));
 	}
 
+#ifdef INJECT_HOST_AS_LIB
+	get_aslr_patched_binary(&binary, &data);
+	return loader.load_library(binary);
+#else
 	return loader.load(self, data);
+#endif
 }
-
 void remove_crash_file()
 {
 	utils::io::remove_file("__h2Exe");
+	utils::io::remove_file("h2_sp_patched.exe"); // remove this at some point
 }
 
 void verify_version()

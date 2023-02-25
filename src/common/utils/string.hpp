@@ -81,6 +81,7 @@ namespace utils::string
 	const char* va(const char* fmt, ...);
 
 	std::vector<std::string> split(const std::string& s, char delim);
+	std::vector<std::string> split_lines(const std::string& s);
 
 	std::string to_lower(std::string text);
 	std::string to_upper(std::string text);
@@ -102,4 +103,6 @@ namespace utils::string
 	bool find_lower(const std::string& a, const std::string& b);
 
 	std::string truncate(const std::string& text, const size_t length, const std::string& end);
+
+	bool strstr_lower(const char* a, const char* b);
 }

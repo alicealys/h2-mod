@@ -8,7 +8,7 @@
 
 #include "command.hpp"
 #include "scheduler.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "fastfiles.hpp"
 
 #include <utils/hook.hpp>
@@ -44,7 +44,12 @@ namespace command
 				return 0;
 			}
 
-			const auto dvar = game::Dvar_FindVar(args[0]);
+			auto dvar = game::Dvar_FindVar(args[0]);
+			if (dvar == nullptr)
+			{
+				const auto hash = static_cast<int>(std::strtoull(args[0], nullptr, 16));
+				dvar = game::Dvar_FindMalleableVar(hash);
+			}
 
 			if (dvar)
 			{
@@ -53,15 +58,25 @@ namespace command
 					const auto current = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
 					const auto reset = game::Dvar_ValueToString(dvar, nullptr, &dvar->reset);
 
-					game_console::print(game_console::con_type_info, "\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX",
-						args[0], current, reset, dvar->name);
+					const auto info = dvars::get_dvar_info_from_hash(dvar->name);
+					std::string desc{};
+					std::string name = args[0];
 
-					game_console::print(game_console::con_type_info, "   %s\n",
-						dvars::dvar_get_domain(dvar->type, dvar->domain).data());
+					if (info.has_value())
+					{
+						name = info.value().name;
+						desc = info.value().description;
+					}
+
+					console::info("\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX\n",
+						name.data(), current, reset, dvar->name);
+
+					console::info("%s\n", desc.data());
+					console::info("   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());
 				}
 				else
 				{
-					char command[0x1000] = { 0 };
+					char command[0x1000] = {0};
 					game::Dvar_GetCombinedString(command, 1);
 					game::Dvar_SetCommand(dvar->name, "", command);
 				}
@@ -161,7 +176,7 @@ namespace command
 
 				if (!exists)
 				{
-					game_console::print(game_console::con_type_error, "map '%s' not found\n", map);
+					console::error("map '%s' not found\n", map);
 					return;
 				}
 
@@ -173,11 +188,11 @@ namespace command
 			{
 				if (params.size() < 2)
 				{
-					game_console::print(game_console::con_type_info, "listassetpool <poolnumber>: list all the assets in the specified pool\n");
+					console::info("listassetpool <poolnumber>: list all the assets in the specified pool\n");
 
 					for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
 					{
-						game_console::print(game_console::con_type_info, "%d %s\n", i, game::g_assetNames[i]);
+						console::info("%d %s\n", i, game::g_assetNames[i]);
 					}
 				}
 				else
@@ -186,11 +201,11 @@ namespace command
 
 					if (type < 0 || type >= game::XAssetType::ASSET_TYPE_COUNT)
 					{
-						game_console::print(game_console::con_type_info, "Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
+						console::info("Invalid pool passed must be between [%d, %d]\n", 0, game::XAssetType::ASSET_TYPE_COUNT - 1);
 						return;
 					}
 
-					game_console::print(game_console::con_type_info, "Listing assets in pool %s\n", game::g_assetNames[type]);
+					console::info("Listing assets in pool %s\n", game::g_assetNames[type]);
 
 					fastfiles::enum_assets(type, [type](const game::XAssetHeader header)
 					{
@@ -198,7 +213,7 @@ namespace command
 						const auto* const asset_name = game::DB_GetXAssetName(&asset);
 						//const auto entry = game::DB_FindXAssetEntry(type, asset_name);
 						//TODO: display which zone the asset is from
-						game_console::print(game_console::con_type_info, "%s\n", asset_name);
+						console::info("%s\n", asset_name);
 					}, true);
 				}
 			});
@@ -213,7 +228,7 @@ namespace command
 				{
 					if (cmd->name)
 					{
-						game_console::print(game_console::con_type_info, "%s\n", cmd->name);
+						console::info("%s\n", cmd->name);
 					}
 
 					cmd = cmd->next;
@@ -233,7 +248,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("godmode %s",
 					game::g_entities[0].flags & game::FL_GODMODE
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("demigod", []()
@@ -247,7 +262,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("demigod mode %s",
 					game::g_entities[0].flags & game::FL_DEMI_GODMODE
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("notarget", []()
@@ -261,7 +276,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("notarget %s",
 					game::g_entities[0].flags & game::FL_NOTARGET
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("noclip", []()
@@ -275,7 +290,7 @@ namespace command
 				game::CG_GameMessage(0, utils::string::va("noclip %s",
 					game::g_entities[0].client->flags & 1
 					? "^2on"
-					: "^1off"));
+					: "^1off"), 0);
 			});
 
 			add("ufo", []()
@@ -287,7 +302,7 @@ namespace command
 
 				game::g_entities[0].client->flags ^= 2;
 				game::CG_GameMessage(
-					0, utils::string::va("ufo %s", game::g_entities[0].client->flags & 2 ? "^2on" : "^1off"));
+					0, utils::string::va("ufo %s", game::g_entities[0].client->flags & 2 ? "^2on" : "^1off"), 0);
 			});
 
 			add("give", [](const params& params)
@@ -299,7 +314,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::CG_GameMessage(0, "You did not specify a weapon name");
+					game::CG_GameMessage(0, "You did not specify a weapon name", 0);
 					return;
 				}
 
@@ -309,8 +324,6 @@ namespace command
 
 				scheduler::once([=]()
 				{
-					printf("%i\n", game::Sys_IsMainThread());
-
 					try
 					{
 						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
@@ -366,7 +379,7 @@ namespace command
 							}
 							else
 							{
-								game::CG_GameMessage(0, "Weapon does not exist");
+								game::CG_GameMessage(0, "Weapon does not exist", 0);
 							}
 						}
 					}
@@ -406,7 +419,7 @@ namespace command
 
 				if (params.size() < 2)
 				{
-					game::CG_GameMessage(0, "You did not specify a weapon name");
+					game::CG_GameMessage(0, "You did not specify a weapon name", 0);
 					return;
 				}
 
@@ -445,6 +458,60 @@ namespace command
 					{
 						const scripting::entity player = scripting::call("getentbynum", {0}).as<scripting::entity>();
 						player.call("kill");
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
+			});
+
+			add("setviewpos", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				scripting::vector origin
+				(
+					static_cast<float>(std::atof(params.get(1))),
+					static_cast<float>(std::atof(params.get(2))),
+					static_cast<float>(std::atof(params.get(3)))
+				);
+
+				scheduler::once([=]()
+				{
+					try
+					{
+						const scripting::entity player{game::Scr_GetEntityId(0, 0)};
+						player.call("setorigin", {origin});
+					}
+					catch (...)
+					{
+					}
+				}, scheduler::pipeline::server);
+			});
+
+			add("setviewang", [](const params& params)
+			{
+				if (!game::SV_Loaded())
+				{
+					return;
+				}
+
+				scripting::vector angles
+				(
+					static_cast<float>(std::atof(params.get(1))),
+					static_cast<float>(std::atof(params.get(2))),
+					static_cast<float>(std::atof(params.get(3)))
+				);
+
+				scheduler::once([=]()
+				{
+					try
+					{
+						const scripting::entity player{game::Scr_GetEntityId(0, 0)};
+						player.call("setplayerangles", {angles});
 					}
 					catch (...)
 					{

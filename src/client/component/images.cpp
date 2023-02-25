@@ -2,7 +2,7 @@
 #include "loader/component_loader.hpp"
 
 #include "images.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "filesystem.hpp"
 
 #include "game/game.hpp"
@@ -84,7 +84,7 @@ namespace images
 			}
 			catch (std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load image %s: %s\n", image->name, e.what());
+				console::error("Failed to load image %s: %s\n", image->name, e.what());
 			}
 
 			load_texture_hook.invoke<void>(image, a2, a3);
@@ -114,8 +114,8 @@ namespace images
 	public:
 		void post_unpack() override
 		{
-			setup_texture_hook.create(0x14074A390, setup_texture_stub);
-			load_texture_hook.create(0x1402A7940, load_texture_stub);
+			setup_texture_hook.create(0x1402A7940, setup_texture_stub);
+			load_texture_hook.create(0x1402A6690, load_texture_stub);
 		}
 	};
 }

@@ -5,8 +5,10 @@
 
 #include "scheduler.hpp"
 #include "command.hpp"
+#include "console.hpp"
 
 #include <utils/string.hpp>
+#include <utils/hook.hpp>
 
 #include <discord_rpc.h>
 
@@ -15,30 +17,86 @@ namespace discord
 	namespace
 	{
 		DiscordRichPresence discord_presence;
-		std::string state;
+
+		std::optional<std::string> state{};
+		std::optional<std::string> details{};
 
 		void update_discord()
 		{
+			static char details_buf[128] = {0};
+			static char state_buf[128] = {0};
+			static char image_key_buf[32] = {0};
+
 			Discord_RunCallbacks();
 
 			if (!game::CL_IsCgameInitialized())
 			{
-				discord_presence.details = "Main Menu";
+				state.reset();
+				details.reset();
+
+				discord_presence.details = game::UI_SafeTranslateString("MENU_MAIN_MENU");
 				discord_presence.state = "";
 
 				discord_presence.startTimestamp = 0;
 
 				const auto background_index = static_cast<int>(game::Sys_Milliseconds() / 300000) % 10;
-				discord_presence.largeImageKey = utils::string::va("bg_%i", background_index);
+				strcpy_s(image_key_buf, sizeof(image_key_buf), utils::string::va("bg_%i", background_index));
+				discord_presence.largeImageKey = image_key_buf;
 			}
 			else
 			{
-				const auto map = game::Dvar_FindVar("mapname")->current.string;
-				const auto mapname = game::UI_SafeTranslateString(utils::string::va("PRESENCE_SP_%s", map));
+				const char* base_mapname = nullptr;
+				auto* mapname = game::Dvar_FindVar("mapname")->current.string;
+				auto* map_image = game::Dvar_FindVar("mapname")->current.string;
+				auto* museum_mode = game::Dvar_FindVar("ui_char_museum_mode")->current.string;
 
-				discord_presence.largeImageKey = map;
-				discord_presence.details = mapname;
-				discord_presence.state = state.data();
+				if (game::Com_IsAddonMap(mapname, &base_mapname))
+				{
+					map_image = base_mapname;
+				}
+
+				if (museum_mode == "free"s)
+				{
+					map_image = "museum";
+				}
+				
+				const auto key = utils::string::va("PRESENCE_SP_%s", mapname);
+				if (game::DB_XAssetExists(game::ASSET_TYPE_LOCALIZE, key) && !game::DB_IsXAssetDefault(game::ASSET_TYPE_LOCALIZE, key))
+				{
+					mapname = game::UI_SafeTranslateString(key);
+				}
+
+				discord_presence.largeImageKey = map_image;
+
+				if (details.has_value())
+				{
+					const auto& details_ = details.value();
+					if (details_.starts_with("@") && details_.size() > 1)
+					{
+						const auto value = game::UI_SafeTranslateString(details_.substr(1).data());
+						discord_presence.details = value;
+					}
+					else
+					{
+						strcpy_s(details_buf, sizeof(details_buf), utils::string::va("%s", details_.data()));
+						discord_presence.details = details_buf;
+					}
+				}
+				else
+				{
+					discord_presence.details = mapname;
+				}
+
+				if (state.has_value())
+				{
+					strcpy_s(state_buf, sizeof(state_buf), state.value().data());
+					discord_presence.state = state_buf;
+				}
+				else
+				{
+					discord_presence.state = "";
+				}
+
 
 				if (!discord_presence.startTimestamp)
 				{
@@ -74,10 +132,19 @@ namespace discord
 			command::add("setdiscordstate", [](const command::params& params)
 			{
 				const std::string _state = params.join(1);
-
-				scheduler::once([_state]()
+				scheduler::once([=]()
 				{
 					state = _state;
+					update_discord();
+				}, scheduler::pipeline::async);
+			});
+
+			command::add("setdiscorddetails", [](const command::params& params)
+			{
+				const std::string details_ = params.join(1);
+				scheduler::once([=]()
+				{
+					details = details_;
 					update_discord();
 				}, scheduler::pipeline::async);
 			});
@@ -98,7 +165,7 @@ namespace discord
 
 		static void errored(const int error_code, const char* message)
 		{
-			printf("Discord: (%i) %s", error_code, message);
+			console::error("Discord: (%i) %s", error_code, message);
 		}
 	};
 }

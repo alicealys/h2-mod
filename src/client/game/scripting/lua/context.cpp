@@ -3,21 +3,34 @@
 #include "error.hpp"
 #include "value_conversion.hpp"
 
-#include "../execution.hpp"
-#include "../functions.hpp"
+#include "game/scripting/execution.hpp"
 
-#include "../../../component/notifies.hpp"
-#include "../../../component/scripting.hpp"
-#include "../../../component/command.hpp"
-#include "../../../component/fastfiles.hpp"
+#include "component/notifies.hpp"
+#include "component/scripting.hpp"
+#include "component/command.hpp"
+#include "component/fastfiles.hpp"
+#include "component/mods.hpp"
+#include "component/localized_strings.hpp"
+#include "component/scheduler.hpp"
+#include "component/filesystem.hpp"
+
+#include "game/ui_scripting/execution.hpp"
+
+#include "lualib.h"
+
+#include <xsk/gsc/types.hpp>
+#include <xsk/resolver.hpp>
 
 #include <utils/string.hpp>
 #include <utils/io.hpp>
+#include <utils/nt.hpp>
 
 namespace scripting::lua
 {
 	namespace
 	{
+		const auto json_script = utils::nt::load_resource(LUA_JSON);
+
 		vector normalize_vector(const vector& vec)
 		{
 			const auto length = sqrt((vec.get_x() * vec.get_x()) + (vec.get_y() * vec.get_y()) + (vec.get_z() * vec.get_z()));
@@ -29,17 +42,43 @@ namespace scripting::lua
 			);
 		}
 
+		void remove_unsafe_functions(sol::state& state)
+		{
+			state["package"]["searchers"][3] = sol::lua_value{state, sol::lua_nil};
+			state["package"]["searchers"][4] = sol::lua_value{state, sol::lua_nil};
+
+			state["os"]["execute"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["exit"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["getenv"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["remove"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["rename"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["setlocale"] = sol::lua_value{state, sol::lua_nil};
+			state["os"]["tmpname"] = sol::lua_value{state, sol::lua_nil};
+
+			state["package"]["loadlib"] = sol::lua_value{state, sol::lua_nil};
+		}
+
+		void setup_json(sol::state& state)
+		{
+			const auto json = state.safe_script(json_script, &sol::script_pass_on_error);
+			handle_error(json);
+			state["json"] = json;
+		}
+
 		void setup_io(sol::state& state)
 		{
-			state["io"]["fileexists"] = utils::io::file_exists;
-			state["io"]["writefile"] = utils::io::write_file;
-			state["io"]["filesize"] = utils::io::file_size;
-			state["io"]["createdirectory"] = utils::io::create_directory;
-			state["io"]["directoryexists"] = utils::io::directory_exists;
-			state["io"]["directoryisempty"] = utils::io::directory_is_empty;
-			state["io"]["listfiles"] = utils::io::list_files;
-			state["io"]["copyfolder"] = utils::io::copy_folder;
-			state["io"]["readfile"] = static_cast<std::string(*)(const std::string&)>(utils::io::read_file);
+			state["io"] = sol::table::create(state.lua_state());
+			state["io"]["fileexists"] = filesystem::safe_io_func<bool>(utils::io::file_exists);
+			state["io"]["writefile"] = filesystem::safe_write_file;
+			state["io"]["filesize"] = filesystem::safe_io_func<size_t>(utils::io::file_size);
+			state["io"]["createdirectory"] = filesystem::safe_io_func<bool>(utils::io::create_directory);
+			state["io"]["directoryexists"] = filesystem::safe_io_func<bool>(utils::io::directory_exists);
+			state["io"]["directoryisempty"] = filesystem::safe_io_func<bool>(utils::io::directory_is_empty);
+			state["io"]["listfiles"] = filesystem::safe_io_func<std::vector<std::string>>(utils::io::list_files);
+			state["io"]["removefile"] = filesystem::safe_io_func<bool>(utils::io::remove_file);
+			state["io"]["removedirectory"] = filesystem::safe_io_func<bool>(utils::io::remove_directory);
+			state["io"]["readfile"] = filesystem::safe_io_func<std::string>(
+				static_cast<std::string(*)(const std::string&)>(utils::io::read_file));
 		}
 
 		void setup_vector_type(sol::state& state)
@@ -190,11 +229,140 @@ namespace scripting::lua
 			state["level"] = entity{*::game::levelEntityId};
 			state["player"] = call("getentbynum", {0}).as<entity>();
 
+			auto animation_type = state.new_usertype<animation>("animation");
+
+			auto array_type = state.new_usertype<array>("array", sol::constructors<array()>());
+
+			array_type["erase"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					array.erase(index);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					array.erase(_key);
+				}
+			};
+
+			array_type["push"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				array.push(_value);
+			};
+
+			array_type["pop"] = [](const array& array, const sol::this_state s)
+			{
+				return convert(s, array.pop());
+			};
+
+			array_type["get"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					return convert(s, array.get(index));
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					return convert(s, array.get(_key));
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			array_type["set"] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key, const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				const auto nil = _value.get_raw().type == 0;
+
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					nil ? array.erase(index) : array.set(index, _value);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					nil ? array.erase(_key) : array.set(_key, _value);
+				}
+			};
+
+			array_type["size"] = [](const array& array, const sol::this_state s)
+			{
+				return array.size();
+			};
+
+			array_type[sol::meta_function::length] = [](const array& array, const sol::this_state s)
+			{
+				return array.size();
+			};
+
+			array_type[sol::meta_function::index] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key)
+			{
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					return convert(s, array.get(index));
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					return convert(s, array.get(_key));
+				}
+
+				return sol::lua_value{s, sol::lua_nil};
+			};
+
+			array_type[sol::meta_function::new_index] = [](const array& array, const sol::this_state s,
+				const sol::lua_value& key, const sol::lua_value& value)
+			{
+				const auto _value = convert(value);
+				const auto nil = _value.get_raw().type == 0;
+
+				if (key.is<int>())
+				{
+					const auto index = key.as<int>() - 1;
+					nil ? array.erase(index) : array.set(index, _value);
+				}
+				else if (key.is<std::string>())
+				{
+					const auto _key = key.as<std::string>();
+					nil ? array.erase(_key) : array.set(_key, _value);
+				}
+			};
+
+			array_type["getkeys"] = [](const array& array, const sol::this_state s)
+			{
+				std::vector<sol::lua_value> keys;
+
+				const auto keys_ = array.get_keys();
+				for (const auto& key : keys_)
+				{
+					keys.push_back(convert(s, key));
+				}
+				
+				return keys;
+			};
+
+			array_type["getentity"] = [](const array& array, const sol::this_state s)
+			{
+				return array.get_raw();
+			};
+
 			auto entity_type = state.new_usertype<entity>("entity");
 
-			for (const auto& func : method_map)
+			for (const auto& func : xsk::gsc::h2::resolver::get_methods())
 			{
-				const auto name = utils::string::to_lower(func.first);
+				const auto name = std::string(func.first);
 				entity_type[name.data()] = [name](const entity& entity, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};
@@ -282,14 +450,12 @@ namespace scripting::lua
 
 			entity_type["struct"] = sol::property([](const entity& entity, const sol::this_state s)
 			{
-				const auto id = entity.get_entity_id();
-				return scripting::lua::entity_to_struct(s, id);
+				return entity;
 			});
 
 			entity_type["getstruct"] = [](const entity& entity, const sol::this_state s)
 			{
-				const auto id = entity.get_entity_id();
-				return scripting::lua::entity_to_struct(s, id);
+				return entity;
 			};
 
 			entity_type["scriptcall"] = [](const entity& entity, const sol::this_state s, const std::string& filename,
@@ -325,9 +491,9 @@ namespace scripting::lua
 			auto game_type = state.new_usertype<game>("game_");
 			state["game"] = game();
 
-			for (const auto& func : function_map)
+			for (const auto& func : xsk::gsc::h2::resolver::get_functions())
 			{
-				const auto name = utils::string::to_lower(func.first);
+				const auto name = std::string(func.first);
 				game_type[name] = [name](const game&, const sol::this_state s, sol::variadic_args va)
 				{
 					std::vector<script_value> arguments{};
@@ -376,6 +542,11 @@ namespace scripting::lua
 				command::execute(utils::string::va("setdiscordstate %s", state.data()), false);
 			};
 
+			game_type["setdiscorddetails"] = [](const game&, const std::string& state)
+			{
+				command::execute(utils::string::va("setdiscorddetails %s", state.data()), false);
+			};
+
 			game_type["say"] = [](const game&)
 			{
 			};
@@ -384,18 +555,18 @@ namespace scripting::lua
 				const std::string function_name, const sol::protected_function& function)
 			{
 				const auto pos = get_function_pos(filename, function_name);
-				notifies::vm_execute_hooks[pos] = function;
+				notifies::set_lua_hook(pos, function);
 
 				auto detour = sol::table::create(function.lua_state());
 
 				detour["disable"] = [pos]()
 				{
-					notifies::vm_execute_hooks.erase(pos);
+					notifies::clear_hook(pos);
 				};
 
-				detour["enable"] = [pos, function]()
+				detour["enable"] = [&]()
 				{
-					notifies::vm_execute_hooks[pos] = function;
+					notifies::set_lua_hook(pos, function);
 				};
 
 				detour["invoke"] = [filename, function_name](const entity& entity, const sol::this_state s, sol::variadic_args va)
@@ -587,6 +758,66 @@ namespace scripting::lua
 					return sol::lua_value{s, sol::lua_nil};
 				}
 			};
+
+			game_type["getvarusage"] = [](const game&)
+			{
+				auto count = 0;
+				for (auto i = 0; i < 56320; i++)
+				{
+					const auto value = ::game::scr_VarGlob->objectVariableValue[i];
+					count += value.w.type != 24;
+				}
+				return count;
+			};
+
+			game_type["getchildvarusage"] = [](const game&)
+			{
+				auto count = 0;
+				for (auto i = 0; i < 384000; i++)
+				{
+					const auto value = ::game::scr_VarGlob->childVariableValue[i];
+					count += value.type != 24;
+				}
+				return count;
+			};
+
+			game_type["getloadedmod"] = [](const game&)
+			{
+				const auto& mod = mods::get_mod();
+				return mod.value_or("");
+			};
+
+			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
+				const std::string& value)
+			{
+				localized_strings::override(string, value, true);
+			};
+
+			game_type["overridedvarint"] = [](const game&, const std::string& dvar, const int value)
+			{
+				scripting::get_dvar_int_overrides[dvar] = value;
+			};
+
+			game_type["removedvarintoverride"] = [](const game&, const std::string& dvar)
+			{
+				scripting::get_dvar_int_overrides.erase(dvar);
+			};
+
+			game_type["luinotify"] = [](const game&, const std::string& name, const std::string& data)
+			{
+				::scheduler::once([=]()
+				{
+					ui_scripting::notify(name, {{"data", data}});
+				}, ::scheduler::pipeline::lui);
+			};
+
+			auto function_ptr_type = state.new_usertype<function_ptr>("functionptr", 
+				sol::constructors<function_ptr(const std::string&, const std::string&)>());
+
+			function_ptr_type["getpos"] = [](const function_ptr& ptr)
+			{
+				return reinterpret_cast<uint64_t>(ptr.get_pos());
+			};
 		}
 	}
 
@@ -598,7 +829,6 @@ namespace scripting::lua
 	{
 		this->state_.open_libraries(sol::lib::base,
 		                            sol::lib::package,
-		                            sol::lib::io,
 		                            sol::lib::string,
 		                            sol::lib::os,
 		                            sol::lib::math,
@@ -621,7 +851,9 @@ namespace scripting::lua
 			return this->folder_;
 		};
 
+		remove_unsafe_functions(this->state_);
 		setup_io(this->state_);
+		setup_json(this->state_);
 		setup_vector_type(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
@@ -652,7 +884,11 @@ namespace scripting::lua
 		{
 		};
 
+		setup_io(this->state_);
+		setup_json(this->state_);
+		setup_vector_type(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
+		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 	}
 
 	std::string context::load(const std::string& code)
@@ -693,8 +929,13 @@ namespace scripting::lua
 
 	void context::notify(const event& e)
 	{
-		this->scheduler_.dispatch(e);
 		this->event_handler_.dispatch(e);
+	}
+
+	void context::handle_endon_conditions(const event& e)
+	{
+		this->scheduler_.dispatch(e);
+		this->event_handler_.handle_endon_conditions(e);
 	}
 
 	void context::load_script(const std::string& script)

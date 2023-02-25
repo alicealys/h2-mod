@@ -7,20 +7,29 @@
 #include "game/scripting/lua/value_conversion.hpp"
 #include "game/scripting/lua/error.hpp"
 #include "notifies.hpp"
+#include "scripting.hpp"
 
 #include <utils/hook.hpp>
 
 namespace notifies
 {
-	std::unordered_map<const char*, sol::protected_function> vm_execute_hooks;
 	bool hook_enabled = true;
 
 	namespace
 	{
+		struct gsc_hook_t
+		{
+			bool is_lua_hook{};
+			const char* target_pos{};
+			sol::protected_function lua_function;
+		};
+
+		std::unordered_map<const char*, gsc_hook_t> vm_execute_hooks;
 		utils::hook::detour scr_entity_damage_hook;
 		std::vector<sol::protected_function> entity_damage_callbacks;
 
 		char empty_function[2] = {0x32, 0x34}; // CHECK_CLEAR_PARAMS, END
+		const char* target_function = nullptr;
 
 		unsigned int local_id_to_entity(unsigned int local_id)
 		{
@@ -43,21 +52,30 @@ namespace notifies
 			}
 
 			const auto& hook = vm_execute_hooks[pos];
-			const auto state = hook.lua_state();
-
-			const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
-
-			std::vector<sol::lua_value> args;
-
-			const auto top = game::scr_function_stack->top;
-
-			for (auto* value = top; value->type != game::SCRIPT_END; --value)
+			if (hook.is_lua_hook)
 			{
-				args.push_back(scripting::lua::convert(state, *value));
-			}
+				const auto& function = hook.lua_function;
+				const auto state = function.lua_state();
 
-			const auto result = hook(self, sol::as_args(args));
-			scripting::lua::handle_error(result);
+				const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
+
+				std::vector<sol::lua_value> args;
+
+				const auto top = game::scr_function_stack->top;
+
+				for (auto* value = top; value->type != game::SCRIPT_END; --value)
+				{
+					args.push_back(scripting::lua::convert(state, *value));
+				}
+
+				const auto result = function(self, sol::as_args(args));
+				scripting::lua::handle_error(result);
+				target_function = empty_function;
+			}
+			else
+			{
+				target_function = hook.target_pos;
+			}
 
 			return true;
 		}
@@ -89,7 +107,8 @@ namespace notifies
 			a.bind(replace);
 
 			a.popad64();
-			a.mov(r14, reinterpret_cast<char*>(empty_function));
+			a.mov(rax, qword_ptr(reinterpret_cast<int64_t>(&target_function)));
+			a.mov(r14, rax);
 			a.jmp(end);
 		}
 
@@ -134,7 +153,7 @@ namespace notifies
 		}
 
 		void scr_entity_damage_stub(game::gentity_s* self, game::gentity_s* inflictor, game::gentity_s* attacker, const float* vDir, const float* vPoint, 
-			int damage, int dflags, const unsigned int hitLoc, const unsigned int weapon, bool isAlternate, unsigned int a11, const int meansOfDeath, unsigned int a13, unsigned int a14)
+			int damage, int dflags, const unsigned int meansOfDeath, const unsigned int weapon, bool isAlternate, unsigned int a11, const int hitLoc, unsigned int a13, unsigned int a14)
 		{
 			{
 				const std::string _hitLoc = reinterpret_cast<const char**>(0x140BF4AA0)[hitLoc];
@@ -169,7 +188,8 @@ namespace notifies
 				}
 			}
 
-			scr_entity_damage_hook.invoke<void>(self, inflictor, attacker, vDir, vPoint, damage, dflags, hitLoc, weapon, isAlternate, a11, meansOfDeath, a13, a14);
+			scr_entity_damage_hook.invoke<void>(self,inflictor, attacker, vDir, vPoint, damage, dflags, 
+				meansOfDeath, weapon, isAlternate, a11, hitLoc, a13, a14);
 		}
 	}
 
@@ -180,8 +200,45 @@ namespace notifies
 
 	void clear_callbacks()
 	{
-		vm_execute_hooks.clear();
+		for (auto i = vm_execute_hooks.begin(); i != vm_execute_hooks.end();)
+		{
+			if (i->second.is_lua_hook)
+			{
+				i = vm_execute_hooks.erase(i);
+			}
+			else
+			{
+				++i;
+			}
+		}
+
 		entity_damage_callbacks.clear();
+	}
+
+	void set_lua_hook(const char* pos, const sol::protected_function& callback)
+	{
+		gsc_hook_t hook;
+		hook.is_lua_hook = true;
+		hook.lua_function = callback;
+		vm_execute_hooks[pos] = hook;
+	}
+
+	void set_gsc_hook(const char* source, const char* target)
+	{
+		gsc_hook_t hook;
+		hook.is_lua_hook = false;
+		hook.target_pos = target;
+		vm_execute_hooks[source] = hook;
+	}
+
+	void clear_hook(const char* pos)
+	{
+		vm_execute_hooks.erase(pos);
+	}
+
+	size_t get_hook_count()
+	{
+		return vm_execute_hooks.size();
 	}
 
 	class component final : public component_interface
@@ -192,6 +249,14 @@ namespace notifies
 			utils::hook::jump(0x1405C90A5, utils::hook::assemble(vm_execute_stub), true);
 
 			scr_entity_damage_hook.create(0x1404BD2E0, scr_entity_damage_stub);
+
+			scripting::on_shutdown([](bool free_scripts, bool post_shutdown)
+			{
+				if (free_scripts && !post_shutdown)
+				{
+					vm_execute_hooks.clear();
+				}
+			});
 		}
 	};
 }

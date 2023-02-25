@@ -26,6 +26,13 @@ namespace utils
 		std::memmove(this->data.data(), rgb_image, size);
 	}
 
+	image::image(const std::string& data_, int width_, int height_)
+		: data(data_)
+		  , width(width_)
+		  , height(height_)
+	{
+	}
+
 	int image::get_width() const
 	{
 		return this->width;

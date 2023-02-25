@@ -45,12 +45,11 @@ namespace scripting::lua::engine
 
 	void start()
 	{
-		clear_custom_fields();
 		get_scripts().clear();
 
 		load_generic_script();
 
-		for (const auto& path : filesystem::get_search_paths())
+		for (const auto& path : filesystem::get_search_paths_rev())
 		{
 			load_scripts(path + "/scripts/");
 		}
@@ -67,6 +66,14 @@ namespace scripting::lua::engine
 		for (auto& script : get_scripts())
 		{
 			script->notify(e);
+		}
+	}
+
+	void handle_endon_conditions(const event& e)
+	{
+		for (auto& script : get_scripts())
+		{
+			script->handle_endon_conditions(e);
 		}
 	}
 

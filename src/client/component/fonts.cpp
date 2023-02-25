@@ -2,8 +2,11 @@
 #include "loader/component_loader.hpp"
 
 #include "fonts.hpp"
-#include "game_console.hpp"
+#include "console.hpp"
 #include "filesystem.hpp"
+#include "command.hpp"
+#include "language.hpp"
+#include "config.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
@@ -19,11 +22,115 @@ namespace fonts
 {
 	namespace
 	{
+		const char* hudelem_fonts[] =
+		{
+			"",
+			"bigfixed",
+			"smallfixed",
+			"objective",
+			"big",
+			"small",
+			"hudbig",
+			"hudsmall",
+			"buttomprompt",
+			"subtitle",
+			"timer",
+			"nameplate",
+			"bank",
+			"bankshadow",
+			"bankshadowmore",
+		};
+
 		struct font_data_t
 		{
 			std::unordered_map<std::string, game::TTF*> fonts;
 			std::unordered_map<std::string, std::string> raw_fonts;
 		};
+
+		utils::memory::allocator font_allocator;
+
+		game::StringTable* get_font_replacements_table()
+		{
+			if (!game::DB_XAssetExists(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv"))
+			{
+				return nullptr;
+			}
+
+			return game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv", false).stringTable;
+		}
+
+		struct font_replacement
+		{
+			const char* target_font;
+			const char* new_font;
+		};
+
+		std::vector<font_replacement>& get_font_replacements()
+		{
+			static std::vector<font_replacement> replacements = {};
+			return replacements;
+		}
+
+		void load_font_replacements()
+		{
+			static auto loaded = false;
+			if (loaded)
+			{
+				return;
+			}
+
+			loaded = true;
+			auto& replacements = get_font_replacements();
+
+			const auto disabled = config::get<bool>("disable_custom_fonts");
+			if (disabled.has_value() && disabled.value() && language::current() != game::LANGUAGE_CZECH)
+			{
+				return;
+			}
+
+			const auto table = get_font_replacements_table();
+			if (table == nullptr)
+			{
+				return;
+			}
+
+			const auto current_language = language::current();
+
+			for (auto row = 0; row < table->rowCount; row++)
+			{
+				if (table->columnCount < 3)
+				{
+					continue;
+				}
+
+				const auto row_values = &table->values[(row * table->columnCount)];
+				const auto lang = row_values[0].string;
+				if (std::strcmp(lang, game::languages[current_language].name))
+				{
+					continue;
+				}
+
+				const auto font = utils::memory::get_allocator()->duplicate_string(row_values[1].string);
+				const auto replacement = utils::memory::get_allocator()->duplicate_string(row_values[2].string);
+				replacements.emplace_back(font, replacement);
+			}
+
+			return;
+		}
+
+		const char* get_font_replacement(const char* name)
+		{
+			const auto& replacements = get_font_replacements();
+			for (const auto& replacement : replacements)
+			{
+				if (!std::strcmp(name, replacement.target_font))
+				{
+					return replacement.new_font;
+				}
+			}
+
+			return name;
+		}
 
 		utils::concurrency::container<font_data_t> font_data;
 
@@ -39,9 +146,9 @@ namespace fonts
 
 		void free_font(game::TTF* font)
 		{
-			utils::memory::get_allocator()->free(font->buffer);
-			utils::memory::get_allocator()->free(font->name);
-			utils::memory::get_allocator()->free(font);
+			font_allocator.free(font->buffer);
+			font_allocator.free(font->name);
+			font_allocator.free(font);
 		}
 
 		game::TTF* load_font(const std::string& name)
@@ -79,7 +186,7 @@ namespace fonts
 			}
 			catch (const std::exception& e)
 			{
-				game_console::print(game_console::con_type_error, "Failed to load font %s: %s\n", name.data(), e.what());
+				console::error("Failed to load font %s: %s\n", name.data(), e.what());
 			}
 
 			return nullptr;
@@ -92,7 +199,140 @@ namespace fonts
 			{
 				result = game::DB_FindXAssetHeader(type, name, create_default).ttf;
 			}
+
 			return result;
+		}
+
+		utils::hook::detour r_register_font_hook;
+		void* r_register_font_stub(const char* name, int size)
+		{
+			const auto name_ = get_font_replacement(name);
+			return r_register_font_hook.invoke<void*>(name_, size);
+		}
+
+		utils::hook::detour cl_init_renderer_hook;
+		void* cl_init_renderer_stub()
+		{
+			load_font_replacements();
+			return cl_init_renderer_hook.invoke<void*>();
+		}
+
+		game::Font_s* bank_font = nullptr;
+
+		utils::hook::detour ui_get_font_handle_hook;
+		utils::hook::detour ui_asset_cache_hook;
+
+		game::Font_s* ui_get_font_handle_stub(void* a1, int font_index)
+		{
+			if (font_index < 12 || bank_font == nullptr)
+			{
+				return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
+			}
+
+			switch (font_index)
+			{
+			case 12:
+			case 13:
+			case 14:
+				return bank_font;
+			}
+
+			return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
+		}
+
+		game::Font_s* get_bank_font()
+		{
+			if (language::is_asian())
+			{
+				return game::R_RegisterFont("fonts/defaultBold.otf", 32);
+			}
+			else
+			{
+				return game::R_RegisterFont("fonts/bank.ttf", 32);
+			}
+		}
+
+		void* ui_asset_cache_stub()
+		{
+			bank_font = get_bank_font();
+			return ui_asset_cache_hook.invoke<void*>();
+		}
+
+		int get_font_handle_index(int hudelem_font_index, int current)
+		{
+			switch (hudelem_font_index)
+			{
+			case 12:
+			case 13:
+			case 14:
+				return hudelem_font_index;
+			}
+
+			return current;
+		}
+
+		void get_hud_elem_info_stub(utils::hook::assembler& a)
+		{
+			a.push(ebx);
+			a.pushad64();
+			a.mov(edx, ebx);
+			a.mov(ecx, dword_ptr(rsi, 4));
+			a.call_aligned(get_font_handle_index);
+			a.mov(dword_ptr(rsp, 0x80), eax);
+			a.popad64();
+			a.pop(ebx);
+
+			a.mov(edx, dword_ptr(rdi, 0x240));
+			a.lea(r8, qword_ptr(rsp, 0x98));
+
+			a.jmp(0x14037B39E);
+		}
+
+		int get_font_style(int font_index)
+		{
+			switch (font_index)
+			{
+			case 12:
+				return 0; // none
+			case 13:
+				return 2; // shadowed
+			case 14:
+				return 4; // shadowed more
+			}
+
+			return 0;
+		}
+
+		void get_hud_elem_text_style_stub(utils::hook::assembler& a)
+		{
+			const auto original = a.newLabel();
+			const auto loc_14037AF98 = a.newLabel();
+
+			a.mov(eax, dword_ptr(rdi, 4));
+			a.cmp(eax, 12);
+			a.jl(original);
+			
+			a.push(edx);
+			a.pushad64();
+
+			a.mov(ecx, eax);
+			a.call_aligned(get_font_style);
+			a.mov(dword_ptr(rsp, 0x80), eax);
+
+			a.popad64();
+			a.pop(edx);
+
+			a.jmp(0x14037AFA5);
+
+			a.bind(original);
+
+			a.cmp(eax, 9);
+			a.jnz(loc_14037AF98);
+			a.mov(edx, 0x400);
+			a.jmp(0x14037AFA5);
+
+			a.bind(loc_14037AF98);
+			a.jmp(0x14037AF98);
 		}
 	}
 
@@ -113,8 +353,9 @@ namespace fonts
 				free_font(font.second);
 			}
 
+			font_allocator.clear();
 			data_.fonts.clear();
-			utils::hook::set<int>(0x14EE3ACB8, 0); // reset registered font count
+			*reinterpret_cast<int*>(0x14EE3ACB8) = 0; // reset registered font count
 		});
 	}
 
@@ -124,6 +365,41 @@ namespace fonts
 		void post_unpack() override
 		{
 			utils::hook::call(0x140747096, db_find_xasset_header_stub);
+			r_register_font_hook.create(0x140746FE0, r_register_font_stub);
+			cl_init_renderer_hook.create(0x1403D5AA0, cl_init_renderer_stub);
+
+			// add custom fonts to hud elem fonts
+			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);
+			ui_get_font_handle_hook.create(0x1406058F0, ui_get_font_handle_stub);
+
+			// change hudelem font array
+			utils::hook::inject(0x1404C17A6, hudelem_fonts);
+			utils::hook::set(0x1404C17B7, static_cast<int>(ARRAYSIZE(hudelem_fonts)));
+
+			// handle custom fonts
+			utils::hook::jump(0x14037B390, utils::hook::assemble(get_hud_elem_info_stub), true);
+			// handle custom font styles
+			utils::hook::jump(0x14037AF89, utils::hook::assemble(get_hud_elem_text_style_stub), true);
+
+			command::add("dumpFont", [](const command::params& params)
+			{
+				if (params.size() < 2)
+				{
+					return;
+				}
+
+				const auto name = params.get(1);
+				const auto ttf = game::DB_FindXAssetHeader(game::XAssetType::ASSET_TYPE_TTF, name, false).ttf;
+				if (ttf == nullptr)
+				{
+					console::error("Font does not exist\n");
+					return;
+				}
+
+				const auto path = utils::string::va("dumps/%s", ttf->name);
+				utils::io::write_file(path, std::string(ttf->buffer, ttf->len), false);
+				console::info("Dumped to %s", path);
+			});
 		}
 	};
 }

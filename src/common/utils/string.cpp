@@ -34,11 +34,30 @@ namespace utils::string
 		return elems;
 	}
 
+	std::vector<std::string> split_lines(const std::string& s)
+	{
+		std::stringstream ss(s);
+		std::string item;
+		std::vector<std::string> elems;
+
+		while (std::getline(ss, item, '\n'))
+		{
+			if (item.ends_with('\r'))
+			{
+				item.pop_back();
+			}
+
+			elems.push_back(item); // elems.push_back(std::move(item)); // if C++11 (based on comment from @mchiasson)
+		}
+
+		return elems;
+	}
+
 	std::string to_lower(std::string text)
 	{
-		std::transform(text.begin(), text.end(), text.begin(), [](const char input)
+		std::transform(text.begin(), text.end(), text.begin(), [](const unsigned char input)
 		{
-			return static_cast<char>(tolower(input));
+			return static_cast<char>(std::tolower(input));
 		});
 
 		return text;
@@ -46,9 +65,9 @@ namespace utils::string
 
 	std::string to_upper(std::string text)
 	{
-		std::transform(text.begin(), text.end(), text.begin(), [](const char input)
+		std::transform(text.begin(), text.end(), text.begin(), [](const unsigned char input)
 		{
-			return static_cast<char>(toupper(input));
+			return static_cast<char>(std::toupper(input));
 		});
 
 		return text;
@@ -147,8 +166,6 @@ namespace utils::string
 		*out = '\0';
 	}
 
-#pragma warning(push)
-#pragma warning(disable: 4100)
 	std::string convert(const std::wstring& wstr)
 	{
 		std::string result;
@@ -174,7 +191,6 @@ namespace utils::string
 
 		return result;
 	}
-#pragma warning(pop)
 
 	std::string replace(std::string str, const std::string& from, const std::string& to)
 	{
@@ -203,5 +219,27 @@ namespace utils::string
 		return text.size() <= length
 			? text
 			: text.substr(0, length - end.size()) + end;
+	}
+
+	bool strstr_lower(const char* a, const char* b)
+	{
+		const char* a_ = a;
+		const char* b_ = b;
+
+		while (*a_ != '\0' && *b_ != '\0')
+		{
+			if (std::tolower(*a_) == std::tolower(*b_))
+			{
+				b_++;
+			}
+			else
+			{
+				b_ = b;
+			}
+
+			a_++;
+		}
+
+		return *b_ == '\0';
 	}
 }

@@ -29,6 +29,7 @@ namespace scripting::lua
 
 		void run_frame();
 		void notify(const event& e);
+		void handle_endon_conditions(const event& e);
 
 		std::string load(const std::string& code);
 

@@ -62,18 +62,18 @@ namespace ui_scripting
 		}
 	}
 
-	class hks_object
+	class hks_reference
 	{
 	public:
-		hks_object() = default;
-		hks_object(const game::hks::HksObject& value);
-		hks_object(const hks_object& other) noexcept;
-		hks_object(hks_object&& other) noexcept;
+		hks_reference() = default;
+		hks_reference(const game::hks::HksObject& value);
+		hks_reference(const hks_reference& other) noexcept;
+		hks_reference(hks_reference&& other) noexcept;
 
-		hks_object& operator=(const hks_object& other) noexcept;
-		hks_object& operator=(hks_object&& other) noexcept;
+		hks_reference& operator=(const hks_reference& other) noexcept;
+		hks_reference& operator=(hks_reference&& other) noexcept;
 
-		~hks_object();
+		~hks_reference();
 
 		const game::hks::HksObject& get() const;
 
@@ -91,7 +91,7 @@ namespace ui_scripting
 	class script_value
 	{
 	public:
-		script_value() = default;
+		script_value();
 		script_value(const game::hks::HksObject& value);
 
 		script_value(int value);
@@ -136,10 +136,13 @@ namespace ui_scripting
 		{
 		}
 
-		bool operator==(const script_value& other) const;
+		template <typename T>
+		script_value(const std::optional<T>& optional)
+			: script_value(optional.has_value() ? script_value(optional.value()) : script_value())
+		{
+		}
 
-		arguments operator()() const;
-		arguments operator()(const arguments& arguments) const;
+		bool operator==(const script_value& other) const;
 
 		template<class ...T>
 		arguments operator()(T... arguments) const
@@ -167,8 +170,11 @@ namespace ui_scripting
 		{
 			if (!this->is<T>())
 			{
+				const auto hks_typename = game::hks::s_compilerTypeName[this->get_type() + 2];
+				const auto typename_ = get_typename<T>();
+
 				throw std::runtime_error(utils::string::va("%s expected, got %s", 
-					typeid(T).name(), game::hks::typenames[this->get_raw().t + 2]));
+					typename_.data(), hks_typename));
 			}
 
 			return get<T>();
@@ -180,10 +186,12 @@ namespace ui_scripting
 			return this->as<T>();
 		}
 
+		const game::hks::HksObjectType get_type() const;
 		const game::hks::HksObject& get_raw() const;
 
-		hks_object value_{};
+		hks_reference value_{};
 
+	private:
 		template <typename T>
 		T get() const;
 
@@ -201,16 +209,15 @@ namespace ui_scripting
 		template <typename T>
 		T as() const
 		{
-			if (!this->value_.is<T>())
+			try
 			{
-				const auto hks_typename = game::hks::typenames[this->value_.get_raw().t + 2];
-				const auto typename_ = get_typename<T>();
-
-				throw std::runtime_error(utils::string::va("bad argument #%d (%s expected, got %s)",
-					this->index_ + 1, typename_.data(), hks_typename));
+				return this->value_.as<T>();
 			}
-
-			return this->value_.get<T>();
+			catch (const std::exception& e)
+			{
+				throw std::runtime_error(utils::string::va("bad argument #%d (%s)",
+					this->index_ + 1, e.what()));
+			}
 		}
 
 		template <>
@@ -222,6 +229,11 @@ namespace ui_scripting
 				args.push_back(this->values_[i]);
 			}
 			return args;
+		}
+
+		operator script_value() const
+		{
+			return this->value_;
 		}
 
 		template <typename T>

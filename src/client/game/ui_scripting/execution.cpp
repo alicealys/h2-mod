@@ -1,7 +1,7 @@
 #include <std_include.hpp>
 #include "execution.hpp"
 #include "component/ui_scripting.hpp"
-#include "component/game_console.hpp"
+#include "component/console.hpp"
 
 #include <utils/string.hpp>
 
@@ -70,7 +70,7 @@ namespace ui_scripting
 			values.push_back(v);
 		}
 
-		if (values.size() == 0)
+		if (values.empty())
 		{
 			values.push_back({});
 		}
@@ -90,7 +90,7 @@ namespace ui_scripting
 			values.push_back(v);
 		}
 
-		if (values.size() == 0)
+		if (values.empty())
 		{
 			values.push_back({});
 		}
@@ -130,7 +130,7 @@ namespace ui_scripting
 		}
 		catch (const std::exception& e)
 		{
-			game_console::print(game_console::con_type_error, "Error processing event '%s' %s\n", name.data(), e.what());
+			console::error("Error processing event '%s' %s\n", name.data(), e.what());
 		}
 
 		return false;

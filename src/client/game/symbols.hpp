@@ -18,10 +18,13 @@ namespace game
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x14059A050};
 
-	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessage{0x14037F450};
+	WEAK symbol<void(int localClientNum, const char* message, int style)> CG_GameMessage{0x14037F450};
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x14037F1B0};
 	WEAK symbol<char*(const unsigned int weapon, 
 		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x1403B9210};
+
+	WEAK symbol<void(ScreenPlacement* place, float x, float y, float w, float h, int horzAlign, int vertAlign, 
+		float t0, float s0, float t1, float s1, float* color, Material* material)> CL_DrawStretchPic{0x1403C9570};
 
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x14059A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x14059ABA0};
@@ -30,6 +33,7 @@ namespace game
 	WEAK symbol<void(char const* finalMessage)> Com_Shutdown{0x1405A62C0};
 	WEAK symbol<void()> Com_Quit_f{0x1405A50D0};
 	WEAK symbol<bool()> Com_InFrontend{0x140328BD0};
+	WEAK symbol<bool(const char* mapName, const char** pBaseMapName)> Com_IsAddonMap{0x140609570};
 	WEAK symbol<void()> Quit{0x1405A52A0};
 
 	WEAK symbol<void(XAssetType type, void(__cdecl* func)(game::XAssetHeader, void*), const void* inData, bool includeOverride)>
@@ -37,12 +41,22 @@ namespace game
 	WEAK symbol<const char*(const XAsset* asset)> DB_GetXAssetName{0x1403E4090};
 	WEAK symbol<void(XZoneInfo* zoneInfo, unsigned int zoneCount, DBSyncMode syncMode)> DB_LoadXAssets{0x140414FF0};
 	WEAK symbol<XAssetHeader(XAssetType type, const char* name, int allowCreateDefault)> DB_FindXAssetHeader{0x140412F60};
+	WEAK symbol<DB_FileSysInterface*()> DB_FSInitialize{0x140272EC0};
 	WEAK symbol<int(const RawFile* rawfile)> DB_GetRawFileLen{0x140413D80};
 	WEAK symbol<int(const RawFile* rawfile, char* buf, int size)> DB_GetRawBuffer{0x140413C40};
-
+	WEAK symbol<XAssetEntry*(XAssetType type, XAssetHeader* header)> DB_LinkXAssetEntry1{0x140414900};
+	WEAK symbol<bool(const char* zoneName)> DB_IsLocalized{0x1404141E0};
+	WEAK symbol<size_t(XAssetType type)> DB_GetXAssetTypeSize{0x1403E40D0};
+	WEAK symbol<void(void* levelLoad, const char* name, 
+		const unsigned int allocFlags, const unsigned __int64 sizeEst)> DB_LevelLoadAddZone{0x1404145D0};
+	WEAK symbol<int(game::XAssetType type, const char* name)> DB_IsXAssetDefault{0x1404143C0};
+	WEAK symbol<int(game::XAssetType type, const char* name)> DB_XAssetExists{0x140417FD0};
+	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
+	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
 	WEAK symbol<void(char* buffer, int index)> Dvar_GetCombinedString{0x1405A75D0};
 	WEAK symbol<dvar_t*(int hash, const char* name, bool value, unsigned int flags)> Dvar_RegisterBool{0x140617BB0};
+	WEAK symbol<dvar_t*(int hash, const char* name, const char** valueList, int defaultIndex, unsigned int flags)> Dvar_RegisterEnum{0x140617E90};
 	WEAK symbol<dvar_t*(int hash, const char* name, int value, int min, int max, unsigned int flags)> Dvar_RegisterInt{0x140618090};
 	WEAK symbol<dvar_t*(int hash, const char* dvarName, float value, float min, float max, unsigned int flags)>
 		Dvar_RegisterFloat{0x140617F80};
@@ -54,6 +68,8 @@ namespace game
 	WEAK symbol<const char*(dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x14061B8F0};
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x14061A5C0};
 	WEAK symbol<void(const char* dvarName, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x14061A910};
+	WEAK symbol<void(const dvar_t* dvar, const char* value)> Dvar_SetString{0x14061ABF0};
+	WEAK symbol<void(const dvar_t* dvar, DvarSetSource source)> Dvar_Reset{0x140619FE0};
 
 	WEAK symbol<int(const char* fname)> generateHashValue{0x140343D20};
 
@@ -75,8 +91,15 @@ namespace game
 	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
 		G_GivePlayerWeapon{0x14051B660};
 	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x1404C4110};
-	WEAK symbol<void(int clientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
+	WEAK symbol<void(int localClientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
+	WEAK symbol<void(trace_t* results, const float* start, const float* end, 
+		const Bounds* bounds, int passEntityNum, int contentmask)> G_TraceCapsule{0x1404CBFE0};
+	WEAK symbol<void(int* hitNum, const float* start, const float* end, 
+		int passEntityNum, int passEntityNum1, int contentmask)> G_SightTrace{0x1404CBCA0};
 	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x14036F310};
+
+	WEAK symbol<char*(const size_t size)> Hunk_AllocateTempMemoryHigh{0x140614790};
+	WEAK symbol<char*(const size_t size, const size_t alignment)> Hunk_AllocAlignInternal{0x140613D80};
 
 	WEAK symbol<char*(char* string)> I_CleanStr{0x140620660};
 
@@ -85,12 +108,15 @@ namespace game
 
 	WEAK symbol<const char*(int, int, int)> Key_KeynumToString{0x1403D32D0};
 
-	WEAK symbol<void(int clientNum, const char* menu, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
-	WEAK symbol<bool(int clientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
+	WEAK symbol<void(int localClientNum, const char* menuName, int a3, int a4, unsigned int a5)> LUI_OpenMenu{0x1405F0EE0};
+	WEAK symbol<bool(int localClientNum, const char* name, hks::lua_State* s)> LUI_BeginEvent{0x1403155E0};
+	WEAK symbol<bool(int localClientNum, int lui_event_cache, hks::lua_State* s)> LUI_BeginCachedEvent{0x1403153E0};
+	WEAK symbol<void(const char* name, int value, hks::lua_State* s)> LUI_SetTableInt{0x140320060};
+	WEAK symbol<void(const char* name, const char* value, hks::lua_State* s)> LUI_SetTableString{0x1403201F0};
 	WEAK symbol<void(hks::lua_State* s)> LUI_EndEvent{0x140316890};
 	WEAK symbol<void()> LUI_EnterCriticalSection{0x140316980};
 	WEAK symbol<void()> LUI_LeaveCriticalSection{0x14031BC20};
-	WEAK symbol<bool(int clientNum, const char* menu)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
+	WEAK symbol<bool(int localClientNum, const char* menuName)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x140759BA0};
 
@@ -104,6 +130,21 @@ namespace game
 	WEAK symbol<void(unsigned int id, scr_string_t stringValue, unsigned int paramcount)> Scr_NotifyId{0x1405C8240};
 	WEAK symbol<unsigned int(unsigned int threadId)> Scr_GetSelf{0x1405C57C0};
 	WEAK symbol<void()> Scr_ErrorInternal{0x1405C6EC0};
+	WEAK symbol<const char*(unsigned int index)> Scr_GetString{0x1405C7C20};
+	WEAK symbol<int(unsigned int index)> Scr_GetInt{0x1405C7890};
+	WEAK symbol<float(unsigned int index)> Scr_GetFloat{0x1405C7730};
+	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
+	WEAK symbol<void(const char* value)> Scr_AddString{0x1405C6A80};
+	WEAK symbol<unsigned int(const char* name)> Scr_LoadScript{0x1405BCEC0};
+	WEAK symbol<int()> Scr_GetNumParam{0x1405C7940};
+	WEAK symbol<unsigned int(const char* script, unsigned int name)> Scr_GetFunctionHandle{0x1405BCD50};
+	WEAK symbol<unsigned int(int handle, unsigned int paramcount)> Scr_ExecThread{0x1405C6F40};
+	WEAK symbol<unsigned int(void* func, int type, unsigned int name)> Scr_RegisterFunction{0x1405BC7B0};
+
+	WEAK symbol<char*(unsigned int size, unsigned int alignment, 
+		unsigned int type, int source)> PMem_AllocFromSource_NoDebug{0x14061E680};
+	WEAK symbol<int(char* buf, unsigned int size, unsigned int alignment, 
+		unsigned int type, int source)> PMem_PopFromSource_NoDebug{0x14061EDF0};
 
 	WEAK symbol<unsigned int(unsigned int localId, const char* pos, unsigned int paramcount)> VM_Execute{0x1405C8DB0};
 
@@ -117,21 +158,29 @@ namespace game
 					 float rotation, float* color1, float* color2, int style)> R_AddCmdDrawText2{0x14076C860};
 	WEAK symbol<void(rectangle* rect, float a2, float a3, float a4, float a5, float* color, Material* material)> R_DrawRectangle{0x14076A280};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, int fontSize, float x, float y, float xScale, float yScale, float rotation, 
-		const float* color, int style, int cursorPos, char cursor)> R_AddCmdDrawTextWithCursor{0x14076CAF0};
+		const float* color, int style, int cursorPos, char cursor, void* fontGlowStyle)> AddBaseDrawTextCmd{0x14076CAF0};
+	WEAK symbol<int(void* font)> R_GetFontHeight{0x1407470C0};
+	WEAK symbol<void*(int style)> R_GetFontGlowStyle{0x140746680};
 	WEAK symbol<void*(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale,
 		int a8, float* color1, unsigned int style, rgba color2)> R_AddCmdDrawTextGradient{0x14076C570};
+	WEAK symbol<void(char const* text, int maxChars, Font_s* font, int height, float x, float y, float xScale, float yScale, 
+		float rotation, float const* color, void* font_glow_style, int, char)> R_AddCmdDrawTextWithCursor{0x14076CAF0};
 	WEAK symbol<Font_s*(const char* font, int size)> R_RegisterFont{0x140746FE0};
 	WEAK symbol<int(const char* text, int maxChars, Font_s* font)> R_TextWidth{0x1407472A0};
 	WEAK symbol<void()> R_SyncRenderThread{0x14076E7D0};
 	WEAK symbol<void()> R_WaitWorkerCmds{0x140794330};
 	WEAK symbol<void(const void* obj, void* pose, unsigned int entnum, unsigned int renderFxFlags, float* lightingOrigin, 
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x140775C40};
+	WEAK symbol<HANDLE(unsigned __int64* outUserData, void* dest, unsigned __int64 bytes)> R_Cinematic_SysIO_BinkRead{0x1407191B0};
 
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x1403E16A0};
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x1403E1660};
+	WEAK symbol<void(const ScreenPlacement* scrPlace, float* x, float* y, float* w, float* h, 
+		int horzAlign, int vertAlign)> ScrPlace_ApplyRect{0x1403E0BF0};
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x1405BFBB0};
 	WEAK symbol<scr_string_t(const char* str, unsigned int user)> SL_GetString{0x1405C0170};
+	WEAK symbol<unsigned int(const char* str)> SL_GetCanonicalString{0x1405BC970};
 
 	WEAK symbol<bool()> SV_Loaded{0x1406B3860};
 
@@ -142,13 +191,24 @@ namespace game
 	WEAK symbol<void(int critSec)> Sys_EnterCriticalSection{0x140624240};
 	WEAK symbol<void(int critSec)> Sys_LeaveCriticalSection{0x1406242C0};
 
+	WEAK symbol<const char*()> SEH_GetCurrentLanguageCode{0x1405E5180};
+	WEAK symbol<const char*()> SEH_GetCurrentLanguageName{0x1405E5200};
+
 	WEAK symbol<const char*(const char* string)> UI_SafeTranslateString{0x1405A2930};
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x140606080};
+	WEAK symbol<void(ScreenPlacement* scrPlace, const char* text, rectDef_s* rect, Font_s* font, float x, float y,
+		float scale, const float* color, int style, int textAlignMode, rectDef_s* textRect, char a12)> UI_DrawWrappedText{0x1406055E0};
 
 	WEAK symbol<void(pmove_t* move, trace_t*, const float*, const float*,
 		const Bounds*, int, int)> PM_playerTrace{0x14068F0A0};
 	WEAK symbol<void(pmove_t*, trace_t*, const float*, const float*,
 		const Bounds*, int, int)> PM_trace{0x14068F1D0};
+
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_WalkMove{0x14068EBB0};
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_AirMove{0x140686BF0};
+	WEAK symbol<void(pmove_t*, pml_t*)> PM_GroundTrace{0x140689AA0};
+
+	WEAK symbol<float(float*)> Vec2Normalize{0x140611D80};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14089EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x1408EC2E0};
@@ -161,10 +221,18 @@ namespace game
 
 	WEAK symbol<HWND> hWnd{0x14CCF81C0};
 
-	WEAK symbol<const char*> g_assetNames{0x140BEF280};
+	WEAK game::symbol<const char*> g_assetNames{0x140BEF280};
+
+	WEAK game::symbol<void*> g_assetPool{0x140BF3620};
+
+	WEAK game::symbol<unsigned int> g_zoneCount{0x1422F45F4};
+	WEAK game::symbol<unsigned short> g_zoneIndex{0x1422F8DC8};
+
+	WEAK symbol<int> g_compressor{0x142065E80};
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
+	WEAK symbol<gclient_s> g_clients{0x1455DA980};
 	WEAK symbol<int> num_entities{0x1455CC738};
 	WEAK symbol<PathData> pathData{0x1452CCDA0};
 	WEAK symbol<int> vehicle_pathnode_count{0x14D009A30};
@@ -186,9 +254,19 @@ namespace game
 	WEAK symbol<jmp_buf> g_script_error{0x14BA9CD40};
 	WEAK symbol<scr_classStruct_t> g_classMap{0x140BF95C0};
 
+	WEAK symbol<physical_memory> g_scriptmem{0x14CC9FEC0};
+
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0x14B617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14BA9EE40};
 	WEAK symbol<function_stack_t> scr_function_stack{0x14BAA93C0};
+
+	WEAK symbol<int> gameTime{0x1455CC780};
+
+	WEAK symbol<DB_FileSysInterface*> g_fileSystem{0x1420B27E8};
+
+	WEAK symbol<map_t> maps{0x14097EE90};
+
+	WEAK symbol<language_values> languages{0x140BF9740};
 
 	namespace hks
 	{
@@ -216,6 +294,6 @@ namespace game
 		WEAK symbol<int(lua_State* s, const char* what, lua_Debug* ar)> hksi_lua_getinfo{0x1402DD1F0};
 		WEAK symbol<int(lua_State* s, int level, lua_Debug* ar)> hksi_lua_getstack{0x1402DD4C0};
 		WEAK symbol<void(lua_State* s, const char* fmt, ...)> hksi_luaL_error{0x1402E3E40};
-		WEAK symbol<const char*> typenames{0x140BE9F50};
+		WEAK symbol<const char*> s_compilerTypeName{0x140BE9F50};
 	}
 }

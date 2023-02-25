@@ -31,7 +31,6 @@ namespace scripting::lua
 		callbacks_.access([&](task_list& tasks)
 		{
 			this->merge_callbacks();
-			this->handle_endon_conditions(event);
 
 			for (auto i = tasks.begin(); i != tasks.end();)
 			{
@@ -41,13 +40,16 @@ namespace scripting::lua
 					continue;
 				}
 
-				if (!has_built_arguments)
+				if (!i->is_deleted)
 				{
-					has_built_arguments = true;
-					arguments = this->build_arguments(event);
-				}
+					if (!has_built_arguments)
+					{
+						has_built_arguments = true;
+						arguments = this->build_arguments(event);
+					}
 
-				handle_error(i->callback(sol::as_args(arguments)));
+					handle_error(i->callback(sol::as_args(arguments)));
+				}
 
 				if (i->is_volatile || i->is_deleted)
 				{
@@ -157,6 +159,7 @@ namespace scripting::lua
 		};
 
 		callbacks_.access(deleter);
+		new_callbacks_.access(deleter);
 	}
 
 	event_arguments event_handler::build_arguments(const event& event) const
