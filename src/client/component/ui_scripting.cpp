@@ -336,6 +336,31 @@ namespace ui_scripting
 				return fastfiles::exists(name);
 			};
 
+			game_type["openlink"] = [](const game&, const std::string& name)
+			{
+				static std::unordered_map<std::string, std::string> links =
+				{
+					{"github", "https://github.com/fedddddd/h2-mod"},
+					{"donate", "https://www.paypal.com/donate/?hosted_button_id=LM5BA9UABEV4Q"},
+					{"credits_1", "https://github.com/momo5502"},
+					{"credits_2", "https://github.com/VladWinner"},
+					{"credits_3", "https://github.com/diamante0018"},
+					{"credits_4", "https://github.com/JariKCoding"},
+					{"credits_5", "https://github.com/netadr"},
+					{"credits_6", "https://github.com/Joelrau"},
+					{"credits_7", "https://github.com/xensik"},
+					{"credits_8", "https://github.com/ZoneTool/zonetool"},
+				};
+
+				const auto link = links.find(name);
+				if (link == links.end())
+				{
+					return;
+				}
+
+				ShellExecuteA(nullptr, "open", link->second.data(), nullptr, nullptr, SW_SHOWNORMAL);
+			};
+
 			lua["Engine"]["SetLanguage"] = [](const int index)
 			{
 				language::set_from_index(index);
