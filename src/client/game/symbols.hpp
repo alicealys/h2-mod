@@ -175,7 +175,7 @@ namespace game
 
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x1403E16A0};
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x1403E1660};
-	WEAK symbol<void(ScreenPlacement* scrPlace, float* x, float* y, float* w, float* h, 
+	WEAK symbol<void(const ScreenPlacement* scrPlace, float* x, float* y, float* w, float* h, 
 		int horzAlign, int vertAlign)> ScrPlace_ApplyRect{0x1403E0BF0};
 
 	WEAK symbol<const char*(scr_string_t stringValue)> SL_ConvertToString{0x1405BFBB0};
