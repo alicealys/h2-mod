@@ -24,7 +24,7 @@ namespace mods
 	{
 		struct mod_zone_info
 		{
-			bool has_common_zones;
+			bool has_common_zones{};
 			std::vector<mod_zone> zones;
 		};
 

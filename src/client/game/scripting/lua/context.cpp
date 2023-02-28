@@ -10,7 +10,6 @@
 #include "component/command.hpp"
 #include "component/fastfiles.hpp"
 #include "component/mods.hpp"
-#include "component/localized_strings.hpp"
 #include "component/scheduler.hpp"
 #include "component/filesystem.hpp"
 
