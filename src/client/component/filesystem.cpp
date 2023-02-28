@@ -3,7 +3,6 @@
 
 #include "filesystem.hpp"
 #include "console.hpp"
-#include "localized_strings.hpp"
 #include "mods.hpp"
 #include "language.hpp"
 
@@ -41,8 +40,6 @@ namespace filesystem
 			{
 				mods::set_mod(mod_path.value());
 			}
-
-			localized_strings::clear();
 
 			utils::hook::invoke<void>(0x14060BF50, name);
 		}

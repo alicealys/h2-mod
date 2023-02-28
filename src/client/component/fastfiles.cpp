@@ -5,7 +5,6 @@
 
 #include "command.hpp"
 #include "console.hpp"
-#include "localized_strings.hpp"
 #include "mods.hpp"
 
 #include <utils/hook.hpp>
@@ -72,16 +71,6 @@ namespace fastfiles
 			}
 
 			return result;
-		}
-
-		void add_missing_localized_strings()
-		{
-			for (auto map = &game::maps[0]; map->unk; ++map)
-			{
-				const auto str = utils::string::va("LUA_MENU_SP_LOCATION_%s",
-					utils::string::to_upper(map->name).data());
-				localized_strings::override(str, str);
-			}
 		}
 
 		utils::hook::detour db_read_stream_file_hook;
@@ -596,8 +585,6 @@ namespace fastfiles
 
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
 			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
-
-			add_missing_localized_strings();
 
 			// Allow loading of mixed compressor types
 			utils::hook::nop(0x1403E66A7, 2);

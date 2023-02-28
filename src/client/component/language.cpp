@@ -4,8 +4,6 @@
 #include "language.hpp"
 #include "config.hpp"
 
-#include "localized_strings.hpp"
-
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
 #include <utils/string.hpp>

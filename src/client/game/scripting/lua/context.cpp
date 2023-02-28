@@ -787,12 +787,6 @@ namespace scripting::lua
 				return mod.value_or("");
 			};
 
-			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
-				const std::string& value)
-			{
-				localized_strings::override(string, value, true);
-			};
-
 			game_type["overridedvarint"] = [](const game&, const std::string& dvar, const int value)
 			{
 				scripting::get_dvar_int_overrides[dvar] = value;

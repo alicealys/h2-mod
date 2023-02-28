@@ -4,7 +4,6 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "localized_strings.hpp"
 #include "scheduler.hpp"
 #include "command.hpp"
 
@@ -56,8 +55,6 @@ namespace branding
 		void post_unpack() override
 		{
 			scheduler::loop(draw, scheduler::pipeline::renderer);
-
-			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
 
 			ui_get_formatted_build_number_hook.create(0x1406057D0, ui_get_formatted_build_number_stub);
 		}
