@@ -354,7 +354,7 @@ namespace ui_scripting
 				ShellExecuteA(nullptr, "open", link->second.data(), nullptr, nullptr, SW_SHOWNORMAL);
 			};
 
-			lua["string"]["escapelocalization"] = [](const game&, const std::string& str)
+			lua["string"]["escapelocalization"] = [](const std::string& str)
 			{
 				return "\x1F"s.append(str);
 			};
