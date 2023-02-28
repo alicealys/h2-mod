@@ -227,6 +227,8 @@ LUI.MenuBuilder.registerType("credits_menu", function(f6_arg0, f6_arg1)
 		skipAnim = f6_local2
 	})
 
+    PersistentBackground.ChangeBackground(nil, CoD.Background.CampaignRegular)
+
 	menu:AddButton("MENU_SP_CREDITS_CAPS", creditsmap, nil, true, nil, {
 		desc_text = Engine.Localize("@LUA_MENU_CREDITS_DESC")
 	})
