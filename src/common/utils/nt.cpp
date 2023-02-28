@@ -237,7 +237,7 @@ namespace utils::nt
 		ZeroMemory(&process_info, sizeof(process_info));
 		startup_info.cb = sizeof(startup_info);
 
-		char current_dir[MAX_PATH];
+		char current_dir[MAX_PATH]{};
 		GetCurrentDirectoryA(sizeof(current_dir), current_dir);
 
 		std::string command_line = GetCommandLineA();
@@ -253,8 +253,8 @@ namespace utils::nt
 			}
 		}
 
-		CreateProcessA(self.get_path().data(), command_line.data(), nullptr, nullptr, false, NULL, nullptr, current_dir,
-		               &startup_info, &process_info);
+		CreateProcessA(self.get_path().data(), command_line.data(), nullptr, nullptr, false, 
+			CREATE_NEW_CONSOLE, nullptr, current_dir, &startup_info, &process_info);
 
 		if (process_info.hThread && process_info.hThread != INVALID_HANDLE_VALUE) CloseHandle(process_info.hThread);
 		if (process_info.hProcess && process_info.hProcess != INVALID_HANDLE_VALUE) CloseHandle(process_info.hProcess);
