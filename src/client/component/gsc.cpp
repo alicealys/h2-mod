@@ -209,9 +209,9 @@ namespace gsc
 			}
 		}
 
-		void load_scripts(const std::filesystem::path& root_dir)
+		void load_scripts(const std::filesystem::path& root_dir, const std::string& subfolder)
 		{
-			std::filesystem::path script_dir = root_dir / "scripts";
+			std::filesystem::path script_dir = root_dir / subfolder;
 			if (!utils::io::directory_exists(script_dir.generic_string()))
 			{
 				return;
@@ -248,9 +248,11 @@ namespace gsc
 				}
 			}, true);
 
+			const auto mapname = game::Dvar_FindVar("mapname");
 			for (const auto& path : filesystem::get_search_paths())
 			{
-				load_scripts(path);
+				load_scripts(path, "scripts");
+				load_scripts(path, "scripts/"s + mapname->current.string);
 			}
 		}
 
