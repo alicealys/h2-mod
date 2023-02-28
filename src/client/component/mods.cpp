@@ -9,7 +9,6 @@
 #include "filesystem.hpp"
 #include "fonts.hpp"
 #include "mods.hpp"
-#include "localized_strings.hpp"
 #include "loadscreen.hpp"
 
 #include <utils/hook.hpp>
@@ -62,8 +61,6 @@ namespace mods
 				fonts::clear();
 				loadscreen::clear();
 			}
-
-			localized_strings::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}
