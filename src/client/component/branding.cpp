@@ -46,7 +46,7 @@ namespace branding
 			game::rectDef_s text_rect{};
 
 			game::UI_DrawWrappedText(placement, "h2-mod", &rect, font,
-				5.f, 13.f, 0.20f, color, 0, 0, &text_rect, 0);
+				5.f, 12.f, 0.17f, color, 0, 0, &text_rect, 0);
 		}
 	}
 
