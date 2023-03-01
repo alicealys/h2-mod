@@ -1,0 +1,26 @@
+{
+    "name": "featured_panel_thumbnail_1",
+    "techniqueSet->name": "2d",
+    "gameFlags": 0,
+    "sortKey": 60,
+    "renderFlags": 0,
+    "textureAtlasRowCount": 1,
+    "textureAtlasColumnCount": 1,
+    "textureAtlasFrameBlend": 0,
+    "textureAtlasAsArray": 0,
+    "surfaceTypeBits": 0,
+    "cameraRegion": 12,
+    "materialType": 0,
+    "assetFlags": 0,
+    "constantTable": null,
+    "textureTable": [
+        {
+            "image": "featured_panel_thumbnail_1",
+            "semantic": 0,
+            "samplerState": 226,
+            "lastCharacter": 112,
+            "firstCharacter": 99,
+            "typeHash": 2695565377
+        }
+    ]
+}
