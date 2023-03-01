@@ -12,6 +12,7 @@
 #include <utils/image.hpp>
 #include <utils/io.hpp>
 #include <utils/concurrency.hpp>
+#include <utils/http.hpp>
 
 namespace images
 {
@@ -73,7 +74,7 @@ namespace images
 			return true;
 		}
 
-		void load_texture_stub(game::GfxImage* image, void* a2, int* a3)
+		void load_texture_stub(void* a1, game::GfxImage* image)
 		{
 			try
 			{
@@ -87,7 +88,7 @@ namespace images
 				console::error("Failed to load image %s: %s\n", image->name, e.what());
 			}
 
-			load_texture_hook.invoke<void>(image, a2, a3);
+			load_texture_hook.invoke<void>(a1, image);
 		}
 
 		int setup_texture_stub(game::GfxImage* image, void* a2, void* a3)
@@ -115,7 +116,7 @@ namespace images
 		void post_unpack() override
 		{
 			setup_texture_hook.create(0x1402A7940, setup_texture_stub);
-			load_texture_hook.create(0x1402A6690, load_texture_stub);
+			load_texture_hook.create(0x14074A390, load_texture_stub);
 		}
 	};
 }

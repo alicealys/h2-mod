@@ -1,2 +1,1 @@
 require("credits")
-require("mainmenu")

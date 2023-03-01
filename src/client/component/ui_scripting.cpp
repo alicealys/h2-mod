@@ -15,6 +15,7 @@
 #include "console.hpp"
 #include "language.hpp"
 #include "config.hpp"
+#include "motd.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -151,6 +152,7 @@ namespace ui_scripting
 				{
 					object[key] = json_to_lua(value);
 				}
+				return object;
 			}
 
 			if (json.is_array())
@@ -161,6 +163,7 @@ namespace ui_scripting
 				{
 					array[index++] = json_to_lua(value);
 				}
+				return array;
 			}
 
 			if (json.is_boolean())
@@ -603,6 +606,41 @@ namespace ui_scripting
 			config_table["set"] = [](const std::string& key, const script_value& value)
 			{
 				config::set(key, lua_to_json(value));
+			};
+
+			auto motd_table = table();
+			lua["motd"] = motd_table;
+
+			motd_table["getnumfeaturedtabs"] = motd::get_num_featured_tabs;
+			motd_table["getmotd"] = []()
+			{
+				return json_to_lua(motd::get_motd());
+			};
+
+			motd_table["getfeaturedtab"] = [](const int index)
+			{
+				return json_to_lua(motd::get_featured_tab(index));
+			};
+
+			motd_table["hasseentoday"] = []()
+			{
+				const auto last_seen = config::get<uint64_t>("motd_last_seen");
+				if (!last_seen.has_value())
+				{
+					return false;
+				}
+
+				const auto value = static_cast<time_t>(last_seen.value());
+				const auto before = std::chrono::floor<std::chrono::days>(std::chrono::system_clock::from_time_t(value));
+				const auto now = std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now());
+				const auto diff = std::chrono::sys_days{now} - std::chrono::sys_days{before};
+				return diff.count() < 1;
+			};
+
+			motd_table["sethasseentoday"] = []()
+			{
+				const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				config::set<uint64_t>("motd_last_seen", static_cast<uint64_t>(now));
 			};
 		}
 

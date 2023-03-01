@@ -125,6 +125,29 @@ namespace fastfiles
 			return true;
 		}
 
+		bool try_add_zone(std::vector<game::XZoneInfo>& zones, 
+			utils::memory::allocator& allocator, const std::string& name, 
+			bool localized, bool game = false)
+		{
+			if (localized)
+			{
+				const auto language = game::SEH_GetCurrentLanguageCode();
+				try_add_zone(zones, allocator, language + "_"s + name, false);
+			}
+
+			if (!fastfiles::exists(name))
+			{
+				return false;
+			}
+
+			game::XZoneInfo info{};
+			info.name = allocator.duplicate_string(name);
+			info.allocFlags = (game ? game::DB_ZONE_GAME : game::DB_ZONE_COMMON) | game::DB_ZONE_CUSTOM;
+			info.freeFlags = 0;
+			zones.push_back(info);
+			return true;
+		}
+
 		void load_mod_zones()
 		{
 			try_load_zone("mod", true);
@@ -138,28 +161,65 @@ namespace fastfiles
 			}
 		}
 
-		void load_pre_gfx_zones(game::XZoneInfo* zoneInfo,
-			unsigned int zoneCount, game::DBSyncMode syncMode)
+		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator)
+		{
+			try_add_zone(zones, allocator, "mod", true);
+			const auto mod_zones = mods::get_mod_zones();
+			for (const auto& zone : mod_zones)
+			{
+				if (zone.alloc_flags & game::DB_ZONE_COMMON)
+				{
+					try_add_zone(zones, allocator, zone.name, true);
+				}
+			}
+		}
+
+		void push_zones(std::vector<game::XZoneInfo>& zones,
+			game::XZoneInfo* source, const size_t count)
+		{
+			for (auto i = 0; i < count; ++i)
+			{
+				zones.push_back(source[i]);
+			}
+		}
+
+		void load_pre_gfx_zones(game::XZoneInfo* zone_info,
+			unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
 			// code_pre_gfx
 
-			try_load_zone("h2_mod_pre_gfx", true);
+			utils::memory::allocator allocator;
+			std::vector<game::XZoneInfo> zones;
+			try_add_zone(zones, allocator, "h2_mod_pre_gfx", true);
+			push_zones(zones, zone_info, zone_count);
 
-			game::DB_LoadXAssets(zoneInfo, zoneCount, syncMode);
+			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 		}
 
-		void load_post_gfx_and_ui_and_common_zones(game::XZoneInfo* zoneInfo, 
-			unsigned int zoneCount, game::DBSyncMode syncMode)
+		void load_post_gfx_and_ui_and_common_zones(game::XZoneInfo* zone_info, 
+			unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
 			// code_post_gfx_mp
 			// ui_mp
 			// common_mp
 
-			try_load_zone("h2_mod_common", true);
+			utils::memory::allocator allocator;
+			std::vector<game::XZoneInfo> zones;
 
-			game::DB_LoadXAssets(zoneInfo, zoneCount, syncMode);
+			try_add_zone(zones, allocator, "h2_mod_common", true);
+			for (auto i = 0u; i < zone_count; i++)
+			{
+				zones.push_back(zone_info[i]);
 
-			load_mod_zones();
+				if (zone_info[i].name == "code_post_gfx"s)
+				{
+					try_add_zone(zones, allocator, "h2_mod_ui", true);
+				}
+			}
+
+			add_mod_zones(zones, allocator);
+
+			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 		}
 
 		constexpr unsigned int get_asset_type_size(const game::XAssetType type)
@@ -432,7 +492,7 @@ namespace fastfiles
 			add_custom_level_load_zone(load, name, size_est);
 		}
 
-		void add_mod_zones(game::LevelLoad* load)
+		void add_mod_zones_to_load(game::LevelLoad* load)
 		{
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
@@ -450,7 +510,7 @@ namespace fastfiles
 
 			a.pushad64();
 			a.mov(rcx, rbx);
-			a.call_aligned(add_mod_zones);
+			a.call_aligned(add_mod_zones_to_load);
 			a.popad64();
 
 			a.mov(rcx, rdi);

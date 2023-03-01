@@ -34,6 +34,7 @@ namespace config
 		{
 			{define_field("disable_custom_fonts", field_type::boolean, false)},
 			{define_field("language", field_type::string, language::get_default_language(), language::is_valid_language)},
+			{define_field("motd_last_seen", field_type::number_unsigned, 0)},
 		};
 
 		std::string get_config_file_path()
