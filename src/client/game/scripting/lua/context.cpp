@@ -10,7 +10,6 @@
 #include "component/command.hpp"
 #include "component/fastfiles.hpp"
 #include "component/mods.hpp"
-#include "component/localized_strings.hpp"
 #include "component/scheduler.hpp"
 #include "component/filesystem.hpp"
 
@@ -785,12 +784,6 @@ namespace scripting::lua
 			{
 				const auto& mod = mods::get_mod();
 				return mod.value_or("");
-			};
-
-			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
-				const std::string& value)
-			{
-				localized_strings::override(string, value, true);
 			};
 
 			game_type["overridedvarint"] = [](const game&, const std::string& dvar, const int value)

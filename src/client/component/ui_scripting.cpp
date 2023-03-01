@@ -8,7 +8,6 @@
 #include "command.hpp"
 
 #include "filesystem.hpp"
-#include "localized_strings.hpp"
 #include "scripting.hpp"
 #include "fastfiles.hpp"
 #include "mods.hpp"
@@ -320,12 +319,6 @@ namespace ui_scripting
 				return path.value_or("");
 			};
 
-			game_type["addlocalizedstring"] = [](const game&, const std::string& string,
-				const std::string& value)
-			{
-				localized_strings::override(string, value, true);
-			};
-
 			game_type["setlanguage"] = [](const game&, const std::string& language)
 			{
 				language::set(language);
@@ -360,6 +353,13 @@ namespace ui_scripting
 
 				ShellExecuteA(nullptr, "open", link->second.data(), nullptr, nullptr, SW_SHOWNORMAL);
 			};
+
+			lua["string"]["escapelocalization"] = [](const std::string& str)
+			{
+				return "\x1F"s.append(str);
+			};
+
+			lua["string"]["el"] = lua["string"]["escapelocalization"];
 
 			lua["Engine"]["SetLanguage"] = [](const int index)
 			{

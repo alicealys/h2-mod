@@ -4,7 +4,6 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "localized_strings.hpp"
 #include "scheduler.hpp"
 #include "command.hpp"
 
@@ -46,7 +45,7 @@ namespace branding
 			game::rectDef_s text_rect{};
 
 			game::UI_DrawWrappedText(placement, "h2-mod", &rect, font,
-				5.f, 13.f, 0.20f, color, 0, 0, &text_rect, 0);
+				5.f, 12.f, 0.17f, color, 0, 0, &text_rect, 0);
 		}
 	}
 
@@ -56,8 +55,6 @@ namespace branding
 		void post_unpack() override
 		{
 			scheduler::loop(draw, scheduler::pipeline::renderer);
-
-			localized_strings::override("MENU_SP_CAMPAIGN", "H2-MOD");
 
 			ui_get_formatted_build_number_hook.create(0x1406057D0, ui_get_formatted_build_number_stub);
 		}

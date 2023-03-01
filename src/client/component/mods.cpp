@@ -9,7 +9,6 @@
 #include "filesystem.hpp"
 #include "fonts.hpp"
 #include "mods.hpp"
-#include "localized_strings.hpp"
 #include "loadscreen.hpp"
 
 #include <utils/hook.hpp>
@@ -25,7 +24,7 @@ namespace mods
 	{
 		struct mod_zone_info
 		{
-			bool has_common_zones;
+			bool has_common_zones{};
 			std::vector<mod_zone> zones;
 		};
 
@@ -62,8 +61,6 @@ namespace mods
 				fonts::clear();
 				loadscreen::clear();
 			}
-
-			localized_strings::clear();
 
 			db_release_xassets_hook.invoke<void>();
 		}
