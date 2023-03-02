@@ -32,6 +32,10 @@
   * Lowering graphics settings
   * Freeing up RAM (close programs)
   * Updating your GPU drivers
+  
+**Do NOT open issues to ask for support!**  
+The issues tab is meant for bugs that have to be fixed or features that should be implemented.  
+Any issue mentioning things like "h2-mod doesn't work" with no other information included will be closed.
 
 ## Compile from source
 
