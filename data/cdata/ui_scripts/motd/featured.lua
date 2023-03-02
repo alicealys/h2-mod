@@ -4,6 +4,7 @@ end
 
 local animmsfull = 150
 local animms = animmsfull / 2
+local minimized = false
 
 LUI.onmenuopen("main_campaign", function(menu)
     if (mods.getloaded() ~= nil or motd.getnumfeaturedtabs() <= 0) then
@@ -160,7 +161,6 @@ LUI.onmenuopen("main_campaign", function(menu)
     local tabcount = motd.getnumfeaturedtabs()
 
     headerbutton:setHandleMouse(true)
-    local minimized = false
     headerbutton:registerEventHandler("leftmousedown", function()
         Engine.PlaySound(CoD.SFX.MenuAccept)
         headerbutton:processEvent({
@@ -184,6 +184,13 @@ LUI.onmenuopen("main_campaign", function(menu)
             end
         end
     end)
+
+    if (minimized) then
+        featuredstencil:animateToState("hide")
+        featuredcontainer:animateToState("hide")
+        headerbutton:animateToState("right")
+        arrowcontainer:animateToState("hide")
+    end
 
     header:addElement(headerbg)
     header:addElement(headerbutton)
