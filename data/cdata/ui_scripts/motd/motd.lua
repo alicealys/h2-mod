@@ -1,15 +1,30 @@
 require("LUI.common_menus.MarketingComms")
 require("LUI.common_menus.MarketingPopup")
+
 LUI.CustomMarketingPopups = {ShowDepotOnboardingPopupIfPossible = function() end}
+
+LUI.MenuBuilder.registerPopupType("motd", function()
+    local data = motd.getmotd()
+    return LUI.MenuBuilder.BuildRegisteredType("motd_main", {
+        popupDataQueue = {data}
+    })
+end)
 
 LUI.onmenuopen("main_campaign", function(menu)
     if (not motd.hasseentoday()) then
         motd.sethasseentoday()
-        local data = motd.getmotd()
-        LUI.FlowManager.RequestPopupMenu( self, "motd_main", true, nil, false, {
-            popupDataQueue = {data}
-        })
+        LUI.FlowManager.RequestPopupMenu(nil, "motd")
     end
+
+    menu:AddHelp({
+        name = "add_button_helper_text",
+        button_ref = "button_alt2",
+        helper_text = Engine.Localize("@MENU_OPEN_MOTD"),
+        side = "right",
+        clickable = true
+    }, function()
+        LUI.FlowManager.RequestPopupMenu(nil, "motd")
+    end)
 end)
 
 LUI.common_menus.MarketingPopup.OnPopupAction = function(a1, a2)
