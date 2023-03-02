@@ -16,6 +16,8 @@ namespace motd
 {
 	namespace
 	{
+		utils::concurrency::container<links_map_t> links;
+
 		utils::concurrency::container<nlohmann::json, std::recursive_mutex> marketing;
 
 		std::unordered_map<std::string, std::string> image_cache;
@@ -91,22 +93,63 @@ namespace motd
 			}
 		}
 
-		void download_images()
+		void download_images(nlohmann::json& data)
 		{
-			marketing.access([&](nlohmann::json& data)
+			if (!data.is_object())
 			{
-				if (!data.is_object())
+				return;
+			}
+
+			download_motd_image(data);
+			download_featured_tabs_images(data);
+		}
+
+		void init_links(links_map_t& map)
+		{
+			map =
+			{
+				{"github", "https://github.com/fedddddd/h2-mod"},
+				{"donate", "https://www.paypal.com/donate/?hosted_button_id=LM5BA9UABEV4Q"},
+				{"credits_1", "https://github.com/momo5502"},
+				{"credits_2", "https://github.com/VladWinner"},
+				{"credits_3", "https://github.com/diamante0018"},
+				{"credits_4", "https://github.com/JariKCoding"},
+				{"credits_5", "https://github.com/netadr"},
+				{"credits_6", "https://github.com/Joelrau"},
+				{"credits_7", "https://github.com/xensik"},
+				{"credits_8", "https://github.com/ZoneTool/zonetool"},
+			};
+		}
+
+		void add_links(nlohmann::json& data)
+		{
+			links.access([&](links_map_t& map)
+			{
+				init_links(map);
+				if (!data.is_object() || !data["links"].is_object())
 				{
 					return;
 				}
 
-				download_motd_image(data);
-				download_featured_tabs_images(data);
+				for (const auto& [link, url] : data["links"].items())
+				{
+					if (!url.is_string())
+					{
+						continue;
+					}
+
+					map.insert(std::make_pair(link, url.get<std::string>()));
+				}
 			});
 		}
 
 		void init(bool load_images = true)
 		{
+			links.access([](links_map_t& map)
+			{
+				init_links(map);
+			});
+
 			marketing.access([&](nlohmann::json& data)
 			{
 				image_cache.clear();
@@ -119,9 +162,11 @@ namespace motd
 					{
 						const auto& value = marketing_data.value();
 						data = nlohmann::json::parse(value);
+
+						add_links(data);
 						if (load_images)
 						{
-							download_images();
+							download_images(data);
 						}
 					}
 					catch (const std::exception& e)
@@ -131,6 +176,14 @@ namespace motd
 				}
 			});
 		}
+	}
+
+	links_map_t get_links()
+	{
+		return links.access<links_map_t>([&](links_map_t& map)
+		{
+			return map;
+		});
 	}
 
 	int get_num_featured_tabs()

@@ -12,42 +12,22 @@ LUI.onmenuopen("main_campaign", function(menu)
     end
 end)
 
-local function makelink(element, link)
-	element:setHandleMouseMove(true)
-	element:setHandleMouseButton(true)
-	element:registerAnimationState("focused", {
-		color = {
-			r = 1,
-			g = 1,
-			b = 1
-		}
-	})
-
-	local entered = false
-	element:registerEventHandler("mouseenter", function()
-		if (not entered) then
-			Engine.PlaySound(CoD.SFX.MouseOver)
-			entered = true
-		end
-
-		element:animateToState("focused")
-	end)
-
-	element:registerEventHandler("mouseleave", function()
-		entered = false
-		element:animateToState("default")
-	end)
-
-	element:registerEventHandler("leftmousedown", function()
-		Engine.PlaySound(CoD.SFX.MouseClick)
-		game:openlink(link)
-	end)
+LUI.common_menus.MarketingPopup.OnPopupAction = function(a1, a2)
+	local data = a1.popupData
+    if (type(data.link) == "string") then
+        game:openlink(data.link)
+    end
 end
 
 local marketingbase = LUI.MarketingPopup.Base
 LUI.MarketingPopup.Base = function(a1, data, a3)
-    local element = marketingbase(a1, data, a3)
+    local haslink = data.popupAction ~= nil and game:islink(data.popupAction)
+    if (haslink) then
+        data.link = data.popupAction
+        data.popupAction = "depot"
+    end
 
+    local element = marketingbase(a1, data, a3)
     local blur = element:getFirstDescendentById("generic_popup_screen_overlay_blur"):getNextSibling()
     local parent = blur:getFirstChild():getNextSibling():getNextSibling():getNextSibling()
     local image = parent:getFirstChild()
@@ -56,6 +36,11 @@ LUI.MarketingPopup.Base = function(a1, data, a3)
     local state = LUI.DeepCopy(image:getAnimationStateInC("default"))
     local imagecontainer = LUI.UIStencilText.new(state)
     local material = RegisterMaterial(data.image)
+
+    local helpertext = element:getFirstDescendentById("helper_text_text")
+    if (haslink and helpertext) then
+        helpertext:setText(Engine.Localize("@MENU_OPEN_LINK"))
+    end
     
     local ratio = Engine.GetMaterialAspectRatio(material)
     local width = 525
