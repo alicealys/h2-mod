@@ -36,11 +36,6 @@ LUI.MarketingPopup.Base = function(a1, data, a3)
     local state = LUI.DeepCopy(image:getAnimationStateInC("default"))
     local imagecontainer = LUI.UIStencilText.new(state)
     local material = RegisterMaterial(data.image)
-
-    local helpertext = element:getFirstDescendentById("helper_text_text")
-    if (haslink and helpertext) then
-        helpertext:setText(Engine.Localize("@MENU_OPEN_LINK"))
-    end
     
     local ratio = Engine.GetMaterialAspectRatio(material)
     local width = 525
