@@ -162,6 +162,11 @@ LUI.onmenuopen("main_campaign", function(menu)
     headerbutton:setHandleMouse(true)
     local minimized = false
     headerbutton:registerEventHandler("leftmousedown", function()
+        Engine.PlaySound(CoD.SFX.MenuAccept)
+        headerbutton:processEvent({
+            name = "mouseleave"
+        })
+
         minimized = not minimized
 
         if (minimized) then
@@ -193,6 +198,9 @@ LUI.onmenuopen("main_campaign", function(menu)
 
     local rightoffset = -15
     local pips = {}
+    local focusindex = 0
+
+    local shiftto = nil
 
     for i = 1, tabcount do
         local pipmat = RegisterMaterial("h1_ui_featured_pip_unfocused")
@@ -211,11 +219,20 @@ LUI.onmenuopen("main_campaign", function(menu)
 
         pip:setHandleMouse(true)
         pip:registerEventHandler("mouseenter", function()
-            if (not istopmost()) then
+            if (not istopmost() or minimized) then
                 return
             end
 
             Engine.PlaySound(CoD.SFX.MouseOver)
+        end)
+
+        pip:registerEventHandler("leftmousedown", function()
+            if (not istopmost() or minimized) then
+                return
+            end
+
+            Engine.PlaySound(CoD.SFX.MenuAccept)
+            shiftto(#pips - i)
         end)
     
         pip:registerAnimationState("focused", {
@@ -280,6 +297,45 @@ LUI.onmenuopen("main_campaign", function(menu)
 
     contentborder:setup9SliceImage()
 
+    local shift = function()
+        imagelist:registerAnimationState("move", {
+            leftAnchor = true,
+            left = (focusindex) * -GenericMenuDims.menu_width_standard
+        })
+
+        imagelist:animateToState("move", animmsfull)
+    end
+
+    shiftto = function(index)
+        local prevfocus = focusindex
+        focusindex = (index) % tabcount
+
+        pips[#pips - (prevfocus)]:animateToState("unfocused")
+        pips[#pips - (focusindex)]:animateToState("focused")
+
+        shift()
+    end
+
+    local shiftright = function()
+        local prevfocus = focusindex
+        focusindex = (focusindex + 1) % tabcount
+
+        pips[#pips - (prevfocus)]:animateToState("unfocused")
+        pips[#pips - (focusindex)]:animateToState("focused")
+
+        shift()
+    end
+
+    local shiftleft = function()
+        local prevfocus = focusindex
+        focusindex = (focusindex - 1) % tabcount
+
+        pips[#pips - (prevfocus)]:animateToState("unfocused")
+        pips[#pips - (focusindex)]:animateToState("focused")
+
+        shift()
+    end
+
     for i = 1, tabcount do
         local panel = LUI.UIElement.new({
             topAnchor = true,
@@ -328,37 +384,6 @@ LUI.onmenuopen("main_campaign", function(menu)
         imagelist:addElement(panel)
     end
 
-    local focusindex = 0
-    local shiftright = function()
-        local prevfocus = focusindex
-        focusindex = (focusindex + 1) % tabcount
-
-        pips[#pips - (prevfocus)]:animateToState("unfocused")
-        pips[#pips - (focusindex)]:animateToState("focused")
-
-        imagelist:registerAnimationState("move", {
-            leftAnchor = true,
-            left = (focusindex) * -GenericMenuDims.menu_width_standard
-        })
-
-        imagelist:animateToState("move", animmsfull)
-    end
-
-    local shiftleft = function()
-        local prevfocus = focusindex
-        focusindex = (focusindex - 1) % tabcount
-
-        pips[#pips - (prevfocus)]:animateToState("unfocused")
-        pips[#pips - (focusindex)]:animateToState("focused")
-
-        imagelist:registerAnimationState("move", {
-            leftAnchor = true,
-            left = (focusindex) * -GenericMenuDims.menu_width_standard
-        })
-
-        imagelist:animateToState("move", animmsfull)
-    end
-
     local autoscrolltimer = LUI.UITimer.new(3000, "autoscroll")
     featured:addElement(autoscrolltimer)
     featured:registerEventHandler("autoscroll", function()
@@ -393,28 +418,66 @@ LUI.onmenuopen("main_campaign", function(menu)
             alpha = 0,
             material = RegisterMaterial("h1_prestige_leftright_arrow") 
         })
+
+        local registeranimationstate = function(name, state)
+            arrowleft:registerAnimationState(name, state)
+            arrowright:registerAnimationState(name, state)
+        end
+
+        registeranimationstate("pulse", {
+            scale = -0.1
+        })
         
-        arrowleft:registerAnimationState("focused", {
+        registeranimationstate("highlight", {
+            scale = 0
+        })
+
+        registeranimationstate("focused", {
             alpha = 1
         })
 
-        arrowleft:registerAnimationState("unfocused", {
-            alpha = 0
-        })
-
-        arrowright:registerAnimationState("focused", {
-            alpha = 1
-        })
-
-        arrowright:registerAnimationState("unfocused", {
+        registeranimationstate("unfocused", {
             alpha = 0
         })
 
         arrowleft:setHandleMouse(true)
         arrowright:setHandleMouse(true)
 
-        arrowleft:registerEventHandler("leftmousedown", shiftleft)
-        arrowright:registerEventHandler("leftmousedown", shiftright)
+        local pulsearrow = function(arrow)
+            arrow:animateInSequence({
+                {
+                    "highlight",
+                    0
+                },
+                {
+                    "pulse",
+                    100
+                },
+                {
+                    "highlight",
+                    100
+                }
+            })
+        end
+
+        arrowleft:registerEventHandler("leftmousedown", function()
+            if (not istopmost()) then
+                return
+            end
+
+            pulsearrow(arrowleft)
+            Engine.PlaySound(CoD.SFX.MouseOver)
+            shiftleft()
+        end)
+        arrowright:registerEventHandler("leftmousedown", function()
+            if (not istopmost()) then
+                return
+            end
+
+            pulsearrow(arrowright)
+            Engine.PlaySound(CoD.SFX.MouseOver)
+            shiftright()
+        end)
 
         arrowcontainer:addElement(arrowleft)
         arrowcontainer:addElement(arrowright)
@@ -474,12 +537,30 @@ LUI.onmenuopen("main_campaign", function(menu)
     content:addElement(contentborder)
 
     content:setHandleMouse(true)
+
     content:registerEventHandler("leftmousedown", function()
+        if (not istopmost() or minimized) then
+            return
+        end
+
+        hoverelem:processEvent({
+            name = "mouseleave",
+        })
+
+        Engine.PlaySound(CoD.SFX.MenuAccept)
         local data = motd.getfeaturedtab(focusindex)
         data.popup_image = "featured_panel_" .. (focusindex + 1)
         LUI.FlowManager.RequestPopupMenu( nil, "motd_main", true, nil, false, {
             popupDataQueue = {data}
         })
+    end)
+
+    content:registerEventHandler("mouseenter", function()
+        if (not istopmost() or minimized) then
+            return
+        end
+
+        Engine.PlaySound(CoD.SFX.MouseOver)
     end)
 
     featured:addElement(content)
