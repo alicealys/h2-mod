@@ -79,31 +79,6 @@ namespace patches
 		{
 			return game::Dvar_RegisterBool(hash, name, value, game::DVAR_FLAG_SAVED);
 		}
-
-		void gscr_cinematic_ingame_loop_resident_stub()
-		{
-			auto arg2 = 1.f;
-			auto arg1 = 1;
-
-			const auto num_params = game::Scr_GetNumParam();
-			if (!num_params)
-			{
-				game::Scr_ErrorInternal();
-			}
-
-			if (num_params >= 2)
-			{
-				arg2 = game::Scr_GetFloat(1);
-			}
-
-			if (num_params >= 3)
-			{
-				arg1 = game::Scr_GetInt(2);
-			}
-
-			const auto video = game::Scr_GetString(0);
-			utils::hook::invoke<void>(0x14071B740, video, arg1, arg2);
-		}
 	}
 
 	class component final : public component_interface
@@ -146,8 +121,8 @@ namespace patches
 			// make snd_musicDisabledForCustomSoundtrack saved
 			utils::hook::call(0x1405D05FB, register_snd_music_stub);
 
-			// Fix broken function
-			utils::hook::jump(0x140502140, gscr_cinematic_ingame_loop_resident_stub);
+			// cinematicingameloopresident -> cinematicingameloop (fix ingame cinematics)
+			utils::hook::jump(0x140502140, 0x1405020C0);
 		}
 	};
 }
