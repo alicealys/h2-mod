@@ -137,23 +137,23 @@ if not (config.get("disable_custom_fonts")) then
         end
 
         CoD.TextSettings.SP_HudAmmoStatusText = {
-            Font = RegisterFont("fonts/mix_gothic.ttf", 16),
+            Font = RegisterFont("fonts/bank.ttf", 16),
             Height = 16
         }
 
         CoD.TextSettings.SP_HudAmmoCounterFont = {
-            Font = RegisterFont("fonts/mix_gothic.ttf", 34),
+            Font = RegisterFont("fonts/bank.ttf", 34),
             Height = 34
         }
 
         CoD.TextSettings.HudAmmoCounterFont = {
-            Font = RegisterFont("fonts/mix_gothic.ttf", 105),
+            Font = RegisterFont("fonts/bank.ttf", 105),
             Height = 64
         }
         -- forced gothic font for headers (arabic/slavic)
         if language.isslavic() or language.isarabic() then
             CoD.TextSettings.H2TitleFont = {
-                Font = RegisterFont("fonts/mix_gothic.ttf", 56),
+                Font = RegisterFont("fonts/bank.ttf", 56),
                 Height = scale(56)
             }
         end
