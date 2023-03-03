@@ -58,7 +58,6 @@ namespace mods
 		{
 			if (release_assets)
 			{
-				fonts::clear();
 				loadscreen::clear();
 			}
 
