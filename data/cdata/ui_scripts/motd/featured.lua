@@ -11,7 +11,7 @@ LUI.onmenuopen("main_campaign", function(menu)
         return
     end
 
-    local left = 866
+    local left = 885
     local featuredcontainer = LUI.UIElement.new({
         leftAnchor = true,
         topAnchor = true,
