@@ -6,6 +6,7 @@
 #include "command.hpp"
 #include "console.hpp"
 #include "mods.hpp"
+#include "fonts.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -104,29 +105,8 @@ namespace fastfiles
 			a.jmp(0x140415E29);
 		}
 
-		bool try_load_zone(const std::string& name, bool localized, bool game = false)
-		{
-			if (localized)
-			{
-				const auto language = game::SEH_GetCurrentLanguageCode();
-				try_load_zone(language + "_"s + name, false);
-			}
-
-			if (!fastfiles::exists(name))
-			{
-				return false;
-			}
-
-			game::XZoneInfo info{};
-			info.name = name.data();
-			info.allocFlags = (game ? game::DB_ZONE_GAME : game::DB_ZONE_COMMON) | game::DB_ZONE_CUSTOM;
-			info.freeFlags = 0;
-			game::DB_LoadXAssets(&info, 1u, game::DBSyncMode::DB_LOAD_ASYNC);
-			return true;
-		}
-
-		bool try_add_zone(std::vector<game::XZoneInfo>& zones, 
-			utils::memory::allocator& allocator, const std::string& name, 
+		bool try_add_zone(std::vector<game::XZoneInfo>& zones,
+			utils::memory::allocator& allocator, const std::string& name,
 			bool localized, bool game = false)
 		{
 			if (localized)
@@ -146,19 +126,6 @@ namespace fastfiles
 			info.freeFlags = 0;
 			zones.push_back(info);
 			return true;
-		}
-
-		void load_mod_zones()
-		{
-			try_load_zone("mod", true);
-			const auto mod_zones = mods::get_mod_zones();
-			for (const auto& zone : mod_zones)
-			{
-				if (zone.alloc_flags & game::DB_ZONE_COMMON)
-				{
-					try_load_zone(zone.name, true);
-				}
-			}
 		}
 
 		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator)
@@ -194,6 +161,7 @@ namespace fastfiles
 			push_zones(zones, zone_info, zone_count);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
+			fonts::load_font_zones();
 		}
 
 		void load_post_gfx_and_ui_and_common_zones(game::XZoneInfo* zone_info, 
@@ -632,6 +600,27 @@ namespace fastfiles
 		});
 	}
 
+	bool try_load_zone(const std::string& name, bool localized, bool game)
+	{
+		if (localized)
+		{
+			const auto language = game::SEH_GetCurrentLanguageCode();
+			try_load_zone(language + "_"s + name, false);
+		}
+
+		if (!fastfiles::exists(name))
+		{
+			return false;
+		}
+
+		game::XZoneInfo info{};
+		info.name = name.data();
+		info.allocFlags = (game ? game::DB_ZONE_GAME : game::DB_ZONE_COMMON) | game::DB_ZONE_CUSTOM;
+		info.freeFlags = 0;
+		game::DB_LoadXAssets(&info, 1u, game::DBSyncMode::DB_LOAD_ASYNC);
+		return true;
+	}
+
 	class component final : public component_interface
 	{
 	public:
@@ -691,7 +680,7 @@ namespace fastfiles
 				}
 
 				const auto name = params.get(1);
-				if (!try_load_zone(name, false))
+				if (!fastfiles::try_load_zone(name, false))
 				{
 					console::warn("loadzone: zone \"%s\" could not be found!\n", name);
 				}

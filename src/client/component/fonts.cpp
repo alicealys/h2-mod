@@ -7,6 +7,7 @@
 #include "command.hpp"
 #include "language.hpp"
 #include "config.hpp"
+#include "fastfiles.hpp"
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
@@ -48,89 +49,6 @@ namespace fonts
 		};
 
 		utils::memory::allocator font_allocator;
-
-		game::StringTable* get_font_replacements_table()
-		{
-			if (!game::DB_XAssetExists(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv"))
-			{
-				return nullptr;
-			}
-
-			return game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_replacements.csv", false).stringTable;
-		}
-
-		struct font_replacement
-		{
-			const char* target_font;
-			const char* new_font;
-		};
-
-		std::vector<font_replacement>& get_font_replacements()
-		{
-			static std::vector<font_replacement> replacements = {};
-			return replacements;
-		}
-
-		void load_font_replacements()
-		{
-			static auto loaded = false;
-			if (loaded)
-			{
-				return;
-			}
-
-			loaded = true;
-			auto& replacements = get_font_replacements();
-
-			const auto disabled = config::get<bool>("disable_custom_fonts");
-			if (disabled.has_value() && disabled.value() && language::current() != game::LANGUAGE_CZECH)
-			{
-				return;
-			}
-
-			const auto table = get_font_replacements_table();
-			if (table == nullptr)
-			{
-				return;
-			}
-
-			const auto current_language = language::current();
-
-			for (auto row = 0; row < table->rowCount; row++)
-			{
-				if (table->columnCount < 3)
-				{
-					continue;
-				}
-
-				const auto row_values = &table->values[(row * table->columnCount)];
-				const auto lang = row_values[0].string;
-				if (std::strcmp(lang, game::languages[current_language].name))
-				{
-					continue;
-				}
-
-				const auto font = utils::memory::get_allocator()->duplicate_string(row_values[1].string);
-				const auto replacement = utils::memory::get_allocator()->duplicate_string(row_values[2].string);
-				replacements.emplace_back(font, replacement);
-			}
-
-			return;
-		}
-
-		const char* get_font_replacement(const char* name)
-		{
-			const auto& replacements = get_font_replacements();
-			for (const auto& replacement : replacements)
-			{
-				if (!std::strcmp(name, replacement.target_font))
-				{
-					return replacement.new_font;
-				}
-			}
-
-			return name;
-		}
 
 		utils::concurrency::container<font_data_t> font_data;
 
@@ -201,20 +119,6 @@ namespace fonts
 			}
 
 			return result;
-		}
-
-		utils::hook::detour r_register_font_hook;
-		void* r_register_font_stub(const char* name, int size)
-		{
-			const auto name_ = get_font_replacement(name);
-			return r_register_font_hook.invoke<void*>(name_, size);
-		}
-
-		utils::hook::detour cl_init_renderer_hook;
-		void* cl_init_renderer_stub()
-		{
-			load_font_replacements();
-			return cl_init_renderer_hook.invoke<void*>();
 		}
 
 		game::Font_s* bank_font = nullptr;
@@ -359,14 +263,53 @@ namespace fonts
 		});
 	}
 
+	void load_font_zones()
+	{
+		const auto disabled = config::get<bool>("disable_custom_fonts");
+		if (disabled.has_value() && disabled.value() && language::current() != game::LANGUAGE_CZECH)
+		{
+			return;
+		}
+
+		const auto table = game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_zones.csv", 0).stringTable;
+		if (table == nullptr)
+		{
+			return;
+		}
+
+		const auto lang = language::current();
+		const auto lang_name = game::languages[lang].name;
+		for (auto row = 0; row < table->rowCount; row++)
+		{
+			if (table->columnCount < 3)
+			{
+				continue;
+			}
+
+			const auto row_values = &table->values[(row * table->columnCount)];
+			const auto lang_value = row_values[0].string;
+			if (std::strcmp(lang_value, lang_name) && lang_value != "*"s)
+			{
+				continue;
+			}
+
+			for (auto col = 1; col < table->columnCount; col++)
+			{
+				const auto zone = row_values[col].string;
+				if (zone != nullptr)
+				{
+					fastfiles::try_load_zone(zone, true);
+				}
+			}
+		}
+	}
+
 	class component final : public component_interface
 	{
 	public:
 		void post_unpack() override
 		{
 			utils::hook::call(0x140747096, db_find_xasset_header_stub);
-			r_register_font_hook.create(0x140746FE0, r_register_font_stub);
-			cl_init_renderer_hook.create(0x1403D5AA0, cl_init_renderer_stub);
 
 			// add custom fonts to hud elem fonts
 			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);

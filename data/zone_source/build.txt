@@ -1,4 +1,5 @@
 ara_h2_mod_common
+ara_h2_mod_font_default_bold
 deu_h2_mod_common
 eng_h2_mod_common
 eng_h2_mod_patch_af_caves
@@ -7,6 +8,9 @@ ens_h2_mod_patch_af_caves
 cze_h2_mod_common
 fra_h2_mod_common
 h2_mod_common
+h2_mod_font_default
+h2_mod_font_default_bold
+h2_mod_font_bank
 h2_mod_patch_af_caves
 h2_mod_patch_dc_whitehouse
 h2_mod_patch_ending
