@@ -164,11 +164,7 @@ namespace fonts
 	void load_font_zones()
 	{
 		const auto disabled = config::get<bool>("disable_custom_fonts");
-		if (disabled.has_value() && disabled.value() && language::current() != game::LANGUAGE_CZECH)
-		{
-			return;
-		}
-
+		const auto custom_fonts_disabled = disabled.has_value() && disabled.value() && !language::is_custom();
 		const auto table = game::DB_FindXAssetHeader(game::ASSET_TYPE_STRINGTABLE, "font_zones.csv", 0).stringTable;
 		if (table == nullptr)
 		{
@@ -176,7 +172,7 @@ namespace fonts
 		}
 
 		const auto lang = language::current();
-		const auto lang_name = game::languages[lang].name;
+		const std::string lang_name = game::languages[lang].name;
 		for (auto row = 0; row < table->rowCount; row++)
 		{
 			if (table->columnCount < 3)
@@ -186,7 +182,13 @@ namespace fonts
 
 			const auto row_values = &table->values[(row * table->columnCount)];
 			const auto lang_value = row_values[0].string;
-			if (std::strcmp(lang_value, lang_name) && lang_value != "*"s)
+			const auto is_replacement = lang_value != "*"s;
+			if (lang_value != lang_name && is_replacement)
+			{
+				continue;
+			}
+
+			if (custom_fonts_disabled && is_replacement)
 			{
 				continue;
 			}
