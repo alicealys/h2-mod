@@ -15,6 +15,7 @@
 #include "console.hpp"
 #include "language.hpp"
 #include "config.hpp"
+#include "motd.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -151,6 +152,7 @@ namespace ui_scripting
 				{
 					object[key] = json_to_lua(value);
 				}
+				return object;
 			}
 
 			if (json.is_array())
@@ -161,6 +163,7 @@ namespace ui_scripting
 				{
 					array[index++] = json_to_lua(value);
 				}
+				return array;
 			}
 
 			if (json.is_boolean())
@@ -331,20 +334,7 @@ namespace ui_scripting
 
 			game_type["openlink"] = [](const game&, const std::string& name)
 			{
-				static std::unordered_map<std::string, std::string> links =
-				{
-					{"github", "https://github.com/fedddddd/h2-mod"},
-					{"donate", "https://www.paypal.com/donate/?hosted_button_id=LM5BA9UABEV4Q"},
-					{"credits_1", "https://github.com/momo5502"},
-					{"credits_2", "https://github.com/VladWinner"},
-					{"credits_3", "https://github.com/diamante0018"},
-					{"credits_4", "https://github.com/JariKCoding"},
-					{"credits_5", "https://github.com/netadr"},
-					{"credits_6", "https://github.com/Joelrau"},
-					{"credits_7", "https://github.com/xensik"},
-					{"credits_8", "https://github.com/ZoneTool/zonetool"},
-				};
-
+				const auto links = motd::get_links();
 				const auto link = links.find(name);
 				if (link == links.end())
 				{
@@ -352,6 +342,31 @@ namespace ui_scripting
 				}
 
 				ShellExecuteA(nullptr, "open", link->second.data(), nullptr, nullptr, SW_SHOWNORMAL);
+			};
+
+			game_type["getlinkurl"] = [](const game&, const std::string& name)
+				-> script_value
+			{
+				const auto links = motd::get_links();
+				const auto link = links.find(name);
+				if (link == links.end())
+				{
+					return script_value();
+				}
+
+				return link->second;
+			};
+
+			game_type["islink"] = [](const game&, const std::string& name)
+			{
+				const auto links = motd::get_links();
+				const auto link = links.find(name);
+				if (link == links.end())
+				{
+					return false;
+				}
+
+				return true;
 			};
 
 			lua["string"]["escapelocalization"] = [](const std::string& str)
@@ -603,6 +618,41 @@ namespace ui_scripting
 			config_table["set"] = [](const std::string& key, const script_value& value)
 			{
 				config::set(key, lua_to_json(value));
+			};
+
+			auto motd_table = table();
+			lua["motd"] = motd_table;
+
+			motd_table["getnumfeaturedtabs"] = motd::get_num_featured_tabs;
+			motd_table["getmotd"] = []()
+			{
+				return json_to_lua(motd::get_motd());
+			};
+
+			motd_table["getfeaturedtab"] = [](const int index)
+			{
+				return json_to_lua(motd::get_featured_tab(index));
+			};
+
+			motd_table["hasseentoday"] = []()
+			{
+				const auto last_seen = config::get<uint64_t>("motd_last_seen");
+				if (!last_seen.has_value())
+				{
+					return false;
+				}
+
+				const auto value = static_cast<time_t>(last_seen.value());
+				const auto before = std::chrono::floor<std::chrono::days>(std::chrono::system_clock::from_time_t(value));
+				const auto now = std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now());
+				const auto diff = std::chrono::sys_days{now} - std::chrono::sys_days{before};
+				return diff.count() < 1;
+			};
+
+			motd_table["sethasseentoday"] = []()
+			{
+				const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+				config::set<uint64_t>("motd_last_seen", static_cast<uint64_t>(now));
 			};
 		}
 

@@ -1,5 +1,2 @@
-stringtable,font_replacements.csv
-ttf,fonts/ibmplexsansarabic-semibold_custom.ttf
-ttf,fonts/mix.ttf
-ttf,fonts/mix_gothic.ttf
-ttf,fonts/mix_open.ttf
+stringtable,font_zones.csv
+localize,branding

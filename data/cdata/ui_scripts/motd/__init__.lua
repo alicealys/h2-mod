@@ -1,0 +1,2 @@
+require("motd")
+require("featured")
