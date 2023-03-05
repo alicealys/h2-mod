@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "Aplikuj h2-mod czcionki",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "Odblokuj wszystkie misje",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Anuluj odblokowanie"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Anuluj odblokowanie",
+
+    "DEPOT_GO_TO_THE_DEPOT": "Otwórz link",
+    "MENU_OPEN_MOTD": "Wiadomość dnia"
 }

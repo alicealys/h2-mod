@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "h2-mod フォントを使用します",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "全ミッションをアンロック",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "アンロックをキャンセル"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "アンロックをキャンセル",
+
+    "DEPOT_GO_TO_THE_DEPOT": "リンクを開く",
+    "MENU_OPEN_MOTD": "本日のメッセージ"
 }

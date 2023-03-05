@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "h2-mod 글꼴 사용",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "모든 임무 잠금 해제",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "잠금 해제 취소"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "잠금 해제 취소",
+
+    "DEPOT_GO_TO_THE_DEPOT": "링크 열기",
+    "MENU_OPEN_MOTD": "오늘의 메시지"
 }
