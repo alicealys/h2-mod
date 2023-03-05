@@ -69,6 +69,9 @@
     "MENU_SYSINFO_DONATION_LINK": "Ссылка для донатов:",
     "MENU_SYSINFO_DONATION_URL": "https://paypal.me/fedecek",
 
+    "DEPOT_GO_TO_THE_DEPOT": "Открыть ссылку",
+    "MENU_OPEN_MOTD": "Открыть сообщение дня",
+
     "AF_CAVES_LINE1": "„Как в прежние времена“",
     "AF_CAVES_LINE3": "«Соуп» Мактавиш",
     "AF_CAVES_LINE4": "Точка „Хоутел-Браво“, Афганистан",

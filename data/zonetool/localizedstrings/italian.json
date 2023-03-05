@@ -58,5 +58,8 @@
     "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK": "Pagina di Github:",
     "MENU_SYSINFO_CUSTOMER_SUPPORT_URL": "https://github.com/fedddddd/h2-mod",
     "MENU_SYSINFO_DONATION_LINK": "Link per donazioni:",
-    "MENU_SYSINFO_DONATION_URL": "https://paypal.me/fedecek"
+    "MENU_SYSINFO_DONATION_URL": "https://paypal.me/fedecek",
+
+    "DEPOT_GO_TO_THE_DEPOT": "Apri il link",
+    "MENU_OPEN_MOTD": "Bollettino del giorno"
 }
