@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "Usar tipografías de h2-mod",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "Desbloquear todas las misiones",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Cancelar desbloqueo"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "Cancelar desbloqueo",
+
+    "DEPOT_GO_TO_THE_DEPOT": "Abrir vínculo",
+    "MENU_OPEN_MOTD": "Mensaje del día"
 }

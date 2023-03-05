@@ -5607,5 +5607,8 @@
     "SUBTITLE_ROADKILL_INTRO_RPG": "^2Ranger: ^7RPG!!!",
     "SUBTITLE_TRAIN_FLY_WELCOME": "^2Sgt. Foley: ^7Vítejte na kurzu mladého bojovníka.",
     "SUBTITLE_FAVELA_GST_NOHESNOT": "^2Ghost: ^7Už ne!",
-    "SUBTITLE_ROADKILL_AR4_ONEONTHELEFT": "^2Ranger: ^7Ten na levé straně."
+    "SUBTITLE_ROADKILL_AR4_ONEONTHELEFT": "^2Ranger: ^7Ten na levé straně.",
+
+    "DEPOT_GO_TO_THE_DEPOT": "Otevřít odkaz",
+    "MENU_OPEN_MOTD": "Zpráva dne"
 }

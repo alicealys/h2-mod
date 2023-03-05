@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "使用 h2-mod 字体",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "解锁全部任务",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "取消解锁"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "取消解锁",
+
+    "DEPOT_GO_TO_THE_DEPOT": "打开链接",
+    "MENU_OPEN_MOTD": "每日信息"
 }

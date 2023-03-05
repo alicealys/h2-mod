@@ -21,5 +21,8 @@
     "LUA_MENU_FALLBACK_ENABLE": "ةصّصخم طوطخ مدختسا",
 
     "LUA_MENU_CAMPAIGN_UNLOCKED_ALL_TITLE": "ﻓﺘﺢ ﺟﻤﻴﻊ ﺍﻟﻤﻬﺎﻡ.",
-    "LUA_MENU_CANCEL_UNLOCK_CAPS": "ﺇﻟﻐﺎء ﺍﻟﻔﺘﺢ"
+    "LUA_MENU_CANCEL_UNLOCK_CAPS": "ﺇﻟﻐﺎء ﺍﻟﻔﺘﺢ",
+
+    "DEPOT_GO_TO_THE_DEPOT": "طبارلا حتف",
+    "MENU_OPEN_MOTD": "مويلا ةلاسر"
 }
