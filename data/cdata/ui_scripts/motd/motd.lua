@@ -11,6 +11,10 @@ LUI.MenuBuilder.registerPopupType("motd", function()
 end)
 
 LUI.onmenuopen("main_campaign", function(menu)
+    if (not motd.hasmotd()) then
+        return
+    end
+
     if (not motd.hasseentoday()) then
         motd.sethasseentoday()
         LUI.FlowManager.RequestPopupMenu(nil, "motd")

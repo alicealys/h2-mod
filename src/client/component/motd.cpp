@@ -233,6 +233,15 @@ namespace motd
 		});
 	}
 
+	bool has_motd()
+	{
+		return marketing.access<bool>([](nlohmann::json& data)
+			-> nlohmann::json
+		{
+			return data.is_object() && data["motd"].is_object();
+		});
+	}
+
 	class component final : public component_interface
 	{
 	public:

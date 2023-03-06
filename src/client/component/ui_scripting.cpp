@@ -654,6 +654,8 @@ namespace ui_scripting
 				const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 				config::set<uint64_t>("motd_last_seen", static_cast<uint64_t>(now));
 			};
+
+			motd_table["hasmotd"] = motd::has_motd;
 		}
 
 		void start()
