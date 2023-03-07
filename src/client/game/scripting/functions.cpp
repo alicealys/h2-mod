@@ -1,8 +1,6 @@
 #include <std_include.hpp>
 #include "functions.hpp"
 
-#include "../../component/gsc.hpp"
-
 #include "component/gsc/script_extension.hpp"
 #include "component/gsc/script_loading.hpp"
 
