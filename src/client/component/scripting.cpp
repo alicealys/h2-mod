@@ -6,8 +6,9 @@
 
 #include "scheduler.hpp"
 #include "scripting.hpp"
-#include "gsc.hpp"
 #include "console.hpp"
+
+#include "gsc/script_loading.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/functions.hpp"
