@@ -222,7 +222,6 @@ namespace motd
 
 			marketing.access([&](nlohmann::json& data)
 			{
-				image_cache.clear();
 				data.clear();
 
 				const auto marketing_data = utils::http::get_data("https://master.fed0001.xyz/h2-mod/marketing.json");
