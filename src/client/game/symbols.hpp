@@ -86,6 +86,7 @@ namespace game
 	WEAK symbol<unsigned int(unsigned int parentId, unsigned int unsignedValue)> GetNewArrayVariable{0x1405C2130};
 	WEAK symbol<void(unsigned int parentId, unsigned int id, VariableValue* value)> SetNewVariableValue{0x1405C5EA0};
 	WEAK symbol<void(unsigned int parentId, unsigned int index)> RemoveVariableValue{0x1405C2A50};
+	WEAK symbol<unsigned int(unsigned int)> GetObjectType{0x1405C25D0};
 
 	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x14051B260};
 	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
@@ -136,10 +137,11 @@ namespace game
 	WEAK symbol<void(int value)> Scr_AddInt{0x1405C69A0};
 	WEAK symbol<void(const char* value)> Scr_AddString{0x1405C6A80};
 	WEAK symbol<unsigned int(const char* name)> Scr_LoadScript{0x1405BCEC0};
-	WEAK symbol<int()> Scr_GetNumParam{0x1405C7940};
+	WEAK symbol<unsigned int()> Scr_GetNumParam{0x1405C7940};
 	WEAK symbol<unsigned int(const char* script, unsigned int name)> Scr_GetFunctionHandle{0x1405BCD50};
 	WEAK symbol<unsigned int(int handle, unsigned int paramcount)> Scr_ExecThread{0x1405C6F40};
 	WEAK symbol<unsigned int(void* func, int type, unsigned int name)> Scr_RegisterFunction{0x1405BC7B0};
+	WEAK symbol<bool(VariableValue* value)> Scr_CastString{0x1405C33A0};
 
 	WEAK symbol<char*(unsigned int size, unsigned int alignment, 
 		unsigned int type, int source)> PMem_AllocFromSource_NoDebug{0x14061E680};

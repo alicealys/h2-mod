@@ -1,5 +1,7 @@
 #pragma once
 
+#include "game/scripting/lua/error.hpp"
+
 namespace notifies
 {
 	extern bool hook_enabled;

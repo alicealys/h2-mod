@@ -162,9 +162,9 @@ namespace scripting
 		{
 			auto result = scripting::find_token(id);
 
-			if (canonical_string_table.find(id) != canonical_string_table.end())
+			if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
 			{
-				result.push_back(canonical_string_table[id]);
+				result.push_back(itr->second);
 			}
 
 			return result;
@@ -323,12 +323,22 @@ namespace scripting
 
 	std::optional<std::string> get_canonical_string(const unsigned int id)
 	{
-		if (canonical_string_table.find(id) == canonical_string_table.end())
+		if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
 		{
-			return {};
+			return itr->second;
 		}
 
-		return {canonical_string_table[id]};
+		return {};
+	}
+
+	std::string get_token(unsigned int id)
+	{
+		if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
+		{
+			return itr->second;
+		}
+
+		return find_token_single(id);
 	}
 
 	class component final : public component_interface

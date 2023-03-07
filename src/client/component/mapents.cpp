@@ -8,9 +8,6 @@
 #include "command.hpp"
 #include "game/scripting/functions.hpp"
 
-#include <xsk/gsc/types.hpp>
-#include <xsk/resolver.hpp>
-
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -50,7 +47,7 @@ namespace mapents
 					continue;
 				}
 
-				const auto token = xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id));
+				const auto token = scripting::find_token_single(static_cast<std::uint16_t>(id));
 				const auto key = "\"" + token + "\"";
 
 				const auto new_line = key + line.substr(first_space);

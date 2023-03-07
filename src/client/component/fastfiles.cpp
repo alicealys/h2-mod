@@ -249,8 +249,6 @@ namespace fastfiles
 			return reallocate_asset_pool<Type, pool_size * Multiplier>();
 		}
 
-#define RVA(ptr) static_cast<uint32_t>(reinterpret_cast<size_t>(ptr) - 0x140000000)
-
 		void reallocate_xmodel_pool()
 		{
 			// array used for DB_GetAllXAssetOfType, not big enough if many assets are added
