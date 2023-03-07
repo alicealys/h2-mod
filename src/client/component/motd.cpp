@@ -9,30 +9,100 @@
 #include <utils/string.hpp>
 #include <utils/http.hpp>
 #include <utils/concurrency.hpp>
+#include <utils/properties.hpp>
+#include <utils/io.hpp>
+#include <utils/cryptography.hpp>
 
 #define MAX_FEATURED_TABS 8
+
+#define CACHE_MAX_AGE 24h * 5
+#define CACHE_FILE_SIGNATURE 'CM2H' // H2MC (H2-MOD Cache)
 
 namespace motd
 {
 	namespace
 	{
 		utils::concurrency::container<links_map_t> links;
-
 		utils::concurrency::container<nlohmann::json, std::recursive_mutex> marketing;
 
-		std::unordered_map<std::string, std::string> image_cache;
+		struct cached_file_header
+		{
+			std::uint32_t signature;
+			time_t date_created;
+		};
+
+		std::filesystem::path get_cache_folder()
+		{
+			return utils::properties::get_appdata_path() / "cache";
+		}
+
+		std::string get_cached_file_name(const std::string& name)
+		{
+			const auto hash = utils::cryptography::sha1::compute(name, true);
+			return (get_cache_folder() / hash).generic_string();
+		}
+
+		void cache_file(const std::string& name, const std::string& data)
+		{
+			std::string buffer;
+			auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+			cached_file_header header{};
+			header.signature = CACHE_FILE_SIGNATURE;
+			header.date_created = now;
+
+			buffer.append(reinterpret_cast<char*>(&header), sizeof(header));
+			buffer.append(data);
+
+			const auto path = get_cached_file_name(name);
+			utils::io::write_file(path, buffer, false);
+		}
+
+		std::optional<std::string> read_cached_file(const std::string& name)
+		{
+			const auto path = get_cached_file_name(name);
+			if (!utils::io::file_exists(path))
+			{
+				return {};
+			}
+
+			auto now = std::chrono::system_clock::now();
+			auto data = utils::io::read_file(path);
+			if (data.size() < sizeof(cached_file_header))
+			{
+				return {};
+			}
+
+			auto buffer = data.data();
+			const auto header = reinterpret_cast<cached_file_header*>(buffer);
+			if (header->signature != CACHE_FILE_SIGNATURE)
+			{
+				return {};
+			}
+
+			const auto date = std::chrono::system_clock::from_time_t(header->date_created);
+			if (now - date >= CACHE_MAX_AGE)
+			{
+				utils::io::remove_file(path);
+				return {};
+			}
+
+			const auto file_data = buffer + sizeof(cached_file_header);
+			return std::string{file_data, data.size() - sizeof(cached_file_header)};
+		}
 
 		std::optional<std::string> download_image(const std::string& url)
 		{
-			if (image_cache.contains(url))
+			const auto cached = read_cached_file(url);
+			if (cached.has_value())
 			{
-				return {image_cache.at(url)};
+				return {cached.value()};
 			}
 
 			const auto res = utils::http::get_data(url);
 			if (res.has_value())
 			{
-				image_cache[url] = res.value();
+				cache_file(url, res.value());
 			}
 
 			return res;
