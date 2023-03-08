@@ -4,9 +4,9 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "scheduler.hpp"
+#include "component/scheduler.hpp"
+#include "component/console.hpp"
 #include "gui.hpp"
-#include "console.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -34,9 +34,17 @@ namespace gui
 			LPARAM lParam;
 		};
 
+		struct menu_t
+		{
+			std::string name;
+			std::string title;
+			std::function<void()> render;
+		};
+
 		utils::concurrency::container<std::vector<frame_callback>> on_frame_callbacks;
 		utils::concurrency::container<std::deque<notification_t>> notifications;
 		utils::concurrency::container<std::vector<event>> event_queue;
+		std::vector<menu_t> menus;
 
 		ID3D11Device* device;
 		ID3D11DeviceContext* device_context;
@@ -161,11 +169,10 @@ namespace gui
 			{
 				if (ImGui::BeginMenu("Windows"))
 				{
-					menu_checkbox("Asset list", "asset_list");
-					menu_checkbox("Entity list", "entity_list");
-					menu_checkbox("Console", "console");
-					menu_checkbox("Script console", "script_console");
-					menu_checkbox("Debug", "debug");
+					for (const auto& menu : menus)
+					{
+						menu_checkbox(menu.title, menu.name);
+					}
 
 					ImGui::EndMenu();
 				}
@@ -210,21 +217,6 @@ namespace gui
 			return result;
 		}
 
-		void dxgi_swap_chain_present_stub(utils::hook::assembler& a)
-		{
-			a.pushad64();
-			a.call_aligned(gui_on_frame);
-			a.popad64();
-
-			a.mov(r8d, esi);
-			a.mov(edx, r15d);
-			a.mov(rcx, rdi);
-			a.call(rbx);
-			a.mov(ecx, eax);
-
-			a.jmp(0x1407A14D1);
-		}
-
 		utils::hook::detour wnd_proc_hook;
 		LRESULT wnd_proc_stub(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
@@ -232,7 +224,7 @@ namespace gui
 			{
 				event_queue.access([hWnd, msg, wParam, lParam](std::vector<event>& queue)
 				{
-					queue.push_back({hWnd, msg, wParam, lParam});
+					queue.emplace_back(hWnd, msg, wParam, lParam);
 				});
 			}
 
@@ -271,7 +263,7 @@ namespace gui
 	{
 		on_frame_callbacks.access([always, callback](std::vector<frame_callback>& callbacks)
 		{
-			callbacks.push_back({callback, always});
+			callbacks.emplace_back(callback, always);
 		});
 	}
 
@@ -298,6 +290,21 @@ namespace gui
 	{
 		utils::string::set_clipboard_data(text);
 		gui::notification("Text copied to clipboard", utils::string::va("\"%s\"", text.data()));
+	}
+
+	void register_menu(const std::string& name, const std::string& title,
+		const std::function<void()>& callback, bool always)
+	{
+		menus.emplace_back(name, title, callback);
+		enabled_menus[name] = false;
+
+		on_frame([=]
+		{
+			if (enabled_menus.at(name))
+			{
+				callback();
+			}
+		}, always);
 	}
 
 	class component final : public component_interface
