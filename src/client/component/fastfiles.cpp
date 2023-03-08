@@ -128,13 +128,14 @@ namespace fastfiles
 			return true;
 		}
 
-		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator)
+		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator, 
+			const mods::zone_priority priority)
 		{
 			try_add_zone(zones, allocator, "mod", true);
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
 			{
-				if (zone.alloc_flags & game::DB_ZONE_COMMON)
+				if ((zone.alloc_flags & game::DB_ZONE_COMMON) && zone.priority == priority)
 				{
 					try_add_zone(zones, allocator, zone.name, true);
 				}
@@ -158,6 +159,7 @@ namespace fastfiles
 			utils::memory::allocator allocator;
 			std::vector<game::XZoneInfo> zones;
 			try_add_zone(zones, allocator, "h2_mod_pre_gfx", true);
+			add_mod_zones(zones, allocator, mods::zone_priority::pre_gfx);
 			push_zones(zones, zone_info, zone_count);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
@@ -175,6 +177,8 @@ namespace fastfiles
 			std::vector<game::XZoneInfo> zones;
 
 			try_add_zone(zones, allocator, "h2_mod_common", true);
+			add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
+
 			for (auto i = 0u; i < zone_count; i++)
 			{
 				zones.push_back(zone_info[i]);
@@ -185,7 +189,7 @@ namespace fastfiles
 				}
 			}
 
-			add_mod_zones(zones, allocator);
+			add_mod_zones(zones, allocator, mods::zone_priority::post_common);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 		}
@@ -458,12 +462,12 @@ namespace fastfiles
 			add_custom_level_load_zone(load, name, size_est);
 		}
 
-		void add_mod_zones_to_load(game::LevelLoad* load)
+		void add_mod_zones_to_load(game::LevelLoad* load, const mods::zone_priority priority)
 		{
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
 			{
-				if (zone.alloc_flags & game::DB_ZONE_GAME)
+				if ((zone.alloc_flags & game::DB_ZONE_GAME) && zone.priority == priority)
 				{
 					add_custom_level_load_zone(load, zone.name.data(), 0x40000);
 				}
@@ -476,6 +480,7 @@ namespace fastfiles
 
 			a.pushad64();
 			a.mov(rcx, rbx);
+			a.mov(rdx, mods::zone_priority::pre_map);
 			a.call_aligned(add_mod_zones_to_load);
 			a.popad64();
 
@@ -529,6 +534,8 @@ namespace fastfiles
 			{
 				add_custom_level_load_zone(load, name, size_est);
 			}
+
+			add_mod_zones_to_load(load, mods::zone_priority::post_map);
 		}
 
 		void db_load_xassets_stub(game::XZoneInfo* info, unsigned int zone_count, game::DBSyncMode sync_mode)

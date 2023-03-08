@@ -2,10 +2,25 @@
 
 namespace mods
 {
+	enum zone_priority
+	{
+		none,
+
+		// common
+		pre_gfx,
+		post_gfx,
+		post_common,
+
+		// game
+		pre_map,
+		post_map,
+	};
+
 	struct mod_zone
 	{
 		std::string name;
 		unsigned int alloc_flags;
+		zone_priority priority;
 	};
 
 	bool mod_requires_restart(const std::string& path);

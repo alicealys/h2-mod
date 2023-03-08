@@ -40,15 +40,52 @@ namespace mods
 			{"game", game::DB_ZONE_GAME},
 		};
 
+		std::unordered_map<std::string, zone_priority> priority_map =
+		{
+			{"none", zone_priority::none},
+
+			{"pre_gfx", zone_priority::post_gfx},
+			{"post_gfx", zone_priority::post_gfx},
+			{"post_common", zone_priority::post_common},
+
+			{"pre_map", zone_priority::pre_map},
+			{"post_map", zone_priority::post_map},
+		};
+
 		unsigned int get_alloc_flag(const std::string& name)
 		{
 			const auto lower = utils::string::to_lower(name);
-			if (alloc_flags_map.find(lower) != alloc_flags_map.end())
+			if (const auto iter = alloc_flags_map.find(lower); iter != alloc_flags_map.end())
 			{
-				return alloc_flags_map[lower];
+				return iter->second;
 			}
 
 			return game::DB_ZONE_COMMON;
+		}
+		
+		zone_priority get_default_zone_priority(unsigned int alloc_flags)
+		{
+			if (alloc_flags & game::DB_ZONE_COMMON)
+			{
+				return zone_priority::post_common;
+			}
+			else if (alloc_flags & game::DB_ZONE_GAME)
+			{
+				return zone_priority::pre_map;
+			}
+
+			return zone_priority::none;
+		}
+
+		zone_priority get_zone_priority(const std::string& name, unsigned int alloc_flags)
+		{
+			const auto lower = utils::string::to_lower(name);
+			if (const auto iter = priority_map.find(lower); iter != priority_map.end())
+			{
+				return iter->second;
+			}
+
+			return get_default_zone_priority(alloc_flags);
 		}
 
 		utils::hook::detour db_release_xassets_hook;
@@ -113,13 +150,28 @@ namespace mods
 					continue;
 				}
 
+				mod_zone zone{};
+
 				const auto alloc_flags = get_alloc_flag(values[0]) | game::DB_ZONE_CUSTOM;
 				if (alloc_flags & game::DB_ZONE_COMMON)
 				{
 					mod_info.zone_info.has_common_zones = true;
 				}
 
-				mod_info.zone_info.zones.emplace_back(values[1], alloc_flags);
+				zone.alloc_flags = alloc_flags;
+
+				if (values.size() <= 2)
+				{
+					zone.name = values[1];
+					zone.priority = get_default_zone_priority(zone.alloc_flags);
+					mod_info.zone_info.zones.emplace_back(zone);
+				}
+				else
+				{
+					zone.name = values[2];
+					zone.priority = get_zone_priority(values[1], zone.alloc_flags);
+					mod_info.zone_info.zones.emplace_back(zone);
+				}
 			}
 		}
 
