@@ -4,30 +4,25 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "scheduler.hpp"
-#include "command.hpp"
+#include "component/scheduler.hpp"
+#include "component/command.hpp"
+#include "component/fastfiles.hpp"
 #include "gui.hpp"
-#include "fastfiles.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 
-namespace asset_list
+namespace gui::asset_list
 {
 	namespace
 	{
-		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT];
+		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT]{};
 		std::string asset_type_filter;
 		std::string assets_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
 
-		void on_frame()
+		void render_window()
 		{
 			static auto* enabled = &gui::enabled_menus["asset_list"];
-			if (!*enabled)
-			{
-				return;
-			}
-
 			ImGui::Begin("Asset list", enabled);
 
 			ImGui::InputText("asset type", &asset_type_filter);
@@ -92,9 +87,9 @@ namespace asset_list
 	public:
 		void post_unpack() override
 		{
-			gui::on_frame(on_frame);
+			gui::register_menu("asset_list", "Asset List", render_window);
 		}
 	};
 }
 
-REGISTER_COMPONENT(asset_list::component)
+REGISTER_COMPONENT(gui::asset_list::component)

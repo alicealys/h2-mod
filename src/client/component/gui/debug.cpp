@@ -4,8 +4,8 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "scheduler.hpp"
-#include "command.hpp"
+#include "component/scheduler.hpp"
+#include "component/command.hpp"
 #include "gui.hpp"
 
 #include "game/scripting/lua/context.hpp"
@@ -693,7 +693,8 @@ namespace gui::debug
 	public:
 		void post_unpack() override
 		{
-			gui::on_frame(draw_window);
+			gui::register_menu("debug", "Debug", draw_window);
+
 			gui::on_frame([]()
 			{
 				if (!game::SV_Loaded() || cl_paused->current.integer)

@@ -4,10 +4,10 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "scheduler.hpp"
-#include "command.hpp"
+#include "component/scheduler.hpp"
+#include "component/command.hpp"
+#include "component/scripting.hpp"
 #include "gui.hpp"
-#include "scripting.hpp"
 
 #include "game/scripting/execution.hpp"
 
@@ -807,14 +807,8 @@ namespace gui::entity_list
 			ImGui::End();
 		}
 
-		void on_frame()
+		void render_window()
 		{
-			static auto* enabled = &gui::enabled_menus["entity_list"];
-			if (!*enabled)
-			{
-				return;
-			}
-
 			data_.access([](data_t& data)
 			{
 				if (!game::CL_IsCgameInitialized())
@@ -845,7 +839,8 @@ namespace gui::entity_list
 	public:
 		void post_unpack() override
 		{
-			gui::on_frame(on_frame);
+			gui::register_menu("entity_list", "Entity List", render_window);
+
 			scheduler::loop([]()
 			{
 				try

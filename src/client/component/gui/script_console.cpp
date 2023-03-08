@@ -4,8 +4,8 @@
 #include "game/game.hpp"
 #include "game/dvars.hpp"
 
-#include "scheduler.hpp"
-#include "command.hpp"
+#include "component/scheduler.hpp"
+#include "component/command.hpp"
 #include "gui.hpp"
 
 #include "game/scripting/lua/context.hpp"
@@ -114,13 +114,8 @@ namespace gui::script_console
 			return 0;
 		}
 
-		void on_frame()
+		void render_window()
 		{
-			if (!gui::enabled_menus["script_console"])
-			{
-				return;
-			}
-
 			menu_data.access([](menu_data_t& menu_data_)
 			{
 				if (!game::CL_IsCgameInitialized())
@@ -132,7 +127,8 @@ namespace gui::script_console
 				static const auto input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue | ImGuiInputTextFlags_CallbackCompletion |
 													 ImGuiInputTextFlags_CallbackHistory;
 
-				ImGui::Begin("Script console", &gui::enabled_menus["script_console"]);
+				static auto* enabled = &gui::enabled_menus["script_console"];
+				ImGui::Begin("Script console", enabled);
 
 				if (ImGui::BeginPopup("Options"))
 				{
@@ -222,7 +218,7 @@ namespace gui::script_console
 	public:
 		void post_unpack() override
 		{
-			gui::on_frame(on_frame);
+			gui::register_menu("script_console", "Script Console", render_window);
 			scheduler::loop(run_commands, scheduler::pipeline::server);
 		}
 	};
