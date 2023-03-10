@@ -131,7 +131,11 @@ namespace fastfiles
 		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator, 
 			const mods::zone_priority priority)
 		{
-			try_add_zone(zones, allocator, "mod", true);
+			if (priority == mods::zone_priority::post_common)
+			{
+				try_add_zone(zones, allocator, "mod", true);
+			}
+
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
 			{
