@@ -7,6 +7,7 @@
 #include "console.hpp"
 #include "mods.hpp"
 #include "fonts.hpp"
+#include "imagefiles.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -31,6 +32,7 @@ namespace fastfiles
 		utils::hook::detour db_try_load_x_file_internal_hook;
 		utils::hook::detour db_find_xasset_header;
 		utils::hook::detour load_xasset_header_hook;
+		utils::hook::detour db_unload_x_zones_hook;
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -158,10 +160,13 @@ namespace fastfiles
 		void load_pre_gfx_zones(game::XZoneInfo* zone_info,
 			unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
+			imagefiles::close_custom_handles();
+
 			// code_pre_gfx
 
 			utils::memory::allocator allocator;
 			std::vector<game::XZoneInfo> zones;
+
 			try_add_zone(zones, allocator, "h2_mod_pre_gfx", true);
 			add_mod_zones(zones, allocator, mods::zone_priority::pre_gfx);
 			push_zones(zones, zone_info, zone_count);
@@ -570,6 +575,22 @@ namespace fastfiles
 
 			load_xasset_header_hook.invoke<void>(a1);
 		}
+
+		void db_unload_x_zones_stub(const unsigned short* unload_zones,
+			const unsigned int unload_count, const bool create_default)
+		{
+			for (auto i = 0u; i < unload_count; i++)
+			{
+				const auto zone_name = game::g_zones[unload_zones[i]].name;
+				if (zone_name[0] != '\0')
+				{
+					printf("unload zone %s\n", zone_name);
+					imagefiles::close_handle(zone_name);
+				}
+			}
+
+			db_unload_x_zones_hook.invoke<void>(unload_zones, unload_count, create_default);
+		}
 	}
 
 	bool exists(const std::string& zone)
@@ -585,7 +606,6 @@ namespace fastfiles
 			{
 				db_fs->vftbl->Close(db_fs, handle);
 			}
-
 		});
 
 		return handle != nullptr;
@@ -643,6 +663,8 @@ namespace fastfiles
 
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
 			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
+
+			db_unload_x_zones_hook.create(0x140417D80, db_unload_x_zones_stub);
 
 			// Allow loading of mixed compressor types
 			utils::hook::nop(0x1403E66A7, 2);

@@ -1156,6 +1156,15 @@ namespace game
 		DB_ZONE_CUSTOM = 0x1000 // added for custom zone loading
 	};
 
+	struct XZone
+	{
+		char __pad0[24];
+		char name[64];
+		char __pad1[128];
+	};
+
+	static_assert(sizeof(XZone) == 216);
+
 	struct XZoneInfo
 	{
 		const char* name;
