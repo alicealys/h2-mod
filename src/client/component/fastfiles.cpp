@@ -168,8 +168,8 @@ namespace fastfiles
 			std::vector<game::XZoneInfo> zones;
 
 			try_add_zone(zones, allocator, "h2_mod_pre_gfx", true);
-			add_mod_zones(zones, allocator, mods::zone_priority::pre_gfx);
 			push_zones(zones, zone_info, zone_count);
+			add_mod_zones(zones, allocator, mods::zone_priority::pre_gfx);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 			fonts::load_font_zones();
@@ -186,7 +186,6 @@ namespace fastfiles
 			std::vector<game::XZoneInfo> zones;
 
 			try_add_zone(zones, allocator, "h2_mod_common", true);
-			add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
 
 			for (auto i = 0u; i < zone_count; i++)
 			{
@@ -195,6 +194,7 @@ namespace fastfiles
 				if (zone_info[i].name == "code_post_gfx"s)
 				{
 					try_add_zone(zones, allocator, "h2_mod_ui", true);
+					add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
 				}
 			}
 
