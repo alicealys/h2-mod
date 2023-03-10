@@ -52,6 +52,12 @@ namespace updater
 			std::string data;
 		};
 
+		struct file_info
+		{
+			std::string name;
+			std::string hash;
+		};
+
 		struct update_data_t
 		{
 			bool restart_required{};
@@ -60,7 +66,7 @@ namespace updater
 			status download{};
 			std::string error{};
 			std::string current_file{};
-			std::vector<std::string> required_files{};
+			std::vector<file_info> required_files{};
 			std::vector<std::string> garbage_files{};
 		};
 
@@ -410,7 +416,7 @@ namespace updater
 				return;
 			}
 
-			std::vector<std::string> required_files;
+			std::vector<file_info> required_files;
 			std::vector<std::string> update_files;
 
 			const auto files = j.GetArray();
@@ -449,7 +455,7 @@ namespace updater
 					console::info("[Updater] need file %s\n", name);
 #endif
 
-					required_files.push_back(name);
+					required_files.emplace_back(name, sha);
 				}
 			}
 
@@ -507,7 +513,7 @@ namespace updater
 
 		scheduler::once([]()
 		{
-			const auto required_files = update_data.access<std::vector<std::string>>([](update_data_t& data_)
+			const auto required_files = update_data.access<std::vector<file_info>>([](update_data_t& data_)
 			{
 				return data_.required_files;
 			});
@@ -516,16 +522,16 @@ namespace updater
 
 			for (const auto& file : required_files)
 			{
-				update_data.access([file](update_data_t& data_)
+				update_data.access([&](update_data_t& data_)
 				{
-					data_.current_file = file;
+					data_.current_file = file.name;
 				});
 
 #ifdef DEBUG
-				console::info("[Updater] downloading file %s\n", file.data());
+				console::info("[Updater] downloading file %s\n", file.name.data());
 #endif
 
-				const auto data = download_file(file);
+				const auto data = download_file(file.name);
 
 				if (is_update_cancelled())
 				{
@@ -535,11 +541,18 @@ namespace updater
 
 				if (!data.has_value())
 				{
-					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file);
+					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file.name);
 					return;
 				}
 
-				downloads.push_back({file, data.value()});
+				const auto& value = data.value();
+				if (file.hash != utils::cryptography::sha1::compute(value, true))
+				{
+					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file.name);
+					return;
+				}
+
+				downloads.emplace_back(file.name, data.value());
 			}
 
 			for (const auto& download : downloads)
