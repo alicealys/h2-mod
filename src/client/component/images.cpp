@@ -60,8 +60,10 @@ namespace images
 				return false;
 			}
 
-			image->imageFormat = 0x1000003;
-			image->resourceSize = -1;
+			image->mapType = game::MAPTYPE_2D;
+			image->semantic = 2;
+			image->category = 3;
+			image->flags = 0;
 
 			D3D11_SUBRESOURCE_DATA data{};
 			data.SysMemPitch = raw_image->get_width() * 4;
@@ -69,7 +71,7 @@ namespace images
 			data.pSysMem = raw_image->get_buffer();
 
 			game::Image_Setup(image, raw_image->get_width(), raw_image->get_height(), image->depth, image->numElements,
-				image->imageFormat, DXGI_FORMAT_R8G8B8A8_UNORM, 0, image->name, &data);
+				image->mapType, DXGI_FORMAT_R8G8B8A8_UNORM, 0, image->name, &data);
 
 			return true;
 		}
