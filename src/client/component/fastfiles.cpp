@@ -186,6 +186,7 @@ namespace fastfiles
 			std::vector<game::XZoneInfo> zones;
 
 			try_add_zone(zones, allocator, "h2_mod_common", true);
+			add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
 
 			for (auto i = 0u; i < zone_count; i++)
 			{
@@ -194,7 +195,6 @@ namespace fastfiles
 				if (zone_info[i].name == "code_post_gfx"s)
 				{
 					try_add_zone(zones, allocator, "h2_mod_ui", true);
-					add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
 				}
 			}
 
