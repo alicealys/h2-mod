@@ -1429,55 +1429,85 @@ namespace game
 		char data[1];
 	};
 
-	union $3FA29451CE6F1FA138A5ABAB84BE9676
-	{
-		ID3D11Texture1D* linemap;
-		ID3D11Texture2D* map;
-		ID3D11Texture3D* volmap;
-		ID3D11Texture2D* cubemap;
-		GfxImageLoadDef* loadDef;
-	};
-
 	struct GfxTexture
 	{
-		$3FA29451CE6F1FA138A5ABAB84BE9676 ___u0;
+		union
+		{
+			ID3D11Texture1D* linemap;
+			ID3D11Texture2D* map;
+			ID3D11Texture3D* volmap;
+			ID3D11Texture2D* cubemap;
+			GfxImageLoadDef* loadDef;
+		};
 		ID3D11ShaderResourceView* shaderView;
 		ID3D11ShaderResourceView* shaderViewAlternate;
 	};
 
 	struct Picmip
 	{
-		char platform[2];
+		unsigned char platform[2];
 	};
 
-	struct CardMemory
+	struct GfxImageStreamData
 	{
-		int platform[2];
+		unsigned short width;
+		unsigned short height;
+		union
+		{
+			unsigned char bytes[4];
+			unsigned int pixelSize;
+		};
 	};
 
+	enum MapType : std::uint8_t
+	{
+		MAPTYPE_NONE = 0x0,
+		MAPTYPE_INVALID1 = 0x1,
+		MAPTYPE_1D = 0x2,
+		MAPTYPE_2D = 0x3,
+		MAPTYPE_3D = 0x4,
+		MAPTYPE_CUBE = 0x5,
+		MAPTYPE_ARRAY = 0x6,
+		MAPTYPE_COUNT = 0x7,
+	};
+
+#pragma warning(push)
+#pragma warning(disable: 4201)
 	struct GfxImage
 	{
-		GfxTexture textures;
-		int flags;
-		int imageFormat;
-		int resourceSize;
-		char mapType;
-		char semantic;
-		char category;
-		char flags2;
-		Picmip picmip;
-		char track;
-		//CardMemory cardMemory;
+		GfxTexture texture;
+		DXGI_FORMAT imageFormat;
+		MapType mapType;
+		unsigned char semantic;
+		unsigned char category;
+		unsigned char flags;
+		union
+		{
+			struct
+			{
+				Picmip picmip;
+				char __pad0[2];
+			};
+			unsigned int resourceSize;
+		};
+		unsigned int dataLen1;
+		unsigned int dataLen2;
 		unsigned short width;
 		unsigned short height;
 		unsigned short depth;
 		unsigned short numElements;
-		char pad3[4];
-		void* pixelData;
-		//GfxImageLoadDef *loadDef;
-		uint64_t streams[4];
+		unsigned char levelCount;
+		unsigned char streamed;
+		char __pad1[2];
+		unsigned char* pixelData;
+		GfxImageStreamData streams[4];
 		const char* name;
 	};
+#pragma warning(pop)
+
+	static_assert(offsetof(GfxImage, resourceSize) == 32);
+	static_assert(offsetof(GfxImage, dataLen1) == 36);
+	static_assert(offsetof(GfxImage, flags) == 31);
 
 
 	struct playerState_s
