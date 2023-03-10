@@ -584,7 +584,6 @@ namespace fastfiles
 				const auto zone_name = game::g_zones[unload_zones[i]].name;
 				if (zone_name[0] != '\0')
 				{
-					printf("unload zone %s\n", zone_name);
 					imagefiles::close_handle(zone_name);
 				}
 			}
