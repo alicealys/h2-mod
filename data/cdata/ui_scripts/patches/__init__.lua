@@ -1,1 +1,2 @@
 require("unlockall")
+require("pausequit")
