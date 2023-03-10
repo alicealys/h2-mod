@@ -223,12 +223,13 @@ namespace game
 
 	WEAK symbol<HWND> hWnd{0x14CCF81C0};
 
-	WEAK game::symbol<const char*> g_assetNames{0x140BEF280};
+	WEAK symbol<const char*> g_assetNames{0x140BEF280};
 
-	WEAK game::symbol<void*> g_assetPool{0x140BF3620};
+	WEAK symbol<void*> g_assetPool{0x140BF3620};
 
-	WEAK game::symbol<unsigned int> g_zoneCount{0x1422F45F4};
-	WEAK game::symbol<unsigned short> g_zoneIndex{0x1422F8DC8};
+	WEAK symbol<unsigned int> g_zoneCount{0x1422F45F4};
+	WEAK symbol<unsigned short> g_zoneIndex{0x1422F8DC8};
+	WEAK symbol<XZone> g_zones{0x144176040};
 
 	WEAK symbol<int> g_compressor{0x142065E80};
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
