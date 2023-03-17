@@ -28,7 +28,7 @@ namespace gsc
 			using std::runtime_error::runtime_error;
 		};
 
-		std::unordered_map<game::BuiltinFunction, std::uint16_t> functions;
+		std::unordered_map<std::uint16_t, game::BuiltinFunction> functions;
 
 		bool force_error_print = false;
 		std::optional<std::string> gsc_error_msg;
@@ -39,7 +39,7 @@ namespace gsc
 		{
 			const auto result = utils::hook::invoke<unsigned int>(0x140509F20, p_name, type);
 
-			for (const auto& [func, id] : functions)
+			for (const auto& [id, func] : functions)
 			{
 				game::Scr_RegisterFunction(func, 0, id);
 			}
@@ -251,12 +251,12 @@ namespace gsc
 		if (gsc_ctx->func_exists(name))
 		{
 			const auto id = gsc_ctx->func_id(name);
-			functions[function] = id;
+			functions[id] = function;
 		}
 		else
 		{
 			const auto id = ++function_id_start;
-			functions[function] = id;
+			functions[id] = function;
 			gsc_ctx->func_add(name, id);
 		}
 	}
