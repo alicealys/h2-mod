@@ -50,6 +50,7 @@
 #include <atlbase.h>
 #include <iphlpapi.h>
 #include <wincrypt.h>
+#include <dwmapi.h>
 
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max
