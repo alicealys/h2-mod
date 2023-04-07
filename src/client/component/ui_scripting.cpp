@@ -481,6 +481,22 @@ namespace ui_scripting
 
 				return info_table;
 			};
+
+			mods_table["load"] = [](const std::string& mod)
+			{
+				scheduler::once([=]()
+				{
+					mods::load(mod);
+				}, scheduler::main);
+			};
+
+			mods_table["unload"] = []
+			{
+				scheduler::once([]()
+				{
+					mods::unload();
+				}, scheduler::main);
+			};
 			
 			auto mods_stats_table = table();
 			mods_table["stats"] = mods_stats_table;

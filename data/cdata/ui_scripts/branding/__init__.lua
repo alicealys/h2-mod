@@ -1,1 +1,2 @@
 require("credits")
+require("victoryscreen")
