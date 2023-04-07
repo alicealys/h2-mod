@@ -332,6 +332,11 @@ namespace mods
 		return mod_list;
 	}
 
+	bool mod_exists(const std::string& folder)
+	{
+		return utils::io::directory_exists(utils::string::va("%s\\%s", MOD_FOLDER, folder.data()));
+	}
+
 	std::optional<nlohmann::json> get_mod_info(const std::string& name)
 	{
 		const auto info_file = name + "/info.json";
@@ -351,6 +356,46 @@ namespace mods
 		}
 
 		return {};
+	}
+
+	void load(const std::string& path)
+	{
+		if (!utils::io::directory_exists(path))
+		{
+			console::error("Mod %s not found!\n", path.data());
+			return;
+		}
+
+		console::info("Loading mod %s\n", path.data());
+		set_mod(path);
+
+		if ((mod_info.path.has_value() && mod_requires_restart(mod_info.path.value())) ||
+			mod_requires_restart(path))
+		{
+			// vid_restart is still broken :(
+			console::info("Restarting...\n");
+			full_restart("-mod "s + path);
+		}
+		else
+		{
+			restart();
+		}
+	}
+
+	void unload()
+	{
+		console::info("Unloading mod %s\n", mod_info.path.value().data());
+
+		if (mod_requires_restart(mod_info.path.value()))
+		{
+			console::info("Restarting...\n");
+			full_restart("");
+		}
+		else
+		{
+			clear_mod();
+			restart();
+		}
 	}
 
 	class component final : public component_interface
@@ -386,26 +431,7 @@ namespace mods
 				}
 
 				const auto path = params.get(1);
-				if (!utils::io::directory_exists(path))
-				{
-					console::error("Mod %s not found!\n", path);
-					return;
-				}
-
-				console::info("Loading mod %s\n", path);
-				set_mod(path);
-
-				if ((mod_info.path.has_value() && mod_requires_restart(mod_info.path.value())) || 
-					mod_requires_restart(path))
-				{
-					// vid_restart is still broken :(
-					console::info("Restarting...\n");
-					full_restart("-mod "s + path);
-				}
-				else
-				{
-					restart();
-				}
+				load(path);
 			});
 
 			command::add("unloadmod", [](const command::params& params)
@@ -423,18 +449,7 @@ namespace mods
 					return;
 				}
 
-				console::info("Unloading mod %s\n", mod_info.path.value().data());
-
-				if (mod_requires_restart(mod_info.path.value()))
-				{
-					console::info("Restarting...\n");
-					full_restart("");
-				}
-				else
-				{
-					clear_mod();
-					restart();
-				}
+				unload();
 			});
 
 			command::add("com_restart", []()
