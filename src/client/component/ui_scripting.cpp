@@ -16,6 +16,7 @@
 #include "language.hpp"
 #include "config.hpp"
 #include "motd.hpp"
+#include "achievements.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -481,6 +482,22 @@ namespace ui_scripting
 
 				return info_table;
 			};
+
+			mods_table["load"] = [](const std::string& mod)
+			{
+				scheduler::once([=]()
+				{
+					mods::load(mod);
+				}, scheduler::main);
+			};
+
+			mods_table["unload"] = []
+			{
+				scheduler::once([]()
+				{
+					mods::unload();
+				}, scheduler::main);
+			};
 			
 			auto mods_stats_table = table();
 			mods_table["stats"] = mods_stats_table;
@@ -656,6 +673,15 @@ namespace ui_scripting
 			};
 
 			motd_table["hasmotd"] = motd::has_motd;
+
+			auto achievements_table = table();
+			lua["achievements"] = achievements_table;
+
+			achievements_table["hasachievement"] = achievements::has_achievement;
+			achievements_table["getrarity"] = achievements::get_rarity;
+			achievements_table["getname"] = achievements::get_name;
+			achievements_table["getdetails"] = achievements::get_details;
+			achievements_table["count"] = achievements::get_count;
 		}
 
 		void start()
