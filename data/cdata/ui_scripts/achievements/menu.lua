@@ -236,7 +236,6 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         if (locked) then
             trophyimage:animateToState("locked")
             image:animateToState("locked")
-            title:setText(Engine.Localize("@LUA_MENU_UNKNOWN_ACHIEVEMENT"))
             desc:setText("")
         end
 
