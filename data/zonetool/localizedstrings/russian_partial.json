@@ -437,6 +437,9 @@
     "WEAPON_UMP45_XMAGS": "UMP45 с магазином повышенной ëмкости",
     "WEAPON_WA2000_FMJ": "WA2000 с ЦМ патронами",
 
+    "LUA_MENU_ACHIEVEMENTS": "ДОСТИЖЕНИЯ",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "Посмотреть прогресс ваших достижений.",
+
     "ACHIEVEMENT_EARNED": "Получено достижение!",
     "ACHIEVEMENT_NAME_0": "Это всë, на что вы способны?",
     "ACHIEVEMENT_DETAIL_0": "Получить все награды игры «Call of Duty®: Modern Warfare® 2. Обновлëнная кампания».",

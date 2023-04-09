@@ -26,6 +26,9 @@
     "DEPOT_GO_TO_THE_DEPOT": "リンクを開く",
     "MENU_OPEN_MOTD": "本日のメッセージ",
 
+    "LUA_MENU_ACHIEVEMENTS": "実績",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "実績の状況。",
+
     "ACHIEVEMENT_EARNED": "実績のロックを解除しました!",
     "ACHIEVEMENT_NAME_0": "全部でこれだけ？",
     "ACHIEVEMENT_DETAIL_0": "Call of Duty®: Modern Warfare® 2 Campaign Remasteredでアンロックできるトロフィーを全て獲得",

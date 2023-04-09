@@ -26,6 +26,9 @@
     "DEPOT_GO_TO_THE_DEPOT": "링크 열기",
     "MENU_OPEN_MOTD": "오늘의 메시지",
 
+    "LUA_MENU_ACHIEVEMENTS": "도전 과제",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "도전 과제 진행률.",
+
     "ACHIEVEMENT_EARNED": "도전 과제를 달성함!",
     "ACHIEVEMENT_NAME_0": "이게 전부야?",
     "ACHIEVEMENT_DETAIL_0": "콜 오브 듀티®: 모던 워페어 2 캠페인 리마스터의 모든 트로피를 획득하십시오.",
