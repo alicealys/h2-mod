@@ -121,6 +121,10 @@
     "DEPOT_GO_TO_THE_DEPOT": "Open link",
     "MENU_OPEN_MOTD": "Open Message of the Day",
 
+    "LUA_MENU_ACHIEVEMENTS": "ACHIEVEMENTS",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "View achievements.",
+    "LUA_MENU_UNKNOWN_ACHIEVEMENT": "???",
+
     "ACHIEVEMENT_EARNED": "Achievement Unlocked!",
     "ACHIEVEMENT_NAME_0": "Is That All You Got?",
     "ACHIEVEMENT_DETAIL_0": "Earn all available trophies for Call of Duty®: Modern Warfare® 2 Campaign Remastered.",

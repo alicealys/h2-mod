@@ -682,6 +682,21 @@ namespace ui_scripting
 			achievements_table["getname"] = achievements::get_name;
 			achievements_table["getdetails"] = achievements::get_details;
 			achievements_table["count"] = achievements::get_count;
+
+			achievements_table["table"] = []()
+			{
+				table table{};
+
+				achievements::achievement_file_t file{};
+				achievements::get_achievements(&file);
+
+				for (auto i = 0; i < achievements::ACHIEVEMENT_COUNT; i++)
+				{
+					table[i] = file.achievements[i];
+				}
+
+				return table;
+			};
 		}
 
 		void start()

@@ -31,6 +31,15 @@ end
 
 LUI.addmenubutton("main_campaign", {
 	index = 6,
+	text = "@LUA_MENU_ACHIEVEMENTS",
+	description = Engine.Localize("@LUA_MENU_ACHIEVEMENTS_DESC"),
+	callback = function()
+		LUI.FlowManager.RequestAddMenu(nil, "achievements_menu")
+	end
+})
+
+LUI.addmenubutton("main_campaign", {
+	index = 6,
 	text = "@MENU_MODS",
 	description = Engine.Localize("@MENU_MODS_DESC"),
 	callback = function()

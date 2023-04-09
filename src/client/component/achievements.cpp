@@ -78,40 +78,12 @@ namespace achievements
 			achievement_t(ACHIEVEMENT_50, "HEADBANGER", ACHIEVEMENT_RARITY_0),
 		};
 
-		struct achievement_file_t
-		{
-			std::uint32_t signature;
-			std::uint8_t version;
-			bool achievements[ACHIEVEMENT_COUNT];
-		};
-
 		std::filesystem::path get_achievements_path()
 		{
 			return utils::properties::get_appdata_path() / "player/achievements.bin";
 		}
 
-		void get_achievements(achievement_file_t* file)
-		{
-			std::lock_guard _0(file_mutex);
-			const auto path = get_achievements_path().generic_string();
 
-			if (!utils::io::file_exists(path))
-			{
-				return;
-			}
-
-			const auto data = utils::io::read_file(path);
-			if (data.size() < sizeof(achievement_file_t))
-			{
-				return;
-			}
-
-			std::memcpy(file, data.data(), sizeof(achievement_file_t));
-			if (file->signature != ACHIEVEMENT_FILE_SIGNATURE)
-			{
-				std::memset(file, 0, sizeof(achievement_file_t));
-			}
-		}
 
 		void write_achievements(achievement_file_t* data)
 		{
@@ -177,7 +149,7 @@ namespace achievements
 
 		void give_achievement_id_internal(achievement_file_t* file, int id)
 		{
-			get_achievements(file);
+			achievements::get_achievements(file);
 			if (has_achievement(file, id))
 			{
 				return;
@@ -213,6 +185,29 @@ namespace achievements
 		void scr_give_achievement_stub()
 		{
 			give_achievement(game::Scr_GetString(0));
+		}
+	}
+
+	void get_achievements(achievement_file_t* file)
+	{
+		std::lock_guard _0(file_mutex);
+		const auto path = get_achievements_path().generic_string();
+
+		if (!utils::io::file_exists(path))
+		{
+			return;
+		}
+
+		const auto data = utils::io::read_file(path);
+		if (data.size() < sizeof(achievement_file_t))
+		{
+			return;
+		}
+
+		std::memcpy(file, data.data(), sizeof(achievement_file_t));
+		if (file->signature != ACHIEVEMENT_FILE_SIGNATURE)
+		{
+			std::memset(file, 0, sizeof(achievement_file_t));
 		}
 	}
 
