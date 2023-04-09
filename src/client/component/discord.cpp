@@ -58,6 +58,7 @@ namespace discord
 				if (museum_mode == "free"s)
 				{
 					map_image = "museum";
+					mapname = "MUSEUM";
 				}
 				
 				const auto key = utils::string::va("PRESENCE_SP_%s", mapname);
