@@ -8,6 +8,8 @@
 #include "scheduler.hpp"
 #include "command.hpp"
 
+#include "gsc/script_extension.hpp"
+
 #include "game/ui_scripting/execution.hpp"
 
 #include <utils/hook.hpp>
@@ -267,6 +269,21 @@ namespace achievements
 				achievement_file_t file{};
 				get_achievements(&file);
 				give_achievement_id_internal(&file, id);
+			});
+
+			gsc::add_function("achievementunlocked", []()
+			{
+				const auto name = game::Scr_GetString(0);
+				const auto id = get_achievement_id(name);
+				if (!id.has_value())
+				{
+					game::Scr_AddInt(0);
+					return;
+				}
+
+				achievement_file_t file{};
+				get_achievements(&file);
+				game::Scr_AddInt(has_achievement(&file, id.value()));
 			});
 		}
 	};
