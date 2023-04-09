@@ -1,17 +1,3 @@
-local maincampaign = LUI.MenuBuilder.m_types_build["main_campaign"]
-LUI.MenuBuilder.m_types_build["main_campaign"] = function(...)
-    local initlist = LUI.Options.InitScrollingList
-    LUI.Options.InitScrollingList = function(list) 
-    	initlist(list, nil ,{
-            rows = 10
-        })
-    end
-
-    local menu = maincampaign(...)
-    LUI.Options.InitScrollingList = initlist
-    return menu
-end
-
 LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
     local menuwidth = 1129
 	local menu = LUI.MenuTemplate.new(root, {
