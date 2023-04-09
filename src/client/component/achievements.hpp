@@ -76,6 +76,15 @@ namespace achievements
 		achievement_rarity rarity;
 	};
 
+	struct achievement_file_t
+	{
+		std::uint32_t signature;
+		std::uint8_t version;
+		bool achievements[ACHIEVEMENT_COUNT];
+	};
+
+	void get_achievements(achievement_file_t* file);
+
 	int get_count();
 	bool has_achievement(int id);
 	std::string get_name(int id);
