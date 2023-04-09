@@ -26,6 +26,9 @@
     "DEPOT_GO_TO_THE_DEPOT": "開啟連結",
     "MENU_OPEN_MOTD": "今日訊息",
 
+    "LUA_MENU_ACHIEVEMENTS": "成就",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "您的成就進度。",
+
     "ACHIEVEMENT_EARNED": "成就解除鎖定！",
     "ACHIEVEMENT_NAME_0": "就這點本事？",
     "ACHIEVEMENT_DETAIL_0": "獲得《決勝時刻®：現代戰爭®2》劇情戰役重製版的所有獎盃。",

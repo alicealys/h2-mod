@@ -26,6 +26,9 @@
     "DEPOT_GO_TO_THE_DEPOT": "打开链接",
     "MENU_OPEN_MOTD": "每日信息",
 
+    "LUA_MENU_ACHIEVEMENTS": "成就",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "您的成就进度。",
+
     "ACHIEVEMENT_EARNED": "成就已解锁！",
     "ACHIEVEMENT_NAME_0": "轻而易举",
     "ACHIEVEMENT_DETAIL_0": "获得《使命召唤®：现代战争®2战役重制版》的全部奖杯。",

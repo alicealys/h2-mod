@@ -43,6 +43,9 @@
     "DEPOT_GO_TO_THE_DEPOT": "Ouvrir le lien",
     "MENU_OPEN_MOTD": "Message du jour",
 
+    "LUA_MENU_ACHIEVEMENTS": "LES SUCCÈS",
+    "LUA_MENU_ACHIEVEMENTS_DESC": "Vos succès remportés jusqu'à présent.",
+
     "ACHIEVEMENT_EARNED": "Succès déverrouillé !",
     "ACHIEVEMENT_NAME_0": "Quoi, c'est tout ?",
     "ACHIEVEMENT_DETAIL_0": "Gagnez tous les trophées disponibles de Call of Duty®: Modern Warfare® 2 Campaign Remastered.",
