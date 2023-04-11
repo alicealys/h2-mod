@@ -57,7 +57,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
     end
 
     for i = 0, achievements.count() - 1 do
-        local trophyimage = LUI.UIImage.new({
+        local btnbg = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
             width = menuwidth,
@@ -65,38 +65,45 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             material = RegisterMaterial("h2_btn_unfocused")  
         })
 
-        trophyimage:setup9SliceImage()
+        btnbg:setup9SliceImage()
 
-        trophyimage:registerAnimationState("locked", {
+        btnbg:registerAnimationState("locked", {
             material = RegisterMaterial("h2_btn_unfocused_locked")
         })
 
-        local stroke = LUI.UIImage.new({
+        local raritynames = {
+            "common",
+            "rare",
+            "legendary",
+            "epic",
+        }
+
+        local rarityname = raritynames[achievements.getrarity(i) + 1]
+
+        local raritystrip = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
-            width = menuwidth,
+            width = 10,
             height = itemwidth,
-            material = RegisterMaterial("h2_btn_focused_stroke")  
+            material = RegisterMaterial("depot_button_rarity_strip_" .. rarityname)  
         })
 
-        stroke:registerAnimationState("hide", {
+        raritystrip:registerAnimationState("hide", {
             alpha = 0
         })
 
-        stroke:registerAnimationState("show", {
+        raritystrip:registerAnimationState("show", {
             alpha = 1
         })
 
-        stroke:setup9SliceImage()
+        raritystrip:setup9SliceImage()
 
         local glow = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
-            left = -20,
-            top = -20,
-            width = menuwidth + 40,
-            height = itemwidth + 40,
-            material = RegisterMaterial("h2_btn_focused_outerglow")  
+            width = menuwidth,
+            height = itemwidth,
+            material = RegisterMaterial("depot_button_rarity_glow_" .. rarityname)
         })
 
         glow:registerAnimationState("hide", {
@@ -107,27 +114,24 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             alpha = 1
         })
 
-        glow:setup9SliceImage()
-
-        local pattern = LUI.UIImage.new({
+        local glow2 = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
             width = menuwidth,
             height = itemwidth,
-            material = RegisterMaterial("h2_btn_dot_pattern")  
+            material = RegisterMaterial("depot_button_rarity_glow_" .. rarityname)
         })
 
-        pattern:registerAnimationState("hide", {
+        glow2:registerAnimationState("hide", {
             alpha = 0
         })
 
-        pattern:registerAnimationState("show", {
+        glow2:registerAnimationState("show", {
             alpha = 1
         })
 
-        stroke:animateToState("hide")
-        pattern:animateToState("hide")
         glow:animateToState("hide")
+        glow2:animateToState("hide")
 
         local achievementcontainer = LUI.UIElement.new({
             topAnchor = true,
@@ -140,7 +144,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing / 2,
-            left = itemspacing / 2,
+            left = itemspacing / 2 + 10,
             width = itemwidth - itemspacing,
             height = itemwidth - itemspacing,
             material = RegisterMaterial("trophy_" .. i) 
@@ -150,7 +154,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing / 2 + 15,
-            left = itemspacing / 2 + 15,
+            left = itemspacing / 2 + 15 + 10,
             width = itemwidth - itemspacing - 30,
             height = itemwidth - itemspacing - 30,
             material = RegisterMaterial("icon_lock_mini") 
@@ -161,7 +165,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing + 5,
-            left = itemwidth + 5,
+            left = itemwidth + 5 + 10,
             color = {
                 r = 0.7,
                 g = 0.7,
@@ -176,7 +180,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing + CoD.TextSettings.Font23.Height + 10,
-            left = itemwidth + 5,
+            left = itemwidth + 5 + 10,
             width = textwidth,
             alignment = LUI.Alignment.Left,
             color = {
@@ -200,41 +204,44 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         achievementcontainer:setHandleMouse(true)
         local locked = not achievementtable[i]
 
+        if (locked) then
+            raritystrip:animateToState("hide")
+        end
+
         achievementcontainer:registerEventHandler("mouseenter", function()
             Engine.PlaySound(CoD.SFX.MouseOver)
 
             if (locked) then
-                trophyimage:setImage(RegisterMaterial("h2_btn_focused_locked"))
+                btnbg:setImage(RegisterMaterial("h2_btn_focused_locked"))
             else
-                stroke:animateToState("show")
-                pattern:animateToState("show")
+                raritystrip:animateToState("show")
                 title:animateToState("focused")
                 desc:animateToState("focused")
                 glow:animateToState("show")
+                glow2:animateToState("show")
             end
         end)
         achievementcontainer:registerEventHandler("mouseleave", function()
             if (locked) then
-                trophyimage:setImage(RegisterMaterial("h2_btn_unfocused_locked"))
+                btnbg:setImage(RegisterMaterial("h2_btn_unfocused_locked"))
             else
-                stroke:animateToState("hide")
-                pattern:animateToState("hide")
                 title:animateToState("default")
                 desc:animateToState("default")
                 glow:animateToState("hide")
+                glow2:animateToState("hide")
             end
         end)
     
-        achievementcontainer:addElement(trophyimage)
-        achievementcontainer:addElement(pattern)
+        achievementcontainer:addElement(btnbg)
         achievementcontainer:addElement(glow)
-        achievementcontainer:addElement(stroke)
+        achievementcontainer:addElement(glow2)
+        achievementcontainer:addElement(raritystrip)
         achievementcontainer:addElement(image)
         achievementcontainer:addElement(title)
         achievementcontainer:addElement(desc)
 
         if (locked) then
-            trophyimage:animateToState("locked")
+            btnbg:animateToState("locked")
             image:animateToState("locked")
             desc:setText("")
         end
