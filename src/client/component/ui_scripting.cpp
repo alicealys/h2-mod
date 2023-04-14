@@ -690,7 +690,7 @@ namespace ui_scripting
 				achievements::achievement_file_t file{};
 				achievements::get_achievements(&file);
 
-				for (auto i = 0; i < achievements::ACHIEVEMENT_COUNT; i++)
+				for (auto i = 0; i < achievements::ACHIEVEMENT_TOTAL_COUNT; i++)
 				{
 					table[i] = file.achievements[i];
 				}
