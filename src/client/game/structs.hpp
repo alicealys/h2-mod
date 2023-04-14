@@ -1728,6 +1728,63 @@ namespace game
 
 	static_assert(sizeof(physical_memory) == 0x530);
 
+	union GamerProfileDataUnion
+	{
+		unsigned __int8 byteVal;
+		bool boolVal;
+		__int16 shortVal;
+		int intVal;
+		float floatVal;
+		const char* stringVal;
+	};
+
+	enum level_number
+	{
+		LEVEL_TRAINER,
+		LEVEL_ROADKILL,
+		LEVEL_CLIFFHANGER,
+		LEVEL_AIRPORT,
+		LEVEL_FAVELA,
+
+		LEVEL_INVASION,
+		LEVEL_FAVELA_ESCAPE,
+		LEVEL_ARCADIA,
+		LEVEL_OILRIG,
+		LEVEL_GULAG,
+		LEVEL_DCBURNING,
+
+		LEVEL_CONTINGENCY,
+		LEVEL_DCEMP,
+		LEVEL_DC_WHITEHOUSE,
+		LEVEL_ESTATE,
+		LEVEL_BONEYARD,
+		LEVEL_AF_CAVES,
+		LEVEL_AF_CHASE,
+
+		LEVEL_ENDING,
+
+		LEVEL_COUNT,
+	};
+
+	enum GamerProfileDataType : __int32
+	{
+		TYPE_INVALID = 0x0,
+		TYPE_BYTE = 0x1,
+		TYPE_BOOL = 0x2,
+		TYPE_SHORT = 0x3,
+		TYPE_INT = 0x4,
+		TYPE_FLOAT = 0x5,
+		TYPE_STRING = 0x6,
+		TYPE_BUFFER = 0x7,
+		TYPE_FLAG = 0x8,
+	};
+
+	struct GamerProfileData
+	{
+		GamerProfileDataType type;
+		GamerProfileDataUnion u;
+	};
+
 	namespace hks
 	{
 		struct lua_State;

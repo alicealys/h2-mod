@@ -188,6 +188,127 @@ namespace achievements
 		{
 			give_achievement(game::Scr_GetString(0));
 		}
+
+		void give_mission_achievements()
+		{
+			game::GamerProfileData data{};
+			game::GamerProfile_GetDataByName(&data, 0, "missionhighestdifficulty", 0xFFFFFFFF);
+
+			if (data.type != game::TYPE_STRING)
+			{
+				return;
+			}
+
+			achievement_file_t file{};
+			achievements::get_achievements(&file);
+
+			const auto completed_mission = [&](const game::level_number level, const std::string& achievement)
+			{
+				const auto id = get_achievement_id(achievement);
+				if (!id.has_value())
+				{
+					return;
+				}
+
+				const auto id_value = id.value();
+				const auto highest_difficulty = data.u.stringVal[level] - '0';
+				if (highest_difficulty)
+				{
+					file.achievements[id_value] = true;
+				}
+			};
+
+			std::unordered_map<achievement_id, std::vector<game::level_number>> veteran_achievements;
+
+			const auto add_veteran_achievement = [&](const game::level_number level, const std::string& achievement)
+			{
+				const auto id = get_achievement_id(achievement);
+				if (!id.has_value())
+				{
+					return;
+				}
+
+				const auto id_value = static_cast<achievement_id>(id.value());
+				veteran_achievements[id_value].push_back(level);
+			};
+
+			const auto give_veteran_achievements = [&]()
+			{
+				for (const auto& achievement : veteran_achievements)
+				{
+					auto has_veteran = true;
+					for (const auto& mission : achievement.second)
+					{
+						if (data.u.stringVal[mission] != '3')
+						{
+							has_veteran = false;
+							break;
+						}
+					}
+
+					if (has_veteran)
+					{
+						file.achievements[achievement.first] = true;
+					}
+				}
+			};
+
+			const auto give_completed_campaign_achievement = [&](const std::string& achievement)
+			{
+				const auto id = get_achievement_id(achievement);
+				if (!id.has_value())
+				{
+					return;
+				}
+
+				const auto id_value = static_cast<achievement_id>(id.value());
+				for (auto i = 0; i < game::LEVEL_COUNT; i++)
+				{
+					if (data.u.stringVal[i] - '0' < 2)
+					{
+						return;
+					}
+				}
+
+				file.achievements[id_value] = true;
+			};
+
+			completed_mission(game::LEVEL_TRAINER, "BACK_IN_THE_SADDLE");
+			completed_mission(game::LEVEL_ROADKILL, "DANGER_CLOSE");
+			completed_mission(game::LEVEL_CLIFFHANGER, "COLD_SHOULDER");
+			completed_mission(game::LEVEL_FAVELA, "TAGEM_AND_BAGEM");
+			completed_mission(game::LEVEL_INVASION, "ROYAL_WITH_CHEESE");
+			completed_mission(game::LEVEL_GULAG, "SOAP_ON_A_ROPE");
+			completed_mission(game::LEVEL_CONTINGENCY, "DESPERATE_TIMES");
+			completed_mission(game::LEVEL_DC_WHITEHOUSE, "HOUSTON_WE_HAVE_A_PROBLEM");
+			completed_mission(game::LEVEL_ESTATE, "THE_PAWN");
+			completed_mission(game::LEVEL_BONEYARD, "OUT_OF_THE_FRYING_PAN");
+			completed_mission(game::LEVEL_ENDING, "FOR_THE_RECORD");
+
+			add_veteran_achievement(game::LEVEL_TRAINER, "FIRST_DAY_OF_SCHOOL");
+			add_veteran_achievement(game::LEVEL_ROADKILL, "FIRST_DAY_OF_SCHOOL");
+			add_veteran_achievement(game::LEVEL_CLIFFHANGER, "BLACK_DIAMOND");
+			add_veteran_achievement(game::LEVEL_FAVELA, "TURISTAS");
+			add_veteran_achievement(game::LEVEL_INVASION, "RED_DAWN");
+			add_veteran_achievement(game::LEVEL_FAVELA_ESCAPE, "TURISTAS");
+			add_veteran_achievement(game::LEVEL_ARCADIA, "RED_DAWN");
+			add_veteran_achievement(game::LEVEL_OILRIG, "PRISONER_627");
+			add_veteran_achievement(game::LEVEL_GULAG, "PRISONER_627");
+			add_veteran_achievement(game::LEVEL_DCBURNING, "HOME_COMING");
+			add_veteran_achievement(game::LEVEL_CONTINGENCY, "ENDS_JUSTIFY_THE_MEANS");
+			add_veteran_achievement(game::LEVEL_DCEMP, "HOME_COMING");
+			add_veteran_achievement(game::LEVEL_DC_WHITEHOUSE, "HOME_COMING");
+			add_veteran_achievement(game::LEVEL_ESTATE, "QUEEN_TAKES_ROOK");
+			add_veteran_achievement(game::LEVEL_BONEYARD, "QUEEN_TAKES_ROOK");
+			add_veteran_achievement(game::LEVEL_AF_CAVES, "OFF_THE_GRID");
+			add_veteran_achievement(game::LEVEL_AF_CHASE, "OFF_THE_GRID");
+			add_veteran_achievement(game::LEVEL_ENDING, "OFF_THE_GRID");
+
+			give_veteran_achievements();
+			give_completed_campaign_achievement("THE_PRICE_OF_WAR");
+
+			write_achievements(&file);
+		}
 	}
 
 	void get_achievements(achievement_file_t* file)
@@ -251,6 +372,8 @@ namespace achievements
 		void post_unpack() override
 		{
 			utils::hook::jump(0x1404B6240, scr_give_achievement_stub);
+
+			scheduler::once(give_mission_achievements, scheduler::main);
 
 			command::add("reset_achievements", []
 			{
