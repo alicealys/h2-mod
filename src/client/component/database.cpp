@@ -39,10 +39,6 @@ namespace database
 
 		utils::memory::allocator handle_allocator;
 
-		using sound_file_t = std::unordered_map<uint64_t, std::string>;
-		std::unordered_map<unsigned short, sound_file_t> sound_files = {};
-		std::unordered_map<std::string, uint64_t> sound_sizes = {};
-
 		game::dvar_t* db_filesysImpl = nullptr;
 		utils::hook::detour db_fs_initialize_hook;
 

@@ -25,7 +25,7 @@ namespace achievements
 	{
 		std::mutex file_mutex;
 
-		std::array<achievement_t, ACHIEVEMENT_COUNT> achievements =
+		std::array<achievement_t, ACHIEVEMENT_TOTAL_COUNT> achievements =
 		{
 			achievement_t(ACHIEVEMENT_ALL_ACHIEVEMENTS, "ACHIEVEMENTS_COMPLETED", ACHIEVEMENT_RARITY_3),
 			achievement_t(ACHIEVEMENT_1, "BACK_IN_THE_SADDLE", ACHIEVEMENT_RARITY_0),
@@ -78,14 +78,14 @@ namespace achievements
 			achievement_t(ACHIEVEMENT_48, "HOT_POTATO", ACHIEVEMENT_RARITY_0),
 			achievement_t(ACHIEVEMENT_49, "CLOWN_IN_TRAINING", ACHIEVEMENT_RARITY_0),
 			achievement_t(ACHIEVEMENT_50, "HEADBANGER", ACHIEVEMENT_RARITY_0),
+			achievement_t(ACHIEVEMENT_51, "BRAINS", ACHIEVEMENT_RARITY_2),
+			achievement_t(ACHIEVEMENT_52, "RAMIREZ", ACHIEVEMENT_RARITY_2),
 		};
 
 		std::filesystem::path get_achievements_path()
 		{
 			return utils::properties::get_appdata_path() / "player/achievements.bin";
 		}
-
-
 
 		void write_achievements(achievement_file_t* data)
 		{
@@ -101,7 +101,7 @@ namespace achievements
 
 		bool has_achievement(achievement_file_t* file, int id)
 		{
-			if (id >= ACHIEVEMENT_COUNT)
+			if (id >= ACHIEVEMENT_TOTAL_COUNT)
 			{
 				return false;
 			}
@@ -111,7 +111,7 @@ namespace achievements
 
 		std::optional<int> get_achievement_id(const std::string& name)
 		{
-			for (auto i = 0; i < ACHIEVEMENT_COUNT; i++)
+			for (auto i = 0; i < ACHIEVEMENT_TOTAL_COUNT; i++)
 			{
 				const auto achievement = &achievements[i];
 				if (name == achievement->code)
@@ -138,7 +138,7 @@ namespace achievements
 				return false;
 			}
 
-			for (auto i = static_cast<int>(ACHIEVEMENT_START); i < ACHIEVEMENT_COUNT; i++)
+			for (auto i = static_cast<int>(ACHIEVEMENT_START); i < ACHIEVEMENT_ORIGINAL_COUNT; i++)
 			{
 				if (!file->achievements[i])
 				{
@@ -206,7 +206,7 @@ namespace achievements
 			return;
 		}
 
-		std::memcpy(file, data.data(), sizeof(achievement_file_t));
+		std::memcpy(file, data.data(), std::min(data.size(), sizeof(achievement_file_t)));
 		if (file->signature != ACHIEVEMENT_FILE_SIGNATURE)
 		{
 			std::memset(file, 0, sizeof(achievement_file_t));
@@ -215,7 +215,7 @@ namespace achievements
 
 	int get_count()
 	{
-		return ACHIEVEMENT_COUNT;
+		return ACHIEVEMENT_TOTAL_COUNT;
 	}
 
 	bool has_achievement(int id)
@@ -237,7 +237,7 @@ namespace achievements
 
 	int get_rarity(int id)
 	{
-		if (id >= ACHIEVEMENT_COUNT)
+		if (id >= ACHIEVEMENT_TOTAL_COUNT)
 		{
 			return 0;
 		}

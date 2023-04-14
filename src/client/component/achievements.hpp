@@ -64,9 +64,10 @@ namespace achievements
 		ACHIEVEMENT_48,
 		ACHIEVEMENT_49,
 		ACHIEVEMENT_50,
-		ACHIEVEMENT_COUNT = 51,
-		ACHIEVEMENT_51,
+		ACHIEVEMENT_ORIGINAL_COUNT = 51,
+		ACHIEVEMENT_51 = 51,
 		ACHIEVEMENT_52,
+		ACHIEVEMENT_TOTAL_COUNT,
 	};
 
 	struct achievement_t
@@ -80,7 +81,7 @@ namespace achievements
 	{
 		std::uint32_t signature;
 		std::uint8_t version;
-		bool achievements[ACHIEVEMENT_COUNT];
+		bool achievements[ACHIEVEMENT_TOTAL_COUNT];
 	};
 
 	void get_achievements(achievement_file_t* file);
