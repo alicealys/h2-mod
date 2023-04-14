@@ -130,7 +130,7 @@
     "ACHIEVEMENT_NAME_40": "N'appuyez PAS sur ce bouton",
     "ACHIEVEMENT_DETAIL_40": "Déclenchez la sonnette rouge dans les deux salles et survivez à l'attaque.",
     "ACHIEVEMENT_NAME_41": "L'élève dépasse le maître",
-    "ACHIEVEMENT_DETAIL_41": "Battez le temps de BX dans ''S.S.D.D''.",
+    "ACHIEVEMENT_DETAIL_41": "Battez le temps de Beenox dans ''S.S.D.D''.",
     "ACHIEVEMENT_NAME_42": "Véritable professionnel",
     "ACHIEVEMENT_DETAIL_42": "Terminez une mission, sauf ''S.S.D.D'' et ''Échec et mat'', sans recharger ni attaquer au CàC.",
     "ACHIEVEMENT_NAME_43": "Paranoïa prémonitoire",
@@ -148,5 +148,7 @@
     "ACHIEVEMENT_NAME_49": "Clown en formation",
     "ACHIEVEMENT_DETAIL_49": "Il n'y a pas de place pour les clowns dans l'armée américaine.",
     "ACHIEVEMENT_NAME_50": "Headbang",
-    "ACHIEVEMENT_DETAIL_50": "Tuez un ennemi en le touchant à la tête avec les dégâts d'impact d'une grenade à fragmentation."
+    "ACHIEVEMENT_DETAIL_50": "Tuez un ennemi en le touchant à la tête avec les dégâts d'impact d'une grenade à fragmentation.",
+    "ACHIEVEMENT_NAME_51": "CEEEEERVEAUUU...",
+    "ACHIEVEMENT_NAME_52": "Ramirez !"
 }

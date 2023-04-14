@@ -113,7 +113,7 @@
     "ACHIEVEMENT_NAME_40": "絶対押すなよ",
     "ACHIEVEMENT_DETAIL_40": "両方の部屋の赤いベルを押して生き延びる",
     "ACHIEVEMENT_NAME_41": "藍より青し",
-    "ACHIEVEMENT_DETAIL_41": "「S.S.D.D.」ピットでBXベストタイムを更新",
+    "ACHIEVEMENT_DETAIL_41": "「S.S.D.D.」ピットでBeenoxベストタイムを更新",
     "ACHIEVEMENT_NAME_42": "リアルGUN GAME",
     "ACHIEVEMENT_DETAIL_42": "キャンペーンで「S.S.D.D.」「エンドゲーム」以外のいずれかを近接攻撃、武器のリロードなしでクリア",
     "ACHIEVEMENT_NAME_43": "未来への妄執",
@@ -131,5 +131,7 @@
     "ACHIEVEMENT_NAME_49": "練習場のピエロ",
     "ACHIEVEMENT_DETAIL_49": "米軍レンジャーはおふざけで務まる場所じゃない",
     "ACHIEVEMENT_NAME_50": "ヘッドバンギング",
-    "ACHIEVEMENT_DETAIL_50": "爆発前のフラググレネードを敵の頭に当ててキル"
+    "ACHIEVEMENT_DETAIL_50": "爆発前のフラググレネードを敵の頭に当ててキル",
+    "ACHIEVEMENT_NAME_51": "脳味噌...",
+    "ACHIEVEMENT_NAME_52": "ラミレス！"
 }
