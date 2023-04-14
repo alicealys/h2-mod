@@ -10,11 +10,18 @@ namespace game
 
 	struct gclient_s
 	{
-		char __pad0[0x8C];
+		char __pad0[140];
 		vec3_t velocity;
-		char __pad1[0xE870];
+		char __pad1[112];
+		vec3_t angles;
+		char __pad2[59380];
 		char flags;
 	};
+
+	static_assert(sizeof(gclient_s) == 59660);
+	static_assert(offsetof(gclient_s, flags) == 59656);
+	static_assert(offsetof(gclient_s, velocity) == 140);
+	static_assert(offsetof(gclient_s, angles) == 264);
 
 	struct client_t
 	{
@@ -1096,9 +1103,14 @@ namespace game
 		const char* name;
 	};
 
+	struct PhysWorld;
+	struct clipMap_t;
+
 	union XAssetHeader
 	{
 		void* data;
+		clipMap_t* col_map;
+		PhysWorld* phys_map;
 		Material* material;
 		Font_s* font;
 		RawFile* rawfile;
@@ -1408,6 +1420,7 @@ namespace game
 		TECHNIQUE_UNLIT = 8,
 		TECHNIQUE_EMISSIVE = 9,
 		TECHNIQUE_LIT = 13,
+		TECHNIQUE_WIREFRAME = 53,
 	};
 
 	struct GfxDrawMethod_s
@@ -1509,6 +1522,1124 @@ namespace game
 	static_assert(offsetof(GfxImage, dataLen1) == 36);
 	static_assert(offsetof(GfxImage, flags) == 31);
 
+	struct GfxSky
+	{
+		int skySurfCount;
+		int* skyStartSurfs;
+		GfxImage* skyImage;
+		unsigned char skySamplerState;
+		Bounds bounds;
+	};
+
+	struct GfxWorldDpvsPlanes
+	{
+		int cellCount;
+		void* planes;
+		unsigned int* nodes;
+		unsigned int* sceneEntCellBits;
+	};
+
+	struct GfxCellTreeCount
+	{
+		int aabbTreeCount;
+	};
+
+	struct GfxAabbTree
+	{
+		Bounds bounds;
+		int childrenOffset;
+		unsigned short childCount;
+		unsigned short smodelIndexCount;
+		unsigned short* smodelIndexes;
+		int startSurfIndex;
+		unsigned short surfaceCount;
+		unsigned short pad;
+	};
+
+	struct GfxCellTree
+	{
+		GfxAabbTree* aabbTree;
+	};
+
+	struct GfxPortal;
+	struct GfxPortalWritable
+	{
+		bool isQueued;
+		bool isAncestor;
+		unsigned char recursionDepth;
+		unsigned char hullPointCount;
+		float(*hullPoints)[2];
+		GfxPortal* queuedParent;
+	};
+
+	struct DpvsPlane
+	{
+		float coeffs[4];
+	};
+
+	struct GfxPortal
+	{
+		GfxPortalWritable writable;
+		DpvsPlane plane;
+		float(*vertices)[3];
+		unsigned short cellIndex;
+		unsigned short closeDistance;
+		unsigned char vertexCount;
+		float hullAxis[2][3];
+	};
+
+	struct GfxCell
+	{
+		Bounds bounds;
+		short portalCount;
+		unsigned char reflectionProbeCount;
+		unsigned char reflectionProbeReferenceCount;
+		GfxPortal* portals;
+		unsigned char* reflectionProbes;
+		unsigned char* reflectionProbeReferences;
+	};
+
+	struct GfxPortalGroupInfo
+	{
+		char __pad0[4];
+	};
+
+	struct GfxPortalGroup
+	{
+		const char* group;
+		GfxPortalGroupInfo* info;
+		char __pad0[8];
+		int infoCount;
+	};
+
+	struct GfxReflectionProbeVolume
+	{
+		unsigned short* data;
+		unsigned int count;
+	};
+
+	struct GfxReflectionProbe
+	{
+		float origin[3];
+		GfxReflectionProbeVolume* probeVolumes;
+		unsigned int probeVolumeCount;
+	};
+
+	struct GfxReflectionProbeReferenceOrigin
+	{
+		float origin[3];
+	};
+
+	struct GfxReflectionProbeReference
+	{
+		unsigned char index;
+	};
+
+	struct GfxRawTexture
+	{
+		char __pad0[32];
+	};
+
+	struct GfxLightmapArray
+	{
+		GfxImage* primary;
+		GfxImage* secondary;
+	};
+
+	struct GfxWorldVertex
+	{
+		float xyz[3];
+		float binormalSign;
+		unsigned int color;
+		float texCoord[2];
+		float lmapCoord[2];
+		unsigned int normal;
+		unsigned int tangent;
+	};
+
+	union GfxWorldVertex0Union
+	{
+		GfxWorldVertex* vertices;
+	};
+
+	struct GfxWorldVertexData
+	{
+		GfxWorldVertex* vertices;
+		ID3D11Buffer* worldVb;
+		ID3D11ShaderResourceView* worldVbView;
+	};
+
+	struct GfxWorldVertexLayerData
+	{
+		unsigned char* data;
+		ID3D11Buffer* layerVb;
+		ID3D11ShaderResourceView* layerVbView;
+	};
+
+	struct GfxDisplacementParms
+	{
+		char __pad0[16];
+	};
+
+	struct GfxWorldDraw
+	{
+		unsigned int reflectionProbeCount;
+		GfxImage** reflectionProbes;
+		GfxReflectionProbe* reflectionProbeOrigins;
+		GfxRawTexture* reflectionProbeTextures;
+		unsigned int reflectionProbeReferenceCount;
+		GfxReflectionProbeReferenceOrigin* reflectionProbeReferenceOrigins;
+		GfxReflectionProbeReference* reflectionProbeReferences;
+		int lightmapCount;
+		GfxLightmapArray* lightmaps;
+		GfxRawTexture* lightmapPrimaryTextures;
+		GfxRawTexture* lightmapSecondaryTextures;
+		GfxImage* lightmapOverridePrimary;
+		GfxImage* lightmapOverrideSecondary;
+		int u1[2];
+		int u2[2];
+		int u3;
+		unsigned int trisType;
+		unsigned int vertexCount;
+		GfxWorldVertexData vd;
+		unsigned int vertexLayerDataSize;
+		GfxWorldVertexLayerData vld;
+		unsigned int indexCount;
+		unsigned short* indices;
+		ID3D11Buffer* indexBuffer;
+		ID3D11ShaderResourceView* indexBufferView;
+		int displacementParmsCount;
+		GfxDisplacementParms* displacementParms;
+		ID3D11Buffer* displacementParmsBuffer;
+		ID3D11ShaderResourceView* displacementParmsBufferView;
+	};
+
+	struct GfxLightGridEntry
+	{
+		unsigned int colorsIndex;
+		unsigned short primaryLightEnvIndex;
+		unsigned char unused;
+		unsigned char needsTrace;
+	};
+
+	struct GfxLightGridColors
+	{
+		unsigned char colorVec6[56][6];
+	};
+
+	struct GfxLightGridColorsHDR
+	{
+		unsigned char colorVec6[56][6];
+	};
+
+	struct GfxLightGridTree
+	{
+		unsigned char maxDepth;
+		int nodeCount;
+		int leafCount;
+		int coordMinGridSpace[3];
+		int coordMaxGridSpace[3];
+		int coordHalfSizeGridSpace[3];
+		int defaultColorIndexBitCount;
+		int defaultLightIndexBitCount;
+		unsigned int* p_nodeTable;
+		int leafTableSize;
+		unsigned char* p_leafTable;
+	};
+
+	struct GfxLightGrid
+	{
+		bool hasLightRegions;
+		bool useSkyForLowZ;
+		unsigned int lastSunPrimaryLightIndex;
+		unsigned short mins[3];
+		unsigned short maxs[3];
+		unsigned int rowAxis;
+		unsigned int colAxis;
+		unsigned short* rowDataStart;
+		unsigned int rawRowDataSize;
+		unsigned char* rawRowData;
+		unsigned int entryCount;
+		GfxLightGridEntry* entries;
+		unsigned int colorCount;
+		GfxLightGridColors* colors;
+		char __pad0[24];
+		int tableVersion;
+		int paletteVersion;
+		char rangeExponent8BitsEncoding;
+		char rangeExponent12BitsEncoding;
+		char rangeExponent16BitsEncoding;
+		unsigned char stageCount;
+		float* stageLightingContrastGain;
+		unsigned int paletteEntryCount;
+		int* paletteEntryAddress;
+		unsigned int paletteBitstreamSize;
+		unsigned char* paletteBitstream;
+		GfxLightGridColorsHDR skyLightGridColors;
+		GfxLightGridColorsHDR defaultLightGridColors;
+		GfxLightGridTree tree[3];
+	};
+
+	struct GfxBrushModelWritable
+	{
+		Bounds bounds;
+		vec3_t origin;
+		vec4_t quat;
+		int mdaoVolumeProcessed;
+	};
+
+	struct GfxBrushModel
+	{
+		GfxBrushModelWritable writable;
+		Bounds bounds;
+		float radius;
+		unsigned int startSurfIndex;
+		unsigned short surfaceCount;
+		int mdaoVolumeIndex;
+	};
+
+	struct MaterialMemory
+	{
+		Material* material;
+		int memory;
+	};
+
+	struct sunflare_t
+	{
+		bool hasValidData;
+		Material* spriteMaterial;
+		Material* flareMaterial;
+		float spriteSize;
+		float flareMinSize;
+		float flareMinDot;
+		float flareMaxSize;
+		float flareMaxDot;
+		float flareMaxAlpha;
+		int flareFadeInTime;
+		int flareFadeOutTime;
+		float blindMinDot;
+		float blindMaxDot;
+		float blindMaxDarken;
+		int blindFadeInTime;
+		int blindFadeOutTime;
+		float glareMinDot;
+		float glareMaxDot;
+		float glareMaxLighten;
+		int glareFadeInTime;
+		int glareFadeOutTime;
+		float sunFxPosition[3];
+	};
+
+	struct XModelDrawInfo
+	{
+		unsigned char hasGfxEntIndex;
+		unsigned char lod;
+		unsigned short surfId;
+	};
+
+	struct GfxSceneDynModel
+	{
+		XModelDrawInfo info;
+		unsigned short dynEntId;
+	};
+
+	struct BModelDrawInfo
+	{
+		unsigned short surfId;
+	};
+
+	struct GfxSceneDynBrush
+	{
+		BModelDrawInfo info;
+		unsigned short dynEntId;
+	};
+
+	struct GfxShadowGeometry
+	{
+		unsigned short surfaceCount;
+		unsigned short smodelCount;
+		unsigned int* sortedSurfIndex;
+		unsigned short* smodelIndex;
+	};
+
+	struct GfxLightRegionAxis
+	{
+		float dir[3];
+		float midPoint;
+		float halfSize;
+	};
+
+	struct GfxLightRegionHull
+	{
+		float kdopMidPoint[9];
+		float kdopHalfSize[9];
+		unsigned int axisCount;
+		GfxLightRegionAxis* axis;
+	};
+
+	struct GfxLightRegion
+	{
+		unsigned int hullCount;
+		GfxLightRegionHull* hulls;
+	};
+
+	struct GfxStaticModelInst
+	{
+		float mins[3];
+		float maxs[3];
+		float lightingOrigin[3];
+	};
+
+	struct srfTriangles_t
+	{
+		unsigned int vertexLayerData;
+		unsigned int firstVertex;
+		float maxEdgeLength;
+		int unk;
+		unsigned short vertexCount;
+		unsigned short triCount;
+		unsigned int baseIndex;
+	};
+
+	struct GfxSurfaceLightingAndFlagsFields
+	{
+		unsigned char lightmapIndex;
+		unsigned char reflectionProbeIndex;
+		unsigned short primaryLightEnvIndex;
+		unsigned char flags;
+		unsigned char unused[3];
+	};
+
+	union GfxSurfaceLightingAndFlags
+	{
+		GfxSurfaceLightingAndFlagsFields fields;
+		unsigned __int64 packed;
+	};
+
+	struct GfxSurface
+	{
+		srfTriangles_t tris;
+		Material* material;
+		GfxSurfaceLightingAndFlags laf;
+	};
+
+	struct GfxSurfaceBounds
+	{
+		Bounds bounds;
+		char __pad0[11];
+		char flags;
+	};
+
+	struct GfxPackedPlacement
+	{
+		float origin[3];
+		float axis[3][3];
+		float scale;
+	};
+
+	enum StaticModelFlag : std::int16_t
+	{
+		STATIC_MODEL_FLAG_NO_CAST_SHADOW = 0x10,
+		STATIC_MODEL_FLAG_GROUND_LIGHTING = 0x20,
+		STATIC_MODEL_FLAG_LIGHTGRID_LIGHTING = 0x40,
+		STATIC_MODEL_FLAG_VERTEXLIT_LIGHTING = 0x80,
+		STATIC_MODEL_FLAG_LIGHTMAP_LIGHTING = 0x100,
+		STATIC_MODEL_FLAG_ALLOW_FXMARK = 0x200,
+		STATIC_MODEL_FLAG_REACTIVEMOTION = 0x400,
+		STATIC_MODEL_FLAG_ANIMATED_VERTS = 0x800,
+	};
+
+	struct GfxStaticModelDrawInst
+	{
+		void* model;
+		GfxPackedPlacement placement;
+		unsigned short cullDist;
+		unsigned short flags;
+		unsigned short lightingHandle;
+		unsigned short staticModelId;
+		short pad;
+		unsigned short primaryLightEnvIndex;
+		char unk;
+		unsigned char reflectionProbeIndex;
+		unsigned char firstMtlSkinIndex;
+		unsigned char sunShadowFlags;
+	};
+
+	struct GfxStaticModelVertexLighting
+	{
+		unsigned char visibility[4];
+		unsigned short ambientColorFloat16[4];
+		unsigned short highlightColorFloat16[4];
+	};
+
+	struct GfxStaticModelVertexLightingInfo
+	{
+		GfxStaticModelVertexLighting* lightingValues;
+		ID3D11Buffer* lightingValuesVb;
+		int numLightingValues;
+	};
+
+	struct GfxStaticModelLightmapInfo
+	{
+		unsigned short smodelCacheIndex[4];
+		unsigned short unk1;
+		unsigned short unk2;
+		float unk3;
+		int unk4;
+		int unk5;
+		/*
+		unsigned short V0[4];
+		unsigned short V1[4];
+		unsigned short V2[4];
+		*/
+	};
+
+	struct GfxStaticModelLighting
+	{
+		union
+		{
+			GfxStaticModelVertexLightingInfo info;
+			GfxStaticModelLightmapInfo info2;
+		};
+	};
+
+	struct GfxSubdivCache
+	{
+		unsigned int size;
+		ID3D11Buffer* subdivCacheBuffer;
+		ID3D11ShaderResourceView* subdivCacheView;
+	};
+
+	struct GfxSubdivVertexLightingInfo
+	{
+		int vertexLightingIndex;
+		ID3D11Buffer* vb;
+		GfxSubdivCache cache;
+	};
+
+	struct GfxDepthAndSurf
+	{
+		char __pad0[8];
+	};
+
+	typedef char* GfxWorldDpvsVoid;
+
+	struct GfxWorldDpvsUnk
+	{
+		char __pad0[8];
+		GfxStaticModelVertexLightingInfo info;
+		char __pad1[24];
+	};
+
+	struct GfxWorldDpvsStatic
+	{
+		unsigned int smodelCount; // 0
+		unsigned int subdivVertexLightingInfoCount; // 4
+		unsigned int staticSurfaceCount; // 8
+		unsigned int litOpaqueSurfsBegin; // 12
+		unsigned int litOpaqueSurfsEnd; // 16
+		unsigned int unkSurfsBegin;
+		unsigned int unkSurfsEnd;
+		unsigned int litDecalSurfsBegin; // 28
+		unsigned int litDecalSurfsEnd; // 32
+		unsigned int litTransSurfsBegin; // 36
+		unsigned int litTransSurfsEnd; // 40
+		unsigned int shadowCasterSurfsBegin; // 44
+		unsigned int shadowCasterSurfsEnd; // 48
+		unsigned int emissiveSurfsBegin; // 52
+		unsigned int emissiveSurfsEnd; // 56
+		unsigned int smodelVisDataCount; // 60
+		unsigned int surfaceVisDataCount; // 64
+		unsigned int unkCount1; // 68
+		unsigned int* smodelVisData[4]; // 72 80 88 96
+		unsigned int* smodelUnknownVisData[27];
+		unsigned int* surfaceVisData[4]; // 320 328 336 344
+		unsigned int* surfaceUnknownVisData[27];
+		unsigned int* smodelUmbraVisData[4]; // 568 576 584 592
+		unsigned int* surfaceUmbraVisData[4]; // 600 608 616 624
+		unsigned int unkCount2; // 632
+		unsigned int* lodData; // 640
+		unsigned int* tessellationCutoffVisData; // 648
+		unsigned int* sortedSurfIndex; // 656
+		GfxStaticModelInst* smodelInsts; // 664
+		GfxSurface* surfaces; // 672
+		GfxSurfaceBounds* surfacesBounds; // 680
+		GfxStaticModelDrawInst* smodelDrawInsts; // 688
+		unsigned int* unknownSModelVisData1; // 696
+		unsigned int* unknownSModelVisData2; // 704
+		GfxStaticModelLighting* smodelLighting; // 712 (array)
+		GfxSubdivVertexLightingInfo* subdivVertexLighting; // 720 (array)
+		void* surfaceMaterials; // 728
+		unsigned int* surfaceCastsSunShadow; // 736
+		unsigned int sunShadowOptCount; // 744
+		unsigned int sunSurfVisDataCount; // 748
+		unsigned int* surfaceCastsSunShadowOpt; // 752
+		GfxDepthAndSurf* surfaceDeptAndSurf; // 760
+		GfxWorldDpvsVoid* constantBuffersLit; // 768
+		GfxWorldDpvsVoid* constantBuffersAmbient; // 776
+		GfxWorldDpvsUnk* gfx_unk; // 784
+		int usageCount; // 792
+	};
+	static_assert(sizeof(GfxWorldDpvsStatic) == 800);
+
+	struct GfxWorldDpvsDynamic
+	{
+		unsigned int dynEntClientWordCount[2]; // 0 4
+		unsigned int dynEntClientCount[2]; // 8 12
+		unsigned int* dynEntCellBits[2]; // 16 24
+		unsigned char* dynEntVisData[2][4]; // 32 40 48 56 64 72 80 88
+	};
+
+	struct GfxHeroOnlyLight
+	{
+		unsigned char type;
+		unsigned char unused[3];
+		float color[3];
+		float dir[3];
+		float up[3];
+		float origin[3];
+		float radius;
+		float cosHalfFovOuter;
+		float cosHalfFovInner;
+		int exponent;
+	};
+
+	typedef void* umbraTomePtr_t;
+
+	struct GfxBuildInfo
+	{
+		const char* args0;
+		const char* args1;
+		const char* buildStartTime;
+		const char* buildEndTime;
+	};
+
+	struct GfxWorld
+	{
+		const char* name; // 0
+		const char* baseName; // 8
+		unsigned int bspVersion; // 16
+		int planeCount; // 20
+		int nodeCount; // 24
+		unsigned int surfaceCount; // 28
+		int skyCount; // 32
+		GfxSky* skies; // 40
+		unsigned int portalGroupCount; // 48
+		char __pad0[16];
+		unsigned int lastSunPrimaryLightIndex; // 68
+		unsigned int primaryLightCount; // 72
+		unsigned int primaryLightEnvCount; // 76
+		unsigned int sortKeyLitDecal; // 80
+		unsigned int sortKeyEffectDecal; // 84
+		unsigned int sortKeyTopDecal; // 88
+		unsigned int sortKeyEffectAuto; // 92
+		unsigned int sortKeyDistortion; // 96
+		unsigned int sortKeyUnknown; // 100
+		unsigned int sortKeyUnknown2; // 104
+		char __pad1[4]; // 108
+		GfxWorldDpvsPlanes dpvsPlanes; // 112
+		GfxCellTreeCount* aabbTreeCounts; // 144
+		GfxCellTree* aabbTrees; // 152
+		GfxCell* cells; // 160
+		GfxPortalGroup* portalGroup; // 168
+		int unk_vec4_count_0; // 176
+		char __pad2[4]; // 180
+		vec4_t* unk_vec4_0; // 184
+		GfxWorldDraw draw; // 192
+		GfxLightGrid lightGrid; // 448
+		int modelCount; // 1528
+		GfxBrushModel* models; // 1536
+		vec3_t mins1;
+		vec3_t maxs1;
+		vec3_t mins2;
+		vec3_t maxs2;
+		unsigned int checksum; // 1592
+		int materialMemoryCount; // 1596
+		MaterialMemory* materialMemory; // 1600
+		sunflare_t sun; // 1608
+		float outdoorLookupMatrix[4][4]; // 1720
+		GfxImage* outdoorImage; // 1784
+		unsigned int* cellCasterBits; // 1792
+		unsigned int* cellHasSunLitSurfsBits; // 1800
+		GfxSceneDynModel* sceneDynModel; // 1808
+		GfxSceneDynBrush* sceneDynBrush; // 1816
+		unsigned int* primaryLightEntityShadowVis; // 1824
+		unsigned int* primaryLightDynEntShadowVis[2]; // 1832 1840
+		unsigned short* nonSunPrimaryLightForModelDynEnt; // 1848
+		GfxShadowGeometry* shadowGeom; // 1856
+		GfxShadowGeometry* shadowGeomOptimized; // 1864
+		GfxLightRegion* lightRegion; // 1872
+		GfxWorldDpvsStatic dpvs; // 1880
+		GfxWorldDpvsDynamic dpvsDyn; // 2680
+		unsigned int mapVtxChecksum; // 2776
+		unsigned int heroOnlyLightCount; // 2780
+		GfxHeroOnlyLight* heroOnlyLights; // 2784
+		unsigned char fogTypesAllowed; // 2792
+		unsigned int umbraTomeSize; // 2796
+		char* umbraTomeData; // 2800
+		umbraTomePtr_t umbraTomePtr; // 2808
+		unsigned int mdaoVolumesCount; // 2816
+		void* mdaoVolumes; // 2824
+		char __pad3[32];
+		GfxBuildInfo buildInfo; // 2864
+	};
+
+	static_assert(sizeof(GfxWorld) == 0xB50);
+
+	struct PhysPreset
+	{
+		const char* name;
+		char __pad0[32];
+		const char* sndAliasPrefix;
+		char __pad1[48];
+	}; static_assert(sizeof(PhysPreset) == 0x60);
+
+	struct dmMeshNode_array_unk
+	{
+		unsigned int unk : 6;
+		unsigned int offset : 26;
+	};
+
+	union dmMeshNode_array_unk_packed
+	{
+		dmMeshNode_array_unk fields;
+		unsigned int packed;
+	};
+
+	static_assert(sizeof(dmMeshNode_array_unk_packed) == 4);
+
+	struct dmMeshNode_array_t
+	{
+		short values[6];
+		dmMeshNode_array_unk_packed unk;
+	};
+
+	static_assert(sizeof(dmMeshNode_array_t) == 16);
+
+	struct dmMeshTriangle
+	{
+		int indices[3];
+		int unk_indices[3];
+		int unk;
+		int flags;
+	};
+
+	typedef vec4_t dm_vec4;
+
+	struct dmMeshData
+	{
+		dmMeshNode_array_t* meshNodes;
+		dm_vec4* meshVertices;
+		dmMeshTriangle* meshTriangles;
+		Bounds bounds;
+		float unk_vec2[3];
+		unsigned int m_nodeCount;
+		unsigned int m_vertexCount;
+		unsigned int m_triangleCount;
+		int unk;
+		int contents;
+	}; static_assert(sizeof(dmMeshData) == 0x50);
+
+	struct dmSubEdge
+	{
+		int value;
+	};
+
+	struct dmPolytopeData
+	{
+		vec4_t* vec4_array0;
+		vec4_t* vec4_array1;
+		unsigned short* uint16_array0;
+		unsigned short* uint16_array1;
+		dmSubEdge* edges;
+		unsigned char* uint8_array0;
+		char __pad0[12];
+		unsigned int count0;
+		unsigned int count1;
+		unsigned int count2;
+		char __pad1[40];
+	}; static_assert(sizeof(dmPolytopeData) == 0x70);
+
+	struct PhysGeomInfo
+	{
+		dmPolytopeData* data;
+	};
+
+	struct PhysMass
+	{
+		float centerOfMass[3];
+		float momentsOfInertia[3];
+		float productsOfInertia[3];
+	};
+
+	struct PhysCollmap
+	{
+		const char* name;
+		unsigned int count;
+		PhysGeomInfo* geoms;
+		PhysMass mass;
+		Bounds bounds;
+	}; static_assert(sizeof(PhysCollmap) == 0x58);
+
+	struct PhysWaterPreset
+	{
+		const char* name;
+		char __pad0[64];
+		void* fx0;
+		void* fx1;
+		void* fx2;
+		void* fx3;
+		void* fx4;
+		void* fx5;
+		void* fx6;
+	}; static_assert(sizeof(PhysWaterPreset) == 0x80);
+
+	struct PhysWaterVolumeDef
+	{
+		PhysWaterPreset* physWaterPreset;
+		char __pad0[12];
+		scr_string_t string;
+		char __pad1[8];
+	}; static_assert(sizeof(PhysWaterVolumeDef) == 0x20);
+	static_assert(offsetof(PhysWaterVolumeDef, string) == 20);
+
+	struct PhysBrushModel
+	{
+		char __pad0[8];
+	};
+
+	struct PhysWorld
+	{
+		const char* name;
+		PhysBrushModel* models;
+		dmPolytopeData* polytopeDatas;
+		dmMeshData* meshDatas;
+		PhysWaterVolumeDef* waterVolumes;
+		unsigned int modelsCount;
+		unsigned int polytopeDatasCount;
+		unsigned int meshDatasCount;
+		unsigned int waterVolumesCount;
+	};
+
+	union GfxColor
+	{
+		unsigned char color[4];
+		unsigned int packed;
+	};
+
+	union PackedUnitVec
+	{
+		unsigned int packed;
+	};
+
+	struct GfxVertex
+	{
+		float xyzw[4];
+		GfxColor color;
+		float texCoord[2];
+		PackedUnitVec normal;
+	};
+
+	struct cplane_s
+	{
+		float normal[3];
+		float dist;
+		unsigned char type;
+		//unsigned char pad[3];
+	}; 
+
+	enum CSurfaceFlags : std::uint32_t
+	{
+		SURF_FLAG_DEFAULT = 0x00000000,
+		SURF_FLAG_BARK = 0x00100000,
+		SURF_FLAG_BRICK = 0x00200000,
+		SURF_FLAG_CARPET = 0x00300000,
+		SURF_FLAG_CLOTH = 0x00400000,
+		SURF_FLAG_CONCRETE = 0x00500000,
+		SURF_FLAG_DIRT = 0x00600000,
+		SURF_FLAG_FLESH = 0x00700000,
+		SURF_FLAG_FOLIAGE_DEBRIS = 0x00800000,
+		SURF_FLAG_GLASS = 0x00900000,
+		SURF_FLAG_GRASS = 0x00A00000,
+		SURF_FLAG_GRAVEL = 0x00B00000,
+		SURF_FLAG_ICE = 0x00C00000,
+		SURF_FLAG_METAL_SOLID = 0x00D00000,
+		SURF_FLAG_METAL_GRATE = 0x00E00000,
+		SURF_FLAG_MUD = 0x00F00000,
+		SURF_FLAG_PAPER = 0x01000000,
+		SURF_FLAG_PLASTER = 0x01100000,
+		SURF_FLAG_ROCK = 0x01200000,
+		SURF_FLAG_SAND = 0x01300000,
+		SURF_FLAG_SNOW = 0x01400000,
+		SURF_FLAG_WATER_WAIST = 0x01500000,
+		SURF_FLAG_WOOD_SOLID = 0x01600000,
+		SURF_FLAG_ASPHALT = 0x01700000,
+		SURF_FLAG_CERAMIC = 0x01800000,
+		SURF_FLAG_PLASTIC_SOLID = 0x01900000,
+		SURF_FLAG_RUBBER = 0x01A00000,
+		SURF_FLAG_FRUIT = 0x01B00000,
+		SURF_FLAG_PAINTEDMETAL = 0x01C00000,
+		SURF_FLAG_RIOTSHIELD = 0x01D00000,
+		SURF_FLAG_SLUSH = 0x01E00000,
+		SURF_FLAG_ASPHALT_WET = 0x01F00000,
+		SURF_FLAG_ASPHALT_DEBRIS = 0x02000000,
+		SURF_FLAG_CONCRETE_WET = 0x02100000,
+		SURF_FLAG_CONCRETE_DEBRIS = 0x02200000,
+		SURF_FLAG_FOLIAGE_VEGETATION = 0x02300000,
+		SURF_FLAG_FOLIAGE_LEAVES = 0x02400000,
+		SURF_FLAG_GRASS_TALL = 0x02500000,
+		SURF_FLAG_METAL_HOLLOW = 0x02600000,
+		SURF_FLAG_METAL_VEHICLE = 0x02700000,
+		SURF_FLAG_METAL_THIN = 0x02800000,
+		SURF_FLAG_METAL_WET = 0x02900000,
+		SURF_FLAG_METAL_DEBRIS = 0x02A00000,
+		SURF_FLAG_PLASTIC_HOLLOW = 0x02B00000,
+		SURF_FLAG_PLASTIC_TARP = 0x02C00000,
+		SURF_FLAG_ROCK_WET = 0x02D00000,
+		SURF_FLAG_ROCK_DEBRIS = 0x02E00000,
+		SURF_FLAG_WATER_ANKLE = 0x02F00000,
+		SURF_FLAG_WATER_KNEE = 0x03000000,
+		SURF_FLAG_WATER_HOLLOW = 0x03100000,
+		SURF_FLAG_WOOD_HOLLOW = 0x03200000,
+		SURF_FLAG_WOOD_DEBRIS = 0x03300000,
+		SURF_FLAG_CUSHION = 0x03400000,
+		SURF_FLAG_CLIPMISSILE = 0x00000000,
+		SURF_FLAG_AI_NOSIGHT = 0x00000000,
+		SURF_FLAG_CLIPSHOT = 0x00000000,
+		SURF_FLAG_PLAYERCLIP = 0x00000000,
+		SURF_FLAG_MONSTERCLIP = 0x00000000,
+		SURF_FLAG_AICLIPALLOWDEATH = 0x00000000,
+		SURF_FLAG_VEHICLECLIP = 0x00000000,
+		SURF_FLAG_ITEMCLIP = 0x00000000,
+		SURF_FLAG_NODROP = 0x00000000,
+		SURF_FLAG_NONSOLID = 0x00004000,
+		SURF_FLAG_NOGRAPPLE = 0x00008000,
+		SURF_FLAG_DETAIL = 0x00000000,
+		SURF_FLAG_STRUCTURAL = 0x00000000,
+		SURF_FLAG_PORTAL = 0x80000000,
+		SURF_FLAG_CANSHOOTCLIP = 0x00000000,
+		SURF_FLAG_ORIGIN = 0x00000000,
+		SURF_FLAG_SKY = 0x00000004,
+		SURF_FLAG_NOCASTSHADOW = 0x00040000,
+		SURF_FLAG_PHYSICSGEOM = 0x00000000,
+		SURF_FLAG_LIGHTPORTAL = 0x00000000,
+		SURF_FLAG_OUTDOORBOUNDS = 0x00000000,
+		SURF_FLAG_SLICK = 0x00000002,
+		SURF_FLAG_NOIMPACT = 0x00000010,
+		SURF_FLAG_NOMARKS = 0x00000020,
+		SURF_FLAG_NOPENETRATE = 0x00000100,
+		SURF_FLAG_LADDER = 0x00000008,
+		SURF_FLAG_NODAMAGE = 0x00000001,
+		SURF_FLAG_MANTLEON = 0x04000000,
+		SURF_FLAG_MANTLEOVER = 0x08000000,
+		SURF_FLAG_STAIRS = 0x00000200,
+		SURF_FLAG_SOFT = 0x00001000,
+		SURF_FLAG_NOSTEPS = 0x00002000,
+		SURF_FLAG_NODRAW = 0x00000080,
+		SURF_FLAG_NOLIGHTMAP = 0x00000400,
+		SURF_FLAG_NODLIGHT = 0x00020000,
+		SURF_FLAG_TRANSSORT = 0x00080000,
+	};
+
+	struct ClipMaterial
+	{
+		const char* name;
+		int surfaceFlags;
+		int contents;
+	}; 
+	struct cLeafBrushNodeLeaf_t
+	{
+		unsigned short* brushes;
+	};
+
+	struct cLeafBrushNodeChildren_t
+	{
+		float dist;
+		float range;
+		unsigned short childOffset[2];
+	};
+
+	union cLeafBrushNodeData_t
+	{
+		cLeafBrushNodeLeaf_t leaf;
+		cLeafBrushNodeChildren_t children;
+	};
+
+	struct cLeafBrushNode_s
+	{
+		unsigned char axis;
+		short leafBrushCount;
+		int contents;
+		cLeafBrushNodeData_t data;
+	};
+
+	typedef unsigned short LeafBrush;
+
+	struct BrushesCollisionTree
+	{
+		unsigned int leafbrushNodesCount;
+		cLeafBrushNode_s* leafbrushNodes;
+		unsigned int numLeafBrushes;
+		LeafBrush* leafbrushes;
+	};
+
+	union CollisionAabbTreeIndex
+	{
+		int firstChildIndex;
+		int partitionIndex;
+	};
+
+	struct CollisionAabbTree
+	{
+		float midPoint[3];
+		unsigned short materialIndex;
+		unsigned short childCount;
+		float halfSize[3];
+		CollisionAabbTreeIndex u;
+	}; 
+
+	struct PatchesCollisionTree
+	{
+		int aabbTreeCount;
+		CollisionAabbTree* aabbTrees;
+	};
+
+	struct SModelAabbNode
+	{
+		Bounds bounds;
+		unsigned short firstChild;
+		unsigned short childCount;
+	};
+
+	struct SModelsCollisionTree
+	{
+		unsigned short numStaticModels;
+		unsigned short smodelNodeCount;
+		SModelAabbNode* smodelNodes;
+	};
+
+	struct cbrushside_t
+	{
+		unsigned int planeIndex;
+		unsigned short materialNum;
+		unsigned char firstAdjacentSideOffset;
+		unsigned char edgeCount;
+	};
+
+	typedef unsigned char cbrushedge_t;
+
+	struct cbrush_t
+	{
+		unsigned short numsides;
+		unsigned short glassPieceIndex;
+		cbrushside_t* sides;
+		cbrushedge_t* baseAdjacentSide;
+		short axialMaterialNum[2][3];
+		unsigned char firstAdjacentSideOffsets[2][3];
+		unsigned char edgeCount[2][3];
+	};;
+
+	struct BrushesCollisionData
+	{
+		unsigned int numBrushSides;
+		cbrushside_t* brushSides;
+		unsigned int numBrushEdges;
+		cbrushedge_t* brushEdges;
+		unsigned int numBrushes;
+		cbrush_t* brushes;
+		Bounds* brushBounds;
+		int* brushContents;
+	};
+
+	static_assert(offsetof(BrushesCollisionData, brushEdges) == 24);
+
+	static_assert(sizeof(BrushesCollisionData) == 0x40);
+
+	struct CollisionBorder
+	{
+		float distEq[3];
+		float zBase;
+		float zSlope;
+		float start;
+		float length;
+	};
+
+	struct CollisionPartition
+	{
+		unsigned char triCount;
+		unsigned char borderCount;
+		unsigned char firstVertSegment;
+		int firstTri;
+		CollisionBorder* borders;
+	};
+
+	struct PatchesCollisionData
+	{
+		unsigned int vertCount;
+		vec3_t* verts;
+		int triCount;
+		unsigned short* triIndices;
+		unsigned char* triEdgeIsWalkable;
+		int borderCount;
+		CollisionBorder* borders;
+		int partitionCount;
+		CollisionPartition* partitions;
+	}; 
+
+	struct cStaticModel_s
+	{
+		void* xmodel;
+		float origin[3];
+		float invScaledAxis[3][3];
+		Bounds absBounds;
+		int lightingHandle;
+	}; 
+
+	struct SModelsCollisionData
+	{
+		unsigned int numStaticModels;
+		cStaticModel_s* staticModelList;
+	}; 
+
+	struct ClipInfo
+	{
+		int planeCount;
+		cplane_s* planes;
+		unsigned int numMaterials;
+		ClipMaterial* materials;
+		BrushesCollisionTree bCollisionTree;
+		PatchesCollisionTree pCollisionTree;
+		SModelsCollisionTree sCollisionTree;
+		BrushesCollisionData bCollisionData;
+		PatchesCollisionData pCollisionData;
+		SModelsCollisionData sCollisionData;
+	};
+
+	struct /*alignas(128)*/ clipMap_t
+	{
+		const char* name; // 0
+		int isInUse; // 8
+		ClipInfo info; // 16
+		ClipInfo* pInfo; // 264
+	};
+
+	static_assert(sizeof(GfxVertex) == 32);
+
+	struct materialCommands_t
+	{
+		GfxVertex verts[5450];
+		unsigned __int16 indices[1048576];
+		int vertDeclType;
+		unsigned int vertexSize;
+		unsigned int indexCount;
+		unsigned int vertexCount;
+		unsigned int firstVertex;
+		unsigned int lastVertex;
+	};
+
+	static_assert(offsetof(materialCommands_t, indices) == 174400);
+	static_assert(offsetof(materialCommands_t, indexCount) == 2271560);
+	static_assert(offsetof(materialCommands_t, vertexCount) == 2271564);
 
 	struct playerState_s
 	{

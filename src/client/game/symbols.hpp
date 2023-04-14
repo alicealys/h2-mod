@@ -88,6 +88,9 @@ namespace game
 	WEAK symbol<void(unsigned int parentId, unsigned int index)> RemoveVariableValue{0x1405C2A50};
 	WEAK symbol<unsigned int(unsigned int)> GetObjectType{0x1405C25D0};
 
+	WEAK symbol<GamerProfileData*(GamerProfileData*, int controllerIndex, 
+		const char* name, __int64 a4)> GamerProfile_GetDataByName{0x1403DCB70};
+
 	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x14051B260};
 	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
 		G_GivePlayerWeapon{0x14051B660};
@@ -175,6 +178,13 @@ namespace game
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x140775C40};
 	WEAK symbol<HANDLE(unsigned __int64* outUserData, void* dest, unsigned __int64 bytes)> R_Cinematic_SysIO_BinkRead{0x1407191B0};
 
+	WEAK symbol<void()> RB_SetIdentity{0x1407A0590};
+	WEAK symbol<void(Material* material, 
+		MaterialTechniqueType tech)> RB_SetTessTechnique{0x1407B2B90};
+	WEAK symbol<void()> RB_TessOverflow{0x1407B2C00};
+	WEAK symbol<void()> RB_EndTessSurface{0x1407B2B70};
+	WEAK symbol<void(void*)> R_Set3D{0x14078B5D0};
+
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetViewPlacement{0x1403E16A0};
 	WEAK symbol<ScreenPlacement*()> ScrPlace_GetView{0x1403E1660};
 	WEAK symbol<void(const ScreenPlacement* scrPlace, float* x, float* y, float* w, float* h, 
@@ -233,6 +243,8 @@ namespace game
 
 	WEAK symbol<int> g_compressor{0x142065E80};
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
+	
+	WEAK symbol<GfxWorld*> gfx_map{0x14EE49000};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
 	WEAK symbol<gclient_s> g_clients{0x1455DA980};
@@ -244,6 +256,8 @@ namespace game
 
 	WEAK symbol<GfxDrawMethod_s> gfxDrawMethod{0x14EDF9E00};
 	WEAK symbol<refdef_t> refdef{0x141BC2500};
+	WEAK symbol<materialCommands_t> tess{0x151854A30};
+	WEAK symbol<void> gfxCmdBufSourceState{0x151B65EA0};
 
 	WEAK symbol<int> keyCatchers{0x14203F3C0};
 
