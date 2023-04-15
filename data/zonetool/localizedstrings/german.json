@@ -113,7 +113,7 @@
     "ACHIEVEMENT_NAME_40": "Knopf NICHT drücken",
     "ACHIEVEMENT_DETAIL_40": "Läuten Sie die rote Glocke in beiden Räumen und überleben Sie den Angriff.",
     "ACHIEVEMENT_NAME_41": "Schüler übertrifft Lehrer",
-    "ACHIEVEMENT_DETAIL_41": "Unterbieten Sie die BX-Zeit in 'Die alte Leier'.",
+    "ACHIEVEMENT_DETAIL_41": "Unterbieten Sie die Beenox-Zeit in 'Die alte Leier'.",
     "ACHIEVEMENT_NAME_42": "Echtes Waffenspiel",
     "ACHIEVEMENT_DETAIL_42": "Schließen Sie 1 Mission (außer 'Die alte Leier' & 'Endphase') ohne Nachladen/Nahkampfangriffe ab.",
     "ACHIEVEMENT_NAME_43": "Vorauseilender Verfolgungswahn",
@@ -131,5 +131,7 @@
     "ACHIEVEMENT_NAME_49": "Clown in Ausbildung",
     "ACHIEVEMENT_DETAIL_49": "Die U.S. Army Rangers haben keinen Platz für Clowns.",
     "ACHIEVEMENT_NAME_50": "Headbanger",
-    "ACHIEVEMENT_DETAIL_50": "Erledigen Sie einen Gegner mit dem Einschlagsschaden einer Splittergranate am Kopf."
+    "ACHIEVEMENT_DETAIL_50": "Erledigen Sie einen Gegner mit dem Einschlagsschaden einer Splittergranate am Kopf.",
+    "ACHIEVEMENT_NAME_51": "GEEEHIRN...",
+    "ACHIEVEMENT_NAME_52": "Ramirez!"
 }

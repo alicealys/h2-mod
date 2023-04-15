@@ -113,7 +113,7 @@
     "ACHIEVEMENT_NAME_40": "千萬別按",
     "ACHIEVEMENT_DETAIL_40": "按響兩個房間裡的紅色響鈴，然後在敵人的攻擊下生還。",
     "ACHIEVEMENT_NAME_41": "青出於藍",
-    "ACHIEVEMENT_DETAIL_41": "在「例行公事」中擊敗BX時間。",
+    "ACHIEVEMENT_DETAIL_41": "在「例行公事」中擊敗Beenox時間。",
     "ACHIEVEMENT_NAME_42": "槍神再世",
     "ACHIEVEMENT_DETAIL_42": "在沒有裝填武器或用近戰攻擊的情況下完成「例行公事」和「遊戲結束」以外的任何任務。",
     "ACHIEVEMENT_NAME_43": "偏執先知",
@@ -131,5 +131,7 @@
     "ACHIEVEMENT_NAME_49": "小丑也訓練",
     "ACHIEVEMENT_DETAIL_49": "美國陸軍遊騎兵可不是給小丑來的地方。",
     "ACHIEVEMENT_NAME_50": "花式爆頭",
-    "ACHIEVEMENT_DETAIL_50": "透過手榴彈丟中頭部的撞擊傷害殺死一個敵人。"
+    "ACHIEVEMENT_DETAIL_50": "透過手榴彈丟中頭部的撞擊傷害殺死一個敵人。",
+    "ACHIEVEMENT_NAME_51": "大腦……",
+    "ACHIEVEMENT_NAME_52": "拉米瑞茲!"
 }
