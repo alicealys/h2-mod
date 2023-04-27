@@ -187,7 +187,11 @@ namespace gsc
 			std::vector<std::uint8_t> stack_data;
 			stack_data.assign(decompressed_stack.begin(), decompressed_stack.end());
 
-			const xsk::gsc::buffer buffer{reinterpret_cast<uint8_t*>(script_file->bytecode), static_cast<std::size_t>(script_file->bytecodeLen)};
+			const xsk::gsc::buffer buffer
+			{
+				reinterpret_cast<uint8_t*>(script_file->bytecode), 
+				static_cast<std::size_t>(script_file->bytecodeLen)
+			};
 
 			return std::make_pair(buffer, stack_data);
 		}
