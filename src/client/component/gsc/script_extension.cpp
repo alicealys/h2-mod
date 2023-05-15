@@ -268,6 +268,7 @@ namespace gsc
 		{
 			utils::hook::set<uint32_t>(0x1405BC7BC, FUNC_TABLE_SIZE); // change builtin func count
 
+			utils::hook::set<uint32_t>(0x1405BCB6C + 2, sizeof(func_table));
 			utils::hook::set<uint32_t>(0x1405BC7C2 + 4, RVA(&func_table));
 			utils::hook::inject(0x1405BCB78 + 3, &func_table);
 			utils::hook::set<uint32_t>(0x1405CA678 + 4, RVA(&func_table));
