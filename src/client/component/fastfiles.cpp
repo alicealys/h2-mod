@@ -30,7 +30,7 @@ namespace fastfiles
 		};
 
 		utils::hook::detour db_try_load_x_file_internal_hook;
-		utils::hook::detour db_find_xasset_header;
+		utils::hook::detour db_find_xasset_header_hook;
 		utils::hook::detour load_xasset_header_hook;
 		utils::hook::detour db_unload_x_zones_hook;
 
@@ -47,8 +47,19 @@ namespace fastfiles
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
 		{
 			const auto start = game::Sys_Milliseconds();
-			const auto result = db_find_xasset_header.invoke<game::XAssetHeader>(type, name, allow_create_default);
+			auto result = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
 			const auto diff = game::Sys_Milliseconds() - start;
+
+			if (result.rawfile)
+			{
+				const std::string override_rawfile_name = "override/"s + name;
+				const auto override_rawfile = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, override_rawfile_name.data(), 0);
+				if (override_rawfile.rawfile)
+				{
+					result.rawfile = override_rawfile.rawfile;
+					console::debug("using override asset for rawfile: \"%s\"\n", name);
+				}
+			}
 
 			if (db_print_default_assets->current.enabled && game::DB_IsXAssetDefault(type, name))
 			{
@@ -450,6 +461,7 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SNDCURVE, 2>();
 		}
 
 		void add_custom_level_load_zone(game::LevelLoad* load, const std::string& name, const size_t size_est)
@@ -661,7 +673,7 @@ namespace fastfiles
 				false, game::DVAR_FLAG_NONE, "Print asset types being loaded");
 
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
-			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
+			db_find_xasset_header_hook.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
 
 			db_unload_x_zones_hook.create(0x140417D80, db_unload_x_zones_stub);
 
