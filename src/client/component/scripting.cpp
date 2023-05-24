@@ -7,6 +7,7 @@
 #include "scheduler.hpp"
 #include "scripting.hpp"
 #include "console.hpp"
+#include "command.hpp"
 
 #include "gsc/script_loading.hpp"
 
@@ -173,6 +174,7 @@ namespace scripting
 
 		void add_function_sort(unsigned int id, const char* pos)
 		{
+
 			std::string filename = current_file;
 			if (current_file_id)
 			{
@@ -368,6 +370,12 @@ namespace scripting
 			scr_delete_hook.create(0x1404F0460, scr_delete_stub);
 
 			utils::hook::call(0x1404B07D2, get_spawn_point_stub);
+
+			command::add("getfunctionptr", [](const command::params& params)
+			{
+				const auto func = find_function(params.get(1), false);
+				console::info("%p\n", func);
+			});
 
 			scheduler::loop([]()
 			{
