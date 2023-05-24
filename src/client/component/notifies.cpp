@@ -21,6 +21,7 @@ namespace notifies
 		{
 			bool is_lua_hook{};
 			const char* target_pos{};
+			bool is_variable{};
 			sol::protected_function lua_function;
 		};
 
@@ -30,23 +31,39 @@ namespace notifies
 
 		char empty_function[2] = {0x32, 0x34}; // CHECK_CLEAR_PARAMS, END
 		const char* target_function = nullptr;
+		bool gsc_hooks_buffer[0x1400000]{};
 
 		scripting::entity local_id_to_entity(unsigned int local_id)
 		{
 			return game::scr_VarGlob->objectVariableValue[local_id].u.f.next;
 		}
 
+		char* get_program_buffer()
+		{
+			return *reinterpret_cast<char**>(0x14B5E0B78);
+		}
+
+		size_t get_program_buffer_offset(const char* pos)
+		{
+			const auto rel_offset = pos - get_program_buffer();
+			return rel_offset;
+		}
+
 		bool execute_vm_hook(const char* pos)
 		{
-			const auto start = std::chrono::high_resolution_clock::now();
-			const auto iter = vm_execute_hooks.find(pos);
-			if (iter == vm_execute_hooks.end())
+			const auto program_buffer = get_program_buffer();
+			if (pos >= program_buffer && (pos - program_buffer < 0x1400000))
 			{
-				hook_enabled = true;
-				return false;
+				const auto rel_offset = pos - program_buffer;
+				if (!gsc_hooks_buffer[rel_offset])
+				{
+					return false;
+				}
 			}
 
-			if (!hook_enabled && pos > reinterpret_cast<char*>(vm_execute_hooks.size()))
+			const auto start = std::chrono::high_resolution_clock::now();
+			const auto iter = vm_execute_hooks.find(pos);
+			if (iter == vm_execute_hooks.end() || (!hook_enabled && !iter->second.is_variable))
 			{
 				hook_enabled = true;
 				return false;
@@ -185,6 +202,13 @@ namespace notifies
 			scr_entity_damage_hook.invoke<void>(self, inflictor, attacker, v_dir, v_point, damage, dflags, 
 				means_of_death, weapon, is_alternate, a11, hit_loc, a13, a14);
 		}
+
+		void set_hook(const char* pos, gsc_hook_t& hook)
+		{
+			const auto rel_pos = get_program_buffer_offset(pos);
+			gsc_hooks_buffer[rel_pos] = true;
+			vm_execute_hooks[pos] = hook;
+		}
 	}
 
 	void add_entity_damage_callback(const sol::protected_function& callback)
@@ -209,12 +233,13 @@ namespace notifies
 		entity_damage_callbacks.clear();
 	}
 
-	void set_lua_hook(const char* pos, const sol::protected_function& callback)
+	void set_lua_hook(const char* pos, const sol::protected_function& callback, bool is_variable)
 	{
 		gsc_hook_t hook;
 		hook.is_lua_hook = true;
+		hook.is_variable = is_variable;
 		hook.lua_function = callback;
-		vm_execute_hooks[pos] = hook;
+		set_hook(pos, hook);
 	}
 
 	void set_gsc_hook(const char* source, const char* target)
@@ -222,11 +247,13 @@ namespace notifies
 		gsc_hook_t hook;
 		hook.is_lua_hook = false;
 		hook.target_pos = target;
-		vm_execute_hooks[source] = hook;
+		set_hook(source, hook);
 	}
 
 	void clear_hook(const char* pos)
 	{
+		const auto rel_offset = get_program_buffer_offset(pos);
+		gsc_hooks_buffer[rel_offset] = false;
 		vm_execute_hooks.erase(pos);
 	}
 
@@ -248,6 +275,7 @@ namespace notifies
 			{
 				if (free_scripts && !post_shutdown)
 				{
+					std::memset(gsc_hooks_buffer, 0, sizeof(gsc_hooks_buffer));
 					vm_execute_hooks.clear();
 				}
 			});
