@@ -10,8 +10,15 @@
 #include "component/console.hpp"
 #include "component/command.hpp"
 #include "component/notifies.hpp"
+#include "component/scheduler.hpp"
+#include "component/mods.hpp"
+#include "component/mod_stats.hpp"
+#include "component/scripting.hpp"
 
 #include "game/scripting/script_value.hpp"
+#include "game/scripting/execution.hpp"
+
+#include "game/ui_scripting/execution.hpp"
 
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
@@ -225,6 +232,42 @@ namespace gsc
 
 			return game::scr_VmPub->top[-index];
 		}
+
+		nlohmann::json gsc_to_json(const scripting::script_value& value)
+		{
+#define CHECK_TYPE(__type__) \
+			if (value.is<__type__>()) \
+			{ \
+				return value.as<__type__>(); \
+			} \
+
+			CHECK_TYPE(std::string);
+			CHECK_TYPE(int);
+			CHECK_TYPE(float);
+			CHECK_TYPE(bool);
+
+			return {};
+
+#undef CHECK_TYPE
+		}
+
+		scripting::script_value json_to_gsc(const nlohmann::json& value)
+		{
+#define CHECK_TYPE(__func__, __type__) \
+			if (value.__func__()) \
+			{ \
+				return value.get<__type__>(); \
+			} \
+
+			CHECK_TYPE(is_string, std::string);
+			CHECK_TYPE(is_number_integer, int);
+			CHECK_TYPE(is_number_float, float);
+			CHECK_TYPE(is_boolean, bool);
+
+			return {};
+
+#undef CHECK_TYPE
+		}
 	}
 
 	void scr_error(bool force_print, const char* fmt, ...)
@@ -321,6 +364,115 @@ namespace gsc
 			{
 				const auto cmd = game::Scr_GetString(0);
 				command::execute(cmd);
+			});
+
+			add_function("luinotify", []()
+			{
+				const std::string name = game::Scr_GetString(0);
+				const std::string data = game::Scr_GetString(1);
+
+				scheduler::once([=]()
+				{
+					ui_scripting::notify(name, {{"data", data}});
+				}, scheduler::pipeline::lui);
+			});
+
+			add_function("statsset", []()
+			{
+				const auto key = game::Scr_GetString(0);
+				const auto value = get_argument(1);
+				const auto json_value = gsc_to_json(value);
+				mod_stats::set(key, json_value);
+			});
+
+			add_function("statssetstruct", []()
+			{
+				const auto struct_ = game::Scr_GetString(0);
+				const auto field = game::Scr_GetString(1);
+				const auto value = get_argument(2);
+				const auto json_value = gsc_to_json(value);
+				mod_stats::set_struct(struct_, field, json_value);
+			});
+
+			add_function("statsget", []()
+			{
+				const auto key = game::Scr_GetString(0);
+				const auto& value = mod_stats::get(key);
+				scripting::push_value(json_to_gsc(value));
+			});
+
+			add_function("statsgetor", []()
+			{
+				const auto key = game::Scr_GetString(0);
+				const auto default_value = get_argument(1);
+				const auto json_default_value = gsc_to_json(default_value);
+				const auto value = mod_stats::get(key, json_default_value);
+				scripting::push_value(json_to_gsc(value));
+			});
+
+			add_function("statsgetstruct", []()
+			{
+				const auto struct_ = game::Scr_GetString(0);
+				const auto field = game::Scr_GetString(1);
+				const auto value = mod_stats::get_struct(struct_, field);
+				scripting::push_value(json_to_gsc(value));
+			});
+
+			add_function("statsgetstructor", []()
+			{
+				const auto struct_ = game::Scr_GetString(0);
+				const auto field = game::Scr_GetString(1);
+				const auto default_value = get_argument(2);
+				const auto json_default_value = gsc_to_json(default_value);
+				const auto value = mod_stats::get_struct(struct_, field, json_default_value);
+				scripting::push_value(json_to_gsc(value));
+			});
+			
+			add_function("typeof", []()
+			{
+				const auto arg = get_argument(0);
+				const auto type = arg.get_raw().type;
+
+				if (type < var_typename.size())
+				{
+					game::Scr_AddString(var_typename[type]);
+				}
+				else
+				{
+					game::Scr_AddString("unknown");
+				}
+			});
+
+			add_function("sharedset", []()
+			{
+				const std::string key = game::Scr_GetString(0);
+				const std::string value = game::Scr_GetString(1);
+
+				scripting::shared_table.access([&](scripting::shared_table_t& table)
+				{
+					table[key] = value;
+				});
+			});
+
+			add_function("sharedget", []()
+			{
+				const std::string key = game::Scr_GetString(0);
+				const auto value = scripting::shared_table.access<std::string>(
+					[&](scripting::shared_table_t& table)
+					{
+						return table[key];
+					}
+				);
+
+				game::Scr_AddString(value.data());
+			});
+
+			add_function("sharedclear", []()
+			{
+				scripting::shared_table.access([&](scripting::shared_table_t& table)
+				{
+					table.clear();
+				});
 			});
 		}
 	};

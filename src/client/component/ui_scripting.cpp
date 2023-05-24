@@ -11,6 +11,7 @@
 #include "scripting.hpp"
 #include "fastfiles.hpp"
 #include "mods.hpp"
+#include "mod_stats.hpp"
 #include "updater.hpp"
 #include "console.hpp"
 #include "language.hpp"
@@ -505,41 +506,37 @@ namespace ui_scripting
 			mods_stats_table["set"] = [](const std::string& key, const script_value& value)
 			{
 				const auto json_value = lua_to_json(value);
-				mods::get_current_stats()[key] = json_value;
-				mods::write_mod_stats();
+				mod_stats::set(key, json_value);
 			};
 			
 			mods_stats_table["get"] = [](const std::string& key)
 			{
-				return json_to_lua(mods::get_current_stats());
+				return json_to_lua(mod_stats::get(key));
 			};
 
-			mods_stats_table["mapset"] = [](const std::string& mapname,
+			mods_stats_table["setstruct"] = [](const std::string& mapname,
 				const std::string& key, const script_value& value)
 			{
 				const auto json_value = lua_to_json(value);
-				auto& stats = mods::get_current_stats();
-				stats["maps"][mapname][key] = json_value;
-				mods::write_mod_stats();
+				mod_stats::set_struct(mapname, key, json_value);
 			};
 
-			mods_stats_table["mapget"] = [](const std::string& mapname,
+			mods_stats_table["getstruct"] = [](const std::string& mapname,
 				const std::string& key)
 			{
-				auto& stats = mods::get_current_stats();
-				return json_to_lua(stats["maps"][mapname][key]);
+				return json_to_lua(mod_stats::get_struct(mapname, key));
 			};
 
-			mods_stats_table["save"] = mods::write_mod_stats;
+			mods_stats_table["save"] = mod_stats::write;
 			mods_stats_table["getall"] = []()
 			{
-				return json_to_lua(mods::get_current_stats());
+				return json_to_lua(mod_stats::get_all());
 			};
 
 			mods_stats_table["setfromjson"] = [](const std::string& data)
 			{
 				const auto json = nlohmann::json::parse(data);
-				mods::get_current_stats() = json;
+				mod_stats::set_all(json);
 			};
 
 			auto config_table = table();
@@ -741,6 +738,11 @@ namespace ui_scripting
 
 			lua["table"]["unpack"] = lua["unpack"];
 			lua["luiglobals"] = lua;
+
+			lua["printmemoryusage"] = []()
+			{
+				utils::hook::invoke<void>(0x14031F470);
+			};
 
 			load_script("lui_common", lui_common);
 			load_script("lui_updater", lui_updater);

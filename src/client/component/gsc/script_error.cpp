@@ -12,6 +12,37 @@
 
 namespace gsc
 {
+	std::array<const char*, 27> var_typename =
+	{
+		"undefined",
+		"object",
+		"string",
+		"localized string",
+		"vector",
+		"float",
+		"int",
+		"codepos",
+		"precodepos",
+		"function",
+		"builtin function",
+		"builtin method",
+		"stack",
+		"animation",
+		"pre animation",
+		"thread",
+		"thread",
+		"thread",
+		"thread",
+		"struct",
+		"removed entity",
+		"entity",
+		"array",
+		"removed thread",
+		"<free>",
+		"thread list",
+		"endon list",
+	};
+
 	namespace
 	{
 		utils::hook::detour scr_emit_function_hook;
@@ -19,37 +50,6 @@ namespace gsc
 		unsigned int current_filename = 0;
 
 		std::string unknown_function_error;
-
-		std::array<const char*, 27> var_typename =
-		{
-			"undefined",
-			"object",
-			"string",
-			"localized string",
-			"vector",
-			"float",
-			"int",
-			"codepos",
-			"precodepos",
-			"function",
-			"builtin function",
-			"builtin method",
-			"stack",
-			"animation",
-			"pre animation",
-			"thread",
-			"thread",
-			"thread",
-			"thread",
-			"struct",
-			"removed entity",
-			"entity",
-			"array",
-			"removed thread",
-			"<free>",
-			"thread list",
-			"endon list",
-		};
 
 		void scr_emit_function_stub(unsigned int filename, unsigned int thread_name, char* code_pos)
 		{

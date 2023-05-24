@@ -12,6 +12,7 @@
 #include "component/mods.hpp"
 #include "component/scheduler.hpp"
 #include "component/filesystem.hpp"
+#include "component/gui/debug.hpp"
 
 #include "component/gsc/script_loading.hpp"
 
@@ -478,6 +479,64 @@ namespace scripting::lua
 				return sol::as_returns(returns);
 			};
 		}
+	
+		void setup_debug_funcs(sol::state& state)
+		{
+			struct debug
+			{
+			};
+			auto debug_type = state.new_usertype<debug>("debug_");
+			state["debug"] = debug();
+
+			debug_type["reset"] = [](const debug&)
+			{
+				gui::debug::reset_debug_items();
+			};
+
+			debug_type["addline"] = [](const debug&, const vector& start, const vector& end, const vector& color)
+			{
+				float color_[4]{};
+				color_[0] = color[0];
+				color_[1] = color[1];
+				color_[2] = color[2];
+				color_[3] = 1.f;
+
+				return gui::debug::add_debug_line(start, end, color_);
+			};
+
+			debug_type["addsquare"] = [](const debug&, const vector& origin, const vector& color)
+			{
+				float color_[4]{};
+				color_[0] = color[0];
+				color_[1] = color[1];
+				color_[2] = color[2];
+				color_[3] = 1.f;
+
+				return gui::debug::add_debug_square(origin, color_);
+			};
+
+			debug_type["setsquarecolor"] = [](const debug&, const size_t& square, const vector& color)
+			{
+				float color_[4]{};
+				color_[0] = color[0];
+				color_[1] = color[1];
+				color_[2] = color[2];
+				color_[3] = 1.f;
+
+				gui::debug::set_debug_square_color(square, color_);
+			};
+
+			debug_type["setlinecolor"] = [](const debug&, const size_t& line, const vector& color)
+			{
+				float color_[4]{};
+				color_[0] = color[0];
+				color_[1] = color[1];
+				color_[2] = color[2];
+				color_[3] = 1.f;
+
+				gui::debug::set_debug_line_color(line, color_);
+			};
+		}
 
 		void setup_game_type(sol::state& state, event_handler& handler, scheduler& scheduler)
 		{
@@ -793,14 +852,6 @@ namespace scripting::lua
 				scripting::get_dvar_int_overrides.erase(dvar);
 			};
 
-			game_type["luinotify"] = [](const game&, const std::string& name, const std::string& data)
-			{
-				::scheduler::once([=]()
-				{
-					ui_scripting::notify(name, {{"data", data}});
-				}, ::scheduler::pipeline::lui);
-			};
-
 			auto function_ptr_type = state.new_usertype<function_ptr>("functionptr", 
 				sol::constructors<function_ptr(const std::string&, const std::string&)>());
 
@@ -845,6 +896,7 @@ namespace scripting::lua
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
+		setup_debug_funcs(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 
@@ -877,6 +929,7 @@ namespace scripting::lua
 		setup_io(this->state_);
 		setup_json(this->state_);
 		setup_vector_type(this->state_);
+		setup_debug_funcs(this->state_);
 		setup_entity_type(this->state_, this->event_handler_, this->scheduler_);
 		setup_game_type(this->state_, this->event_handler_, this->scheduler_);
 	}

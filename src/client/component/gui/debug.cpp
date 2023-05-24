@@ -20,6 +20,23 @@ namespace gui::debug
 {
 	namespace
 	{
+		struct debug_line
+		{
+			float start[3];
+			float end[3];
+			float color[4];
+		};
+
+		struct debug_square
+		{
+			float origin[3];
+			float color[4];
+		};
+
+		std::vector<debug_line> debug_lines;
+		std::vector<debug_square> debug_squares;
+		std::mutex debug_items_mutex;
+
 		game::dvar_t* cl_paused = nullptr;
 
 		enum object_type
@@ -570,6 +587,12 @@ namespace gui::debug
 					continue;
 				}
 
+				float screen_center[2]{};
+				ImGuiWindow* window = ImGui::GetCurrentWindow();
+				world_pos_to_screen_pos(origin, screen_center);
+				window->DrawList->AddText(ImGui::GetDefaultFont(), ImGui::GetFontSize(), ImVec2(screen_center[0],
+					screen_center[1]), ImColor(255, 255, 0, 255), utils::string::va("%i", node->constant.type), 0, 0.f, 0);
+
 				switch (path_node_settings.type)
 				{
 				case object_type::square:
@@ -654,6 +677,21 @@ namespace gui::debug
 			}
 		}
 
+		void draw_debug_items()
+		{
+			std::lock_guard _0(debug_items_mutex);
+
+			for (auto& line : debug_lines)
+			{
+				draw_line(line.start, line.end, line.color, 1.f);
+			}
+
+			for (auto& square : debug_squares)
+			{
+				draw_square(square.origin, 100.f, square.color);
+			}
+		}
+
 		void update_camera()
 		{
 			camera[0] = game::refdef->org[0];
@@ -688,6 +726,62 @@ namespace gui::debug
 		}
 	}
 
+	size_t add_debug_line(const float* start, const float* end, const float* color)
+	{
+		debug_line line{};
+		std::memcpy(line.start, start, sizeof(float[3]));
+		std::memcpy(line.end, end, sizeof(float[3]));
+		std::memcpy(line.color, color, sizeof(float[4]));
+
+		std::lock_guard _0(debug_items_mutex);
+		const auto index = debug_squares.size();
+		debug_lines.emplace_back(line);
+		return index;
+	}
+
+	void set_debug_line_color(size_t line, const float* color)
+	{
+		std::lock_guard _0(debug_items_mutex);
+		if (line >= debug_lines.size())
+		{
+			return;
+		}
+
+		auto& line_ = debug_lines.at(line);
+		std::memcpy(line_.color, color, sizeof(float[4]));
+	}
+
+	size_t add_debug_square(const float* origin, const float* color)
+	{
+		debug_square line{};
+		std::memcpy(line.origin, origin, sizeof(float[3]));
+		std::memcpy(line.color, color, sizeof(float[4]));
+
+		std::lock_guard _0(debug_items_mutex);
+		const auto index = debug_squares.size();
+		debug_squares.emplace_back(line);
+		return index;
+	}
+
+	void set_debug_square_color(size_t square, const float* color)
+	{
+		std::lock_guard _0(debug_items_mutex);
+		if (square >= debug_squares.size())
+		{
+			return;
+		}
+
+		auto& square_ = debug_squares.at(square);
+		std::memcpy(square_.color, color, sizeof(float[4]));
+	}
+
+	void reset_debug_items()
+	{
+		std::lock_guard _0(debug_items_mutex);
+		debug_lines.clear();
+		debug_squares.clear();
+	}
+
 	class component final : public component_interface
 	{
 	public:
@@ -705,6 +799,7 @@ namespace gui::debug
 				begin_render_window();
 				draw_nodes();
 				draw_triggers();
+				draw_debug_items();
 				end_render_window();
 			}, true);
 
