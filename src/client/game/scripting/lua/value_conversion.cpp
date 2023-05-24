@@ -41,7 +41,7 @@ namespace scripting::lua
 		{
 			const auto function = value.as<sol::protected_function>();
 			const auto index = reinterpret_cast<char*>(notifies::get_hook_count() + 1);
-			notifies::set_lua_hook(index, function);
+			notifies::set_lua_hook(index, function, true);
 
 			game::VariableValue func{};
 			func.type = game::SCRIPT_FUNCTION;

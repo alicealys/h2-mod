@@ -6,7 +6,7 @@ namespace notifies
 {
 	extern bool hook_enabled;
 
-	void set_lua_hook(const char* pos, const sol::protected_function&);
+	void set_lua_hook(const char* pos, const sol::protected_function&, bool is_variable = false);
 	void set_gsc_hook(const char* source, const char* target);
 	void clear_hook(const char* pos);
 	size_t get_hook_count();
