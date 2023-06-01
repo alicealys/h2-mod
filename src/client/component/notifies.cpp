@@ -20,8 +20,9 @@ namespace notifies
 		struct gsc_hook_t
 		{
 			bool is_lua_hook{};
-			const char* target_pos{};
 			bool is_variable{};
+			const char* target_pos{};
+			size_t rel_source_pos{};
 			sol::protected_function lua_function;
 		};
 
@@ -57,11 +58,11 @@ namespace notifies
 				const auto rel_offset = pos - program_buffer;
 				if (!gsc_hooks_buffer[rel_offset])
 				{
+					hook_enabled = true;
 					return false;
 				}
 			}
 
-			const auto start = std::chrono::high_resolution_clock::now();
 			const auto iter = vm_execute_hooks.find(pos);
 			if (iter == vm_execute_hooks.end() || (!hook_enabled && !iter->second.is_variable))
 			{
@@ -205,8 +206,13 @@ namespace notifies
 
 		void set_hook(const char* pos, gsc_hook_t& hook)
 		{
-			const auto rel_pos = get_program_buffer_offset(pos);
-			gsc_hooks_buffer[rel_pos] = true;
+			if (!hook.is_variable)
+			{
+				const auto rel_pos = get_program_buffer_offset(pos);
+				gsc_hooks_buffer[rel_pos] = true;
+				hook.rel_source_pos = rel_pos;
+			}
+
 			vm_execute_hooks[pos] = hook;
 		}
 	}
@@ -222,6 +228,11 @@ namespace notifies
 		{
 			if (i->second.is_lua_hook)
 			{
+				if (!i->second.is_variable)
+				{
+					gsc_hooks_buffer[i->second.rel_source_pos] = false;
+				}
+
 				i = vm_execute_hooks.erase(i);
 			}
 			else
@@ -235,7 +246,7 @@ namespace notifies
 
 	void set_lua_hook(const char* pos, const sol::protected_function& callback, bool is_variable)
 	{
-		gsc_hook_t hook;
+		gsc_hook_t hook{};
 		hook.is_lua_hook = true;
 		hook.is_variable = is_variable;
 		hook.lua_function = callback;
@@ -244,7 +255,7 @@ namespace notifies
 
 	void set_gsc_hook(const char* source, const char* target)
 	{
-		gsc_hook_t hook;
+		gsc_hook_t hook{};
 		hook.is_lua_hook = false;
 		hook.target_pos = target;
 		set_hook(source, hook);

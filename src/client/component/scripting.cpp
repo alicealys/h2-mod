@@ -174,7 +174,6 @@ namespace scripting
 
 		void add_function_sort(unsigned int id, const char* pos)
 		{
-
 			std::string filename = current_file;
 			if (current_file_id)
 			{
