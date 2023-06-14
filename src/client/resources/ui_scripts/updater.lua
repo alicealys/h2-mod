@@ -31,17 +31,21 @@ function startupdatecheck(popup, autoclose)
 			return
 		end
 
-		LUI.yesnopopup({
-			title = Engine.Localize("@MENU_NOTICE"),
-			text = Engine.Localize("@MENU_CCS_NEW_PATCH_NOTICE") .. " " .. Engine.Localize("@MENU_DOWNLOAD_AUTOUPDATE_PATCH"),
-			callback = function(result)
-				if (result) then
-					startupdatedownload(popup, autoclose)
-				else
-					LUI.FlowManager.RequestLeaveMenu(popup)
+		if (updater.shouldforceupdate()) then
+			startupdatedownload(popup, autoclose)
+		else
+			LUI.yesnopopup({
+				title = Engine.Localize("@MENU_NOTICE"),
+				text = Engine.Localize("@MENU_CCS_NEW_PATCH_NOTICE") .. " " .. Engine.Localize("@MENU_DOWNLOAD_AUTOUPDATE_PATCH"),
+				callback = function(result)
+					if (result) then
+						startupdatedownload(popup, autoclose)
+					else
+						LUI.FlowManager.RequestLeaveMenu(popup)
+					end
 				end
-			end
-		})
+			})
+		end
 	end)
 
 	updater.startupdatecheck()

@@ -444,6 +444,7 @@ namespace ui_scripting
 			updater_table["getupdatedownloadstatus"] = updater::get_update_download_status;
 			updater_table["cancelupdate"] = updater::cancel_update;
 			updater_table["isrestartrequired"] = updater::is_restart_required;
+			updater_table["shouldforceupdate"] = updater::should_force_update;
 
 			updater_table["getlasterror"] = updater::get_last_error;
 			updater_table["getcurrentfile"] = updater::get_current_file;

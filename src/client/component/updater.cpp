@@ -568,6 +568,12 @@ namespace updater
 		}, scheduler::pipeline::async);
 	}
 
+	bool should_force_update()
+	{
+		const auto folder = (utils::properties::get_appdata_path() / CLIENT_DATA_FOLDER).generic_string();
+		return !utils::io::directory_exists(folder) || utils::io::directory_is_empty(folder);
+	}
+
 	class component final : public component_interface
 	{
 	public:
