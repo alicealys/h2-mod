@@ -268,6 +268,16 @@ namespace gsc
 
 #undef CHECK_TYPE
 		}
+
+		void return_value(const scripting::script_value& value)
+		{
+			if (game::scr_VmPub->outparamcount)
+			{
+				game::Scr_ClearOutParams();
+			}
+
+			scripting::push_value(value);
+		}
 	}
 
 	void scr_error(bool force_print, const char* fmt, ...)
@@ -398,7 +408,7 @@ namespace gsc
 			{
 				const auto key = game::Scr_GetString(0);
 				const auto& value = mod_stats::get(key);
-				scripting::push_value(json_to_gsc(value));
+				return_value(json_to_gsc(value));
 			});
 
 			add_function("statsgetor", []()
@@ -407,7 +417,7 @@ namespace gsc
 				const auto default_value = get_argument(1);
 				const auto json_default_value = gsc_to_json(default_value);
 				const auto value = mod_stats::get(key, json_default_value);
-				scripting::push_value(json_to_gsc(value));
+				return_value(json_to_gsc(value));
 			});
 
 			add_function("statsgetstruct", []()
@@ -415,7 +425,7 @@ namespace gsc
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto value = mod_stats::get_struct(struct_, field);
-				scripting::push_value(json_to_gsc(value));
+				return_value(json_to_gsc(value));
 			});
 
 			add_function("statsgetstructor", []()
@@ -425,7 +435,7 @@ namespace gsc
 				const auto default_value = get_argument(2);
 				const auto json_default_value = gsc_to_json(default_value);
 				const auto value = mod_stats::get_struct(struct_, field, json_default_value);
-				scripting::push_value(json_to_gsc(value));
+				return_value(json_to_gsc(value));
 			});
 			
 			add_function("typeof", []()
