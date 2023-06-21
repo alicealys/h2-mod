@@ -435,7 +435,7 @@ namespace dvars
 			dvar_set_bool_hook.create(0x14061A310, &dvar_set_bool);
 			dvar_set_float_hook.create(0x14061A750, &dvar_set_float);
 			dvar_set_int_hook.create(0x14061A9D0, &dvar_set_int);
-			dvar_set_string_hook.create(0x14061ABF0, &dvar_set_string);
+			dvar_set_string_hook.create(0x14061ABE0, &dvar_set_string);
 			dvar_set_from_string_hook.create(0x14061A910, &dvar_set_from_string);
 		}
 	};
