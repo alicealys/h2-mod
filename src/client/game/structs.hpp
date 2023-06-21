@@ -687,7 +687,11 @@ namespace game
 
 	struct dvar_t
 	{
-		int name; //00
+		union
+		{
+			int name;
+			int hash;
+		};
 		unsigned int flags; //08
 		dvar_type type; //0C
 		bool modified; //0D
