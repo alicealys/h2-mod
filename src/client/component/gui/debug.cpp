@@ -25,12 +25,14 @@ namespace gui::debug
 			float start[3];
 			float end[3];
 			float color[4];
+			bool deleted;
 		};
 
 		struct debug_square
 		{
 			float origin[3];
 			float color[4];
+			bool deleted;
 		};
 
 		std::vector<debug_line> debug_lines;
@@ -683,12 +685,22 @@ namespace gui::debug
 
 			for (auto& line : debug_lines)
 			{
+				if (line.deleted)
+				{
+					continue;
+				}
+
 				draw_line(line.start, line.end, line.color, 1.f);
 			}
 
 			for (auto& square : debug_squares)
 			{
-				draw_square(square.origin, 100.f, square.color);
+				if (square.deleted)
+				{
+					continue;
+				}
+
+				draw_square(square.origin, 50.f, square.color);
 			}
 		}
 
@@ -734,9 +746,20 @@ namespace gui::debug
 		std::memcpy(line.color, color, sizeof(float[4]));
 
 		std::lock_guard _0(debug_items_mutex);
-		const auto index = debug_squares.size();
+		const auto index = debug_lines.size();
 		debug_lines.emplace_back(line);
 		return index;
+	}
+
+	void remove_debug_line(const size_t line)
+	{
+		std::lock_guard _0(debug_items_mutex);
+		if (line >= debug_lines.size())
+		{
+			return;
+		}
+
+		debug_lines[line].deleted = true;
 	}
 
 	void set_debug_line_color(size_t line, const float* color)
@@ -761,6 +784,17 @@ namespace gui::debug
 		const auto index = debug_squares.size();
 		debug_squares.emplace_back(line);
 		return index;
+	}
+
+	void remove_debug_square(const size_t square)
+	{
+		std::lock_guard _0(debug_items_mutex);
+		if (square >= debug_squares.size())
+		{
+			return;
+		}
+
+		debug_squares[square].deleted = true;
 	}
 
 	void set_debug_square_color(size_t square, const float* color)

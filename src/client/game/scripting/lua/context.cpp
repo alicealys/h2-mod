@@ -101,7 +101,7 @@ namespace scripting::lua
 						a.get_z() + b.get_z()
 					);
 				},
-				[](const vector& a, const int value)
+				[](const vector& a, const float value)
 				{
 					return vector(
 						a.get_x() + value,
@@ -120,7 +120,7 @@ namespace scripting::lua
 						a.get_z() - b.get_z()
 					);
 				},
-				[](const vector& a, const int value)
+				[](const vector& a, const float value)
 				{
 					return vector(
 						a.get_x() - value,
@@ -139,7 +139,7 @@ namespace scripting::lua
 						a.get_z() * b.get_z()
 					);
 				},
-				[](const vector& a, const int value)
+				[](const vector& a, const float value)
 				{
 					return vector(
 						a.get_x() * value,
@@ -158,7 +158,7 @@ namespace scripting::lua
 						a.get_z() / b.get_z()
 					);
 				},
-				[](const vector& a, const int value)
+				[](const vector& a, const float value)
 				{
 					return vector(
 						a.get_x() / value,
@@ -504,6 +504,11 @@ namespace scripting::lua
 				return gui::debug::add_debug_line(start, end, color_);
 			};
 
+			debug_type["removeline"] = [](const debug&, const size_t line)
+			{
+				return gui::debug::remove_debug_line(line);
+			};
+
 			debug_type["addsquare"] = [](const debug&, const vector& origin, const vector& color)
 			{
 				float color_[4]{};
@@ -513,6 +518,11 @@ namespace scripting::lua
 				color_[3] = 1.f;
 
 				return gui::debug::add_debug_square(origin, color_);
+			};
+
+			debug_type["removesquare"] = [](const debug&, const size_t square)
+			{
+				return gui::debug::remove_debug_square(square);
 			};
 
 			debug_type["setsquarecolor"] = [](const debug&, const size_t& square, const vector& color)
