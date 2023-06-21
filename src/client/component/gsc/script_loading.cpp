@@ -370,6 +370,15 @@ namespace gsc
 
 			utils::hook::set<uint32_t>(0x14061EC72, size_0 + size_1);
 		}
+
+		void add_function_name(const std::string& name, const std::uint16_t id)
+		{
+			const std::string_view name_ = utils::memory::get_allocator()->duplicate_string(name);
+			auto& func_map = gsc_ctx->func_map();
+			auto func_map_ = reinterpret_cast<std::unordered_map<std::string_view, uint16_t>*>(
+				reinterpret_cast<size_t>(&func_map));
+			func_map_->insert(std::make_pair(name_, id));
+		}
 	}
 
 	game::ScriptFile* find_script(game::XAssetType type, const char* name, int allow_create_default)
@@ -420,6 +429,8 @@ namespace gsc
 
 			// increase script memory
 			utils::hook::call(0x1405A4798, pmem_init_stub);
+
+			add_function_name("isusinghdr", 0x242);
 
 			scripting::on_shutdown([](bool free_scripts, bool post_shutdown)
 			{
