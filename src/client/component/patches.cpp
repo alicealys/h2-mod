@@ -66,6 +66,20 @@ namespace patches
 			dvars::register_string("name", "Unknown Soldier", game::DVAR_FLAG_SAVED, "Player name");
 			utils::hook::invoke<void>(0x1405A35E0, a1);
 		}
+
+		const char* dvar_get_hash_stub(game::dvar_t* dvar)
+		{
+			const auto info = dvars::get_dvar_info_from_hash(dvar->hash);
+			if (info.has_value())
+			{
+				const auto& value = info.value();
+				return utils::string::va("%s", value.name.data());
+			}
+			else
+			{
+				return utils::hook::invoke<const char*>(0x140619240, dvar);
+			}
+		}
 	}
 
 	class component final : public component_interface
@@ -108,6 +122,8 @@ namespace patches
 			// make "name" saved
 			utils::hook::call(0x1405A4960, exec_config_stub);
 			dvars::override::register_string("name", "Unknown Soldier", game::DVAR_FLAG_SAVED);
+
+			utils::hook::call(0x1405A7CB7, dvar_get_hash_stub);
 		}
 	};
 }
