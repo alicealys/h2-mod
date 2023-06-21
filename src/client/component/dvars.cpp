@@ -293,11 +293,6 @@ namespace dvars
 	{
 		auto* var = find_dvar(override::register_string_overrides, hash);
 
-		if (hash == game::generateHashValue("name"))
-		{
-			printf("lol\n");
-		}
-
 		if (var)
 		{
 			value = var->value.data();
@@ -393,11 +388,6 @@ namespace dvars
 
 	void dvar_set_string(game::dvar_t* dvar, const char* string)
 	{
-		if (dvar->hash == game::generateHashValue("name"))
-		{
-			printf("lol\n");
-		}
-
 		const auto disabled = find_dvar(disable::set_string_disables, dvar->hash);
 		if (disabled)
 		{
@@ -415,11 +405,6 @@ namespace dvars
 
 	void dvar_set_from_string(game::dvar_t* dvar, const char* string, game::DvarSetSource source)
 	{
-		if (dvar->hash == game::generateHashValue("name"))
-		{
-			printf("lol\n");
-		}
-
 		const auto disabled = find_dvar(disable::set_string_disables, dvar->hash);
 		if (disabled)
 		{
