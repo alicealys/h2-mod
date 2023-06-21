@@ -3,6 +3,7 @@
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
+#include "dvars.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
@@ -28,34 +29,19 @@ namespace patches
 
 		void gscr_set_save_dvar_stub()
 		{
-			const auto string = utils::string::to_lower(utils::hook::invoke<const char*>(0x1405C7C20, 0));
+			const auto dvar = game::Scr_GetString(0);
+			if (dvar == nullptr)
+			{
+				return;
+			}
+
+			const auto string = utils::string::to_lower(dvar);
 			if (string == "cg_fov" || string == "cg_fovscale")
 			{
 				return;
 			}
 
 			gscr_set_save_dvar_hook.invoke<void>();
-		}
-
-		game::dvar_t* cg_fov = nullptr;
-		game::dvar_t* cg_fovScale = nullptr;
-
-		game::dvar_t* dvar_register_float_stub(int hash, const char* dvarName, float value, float min, float max, unsigned int flags)
-		{
-			static const auto cg_fov_hash = game::generateHashValue("cg_fov");
-			static const auto cg_fov_scale_hash = game::generateHashValue("cg_fovscale");
-
-			if (hash == cg_fov_hash)
-			{
-				return cg_fov;
-			}
-
-			if (hash == cg_fov_scale_hash)
-			{
-				return cg_fovScale;
-			}
-
-			return dvar_register_float_hook.invoke<game::dvar_t*>(hash, dvarName, value, min, max, flags);
 		}
 
 		void free_lui_memory()
@@ -75,9 +61,10 @@ namespace patches
 			utils::hook::invoke<void>(0x1406B5290);
 		}
 
-		game::dvar_t* register_snd_music_stub(int hash, const char* name, bool value, unsigned int /*flags*/)
+		void exec_config_stub(void* a1)
 		{
-			return game::Dvar_RegisterBool(hash, name, value, game::DVAR_FLAG_SAVED);
+			dvars::register_string("name", "Unknown Soldier", game::DVAR_FLAG_SAVED, "Player name");
+			utils::hook::invoke<void>(0x1405A35E0, a1);
 		}
 	}
 
@@ -106,23 +93,21 @@ namespace patches
 			// Prevent game from overriding cg_fov and cg_fovscale values
 			gscr_set_save_dvar_hook.create(0x140504C60, &gscr_set_save_dvar_stub);
 
-			// Make cg_fov and cg_fovscale saved dvars
-			cg_fov = dvars::register_float("cg_fov", 65.f, 40.f, 200.f, 
-				game::DVAR_FLAG_SAVED, "The field of view angle in degrees for client 0");
-			cg_fovScale = dvars::register_float("cg_fovScale", 1.f, 0.1f, 2.f, 
-				game::DVAR_FLAG_SAVED, "Scale applied to the field of view");
-
-			dvar_register_float_hook.create(game::Dvar_RegisterFloat.get(), dvar_register_float_stub);
-
 			// fix vid_restart crashing
 			utils::hook::call(0x1403D7413, vid_restart_stub_1);
 			utils::hook::jump(0x1403D7402, vid_restart_stub_2);
 
-			// make snd_musicDisabledForCustomSoundtrack saved
-			utils::hook::call(0x1405D05FB, register_snd_music_stub);
-
 			// cinematicingameloopresident -> cinematicingameloop (fix ingame cinematics)
 			utils::hook::jump(0x140502140, 0x1405020C0);
+
+			// override dvar flags
+			dvars::override::register_float("cg_fovScale", 1.f, 0.1f, 2.f, game::DVAR_FLAG_SAVED);
+			dvars::override::register_float("cg_fov", 65.f, 40.f, 200.f, game::DVAR_FLAG_SAVED);
+			dvars::override::register_bool("snd_musicDisabledForCustomSoundtrack", false, game::DVAR_FLAG_SAVED);
+
+			// make "name" saved
+			utils::hook::call(0x1405A4960, exec_config_stub);
+			dvars::override::register_string("name", "Unknown Soldier", game::DVAR_FLAG_SAVED);
 		}
 	};
 }
