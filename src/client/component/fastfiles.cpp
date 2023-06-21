@@ -456,7 +456,6 @@ namespace fastfiles
 		{
 			reallocate_xmodel_pool();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_WEAPON, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
