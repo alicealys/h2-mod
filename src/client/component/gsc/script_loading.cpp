@@ -98,7 +98,7 @@ namespace gsc
 
 		game::ScriptFile* load_custom_script(const char* file_name, const std::string& real_name)
 		{
-			if (const auto itr = loaded_scripts.find(real_name); itr != loaded_scripts.end())
+			if (const auto itr = loaded_scripts.find(file_name); itr != loaded_scripts.end())
 			{
 				return itr->second;
 			}
@@ -137,7 +137,7 @@ namespace gsc
 
 				script_file_ptr->compressedLen = 0;
 
-				loaded_scripts[real_name] = script_file_ptr;
+				loaded_scripts[file_name] = script_file_ptr;
 
 				return script_file_ptr;
 			}
@@ -431,6 +431,7 @@ namespace gsc
 			utils::hook::call(0x1405A4798, pmem_init_stub);
 
 			add_function_name("isusinghdr", 0x242);
+			add_function_name("tablegetrowcount", 0x2A6);
 
 			scripting::on_shutdown([](bool free_scripts, bool post_shutdown)
 			{

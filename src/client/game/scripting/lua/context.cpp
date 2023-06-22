@@ -629,7 +629,7 @@ namespace scripting::lua
 					notifies::clear_hook(pos);
 				};
 
-				detour["enable"] = [&]()
+				detour["enable"] = [=]()
 				{
 					notifies::set_lua_hook(pos, function);
 				};
