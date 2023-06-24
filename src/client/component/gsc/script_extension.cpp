@@ -484,6 +484,31 @@ namespace gsc
 					table.clear();
 				});
 			});
+
+			add_function("assetexists", []()
+			{
+				const std::string type = game::Scr_GetString(0);
+				const auto name = game::Scr_GetString(1);
+
+				game::XAssetType type_index = game::ASSET_TYPE_COUNT;
+
+				for (auto i = 0; i < ::game::XAssetType::ASSET_TYPE_COUNT; i++)
+				{
+					if (type == ::game::g_assetNames[i])
+					{
+						type_index = static_cast<game::XAssetType>(i);
+					}
+				}
+
+				if (type_index == game::ASSET_TYPE_COUNT)
+				{
+					return scr_error(true, "invalid asset type %s", type.data());
+				}
+
+				const auto result = game::DB_XAssetExists(type_index, name) && 
+					!game::DB_IsXAssetDefault(type_index, name);
+				game::Scr_AddInt(result);
+			});
 		}
 	};
 }
