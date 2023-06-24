@@ -146,7 +146,10 @@ namespace fastfiles
 		{
 			if (priority == mods::zone_priority::post_common)
 			{
-				try_add_zone(zones, allocator, "mod", true);
+				if (mods::get_mod().has_value())
+				{
+					try_add_zone(zones, allocator, "mod", true);
+				}
 			}
 
 			const auto mod_zones = mods::get_mod_zones();
