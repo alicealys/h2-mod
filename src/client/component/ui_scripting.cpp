@@ -534,6 +534,13 @@ namespace ui_scripting
 				return json_to_lua(mod_stats::get_struct(mapname, key));
 			};
 
+			mods_stats_table["getstructor"] = [](const std::string& mapname,
+				const std::string& key, const script_value& default_value)
+			{
+				const auto json_default_value = lua_to_json(default_value);
+				return json_to_lua(mod_stats::get_struct(mapname, key, json_default_value));
+			};
+
 			mods_stats_table["save"] = mod_stats::write;
 			mods_stats_table["getall"] = []()
 			{
