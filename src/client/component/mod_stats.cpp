@@ -171,7 +171,7 @@ namespace mod_stats
 		return get_stats().access<nlohmann::json>([&](mod_stats_t& stats)
 			-> nlohmann::json
 		{
-			if (!stats.is_object() || !stats[name].is_object() || stats[name].is_null())
+			if (!stats.is_object() || !stats[name].is_object() || stats[name][field].is_null())
 			{
 				return default_value;
 			}
