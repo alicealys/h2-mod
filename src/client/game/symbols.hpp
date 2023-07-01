@@ -271,7 +271,15 @@ namespace game
 	WEAK symbol<jmp_buf> g_script_error{0x14BA9CD40};
 	WEAK symbol<scr_classStruct_t> g_classMap{0x140BF95C0};
 
-	WEAK symbol<physical_memory> g_scriptmem{0x14CC9FEC0};
+	WEAK game::symbol<unsigned __int64> pmem_size{0x14CC9F458};
+	WEAK game::symbol<unsigned char*> pmem_buffer{0x14CC9F450};
+
+	WEAK game::symbol<PhysicalMemory> g_mem{0x14CC9F460};
+	WEAK game::symbol<PhysicalMemory> g_scriptmem{0x14CC9FEC0};
+	WEAK game::symbol<PhysicalMemory> g_physmem{0x14CCA0920};
+
+	WEAK game::symbol<unsigned __int64> stream_size{0x141865C90};
+	WEAK game::symbol<unsigned char*> stream_buffer{0x141865C88};
 
 	WEAK symbol<scrVarGlob_t> scr_VarGlob{0x14B617C00};
 	WEAK symbol<scrVmPub_t> scr_VmPub{0x14BA9EE40};

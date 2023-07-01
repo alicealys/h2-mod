@@ -8,6 +8,7 @@
 #include "component/console.hpp"
 #include "component/scripting.hpp"
 #include "component/fastfiles.hpp"
+#include "component/memory.hpp"
 
 #include "script_loading.hpp"
 
@@ -33,7 +34,7 @@ namespace gsc
 		{
 			char* buf = nullptr;
 			char* pos = nullptr;
-			unsigned int size = 0x1000000;
+			unsigned int size = memory::custom_script_mem_size;
 		} script_memory;
 
 		char* allocate_buffer(size_t size)
@@ -350,27 +351,6 @@ namespace gsc
 			utils::hook::invoke<void>(0x1405BFBF0);
 		}
 
-		void pmem_init_stub()
-		{
-			utils::hook::invoke<void>(0x14061EC80);
-
-			const auto type_0 = &game::g_scriptmem[0];
-			const auto type_1 = &game::g_scriptmem[1];
-
-			const auto size_0 = 0x200000; // default size
-			const auto size_1 = 0x200000 + script_memory.size;
-
-			const auto block = reinterpret_cast<char*>(VirtualAlloc(NULL, size_0 + size_1, MEM_RESERVE, PAGE_READWRITE));
-
-			type_0->buf = block;
-			type_0->size = size_0;
-
-			type_1->buf = block + size_0;
-			type_1->size = size_1;
-
-			utils::hook::set<uint32_t>(0x14061EC72, size_0 + size_1);
-		}
-
 		void add_function_name(const std::string& name, const std::uint16_t id)
 		{
 			const std::string_view name_ = utils::memory::get_allocator()->duplicate_string(name);
@@ -426,9 +406,6 @@ namespace gsc
 			// execute handles
 			utils::hook::call(0x1404C8F71, g_load_structs_stub);
 			utils::hook::call(0x1404C8F80, scr_load_level_stub);
-
-			// increase script memory
-			utils::hook::call(0x1405A4798, pmem_init_stub);
 
 			add_function_name("isusinghdr", 0x242);
 			add_function_name("tablegetrowcount", 0x2A6);
