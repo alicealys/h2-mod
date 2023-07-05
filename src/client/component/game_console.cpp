@@ -63,6 +63,8 @@ namespace game_console
 		float color_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 		float color_h2[4] = {0.9f, 0.9f, 0.5f, 1.0f};
 
+		bool is_initialized{};
+
 		void clear()
 		{
 			strncpy_s(con.buffer, "", 256);
@@ -82,7 +84,7 @@ namespace game_console
 					con.display_line_offset++;
 				}
 
-				output.push_back(data);
+				output.emplace_back(data);
 				if (output.size() > 512)
 				{
 					output.pop_front();
@@ -548,6 +550,11 @@ namespace game_console
 
 	void add(const std::string& cmd)
 	{
+		if (!is_initialized)
+		{
+			return;
+		}
+
 		execute(cmd.data());
 
 		history.push_front(cmd);
@@ -702,7 +709,7 @@ namespace game_console
 			auto name = utils::string::to_lower(dvar.name);
 			if (game::Dvar_FindVar(name.data()) && match_compare(input, name, exact))
 			{
-				suggestions.push_back(dvar);
+				suggestions.emplace_back(dvar);
 			}
 
 			if (exact && suggestions.size() > 1)
@@ -713,7 +720,7 @@ namespace game_console
 
 		if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
 		{
-			suggestions.push_back({ input, "" });
+			suggestions.emplace_back(input, "");
 		}
 
 		game::cmd_function_s* cmd = (*game::cmd_functions);
@@ -725,7 +732,7 @@ namespace game_console
 
 				if (match_compare(input, name, exact))
 				{
-					suggestions.push_back({cmd->name, ""});
+					suggestions.emplace_back(cmd->name, "");
 				}
 
 				if (exact && suggestions.size() > 1)
@@ -756,6 +763,11 @@ namespace game_console
 		void post_unpack() override
 		{
 			scheduler::loop(draw_console, scheduler::pipeline::renderer);
+
+			scheduler::once([]
+			{
+				is_initialized = true;
+			}, scheduler::main);
 
 			con.cursor = 0;
 			con.visible_line_count = 0;

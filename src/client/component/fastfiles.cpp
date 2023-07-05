@@ -50,7 +50,7 @@ namespace fastfiles
 			auto result = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
 			const auto diff = game::Sys_Milliseconds() - start;
 
-			if (result.rawfile)
+			if (type == game::ASSET_TYPE_RAWFILE && result.rawfile)
 			{
 				const std::string override_rawfile_name = "override/"s + name;
 				const auto override_rawfile = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, override_rawfile_name.data(), 0);
