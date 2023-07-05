@@ -120,7 +120,11 @@ namespace game
 	WEAK symbol<void(hks::lua_State* s)> LUI_EndEvent{0x140316890};
 	WEAK symbol<void()> LUI_EnterCriticalSection{0x140316980};
 	WEAK symbol<void()> LUI_LeaveCriticalSection{0x14031BC20};
+
 	WEAK symbol<bool(int localClientNum, const char* menuName)> Menu_IsMenuOpenAndVisible{0x1405EE1A0};
+	WEAK symbol<void*(void* context, const char* name)> Menus_FindByName{0x140603080};
+	WEAK symbol<void(void* context, const char* name)> Menus_OpenByName{0x140603770};
+	WEAK symbol<void(void* context, void* menu, int a3)> Menus_Open{0x1406034E0};
 
 	WEAK symbol<Material*(const char* material)> Material_RegisterHandle{0x140759BA0};
 
@@ -210,6 +214,9 @@ namespace game
 	WEAK symbol<int(int localClientNum, const char* sound)> UI_PlayLocalSoundAlias{0x140606080};
 	WEAK symbol<void(ScreenPlacement* scrPlace, const char* text, rectDef_s* rect, Font_s* font, float x, float y,
 		float scale, const float* color, int style, int textAlignMode, rectDef_s* textRect, char a12)> UI_DrawWrappedText{0x1406055E0};
+
+	WEAK symbol<void*(const char* name)> UI_LoadMenus{0x1406072B0};
+	WEAK symbol<void(void* context, void* menu_list, int a3)> UI_AddMenuList{0x140604FE0};
 
 	WEAK symbol<void(pmove_t* move, trace_t*, const float*, const float*,
 		const Bounds*, int, int)> PM_playerTrace{0x14068F0A0};
