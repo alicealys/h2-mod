@@ -23,7 +23,7 @@ namespace fonts
 {
 	namespace
 	{
-		const char* hudelem_fonts[] =
+		std::array<const char*, game::HE_FONT_COUNT> hudelem_fonts
 		{
 			"",
 			"bigfixed",
@@ -45,24 +45,43 @@ namespace fonts
 		game::Font_s* bank_font = nullptr;
 
 		utils::hook::detour ui_get_font_handle_hook;
+		utils::hook::detour ui_get_font_handle2_hook;
 		utils::hook::detour ui_asset_cache_hook;
 
-		game::Font_s* ui_get_font_handle_stub(void* a1, int font_index)
+		game::Font_s* get_font_handle_at_index(int font_index)
 		{
-			if (font_index < 12 || bank_font == nullptr)
-			{
-				return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
-			}
-
 			switch (font_index)
 			{
-			case 12:
-			case 13:
-			case 14:
+			case game::HE_FONT_BANK:
+			case game::HE_FONT_BANKSHADOW:
+			case game::HE_FONT_BANKSHADOWMORE:
 				return bank_font;
 			}
 
+			return nullptr;
+		}
+
+		game::Font_s* ui_get_font_handle_stub(void* a1, int font_index)
+		{
+			const auto res = get_font_handle_at_index(font_index);
+			if (res)
+			{
+				return res;
+			}
+
 			return ui_get_font_handle_hook.invoke<game::Font_s*>(a1, font_index);
+		}
+
+		game::Font_s* ui_get_font_handle2_stub(void* a1, size_t a2)
+		{
+			const auto font_index = *reinterpret_cast<int*>(a2 + 208);
+			const auto res = get_font_handle_at_index(font_index);
+			if (res)
+			{
+				return res;
+			}
+
+			return ui_get_font_handle2_hook.invoke<game::Font_s*>(a1, a2);
 		}
 
 		game::Font_s* get_bank_font()
@@ -87,9 +106,9 @@ namespace fonts
 		{
 			switch (hudelem_font_index)
 			{
-			case 12:
-			case 13:
-			case 14:
+			case game::HE_FONT_BANK:
+			case game::HE_FONT_BANKSHADOW:
+			case game::HE_FONT_BANKSHADOWMORE:
 				return hudelem_font_index;
 			}
 
@@ -117,11 +136,11 @@ namespace fonts
 		{
 			switch (font_index)
 			{
-			case 12:
+			case game::HE_FONT_BANK:
 				return 0; // none
-			case 13:
+			case game::HE_FONT_BANKSHADOW:
 				return 2; // shadowed
-			case 14:
+			case game::HE_FONT_BANKSHADOWMORE:
 				return 4; // shadowed more
 			}
 
@@ -212,10 +231,11 @@ namespace fonts
 			// add custom fonts to hud elem fonts
 			ui_asset_cache_hook.create(0x140606090, ui_asset_cache_stub);
 			ui_get_font_handle_hook.create(0x1406058F0, ui_get_font_handle_stub);
+			ui_get_font_handle2_hook.create(0x1405F9820, ui_get_font_handle2_stub);
 
 			// change hudelem font array
-			utils::hook::inject(0x1404C17A6, hudelem_fonts);
-			utils::hook::set(0x1404C17B7, static_cast<int>(ARRAYSIZE(hudelem_fonts)));
+			utils::hook::inject(0x1404C17A6, hudelem_fonts.data());
+			utils::hook::set(0x1404C17B7, static_cast<int>(hudelem_fonts.size()));
 
 			// handle custom fonts
 			utils::hook::jump(0x14037B390, utils::hook::assemble(get_hud_elem_info_stub), true);

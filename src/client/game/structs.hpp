@@ -2949,6 +2949,26 @@ namespace game
 		GamerProfileDataUnion u;
 	};
 
+	enum HeFont
+	{
+		HE_FONT_DEFAULT = 0x0,
+		HE_FONT_BIGFIXED = 0x1,
+		HE_FONT_SMALLFIXED = 0x2,
+		HE_FONT_OBJECTIVE = 0x3,
+		HE_FONT_BIG = 0x4,
+		HE_FONT_SMALL = 0x5,
+		HE_FONT_HUDBIG = 0x6,
+		HE_FONT_HUDSMALL = 0x7,
+		HE_FONT_BUTTONPROMPT = 0x8,
+		HE_FONT_SUBTITLE = 0x9,
+		HE_FONT_TIMER = 0xA,
+		HE_FONT_NAMEPLATE = 0xB,
+		HE_FONT_BANK = 0xC,
+		HE_FONT_BANKSHADOW = 0xD,
+		HE_FONT_BANKSHADOWMORE = 0xE,
+		HE_FONT_COUNT,
+	};
+
 	namespace hks
 	{
 		struct lua_State;
