@@ -124,6 +124,11 @@ namespace patches
 			dvars::override::register_string("name", "Unknown Soldier", game::DVAR_FLAG_SAVED);
 
 			utils::hook::call(0x1405A7CB7, dvar_get_hash_stub);
+
+			// fix vehicle hud compass color
+			utils::hook::set<float>(0x140948F40, 1.f);
+			utils::hook::set<float>(0x140948F44, 1.f);
+			utils::hook::set<float>(0x140948F48, 1.f);
 		}
 	};
 }
