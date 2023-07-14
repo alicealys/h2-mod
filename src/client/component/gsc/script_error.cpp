@@ -277,6 +277,20 @@ namespace gsc
 			scr_error(false, "parameter %u does not exist", index + 1);
 			return nullptr;
 		}
+
+		void g_model_index_no_cache_stub(utils::hook::assembler& a)
+		{
+			a.lea(ecx, qword_ptr(rbx, 0xA81));
+			a.call(0x1406B3580);
+			a.cmp(eax, 1);
+			a.mov(rcx, rdi); // restore rcx
+			a.jmp(0x140290351);
+		}
+
+		void g_model_index_no_cache_error_stub(const char* model)
+		{
+			scr_error(true, "model \"%s\" must be precached", model);
+		}
 	}
 
 	std::optional<std::pair<std::string, std::string>> find_function(const char* pos)
@@ -319,6 +333,10 @@ namespace gsc
 			utils::hook::jump(0x1405C7B70, scr_get_pointer_type);
 			utils::hook::jump(0x1405C7D40, scr_get_type);
 			utils::hook::jump(0x1405C7DB0, scr_get_type_name);
+
+			// add error print to G_PrecacheModel
+			utils::hook::jump(0x140290340, utils::hook::assemble(g_model_index_no_cache_stub), true);
+			utils::hook::call(0x140290365, g_model_index_no_cache_error_stub);
 		}
 	};
 }
