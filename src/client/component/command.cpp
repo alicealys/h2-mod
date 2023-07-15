@@ -24,6 +24,8 @@ namespace command
 
 		std::unordered_map<std::string, std::function<void(params&)>> handlers;
 
+		bool game_initialized{};
+
 		void main_handler()
 		{
 			params params = {};
@@ -147,6 +149,11 @@ namespace command
 
 	void execute(std::string command, const bool sync)
 	{
+		if (!game_initialized)
+		{
+			return;
+		}
+
 		command += "\n";
 
 		if (sync)
@@ -159,12 +166,22 @@ namespace command
 		}
 	}
 
+	bool is_game_initialized()
+	{
+		return game_initialized;
+	}
+
 	class component final : public component_interface
 	{
 	public:
 		void post_unpack() override
 		{
 			utils::hook::jump(0x1405A74F0, dvar_command_stub, true);
+
+			scheduler::once([]
+			{
+				game_initialized = true;
+			}, scheduler::main);
 
 			add("quit", game::Quit);
 
