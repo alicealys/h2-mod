@@ -23,4 +23,6 @@ namespace gui
 
 	void register_menu(const std::string& name, const std::string& title, 
 		const std::function<void()>& callback, bool always = false);
+
+	void register_callback(const std::function<void()>& callback, bool always = false);
 }

@@ -228,7 +228,7 @@ namespace utils::string
 
 		while (*a_ != '\0' && *b_ != '\0')
 		{
-			if (std::tolower(*a_) == std::tolower(*b_))
+			if (*b_ == '*' || std::tolower(*a_) == std::tolower(*b_))
 			{
 				b_++;
 			}

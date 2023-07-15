@@ -458,12 +458,12 @@ namespace fastfiles
 		void reallocate_asset_pools()
 		{
 			reallocate_xmodel_pool();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODEL_SURFS, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SNDCURVE, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE_ENTRY, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND_CURVE, 2>();
 		}
 
 		void add_custom_level_load_zone(game::LevelLoad* load, const std::string& name, const size_t size_est)
@@ -631,6 +631,39 @@ namespace fastfiles
 			const auto& cb = *static_cast<const std::function<void(game::XAssetHeader)>*>(data);
 			cb(header);
 		}), &callback, includeOverride);
+	}
+
+	void enum_asset_entries(const game::XAssetType type, const std::function<void(game::XAssetEntry*)>& callback, bool include_override)
+	{
+		constexpr auto max_asset_count = 0x25D78;
+		auto hash = &game::db_hashTable[0];
+		for (auto c = 0; c < max_asset_count; c++)
+		{
+			for (auto i = *hash; i; )
+			{
+				const auto entry = &game::g_assetEntryPool[i];
+
+				if (entry->asset.type == type)
+				{
+					callback(entry);
+
+					if (include_override && entry->nextOverride)
+					{
+						auto next_ovveride = entry->nextOverride;
+						while (next_ovveride)
+						{
+							const auto override = &game::g_assetEntryPool[next_ovveride];
+							callback(override);
+							next_ovveride = override->nextOverride;
+						}
+					}
+				}
+
+				i = entry->nextHash;
+			}
+
+			++hash;
+		}
 	}
 
 	std::string get_current_fastfile()
