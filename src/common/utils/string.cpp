@@ -242,4 +242,9 @@ namespace utils::string
 
 		return *b_ == '\0';
 	}
+
+	bool is_numeric(const std::string& text)
+	{
+		return std::to_string(atoi(text.data())) == text;
+	}
 }
