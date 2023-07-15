@@ -46,7 +46,7 @@ namespace gui::asset_list::material
 			return image_type_names[type];
 		}
 
-		void draw_material_window(game::Material* asset)
+		bool draw_material_window(game::Material* asset)
 		{
 			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
 			if (ImGui::TreeNode("textures"))
@@ -99,6 +99,8 @@ namespace gui::asset_list::material
 			DRAW_ASSET_PROPERTY(materialType, "%i");
 			DRAW_ASSET_PROPERTY(layerCount, "%i");
 			DRAW_ASSET_PROPERTY(assetFlags, "%X");
+
+			return true;
 		}
 	}
 

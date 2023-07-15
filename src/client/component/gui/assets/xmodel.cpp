@@ -177,7 +177,7 @@ namespace gui::asset_list::xmodel
 			}
 		}
 
-		void draw_xmodel_window(game::XModel* asset)
+		bool draw_xmodel_window(game::XModel* asset)
 		{
 			static bool flip_axis = false;
 			ImGui::Checkbox("flip axis", &flip_axis);
@@ -252,8 +252,17 @@ namespace gui::asset_list::xmodel
 
 			if (ImGui::TreeNode("surface materials"))
 			{
+				game::Material* prev_material = nullptr;
+
 				for (auto i = 0; i < asset->numsurfs; i++)
 				{
+					if (prev_material == asset->materialHandles[i])
+					{
+						continue;
+					}
+
+					prev_material = asset->materialHandles[i];
+
 					if (ImGui::Button(asset->materialHandles[i]->name))
 					{
 						gui::copy_to_clipboard(asset->materialHandles[i]->name);
@@ -275,11 +284,15 @@ namespace gui::asset_list::xmodel
 						{
 							gui::copy_to_clipboard(asset->compositeModels[i]->name);
 						}
+
+						gui::asset_list::add_view_button(i, game::ASSET_TYPE_XMODEL, asset->compositeModels[i]->name);
 					}
 
 					ImGui::TreePop();
 				}
 			}
+
+			return true;
 		}
 	}
 

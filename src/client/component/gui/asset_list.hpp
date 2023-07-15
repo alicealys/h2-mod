@@ -9,7 +9,7 @@ namespace gui::asset_list
 	void add_view_button(int id, game::XAssetType type, const char* name);
 
 	template <typename T>
-	void add_asset_view(game::XAssetType type, const std::function<void(T*)>& draw_callback)
+	void add_asset_view(game::XAssetType type, const std::function<bool(T*)>& draw_callback)
 	{
 		static std::unordered_set<std::string> opened_assets;
 		add_asset_view_callback(type, [](const std::string& name)
@@ -32,7 +32,10 @@ namespace gui::asset_list
 				auto is_open = true;
 				if (ImGui::Begin(name.data(), &is_open))
 				{
-					draw_callback(header);
+					if (!draw_callback(header))
+					{
+						is_open = false;
+					}
 				}
 				ImGui::End();
 
