@@ -13,12 +13,10 @@
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 
-namespace gui::asset_list::assets::material
+namespace gui::asset_list::material
 {
 	namespace
 	{
-		std::unordered_set<std::string> opened_assets;
-
 		std::unordered_map<unsigned char, std::string> image_type_names =
 		{
 			{0x0, "2D"},
@@ -38,11 +36,6 @@ namespace gui::asset_list::assets::material
 			{0xE, "PARALLAX_MAP"},
 		};
 
-		void add_material_view(const std::string& name)
-		{
-			opened_assets.insert(name);
-		}
-
 		std::string get_image_type_name(unsigned char type)
 		{
 			if (!image_type_names.contains(type))
@@ -53,46 +46,37 @@ namespace gui::asset_list::assets::material
 			return image_type_names[type];
 		}
 
-		bool draw_material_window(const std::string& name)
+		void draw_material_window(game::Material* asset)
 		{
-			const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_MATERIAL, name.data(), 0).material;
-			if (asset == nullptr)
+			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
+			if (ImGui::TreeNode("textures"))
 			{
-				return false;
-			}
-
-			auto is_open = true;
-			if (ImGui::Begin(name.data(), &is_open))
-			{
-				ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
-				if (ImGui::TreeNode("textures"))
+				for (auto i = 0; i < asset->textureCount; i++)
 				{
-					for (auto i = 0; i < asset->textureCount; i++)
+					if (asset->textureTable && asset->textureTable->u.image && asset->textureTable->u.image->texture.shaderView)
 					{
-						if (asset->textureTable && asset->textureTable->u.image && asset->textureTable->u.image->texture.shaderView)
+						const auto type_name = get_image_type_name(asset->textureTable[i].semantic);
+
+						ImGui::Text("%s", type_name.data());
+						ImGui::SameLine();
+						if (ImGui::Button(asset->textureTable[i].u.image->name))
 						{
-							const auto type_name = get_image_type_name(asset->textureTable[i].semantic);
-
-							ImGui::Text("%s", type_name.data());
-							ImGui::SameLine();
-							if (ImGui::Button(asset->textureTable[i].u.image->name))
-							{
-								gui::copy_to_clipboard(asset->textureTable->u.image->name);
-							}
-
-							const auto width = asset->textureTable[i].u.image->width;
-							const auto height = asset->textureTable[i].u.image->height;
-							const auto ratio = static_cast<float>(width) / static_cast<float>(height);
-							constexpr auto size = 200.f;
-
-							ImGui::Image(asset->textureTable[i].u.image->texture.shaderView, 
-								ImVec2(size * ratio, size)
-							);
+							gui::copy_to_clipboard(asset->textureTable->u.image->name);
 						}
-					}
 
-					ImGui::TreePop();
+						const auto width = asset->textureTable[i].u.image->width;
+						const auto height = asset->textureTable[i].u.image->height;
+						const auto ratio = static_cast<float>(width) / static_cast<float>(height);
+						constexpr auto size = 200.f;
+
+						ImGui::Image(asset->textureTable[i].u.image->texture.shaderView,
+							ImVec2(size * ratio, size)
+						);
+					}
 				}
+
+				ImGui::TreePop();
+			}
 
 #define DRAW_ASSET_PROPERTY(__name__, __fmt__) \
 				ImGui::Text(#__name__ ": " __fmt__, asset->__name__); \
@@ -105,36 +89,16 @@ namespace gui::asset_list::assets::material
 					gui::copy_to_clipboard(asset->__name__); \
 				} \
 
-				DRAW_ASSET_PROPERTY_COPY(name);
-				DRAW_ASSET_PROPERTY_COPY(techniqueSet->name);
-				DRAW_ASSET_PROPERTY(textureCount, "%i");
-				DRAW_ASSET_PROPERTY(constantCount, "%i");
-				DRAW_ASSET_PROPERTY(stateBitsCount, "%i");
-				DRAW_ASSET_PROPERTY(stateFlags, "%i");
-				DRAW_ASSET_PROPERTY(cameraRegion, "%i");
-				DRAW_ASSET_PROPERTY(materialType, "%i");
-				DRAW_ASSET_PROPERTY(layerCount, "%i");
-				DRAW_ASSET_PROPERTY(assetFlags, "%X");
-			}
-
-			ImGui::End();
-
-			return is_open;
-		}
-
-		void draw_materials()
-		{
-			for (auto i = opened_assets.begin(); i != opened_assets.end(); )
-			{
-				if (!draw_material_window(*i))
-				{
-					i = opened_assets.erase(i);
-				}
-				else
-				{
-					++i;
-				}
-			}
+			DRAW_ASSET_PROPERTY_COPY(name);
+			DRAW_ASSET_PROPERTY_COPY(techniqueSet->name);
+			DRAW_ASSET_PROPERTY(textureCount, "%i");
+			DRAW_ASSET_PROPERTY(constantCount, "%i");
+			DRAW_ASSET_PROPERTY(stateBitsCount, "%i");
+			DRAW_ASSET_PROPERTY(stateFlags, "%i");
+			DRAW_ASSET_PROPERTY(cameraRegion, "%i");
+			DRAW_ASSET_PROPERTY(materialType, "%i");
+			DRAW_ASSET_PROPERTY(layerCount, "%i");
+			DRAW_ASSET_PROPERTY(assetFlags, "%X");
 		}
 	}
 
@@ -143,10 +107,9 @@ namespace gui::asset_list::assets::material
 	public:
 		void post_unpack() override
 		{
-			gui::asset_list::add_asset_view_callback(game::ASSET_TYPE_MATERIAL, add_material_view);
-			gui::register_callback(draw_materials, false);
+			gui::asset_list::add_asset_view<game::Material>(game::ASSET_TYPE_MATERIAL, draw_material_window);
 		}
 	};
 }
 
-REGISTER_COMPONENT(gui::asset_list::assets::material::component)
+REGISTER_COMPONENT(gui::asset_list::material::component)

@@ -13,17 +13,10 @@
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 
-namespace gui::asset_list::assets::xmodel
+namespace gui::asset_list::xmodel
 {
 	namespace
 	{
-		std::unordered_set<std::string> opened_assets;
-
-		void add_xmodel_view(const std::string& name)
-		{
-			opened_assets.insert(name);
-		}
-
 		ImVec2 project_vertex(game::vec3_t v, bool flip_axis, float scale = 1.f, 
 			bool rotate = false, float rotation_speed = 0.f)
 		{
@@ -184,50 +177,41 @@ namespace gui::asset_list::assets::xmodel
 			}
 		}
 
-		bool draw_material_window(const std::string& name)
+		void draw_xmodel_window(game::XModel* asset)
 		{
-			const auto asset = game::DB_FindXAssetHeader(game::ASSET_TYPE_XMODEL, name.data(), 0).model;
-			if (asset == nullptr)
-			{
-				return false;
-			}
+			static bool flip_axis = false;
+			ImGui::Checkbox("flip axis", &flip_axis);
 
-			auto is_open = true;
-			if (ImGui::Begin(name.data(), &is_open))
+			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
+			if (ImGui::TreeNode("3d mesh"))
 			{
-				static bool flip_axis = false;
-				ImGui::Checkbox("flip axis", &flip_axis);
+				int vert_count = 0;
 
-				ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
-				if (ImGui::TreeNode("3d mesh"))
+				game::vec3_t mins{};
+				game::vec3_t maxs{};
+				game::vec3_t origin{};
+				game::vec2_t maxs_2d{};
+
+				vert_count += sum_verts_in_xmodels(asset, mins, maxs, origin);
+				for (auto i = 0; i < asset->numCompositeModels; i++)
 				{
-					int vert_count = 0;
-
-					game::vec3_t mins{};
-					game::vec3_t maxs{};
-					game::vec3_t origin{};
-					game::vec2_t maxs_2d{};
-
-					vert_count += sum_verts_in_xmodels(asset, mins, maxs, origin);
-					for (auto i = 0; i < asset->numCompositeModels; i++)
-					{
-						vert_count += sum_verts_in_xmodels(asset->compositeModels[i], mins, maxs, origin);
-					}
-
-					for (auto o = 0; o < 3; o++)
-					{
-						origin[o] /= static_cast<float>(vert_count);
-					}
-
-					draw_xmodel(asset, flip_axis, mins, maxs, origin, maxs_2d);
-					for (auto i = 0; i < asset->numCompositeModels; i++)
-					{
-						draw_xmodel(asset->compositeModels[i], flip_axis, mins, maxs, origin, maxs_2d);
-					}
-
-					ImGui::Dummy(ImVec2(maxs_2d[0] + 800, maxs_2d[1] + 250));
-					ImGui::TreePop();
+					vert_count += sum_verts_in_xmodels(asset->compositeModels[i], mins, maxs, origin);
 				}
+
+				for (auto o = 0; o < 3; o++)
+				{
+					origin[o] /= static_cast<float>(vert_count);
+				}
+
+				draw_xmodel(asset, flip_axis, mins, maxs, origin, maxs_2d);
+				for (auto i = 0; i < asset->numCompositeModels; i++)
+				{
+					draw_xmodel(asset->compositeModels[i], flip_axis, mins, maxs, origin, maxs_2d);
+				}
+
+				ImGui::Dummy(ImVec2(maxs_2d[0] + 800, maxs_2d[1] + 250));
+				ImGui::TreePop();
+			}
 
 #define DRAW_ASSET_PROPERTY(__name__, __fmt__) \
 				ImGui::Text(#__name__ ": " __fmt__, asset->__name__); \
@@ -240,80 +224,60 @@ namespace gui::asset_list::assets::xmodel
 					gui::copy_to_clipboard(asset->__name__); \
 				} \
 
-				DRAW_ASSET_PROPERTY_COPY(name);
-				DRAW_ASSET_PROPERTY(numRootBones, "%i");
-				DRAW_ASSET_PROPERTY(numsurfs, "%i");
-				DRAW_ASSET_PROPERTY(lodRampType, "%i");
-				DRAW_ASSET_PROPERTY(numBonePhysics, "%i");
-				DRAW_ASSET_PROPERTY(numCompositeModels, "%i");
-				DRAW_ASSET_PROPERTY(unk_float, "%f");
-				DRAW_ASSET_PROPERTY(scale, "%f");
+			DRAW_ASSET_PROPERTY_COPY(name);
+			DRAW_ASSET_PROPERTY(numRootBones, "%i");
+			DRAW_ASSET_PROPERTY(numsurfs, "%i");
+			DRAW_ASSET_PROPERTY(lodRampType, "%i");
+			DRAW_ASSET_PROPERTY(numBonePhysics, "%i");
+			DRAW_ASSET_PROPERTY(numCompositeModels, "%i");
+			DRAW_ASSET_PROPERTY(unk_float, "%f");
+			DRAW_ASSET_PROPERTY(scale, "%f");
 
-				if (ImGui::TreeNode("bones"))
+			if (ImGui::TreeNode("bones"))
+			{
+				for (auto i = 0; i < asset->numBones; i++)
 				{
-					for (auto i = 0; i < asset->numBones; i++)
+					const auto bone_name = game::SL_ConvertToString(asset->boneNames[i]);
+					if (bone_name)
 					{
-						const auto bone_name = game::SL_ConvertToString(asset->boneNames[i]);
-						if (bone_name)
+						if (ImGui::Button(bone_name))
 						{
-							if (ImGui::Button(bone_name))
-							{
-								gui::copy_to_clipboard(bone_name);
-							}
+							gui::copy_to_clipboard(bone_name);
 						}
 					}
-
-					ImGui::TreePop();
 				}
 
-				if (ImGui::TreeNode("surface materials"))
-				{
-					for (auto i = 0; i < asset->numsurfs; i++)
-					{
-						if (ImGui::Button(asset->materialHandles[i]->name))
-						{
-							gui::copy_to_clipboard(asset->materialHandles[i]->name);
-						}
-
-						add_view_button(i, game::ASSET_TYPE_MATERIAL, asset->materialHandles[i]->name);
-					}
-
-					ImGui::TreePop();
-				}
-
-				if (asset->numCompositeModels > 0)
-				{
-					if (ImGui::TreeNode("composite models"))
-					{
-						for (auto i = 0; i < asset->numCompositeModels; i++)
-						{
-							if (ImGui::Button(asset->compositeModels[i]->name))
-							{
-								gui::copy_to_clipboard(asset->compositeModels[i]->name);
-							}
-						}
-
-						ImGui::TreePop();
-					}
-				}
+				ImGui::TreePop();
 			}
 
-			ImGui::End();
-
-			return is_open;
-		}
-
-		void draw_xmodels()
-		{
-			for (auto i = opened_assets.begin(); i != opened_assets.end(); )
+			if (ImGui::TreeNode("surface materials"))
 			{
-				if (!draw_material_window(*i))
+				for (auto i = 0; i < asset->numsurfs; i++)
 				{
-					i = opened_assets.erase(i);
+					if (ImGui::Button(asset->materialHandles[i]->name))
+					{
+						gui::copy_to_clipboard(asset->materialHandles[i]->name);
+					}
+
+					add_view_button(i, game::ASSET_TYPE_MATERIAL, asset->materialHandles[i]->name);
 				}
-				else
+
+				ImGui::TreePop();
+			}
+
+			if (asset->numCompositeModels > 0)
+			{
+				if (ImGui::TreeNode("composite models"))
 				{
-					++i;
+					for (auto i = 0; i < asset->numCompositeModels; i++)
+					{
+						if (ImGui::Button(asset->compositeModels[i]->name))
+						{
+							gui::copy_to_clipboard(asset->compositeModels[i]->name);
+						}
+					}
+
+					ImGui::TreePop();
 				}
 			}
 		}
@@ -324,10 +288,9 @@ namespace gui::asset_list::assets::xmodel
 	public:
 		void post_unpack() override
 		{
-			gui::asset_list::add_asset_view_callback(game::ASSET_TYPE_XMODEL, add_xmodel_view);
-			gui::register_callback(draw_xmodels, false);
+			gui::asset_list::add_asset_view<game::XModel>(game::ASSET_TYPE_XMODEL, draw_xmodel_window);
 		}
 	};
 }
 
-REGISTER_COMPONENT(gui::asset_list::assets::xmodel::component)
+REGISTER_COMPONENT(gui::asset_list::xmodel::component)
