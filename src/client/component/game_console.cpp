@@ -63,8 +63,6 @@ namespace game_console
 		float color_white[4] = {1.0f, 1.0f, 1.0f, 1.0f};
 		float color_h2[4] = {0.9f, 0.9f, 0.5f, 1.0f};
 
-		bool is_initialized{};
-
 		void clear()
 		{
 			strncpy_s(con.buffer, "", 256);
@@ -550,11 +548,6 @@ namespace game_console
 
 	void add(const std::string& cmd)
 	{
-		if (!is_initialized)
-		{
-			return;
-		}
-
 		execute(cmd.data());
 
 		history.push_front(cmd);
@@ -763,11 +756,6 @@ namespace game_console
 		void post_unpack() override
 		{
 			scheduler::loop(draw_console, scheduler::pipeline::renderer);
-
-			scheduler::once([]
-			{
-				is_initialized = true;
-			}, scheduler::main);
 
 			con.cursor = 0;
 			con.visible_line_count = 0;

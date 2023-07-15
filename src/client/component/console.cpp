@@ -26,7 +26,7 @@ namespace console
 
 		struct
 		{
-			bool kill;
+			std::atomic_bool kill;
 			std::thread thread;
 			HANDLE kill_event;
 			char buffer[512]{};
@@ -328,6 +328,25 @@ namespace console
 
 			return dispatch_message(con_type_info, result);
 		}
+
+		BOOL WINAPI console_ctrl_handler(DWORD ctrl_type)
+		{
+			if (ctrl_type == CTRL_CLOSE_EVENT)
+			{
+				if (command::is_game_initialized())
+				{
+					command::execute("quit");
+					while (!con.kill)
+					{
+						std::this_thread::sleep_for(10ms);
+					}
+
+					return TRUE;
+				}
+			}
+
+			return FALSE;
+		}
 	}
 
 	void print(const int type, const char* fmt, ...)
@@ -357,6 +376,7 @@ namespace console
 		{
 			ShowWindow(GetConsoleWindow(), SW_SHOW);
 			SetConsoleTitle("H2-Mod");
+			SetConsoleCtrlHandler(console_ctrl_handler, TRUE);
 
 			con.kill_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
