@@ -62,7 +62,7 @@ namespace discord
 				}
 				
 				const auto key = utils::string::va("PRESENCE_SP_%s", mapname);
-				if (game::DB_XAssetExists(game::ASSET_TYPE_LOCALIZE, key) && !game::DB_IsXAssetDefault(game::ASSET_TYPE_LOCALIZE, key))
+				if (game::DB_XAssetExists(game::ASSET_TYPE_LOCALIZE_ENTRY, key) && !game::DB_IsXAssetDefault(game::ASSET_TYPE_LOCALIZE_ENTRY, key))
 				{
 					mapname = game::UI_SafeTranslateString(key);
 				}

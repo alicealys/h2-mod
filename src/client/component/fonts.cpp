@@ -250,7 +250,7 @@ namespace fonts
 				}
 
 				const auto name = params.get(1);
-				const auto ttf = game::DB_FindXAssetHeader(game::XAssetType::ASSET_TYPE_TTF, name, false).ttf;
+				const auto ttf = game::DB_FindXAssetHeader(game::XAssetType::ASSET_TYPE_TTF, name, false).ttfDef;
 				if (ttf == nullptr)
 				{
 					console::error("Font does not exist\n");
@@ -258,7 +258,7 @@ namespace fonts
 				}
 
 				const auto path = utils::string::va("dumps/%s", ttf->name);
-				utils::io::write_file(path, std::string(ttf->buffer, ttf->len), false);
+				utils::io::write_file(path, std::string(ttf->file, ttf->fileLen), false);
 				console::info("Dumped to %s", path);
 			});
 		}

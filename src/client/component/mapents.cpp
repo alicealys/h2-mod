@@ -73,14 +73,14 @@ namespace mapents
 
 				fastfiles::enum_assets(game::ASSET_TYPE_MAP_ENTS, [](game::XAssetHeader header)
 				{
-					if (header.mapents == nullptr)
+					if (header.mapEnts == nullptr)
 					{
 						console::info("Failed to dump mapents\n");
 						return;
 					}
 
-					const auto dest = utils::string::va("dumps/%s.ents", header.mapents->name);
-					const auto str = std::string(header.mapents->entityString, header.mapents->numEntityChars);
+					const auto dest = utils::string::va("dumps/%s.ents", header.mapEnts->name);
+					const auto str = std::string(header.mapEnts->entityString, header.mapEnts->numEntityChars);
 					const auto data = replace_mapents_keys(str);
 					utils::io::write_file(dest, data, false);
 					console::info("Mapents dumped to %s\n", dest);

@@ -307,6 +307,14 @@ namespace gui
 		}, always);
 	}
 
+	void register_callback(const std::function<void()>& callback, bool always)
+	{
+		on_frame([=]
+		{
+			callback();
+		}, always);
+	}
+
 	class component final : public component_interface
 	{
 	public:

@@ -296,6 +296,9 @@ namespace game
 
 	WEAK symbol<DB_FileSysInterface*> g_fileSystem{0x1420B27E8};
 
+	WEAK symbol<int> db_hashTable{0x142250000};
+	WEAK symbol<XAssetEntry> g_assetEntryPool{0x143CBB140};
+
 	WEAK symbol<map_t> maps{0x14097EE90};
 
 	WEAK symbol<language_values> languages{0x140BF9740};

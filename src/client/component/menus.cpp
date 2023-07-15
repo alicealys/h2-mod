@@ -17,8 +17,8 @@ namespace menus
 		{
 			game::UI_AddMenuList(context, menu_list, a3);
 
-			if (game::DB_XAssetExists(game::ASSET_TYPE_MENUFILE, patch_menu_list_name) &&
-				!game::DB_IsXAssetDefault(game::ASSET_TYPE_MENUFILE, patch_menu_list_name))
+			if (game::DB_XAssetExists(game::ASSET_TYPE_MENULIST, patch_menu_list_name) &&
+				!game::DB_IsXAssetDefault(game::ASSET_TYPE_MENULIST, patch_menu_list_name))
 			{
 				const auto patch_code_list = game::UI_LoadMenus(patch_menu_list_name);
 				game::UI_AddMenuList(context, patch_code_list, a3);
