@@ -172,6 +172,20 @@ namespace gui::asset_list
 		}
 	}
 
+	void add_view_button(int id, game::XAssetType type, const char* name)
+	{
+		if (asset_view_callbacks.contains(type))
+		{
+			ImGui::SameLine();
+			ImGui::PushID(id);
+			if (ImGui::Button("view"))
+			{
+				asset_view_callbacks.at(type)(name);
+			}
+			ImGui::PopID();
+		}
+	}
+
 	void add_asset_view_callback(game::XAssetType type, const std::function<void(const std::string&)>& callback)
 	{
 		asset_view_callbacks.insert(std::make_pair(type, callback));
