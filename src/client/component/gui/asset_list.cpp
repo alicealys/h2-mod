@@ -20,17 +20,102 @@ namespace gui::asset_list
 		bool shown_assets[game::XAssetType::ASSET_TYPE_COUNT]{};
 		std::string asset_type_filter;
 		std::string assets_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
+		std::string assets_value_filter[game::XAssetType::ASSET_TYPE_COUNT];
 		std::string zone_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
 
 		std::unordered_map<game::XAssetType, std::function<void(const std::string&)>> asset_view_callbacks;
 
-		void render_window()
+		bool default_only[game::ASSET_TYPE_COUNT] = {};
+		int asset_count[game::ASSET_TYPE_COUNT] = {};
+		bool disabled_zones[game::ASSET_TYPE_COUNT][0x100] = {};
+		bool show_asset_zone = true;
+
+		void draw_table_row(game::XAssetType type, const game::XAssetEntry* entry, bool should_add_view_btn)
 		{
-			static auto* enabled = &gui::enabled_menus["asset_list"];
-			ImGui::Begin("Asset list", enabled);
+			const auto asset = entry->asset;
+			auto asset_name = game::DB_GetXAssetName(&asset);
+			const auto is_default = entry->zoneIndex == 0;
 
-			static bool show_asset_zone = true;
+			if (asset_name[0] == '\0' || disabled_zones[type][entry->zoneIndex] || default_only[type] && !is_default)
+			{
+				return;
+			}
 
+			if (is_default)
+			{
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.43f, 0.15f, 0.15f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.98f, 0.26f, 0.26f, 1.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.98f, 0.06f, 0.06f, 1.f));
+			}
+
+			const auto _0 = gsl::finally([&]
+			{
+				if (is_default)
+				{
+					ImGui::PopStyleColor(3);
+				}
+			});
+
+			auto col_index = 0;
+			if (!utils::string::strstr_lower(asset_name, assets_name_filter[type].data()))
+			{
+				return;
+			}
+
+			if (type == game::ASSET_TYPE_LOCALIZE_ENTRY)
+			{
+				if (!utils::string::strstr_lower(entry->asset.header.localize->value, assets_value_filter[type].data()))
+				{
+					return;
+				}
+			}
+
+			ImGui::TableNextRow();
+
+			if (should_add_view_btn)
+			{
+				ImGui::TableSetColumnIndex(col_index++);
+				ImGui::PushID(asset_count[type]);
+				if (ImGui::Button("view"))
+				{
+					asset_view_callbacks.at(type)(asset_name);
+				}
+				ImGui::PopID();
+			}
+
+			if (show_asset_zone)
+			{
+				ImGui::TableSetColumnIndex(col_index++);
+				if (entry->zoneIndex > 0)
+				{
+					ImGui::Text(game::g_zones[entry->zoneIndex].name);
+				}
+				else
+				{
+					ImGui::Text("default");
+				}
+			}
+
+			ImGui::TableSetColumnIndex(col_index++);
+
+			if (ImGui::Button(asset_name))
+			{
+				gui::copy_to_clipboard(asset_name);
+			}
+
+			if (type == game::ASSET_TYPE_LOCALIZE_ENTRY)
+			{
+				ImGui::TableSetColumnIndex(col_index++);
+
+				if (ImGui::Button(entry->asset.header.localize->value))
+				{
+					gui::copy_to_clipboard(entry->asset.header.localize->value);
+				}
+			}
+		}
+
+		void draw_asset_type_list()
+		{
 			if (ImGui::TreeNode("loaded zones"))
 			{
 				for (auto i = 1u; i <= *game::g_zoneCount; i++)
@@ -60,115 +145,104 @@ namespace gui::asset_list
 			}
 
 			ImGui::EndChild();
-			ImGui::End();
+		}
 
-			for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
+		void draw_asset_list_filter(const game::XAssetType type)
+		{
+			ImGui::Text("count: %i / %i", asset_count[type], game::g_poolSize[type]);
+			ImGui::InputText("name", &assets_name_filter[type]);
+
+			if (type == game::ASSET_TYPE_LOCALIZE_ENTRY)
 			{
-				const auto name = game::g_assetNames[i];
-				const auto type = static_cast<game::XAssetType>(i);
+				ImGui::InputText("value", &assets_value_filter[type]);
+			}
 
-				if (!shown_assets[type])
+			if (ImGui::InputText("zone name", &zone_name_filter[type]))
+			{
+				for (auto zone = 0u; zone <= *game::g_zoneCount; zone++)
 				{
-					continue;
+					const auto zone_name = game::g_zones[zone].name;
+					disabled_zones[type][zone] = !utils::string::strstr_lower(zone_name, zone_name_filter[type].data());
 				}
+			}
 
-				ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), ImVec2(1000, 1000));
-				ImGui::Begin(name, &shown_assets[type]);
+			ImGui::Checkbox("default assets only", &default_only[type]);
+		}
 
-				static bool default_only[game::ASSET_TYPE_COUNT] = {};
-				static int asset_count[game::ASSET_TYPE_COUNT] = {};
-				static bool disabled_zones[game::ASSET_TYPE_COUNT][0x100] = {};
+		constexpr auto get_table_flags()
+		{
+			constexpr auto flags =
+				ImGuiTableFlags_BordersInnerH |
+				ImGuiTableFlags_BordersOuterH |
+				ImGuiTableFlags_BordersInnerV |
+				ImGuiTableFlags_BordersOuterV |
+				ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_ScrollX |
+				ImGuiTableFlags_ScrollY;
 
-				ImGui::Text("count: %i / %i", asset_count[type], game::g_poolSize[type]);
+			return flags;
+		}
 
-				ImGui::InputText("asset name", &assets_name_filter[type]);
+		void draw_asset_list_entries(const game::XAssetType type)
+		{
+			const auto should_add_view_btn = asset_view_callbacks.contains(type);
+			constexpr auto flags = get_table_flags();
 
-				if (ImGui::InputText("zone name", &zone_name_filter[type]))
-				{
-					for (auto zone = 0u; zone <= *game::g_zoneCount; zone++)
-					{
-						const auto zone_name = game::g_zones[zone].name;
-						disabled_zones[type][zone] = !utils::string::strstr_lower(zone_name, zone_name_filter[type].data());
-					}
-				}
+			asset_count[type] = 0;
 
-				const auto should_add_view_btn = asset_view_callbacks.contains(type);
-				ImGui::Checkbox("default assets only", &default_only[type]);
+			ImGui::BeginChild("assets list");
 
-				ImGui::BeginChild("assets list");
+			auto column_count = 1;
+			column_count += should_add_view_btn;
+			column_count += show_asset_zone;
+			column_count += type == game::ASSET_TYPE_LOCALIZE_ENTRY;
 
-				asset_count[type] = 0;
+			if (ImGui::BeginTable("assets", column_count, flags))
+			{
 				fastfiles::enum_asset_entries(type, [&](const game::XAssetEntry* entry)
 				{
 					asset_count[type]++;
-
-					const auto asset = entry->asset;
-					auto asset_name = game::DB_GetXAssetName(&asset);
-					if (asset_name[0] == '\0')
-					{
-						return;
-					}
-
-					if (disabled_zones[type][entry->zoneIndex])
-					{
-						return;
-					}
-
-					const auto is_default = entry->zoneIndex == 0;
-					if (default_only[type] && !is_default)
-					{
-						return;
-					}
-
-					if (is_default)
-					{
-						ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.43f, 0.15f, 0.15f, 1.f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.98f, 0.26f, 0.26f, 1.f));
-						ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.98f, 0.06f, 0.06f, 1.f));
-					}
-
-					if (utils::string::strstr_lower(asset_name, assets_name_filter[type].data()))
-					{
-						if (show_asset_zone)
-						{
-							if (entry->zoneIndex > 0)
-							{
-								ImGui::Text(game::g_zones[entry->zoneIndex].name);
-							}
-							else
-							{
-								ImGui::Text("default");
-							}
-
-							ImGui::SameLine();
-						}
-
-						if (ImGui::Button(asset_name))
-						{
-							gui::copy_to_clipboard(asset_name);
-						}
-
-						if (should_add_view_btn)
-						{
-							ImGui::SameLine();
-							ImGui::PushID(asset_count[type]);
-							if (ImGui::Button("view"))
-							{
-								asset_view_callbacks.at(type)(asset_name);
-							}
-							ImGui::PopID();
-						}
-					}
-
-					if (is_default)
-					{
-						ImGui::PopStyleColor(3);
-					}
+					draw_table_row(type, entry, should_add_view_btn);
 				}, true);
 
-				ImGui::EndChild();
-				ImGui::End();
+				ImGui::EndTable();
 			}
+
+			ImGui::EndChild();
+		}
+
+		void draw_asset_list(const game::XAssetType type)
+		{
+			if (!shown_assets[type])
+			{
+				return;
+			}
+
+			const auto name = game::g_assetNames[type];
+
+			auto& io = ImGui::GetIO();
+			ImGui::SetNextWindowSizeConstraints(ImVec2(500, 500), io.DisplaySize);
+			ImGui::Begin(name, &shown_assets[type]);
+
+			draw_asset_list_filter(type);
+			draw_asset_list_entries(type);
+
+			ImGui::End();
+		}
+
+		void render_window()
+		{
+			static auto* enabled = &gui::enabled_menus["asset_list"];
+			ImGui::Begin("Asset list", enabled);
+
+			draw_asset_type_list();
+
+			for (auto i = 0; i < game::XAssetType::ASSET_TYPE_COUNT; i++)
+			{
+				draw_asset_list(static_cast<game::XAssetType>(i));
+			}
+
+			ImGui::End();
 		}
 	}
 
