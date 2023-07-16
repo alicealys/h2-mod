@@ -75,6 +75,63 @@ namespace gui
 			});
 		}
 
+		std::vector<int> imgui_colors =
+		{
+			ImGuiCol_FrameBg,
+			ImGuiCol_FrameBgHovered,
+			ImGuiCol_FrameBgActive,
+			ImGuiCol_TitleBgActive,
+			ImGuiCol_ScrollbarGrabActive,
+			ImGuiCol_CheckMark,
+			ImGuiCol_SliderGrab,
+			ImGuiCol_SliderGrabActive,
+			ImGuiCol_Button,
+			ImGuiCol_ButtonHovered,
+			ImGuiCol_ButtonActive,
+			ImGuiCol_Header,
+			ImGuiCol_HeaderHovered,
+			ImGuiCol_HeaderActive,
+			ImGuiCol_SeparatorHovered,
+			ImGuiCol_SeparatorActive,
+			ImGuiCol_ResizeGrip,
+			ImGuiCol_ResizeGripHovered,
+			ImGuiCol_ResizeGripActive,
+			ImGuiCol_TextSelectedBg,
+			ImGuiCol_NavHighlight,
+		};
+
+		void update_colors()
+		{
+			auto& style = ImGui::GetStyle();
+			const auto colors = style.Colors;
+
+			const auto now = std::chrono::system_clock::now();
+			const auto days = std::chrono::floor<std::chrono::days>(now);
+			std::chrono::year_month_day y_m_d{days};
+
+			if (y_m_d.month() != std::chrono::month(6))
+			{
+				return;
+			}
+
+			for (const auto& id : imgui_colors)
+			{
+				const auto color = colors[id];
+
+				ImVec4 hsv_color =
+				{
+					static_cast<float>((game::Sys_Milliseconds() / 100) % 256) / 255.f,
+					1.f, 1.f, 1.f,
+				};
+
+				ImVec4 rgba_color{};
+				ImGui::ColorConvertHSVtoRGB(hsv_color.x, hsv_color.y, hsv_color.z, rgba_color.x, rgba_color.y, rgba_color.z);
+
+				rgba_color.w = color.w;
+				colors[id] = rgba_color;
+			}
+		}
+
 		void new_gui_frame()
 		{
 			ImGui::GetIO().MouseDrawCursor = toggled;
@@ -86,6 +143,8 @@ namespace gui
 			{
 				*game::keyCatchers &= ~0x10;
 			}
+
+			update_colors();
 
 			ImGui_ImplDX11_NewFrame();
 			ImGui_ImplWin32_NewFrame();

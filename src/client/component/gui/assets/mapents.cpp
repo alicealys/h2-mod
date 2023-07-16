@@ -33,8 +33,6 @@ namespace gui::asset_list::mapents
 			std::atomic_bool done_parsing = false;
 		};
 
-		std::unordered_set<std::string> temp_files;
-
 		utils::concurrency::container<mapents_t, std::recursive_mutex> mapents;
 
 		void parse_mapents(game::MapEnts* asset, mapents_t& data)
@@ -89,7 +87,6 @@ namespace gui::asset_list::mapents
 		{
 			const auto current_path = std::filesystem::current_path().generic_string();
 			const std::string path = utils::string::va("%s\\h2-mod\\tmp\\%s", current_path.data(), data.asset->name);
-			temp_files.insert(path);
 
 			utils::io::write_file(path, data.converted_mapents, false);
 			ShellExecuteA(nullptr, nullptr, path.data(), nullptr, nullptr, SW_SHOWNORMAL);
@@ -135,10 +132,7 @@ namespace gui::asset_list::mapents
 
 		void pre_destroy() override
 		{
-			for (const auto& file : temp_files)
-			{
-				utils::io::remove_file(file);
-			}
+			utils::io::remove_directory("h2-mod/tmp");
 		}
 	};
 }
