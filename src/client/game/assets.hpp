@@ -119,47 +119,106 @@ namespace game
 		char __pad1[48];
 	}; static_assert(sizeof(PhysPreset) == 0x60);
 
-	struct dmMeshNode_array_t
+	typedef std::int8_t dm_int8;
+	typedef std::uint8_t dm_uint8;
+	typedef std::int16_t dm_int16;
+	typedef std::uint16_t dm_uint16;
+	typedef std::int32_t dm_int32;
+	typedef std::uint32_t dm_uint32;
+	typedef std::int64_t dm_int64;
+	typedef std::uint64_t dm_uint64;
+	typedef float dm_float32;
+
+	struct dmFloat3
 	{
-		char __pad0[16];
+		dm_float32 x;
+		dm_float32 y;
+		dm_float32 z;
 	};
+
+	struct dmFloat4
+	{
+		dm_float32 x;
+		dm_float32 y;
+		dm_float32 z;
+		dm_float32 w;
+	};
+
+	struct dmMeshNode_anon_fields
+	{
+		unsigned int axis : 2;
+		unsigned int triangleCount : 4;
+		unsigned int index : 26;
+	};
+
+	union dmMeshNode_anon
+	{
+		dmMeshNode_anon_fields fields;
+		unsigned int packed;
+	};
+
+	struct dmMeshNode
+	{
+		dm_int16 lowerX;
+		dm_int16 lowerY;
+		dm_int16 lowerZ;
+		dm_int16 upperX;
+		dm_int16 upperY;
+		dm_int16 upperZ;
+		dmMeshNode_anon anon;
+	}; assert_sizeof(dmMeshNode, 16);
 
 	struct dmMeshTriangle
 	{
-		char __pad0[32];
-	};
+		dm_int32 i1;
+		dm_int32 i2;
+		dm_int32 i3;
+		dm_int32 w1;
+		dm_int32 w2;
+		dm_int32 w3;
+		dm_int32 materialIndex;
+		dm_int32 collisionFlags;
+	}; assert_sizeof(dmMeshTriangle, 32);
 
 	struct dmMeshData
 	{
-		dmMeshNode_array_t* meshNodes;
-		vec4_t* vec4_array0;
-		dmMeshTriangle* meshTriangles;
-		char __pad0[36];
-		unsigned int count0;
-		unsigned int count1;
-		unsigned int count2;
-		char __pad1[8];
-	}; static_assert(sizeof(dmMeshData) == 0x50);
+		dmMeshNode* m_pRoot;
+		dmFloat4* m_aVertices;
+		dmMeshTriangle* m_aTriangles;
+		dmFloat3 m_center;
+		dmFloat3 m_extents;
+		dmFloat3 m_unquantize;
+		dm_int32 m_nodeCount;
+		dm_int32 m_vertexCount;
+		dm_int32 m_triangleCount;
+		dm_int32 m_height;
+		dm_int32 contents;
+	}; assert_sizeof(dmMeshData, 0x50);
 
 	struct dmSubEdge
 	{
-		int value;
-	};
+		dm_int8 twinOffset;
+		dm_uint8 tail;
+		dm_uint8 left;
+		dm_uint8 next;
+	}; assert_sizeof(dmSubEdge, 4);
 
 	struct dmPolytopeData
 	{
-		vec4_t* vec4_array0;
-		vec4_t* vec4_array1;
-		unsigned short* uint16_array0;
-		unsigned short* uint16_array1;
-		dmSubEdge* edges;
-		unsigned char* uint8_array0;
-		char __pad0[12];
-		unsigned int count0;
-		unsigned int count1;
-		unsigned int count2;
-		char __pad1[40];
-	}; static_assert(sizeof(dmPolytopeData) == 0x70);
+		dmFloat4* vec4_array0; // count: m_vertexCount, m_aVertices?
+		dmFloat4* vec4_array1; // count: m_faceCount, m_aPlanes?
+		dm_uint16* uint16_array0; // count: m_faceCount, m_vertexMaterials? surfaceType? // ALWAYS 0
+		dm_uint16* uint16_array1; // count: m_vertexCount, m_vertexMaterials? // ALWAYS 0
+		dmSubEdge* m_aSubEdges; // count: m_subEdgeCount
+		dm_uint8* m_aFaceSubEdges; // count: m_faceCount
+		dmFloat3 m_centroid;
+		dm_int32 m_vertexCount;
+		dm_int32 m_faceCount;
+		dm_int32 m_subEdgeCount;
+		float pad1[8];
+		int contents;
+		int pad2;
+	}; assert_sizeof(dmPolytopeData, 0x70);
 
 	struct PhysGeomInfo
 	{
@@ -180,7 +239,7 @@ namespace game
 		PhysGeomInfo* geoms;
 		PhysMass mass;
 		Bounds bounds;
-	}; static_assert(sizeof(PhysCollmap) == 0x58);
+	}; assert_sizeof(PhysCollmap, 0x58);
 
 	struct PhysWaterPreset
 	{
@@ -193,34 +252,50 @@ namespace game
 		FxEffectDef* fx4;
 		FxEffectDef* fx5;
 		FxEffectDef* fx6;
-	}; static_assert(sizeof(PhysWaterPreset) == 0x80);
+	}; assert_sizeof(PhysWaterPreset, 0x80);
 
 	struct PhysWaterVolumeDef
 	{
 		PhysWaterPreset* physWaterPreset;
 		char __pad0[12];
 		scr_string_t string;
-		char __pad1[8];
-	}; static_assert(sizeof(PhysWaterVolumeDef) == 0x20);
-	static_assert(offsetof(PhysWaterVolumeDef, string) == 20);
+		short brushModelIndex;
+		char __pad1[6];
+	}; assert_sizeof(PhysWaterVolumeDef, 0x20);
+	assert_offsetof(PhysWaterVolumeDef, string, 20);
 
-	struct PhysBrushModel
+	struct PhysBrushModelPacked
 	{
-		char __pad0[8];
+		std::uint64_t p;
 	};
 
-	struct PhysWorld
+	struct PhysBrushModelFields
+	{
+		short polytopeIndex;
+		short unk;
+		short worldIndex;
+		short meshIndex;
+	};
+
+	union PhysBrushModel
+	{
+		PhysBrushModelPacked packed;
+		PhysBrushModelFields fields;
+	}; assert_sizeof(PhysBrushModel, 8);
+
+	struct PhysWorld // PhysicsWorld
 	{
 		const char* name;
-		PhysBrushModel* models;
+		PhysBrushModel* brushModels;
 		dmPolytopeData* polytopeDatas;
 		dmMeshData* meshDatas;
-		PhysWaterVolumeDef* waterVolumes;
-		unsigned int modelsCount;
-		unsigned int polytopeDatasCount;
-		unsigned int meshDatasCount;
-		unsigned int waterVolumesCount;
-	}; static_assert(sizeof(PhysWorld) == 0x38);
+		PhysWaterVolumeDef* waterVolumeDefs;
+		unsigned int brushModelCount;
+		unsigned int polytopeCount;
+		unsigned int meshDataCount;
+		unsigned int waterVolumeDefCount;
+	}; assert_sizeof(PhysWorld, 0x38);
+
 
 	struct PhysConstraint
 	{
