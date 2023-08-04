@@ -376,7 +376,10 @@ namespace console
 		{
 			ShowWindow(GetConsoleWindow(), SW_SHOW);
 			SetConsoleTitle("H2-Mod");
+
+#ifndef DEBUG
 			SetConsoleCtrlHandler(console_ctrl_handler, TRUE);
+#endif
 
 			con.kill_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
