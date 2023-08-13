@@ -752,9 +752,12 @@ namespace game
 		char __pad2[40];
 		vec3_t origin;
 		vec3_t velocity;
+		char __pad3[144];
+		vec3_t delta_angles;
 	};
 
 	static_assert(offsetof(playerState_s, origin) == 128);
+	static_assert(offsetof(playerState_s, delta_angles) == 296);
 
 	struct SprintState_s
 	{
@@ -769,7 +772,9 @@ namespace game
 	{
 		int serverTime;
 		int buttons;
-		char __pad0[20];
+		int angles[3];
+		unsigned int weapon;
+		unsigned int offHand;
 		char forwardmove;
 		char rightmove;
 		char __pad1[2];
