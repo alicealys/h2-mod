@@ -13,7 +13,10 @@ namespace camera
 {
 	namespace
 	{
+		utils::hook::detour sub_140781090_hook;
+
 		game::dvar_t* cl_free_move_scale = nullptr;
+		game::dvar_t** cg_paused = nullptr;
 
 		float angle_normalize(const float angle)
 		{
@@ -35,10 +38,11 @@ namespace camera
 			a3[2] = (a2[1] * a1[0]) - (a1[1] * a2[0]);
 		}
 
+		float camera_origin[3]{};
+
 		void paused_free_move()
 		{
-			const auto cg_paused = *reinterpret_cast<game::dvar_t**>(0x141E39FC0);
-			if (cg_paused->current.integer != 2)
+			if ((*cg_paused)->current.integer != 2)
 			{
 				return;
 			}
@@ -53,10 +57,10 @@ namespace camera
 				return;
 			}
 
-			float viewangles[3]{};
-			viewangles[0] = angle_normalize((cmd.angles[0] * 0.000021457672f) + ps->delta_angles[0]);
-			viewangles[1] = angle_normalize((cmd.angles[1] * 0.000021457672f) + ps->delta_angles[1]);
-			viewangles[2] = angle_normalize((cmd.angles[2] * 0.000021457672f) + ps->delta_angles[2]);
+			game::cgs->refdefViewAngles[0] = angle_normalize((cmd.angles[0] * 0.000021457672f) + ps->delta_angles[0]);
+			game::cgs->refdefViewAngles[1] = angle_normalize((cmd.angles[1] * 0.000021457672f) + ps->delta_angles[1]);
+			game::cgs->refdefViewAngles[2] = angle_normalize((cmd.angles[2] * 0.000021457672f) + ps->delta_angles[2]);
+			game::cgs->refdefViewAngles[2] = 0;
 
 			const auto game_time = game::CG_GetGameTime(local_client_num);
 
@@ -81,7 +85,7 @@ namespace camera
 
 			scale *= cl_free_move_scale->current.value;
 
-			game::AnglesToAxis(viewangles, game::refdef->axis);
+			game::AnglesToAxis(game::cgs->refdefViewAngles, game::refdef->axis);
 
 			float v1[3] = {0.f, 0.f, 1.f};
 			float v2[3] = {game::refdef->axis[0][0], game::refdef->axis[0][1], game::refdef->axis[0][2]};
@@ -117,12 +121,29 @@ namespace camera
 			game::refdef->org[0] = ps->origin[0];
 			game::refdef->org[1] = ps->origin[1];
 			game::refdef->org[2] = ps->origin[2] + ps->viewHeightCurrent;
+
+			camera_origin[0] = game::refdef->org[0];
+			camera_origin[1] = game::refdef->org[1];
+			camera_origin[2] = game::refdef->org[2];
 		}
 
 		void set_viewpos_now_stub(void* a1)
 		{
 			paused_free_move();
 			utils::hook::invoke<void>(0x1403B07C0, a1);
+		}
+
+		void sub_140781090_stub(void* a1, void* a2, float a3)
+		{
+			sub_140781090_hook.invoke<void>(a1, a2, a3);
+
+			if ((*cg_paused)->current.integer == 2)
+			{
+				const auto lod_origin = reinterpret_cast<float*>(0x14EEE0890);
+				lod_origin[0] = camera_origin[0];
+				lod_origin[1] = camera_origin[1];
+				lod_origin[2] = camera_origin[2];
+			}
 		}
 	}
 
@@ -134,7 +155,10 @@ namespace camera
 			cl_free_move_scale = dvars::register_float("cl_freemoveScale", 1.f, 0.01f, 100.f,
 				game::DVAR_FLAG_SAVED, "Scale how fast you move in cl_freemove mode");
 
+			cg_paused = reinterpret_cast<game::dvar_t**>(0x141E39FC0);
+
 			utils::hook::call(0x1403ACB2D, set_viewpos_now_stub);
+			sub_140781090_hook.create(0x140781090, sub_140781090_stub);
 		}
 	};
 }
