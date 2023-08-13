@@ -762,6 +762,12 @@ namespace game
 	static_assert(offsetof(playerState_s, viewHeightCurrent) == 280);
 	static_assert(offsetof(playerState_s, delta_angles) == 296);
 
+	struct cg_s
+	{
+		char __pad0[507228];
+		float refdefViewAngles[3];
+	};
+
 	struct SprintState_s
 	{
 		int sprintButtonUpRequired;

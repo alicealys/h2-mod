@@ -242,6 +242,8 @@ namespace game
 
 	// Variables
 
+	WEAK symbol<cg_s> cgs{0x141B96B20};
+
 	WEAK symbol<cmd_function_s*> cmd_functions{0x14AD17BB8};
 	WEAK symbol<CmdArgs> cmd_args{0x14AD17A60};
 	WEAK symbol<const char*> command_whitelist{0x140BF84E0};
