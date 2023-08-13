@@ -6,6 +6,8 @@ namespace game
 {
 	// Functions
 	
+	WEAK symbol<void(float* angles, float(*axis)[3])> AnglesToAxis{0x140613090};
+	
 	WEAK symbol<void(int type, VariableUnion u)> AddRefToValue{0x1405C0EB0};
 	WEAK symbol<void(unsigned int id)> AddRefToObject{0x1405C0EA0};
 	WEAK symbol<unsigned int(unsigned int id)> AllocThread{0x1405C1200};
@@ -22,9 +24,15 @@ namespace game
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x14037F1B0};
 	WEAK symbol<char*(const unsigned int weapon, 
 		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x1403B9210};
+	WEAK symbol<int(int localClientNum)> CG_GetGameTime{0x14037F580};
+
+	WEAK symbol<playerState_s*(int localClientNum)> CG_GetPredictedPlayerState{0x14037F720};
 
 	WEAK symbol<void(ScreenPlacement* place, float x, float y, float w, float h, int horzAlign, int vertAlign, 
 		float t0, float s0, float t1, float s1, float* color, Material* material)> CL_DrawStretchPic{0x1403C9570};
+
+	WEAK symbol<int(int localClientNum, int cmdNumber, usercmd_s* cmd)> CL_GetUserCmd{0x1403C9F10};
+	WEAK symbol<int(int localClientNum)> CL_GetCurrentCmdNumber{0x1403C9D80};
 
 	WEAK symbol<void(const char* cmdName, void(), cmd_function_s* allocedCmd)> Cmd_AddCommandInternal{0x14059A5F0};
 	WEAK symbol<void(int localClientNum, int controllerIndex, const char* text)> Cmd_ExecuteSingleCommand{0x14059ABA0};
@@ -252,6 +260,7 @@ namespace game
 	WEAK symbol<int> g_poolSize{0x140BF2E40};
 	
 	WEAK symbol<GfxWorld*> gfx_map{0x14EE49000};
+	WEAK symbol<ComWorld> comWorld{0x14AD26078};
 
 	WEAK symbol<gentity_s> g_entities{0x1452DDDA0};
 	WEAK symbol<gclient_s> g_clients{0x1455DA980};
