@@ -752,11 +752,14 @@ namespace game
 		char __pad2[40];
 		vec3_t origin;
 		vec3_t velocity;
-		char __pad3[144];
+		char __pad3[128];
+		float viewHeightCurrent;
+		char __pad4[12];
 		vec3_t delta_angles;
 	};
 
 	static_assert(offsetof(playerState_s, origin) == 128);
+	static_assert(offsetof(playerState_s, viewHeightCurrent) == 280);
 	static_assert(offsetof(playerState_s, delta_angles) == 296);
 
 	struct SprintState_s
