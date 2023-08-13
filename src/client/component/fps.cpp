@@ -281,11 +281,10 @@ namespace fps
 			}
 
 			const auto font = fps_font;
-
 			const auto pos_string = utils::string::va("%f %f %f",
-													  game::g_entities[0].origin[0],
-													  game::g_entities[0].origin[1],
-													  game::g_entities[0].origin[2]);
+				game::refdef->org[0],
+				game::refdef->org[1],
+				game::refdef->org[2]);
 
 			const auto x = screen_max[0] - 15.f - game::R_TextWidth(pos_string, 0x7FFFFFFF, font);
 

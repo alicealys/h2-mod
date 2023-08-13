@@ -53,6 +53,14 @@ namespace camera
 				return;
 			}
 
+			if (cg_paused->modified)
+			{
+				ps->origin[0] = game::refdef->org[0];
+				ps->origin[1] = game::refdef->org[1];
+				ps->origin[2] = game::refdef->org[2];
+				cg_paused->modified = false;
+			}
+
 			float viewangles[3]{};
 			viewangles[0] = angle_normalize((cmd.angles[0] * 0.000021457672f) + ps->delta_angles[0]);
 			viewangles[1] = angle_normalize((cmd.angles[1] * 0.000021457672f) + ps->delta_angles[1]);
