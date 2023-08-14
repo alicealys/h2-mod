@@ -18,6 +18,7 @@
 #include "config.hpp"
 #include "motd.hpp"
 #include "achievements.hpp"
+#include "camera.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -708,6 +709,20 @@ namespace ui_scripting
 
 				return table;
 			};
+
+			table camera_table;
+			lua["camera"] = camera_table;
+
+			camera::clear_lua();
+			camera_table["enablefreemove"] = camera::enable_free_move;
+			camera_table["disablefreemove"] = camera::disable_free_move;
+			camera_table["isfreemoveenabled"] = camera::is_free_move_enabled;
+			camera_table["setposition"] = camera::set_camera_position;
+			camera_table["setangles"] = camera::set_camera_angles;
+			camera_table["getposition"] = camera::get_camera_position;
+			camera_table["setusingoriginoverride"] = camera::set_using_origin_override;
+			camera_table["setusinganglesoverride"] = camera::set_using_angles_override;
+			camera_table["setcallback"] = camera::set_callback;
 		}
 
 		void start()
@@ -788,6 +803,7 @@ namespace ui_scripting
 
 		void hks_shutdown_stub()
 		{
+			camera::clear_lua();
 			converted_functions.clear();
 			globals = {};
 			hks_shutdown_hook.invoke<void>();
