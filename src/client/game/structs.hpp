@@ -69,7 +69,8 @@ namespace game
 	{
 		char __pad0[26];
 		vec3_t origin;
-		char __pad1[100];
+		vec3_t angles;
+		char __pad1[88];
 		EntityState s;
 		char __pad2[50];
 		Bounds box;
