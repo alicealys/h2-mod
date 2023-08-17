@@ -129,6 +129,8 @@ namespace patches
 			utils::hook::set<float>(0x140948F40, 1.f);
 			utils::hook::set<float>(0x140948F44, 1.f);
 			utils::hook::set<float>(0x140948F48, 1.f);
+
+			utils::hook::nop(0x14037B8AE, 7);
 		}
 	};
 }
