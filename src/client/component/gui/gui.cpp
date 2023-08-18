@@ -260,10 +260,23 @@ namespace gui
 			}
 		}
 
+		void shutdown_gui()
+		{
+			if (initialized)
+			{
+				ImGui_ImplWin32_Shutdown();
+				ImGui::DestroyContext();
+			}
+
+			initialized = false;
+		}
+
 		HRESULT d3d11_create_device_stub(IDXGIAdapter* pAdapter, D3D_DRIVER_TYPE DriverType, HMODULE Software,
 			UINT Flags, const D3D_FEATURE_LEVEL* pFeatureLevels, UINT FeatureLevels, UINT SDKVersion, 
 			ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext)
 		{
+			shutdown_gui();
+
 			const auto result = D3D11CreateDevice(pAdapter, DriverType, Software, Flags, pFeatureLevels,
 				FeatureLevels, SDKVersion, ppDevice, pFeatureLevel, ppImmediateContext);
 
@@ -402,11 +415,7 @@ namespace gui
 
 		void pre_destroy() override
 		{
-			if (initialized)
-			{
-				ImGui_ImplWin32_Shutdown();
-				ImGui::DestroyContext();
-			}
+			shutdown_gui();
 		}
 	};
 }

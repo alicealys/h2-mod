@@ -319,11 +319,6 @@ namespace mods
 				utils::io::create_directory(MOD_FOLDER);
 			}
 
-			if (!utils::io::directory_exists(MOD_STATS_FOLDER))
-			{
-				utils::io::create_directory(MOD_STATS_FOLDER);
-			}
-
 			db_release_xassets_hook.create(0x140416A80, db_release_xassets_stub);
 
 			command::add("loadmod", [](const command::params& params)
