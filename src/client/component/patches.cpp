@@ -44,21 +44,14 @@ namespace patches
 			gscr_set_save_dvar_hook.invoke<void>();
 		}
 
-		void free_lui_memory()
+		void vid_restart_stub()
 		{
+			// free stuff
+			*reinterpret_cast<void**>(0x141E584D8) = nullptr; // free material
+			utils::hook::invoke<void>(0x1406926B0); // free scripted viewmodel xanim stuff
 			utils::hook::invoke<void>(0x14032A540); // properly free lui memory
-		}
 
-		void vid_restart_stub_1()
-		{
-			free_lui_memory();
 			utils::hook::invoke<void>(0x1405A6480);
-		}
-
-		void vid_restart_stub_2()
-		{
-			free_lui_memory();
-			utils::hook::invoke<void>(0x1406B5290);
 		}
 
 		void exec_config_stub(void* a1)
@@ -108,8 +101,7 @@ namespace patches
 			gscr_set_save_dvar_hook.create(0x140504C60, &gscr_set_save_dvar_stub);
 
 			// fix vid_restart crashing
-			utils::hook::call(0x1403D7413, vid_restart_stub_1);
-			utils::hook::jump(0x1403D7402, vid_restart_stub_2);
+			utils::hook::call(0x1403D7413, vid_restart_stub);
 
 			// cinematicingameloopresident -> cinematicingameloop (fix ingame cinematics)
 			utils::hook::jump(0x140502140, 0x1405020C0);
