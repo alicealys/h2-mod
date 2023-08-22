@@ -64,6 +64,9 @@
     "LUA_MENU_INTRO": "Intro movie",
     "LUA_MENU_INTRO_DESC": "Show or skip intro movie with companies' logos on startup.",
 
+    "MENU_MUSIC_VOLUME": "Music Volume",
+    "MENU_MUSIC_VOLUME_DESC": "Move the slider to adjust the volume of the music.",
+
     "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK": "Github Page:",
     "MENU_SYSINFO_CUSTOMER_SUPPORT_URL": "https://github.com/fedddddd/h2-mod",
     "MENU_SYSINFO_DONATION_LINK": "Donation link:",
