@@ -239,7 +239,15 @@ namespace game_console
 			else if (matches.size() == 1)
 			{
 				auto* const dvar = game::Dvar_FindVar(matches[0].name.data());
-				const auto line_count = dvar ? 3 : 1;
+				auto line_count = dvar ? 3 : 1;
+
+				for (const auto& c : matches[0].description)
+				{
+					if (c == '\n')
+					{
+						++line_count;
+					}
+				}
 
 				const auto height = draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
 				draw_hint_text(0, matches[0].name.data(), dvar
@@ -290,11 +298,12 @@ namespace game_console
 					{
 						const auto value = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
 						const auto truncated = utils::string::truncate(value, 34, "...");
+						const auto truncated_desc = utils::string::truncate(matches[i].description, 160, "...");
 
 						draw_hint_text(static_cast<int>(i), truncated.data(),
 							dvars::con_inputDvarValueColor->current.vector, offset);
 
-						draw_hint_text(static_cast<int>(i), matches[i].description.data(),
+						draw_hint_text(static_cast<int>(i), truncated_desc.data(),
 							dvars::con_inputDvarValueColor->current.vector, offset * 1.5f);
 					}
 				}
