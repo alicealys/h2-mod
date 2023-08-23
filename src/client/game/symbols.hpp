@@ -207,6 +207,7 @@ namespace game
 	WEAK symbol<unsigned int(const char* str)> SL_GetCanonicalString{0x1405BC970};
 
 	WEAK symbol<bool()> SV_Loaded{0x1406B3860};
+	WEAK symbol<void(char client_num, const char* cmd)> SV_SendGameServerCommand{0x1406B2F40};
 
 	WEAK symbol<void()> Sys_ShowConsole{0x140633080};
 	WEAK symbol<bool()> Sys_IsDatabaseReady2{0x1405A9FE0};
@@ -313,6 +314,10 @@ namespace game
 	WEAK symbol<map_t> maps{0x14097EE90};
 
 	WEAK symbol<language_values> languages{0x140BF9740};
+
+	WEAK symbol<sound_data_t> sound_data{0x151B81A00};
+	WEAK symbol<int> volmod_index{0x151BADFD8};
+	WEAK symbol<int> music_dsp_bus_index{0x151B9AA40};
 
 	namespace hks
 	{
