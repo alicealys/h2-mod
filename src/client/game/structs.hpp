@@ -1079,6 +1079,21 @@ namespace game
 		HE_FONT_COUNT,
 	};
 
+	struct volmod_t
+	{
+		char name[64];
+		float value;
+		float headroom;
+		float mixExclusion;
+	};
+
+	struct sound_data_t
+	{
+		char __pad0[163720];
+		volmod_t volmods[180];
+		// ...
+	};
+
 	namespace hks
 	{
 		struct lua_State;

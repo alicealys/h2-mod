@@ -15,6 +15,7 @@ namespace sound
 	{
 		game::dvar_t* snd_music_volume = nullptr;
 		game::dvar_t** snd_music_disabled_for_custom_sndtrack = nullptr;
+		int music_volmod_index = -1;
 
 		void com_sprintf_raw_sound_localized_stub(char* buffer, int size, const char* fmt,
 			const char* lang, const char* name, const char* extension)
@@ -39,17 +40,22 @@ namespace sound
 			return snd_is_music_playing_hook.invoke<bool>(a1);
 		}
 
+		bool is_sound_music(game::snd_alias_t* sound)
+		{
+			return sound->dspBusIndex == *game::music_dsp_bus_index ||
+				sound->volModIndex == music_volmod_index;
+		}
+
 		float get_snd_volume(game::snd_alias_t* sound, float original_volume)
 		{
-			// original code
-			if (sound->dspBusIndex == *reinterpret_cast<int*>(0x151B9AA40) &&
+			if (is_sound_music(sound) &&
 				snd_music_disabled_for_custom_sndtrack &&
 				(*snd_music_disabled_for_custom_sndtrack)->current.enabled)
 			{
 				return 0.f;
 			}
 
-			if (sound->dspBusIndex == 11 || sound->volModIndex == 5)
+			if (is_sound_music(sound))
 			{
 				return original_volume * snd_music_volume->current.value;
 			}
@@ -66,6 +72,16 @@ namespace sound
 			a.popad64();
 
 			a.jmp(0x1407CD8C7);
+		}
+
+		double atof_stub(const char* str)
+		{
+			if (!std::strncmp(game::sound_data->volmods[*game::volmod_index].name, "music", sizeof(game::volmod_t::name)))
+			{
+				music_volmod_index = *game::volmod_index;
+			}
+
+			return std::atof(str);
 		}
 	}
 
@@ -85,6 +101,7 @@ namespace sound
 			snd_is_music_playing_hook.create(0x1407C58A0, snd_is_music_playing_stub);
 
 			utils::hook::jump(0x1407CD8A5, utils::hook::assemble(snd_update_channel_stub), true);
+			utils::hook::call(0x1407C5F2F, atof_stub);
 		}
 	};
 }
