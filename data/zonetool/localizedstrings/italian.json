@@ -33,6 +33,8 @@
     "LUA_MENU_WORKSHOP": "Workshop",
     "LUA_MENU_WORKSHOP_DESC": "Scarica e installa mod.",
 
+    "MENU_MUSIC_VOLUME": "Volume musica",
+
     "MENU_GENERAL": "H2-MOD",
     "MENU_GENERAL_DESC": "Imposta le opzioni di h2-mod.",
     "LUA_MENU_AUTO_UPDATE": "Aggiornamenti automatici",
