@@ -38,6 +38,8 @@
     "LUA_MENU_UNLOAD": "Décharger",
     "LUA_MENU_UNLOAD_DESC": "Déchargez le mod actuellement chargé.",
 
+    "MENU_MUSIC_VOLUME": "Volume musique",
+
     "LUA_MENU_CHOOSE_LANGUAGE": "Choisissez la langue",
 
     "DEPOT_GO_TO_THE_DEPOT": "Ouvrir le lien",

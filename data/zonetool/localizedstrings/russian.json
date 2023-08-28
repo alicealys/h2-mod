@@ -64,6 +64,9 @@
     "LUA_MENU_INTRO": "Заставка",
     "LUA_MENU_INTRO_DESC": "Показывать или пропускать вступительный ролик с логотипами разработчиков при запуске игры.",
 
+    "MENU_MUSIC_VOLUME": "Громкость музыки",
+    "MENU_MUSIC_VOLUME_DESC": "Перемещайте бегунок, чтобы отрегулировать громкость саундтрека.",
+
     "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK": "Страница на GitHub:",
     "MENU_SYSINFO_CUSTOMER_SUPPORT_URL": "https://github.com/fedddddd/h2-mod",
     "MENU_SYSINFO_DONATION_LINK": "Ссылка для донатов:",
