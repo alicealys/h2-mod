@@ -88,7 +88,9 @@ namespace achievements
 
 	int get_count();
 	bool has_achievement(int id);
+
 	std::string get_name(int id);
 	std::string get_details(int id);
+	std::optional<std::string> get_background(int id);
 	int get_rarity(int id);
 }

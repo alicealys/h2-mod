@@ -1,5 +1,5 @@
 LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
-    local menuwidth = 1129
+    local menuwidth = 500
 	local menu = LUI.MenuTemplate.new(root, {
 		menu_title = "@LUA_MENU_ACHIEVEMENTS",
 		exclusiveController = 0,
@@ -9,7 +9,58 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
 		uppercase_title = true
 	})
 
-    local itemwidth = 80
+	local black_state = CoD.CreateState(nil, nil, nil, nil, CoD.AnchorTypes.All)
+	black_state.red = 0
+	black_state.blue = 0
+	black_state.green = 0
+	black_state.alpha = 0
+	black_state.left = -100
+	black_state.right = 100
+	black_state.top = -100
+	black_state.bottom = 100
+
+	local black = LUI.UIImage.new(black_state)
+	black:setPriority(-1000)
+
+	black:registerAnimationState("BlackScreen", {
+		alpha = 1
+	})
+
+	black:registerAnimationState("Faded", {
+		alpha = 0
+	})
+
+	menu:addElement(black)
+
+    local currentbackground = nil
+	local changebackground = function(background, isvideobg)
+        if (currentbackground == background) then
+            return
+        end
+
+        currentbackground = background
+
+		if (isvideobg) then
+			PersistentBackground.ChangeBackground(nil, background)
+		else
+			PersistentBackground.ChangeBackground(background, "")
+			PersistentBackground.ChangeBackground(background, nil)
+		end
+
+		black:animateInSequence( {
+			{
+				"BlackScreen",
+				0
+			},
+			{
+				"Faded",
+				500
+			}
+		})
+	end
+
+    local itemheight = 80
+    local itemwidth = menuwidth
     local itemspacing = 10
     local maxrowelements = 1
     
@@ -18,14 +69,13 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local currentrow = LUI.UIElement.new({
             topAnchor = true,
             leftAnchor = true,
-            width = itemwidth * maxrowelements,
-            height = itemwidth,
+            width = itemheight * maxrowelements,
+            height = itemheight,
         })
     
         menu.list.currentrow = currentrow
         menu.list:addElement(currentrow)
         menu.list.currentrow:makeFocusable()
-
     end
 
     newrow()
@@ -34,9 +84,9 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local container = LUI.UIElement.new({
             topAnchor = true,
             leftAnchor = true,
-            width = itemwidth,
-            height = itemwidth,
-            left = rowelements * (itemwidth + itemspacing)
+            width = itemheight,
+            height = itemheight,
+            left = rowelements * (itemheight + itemspacing)
         })
         container:addElement(element)
         container:makeFocusable()
@@ -60,8 +110,8 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local btnbg = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
-            width = menuwidth,
-            height = itemwidth,
+            width = itemwidth,
+            height = itemheight,
             material = RegisterMaterial("h2_btn_unfocused")  
         })
 
@@ -84,7 +134,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             width = 10,
-            height = itemwidth,
+            height = itemheight,
             material = RegisterMaterial("depot_button_rarity_strip_" .. rarityname)  
         })
 
@@ -101,8 +151,8 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local glow = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
-            width = menuwidth,
-            height = itemwidth,
+            width = itemwidth,
+            height = itemheight,
             material = RegisterMaterial("depot_button_rarity_glow_" .. rarityname)
         })
 
@@ -117,8 +167,8 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local glow2 = LUI.UIImage.new({
             topAnchor = true,
             leftAnchor = true,
-            width = menuwidth,
-            height = itemwidth,
+            width = itemwidth,
+            height = itemheight,
             material = RegisterMaterial("depot_button_rarity_glow_" .. rarityname)
         })
 
@@ -136,8 +186,8 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         local achievementcontainer = LUI.UIElement.new({
             topAnchor = true,
             leftAnchor = true,
-            width = menuwidth,
-            height = itemwidth,
+            width = itemwidth,
+            height = itemheight,
         })
 
         local image = LUI.UIImage.new({
@@ -145,8 +195,8 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             leftAnchor = true,
             top = itemspacing / 2,
             left = itemspacing / 2 + 10,
-            width = itemwidth - itemspacing,
-            height = itemwidth - itemspacing,
+            width = itemheight - itemspacing,
+            height = itemheight - itemspacing,
             material = RegisterMaterial("trophy_" .. i) 
         })
 
@@ -155,17 +205,17 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             leftAnchor = true,
             top = itemspacing / 2 + 15,
             left = itemspacing / 2 + 15 + 10,
-            width = itemwidth - itemspacing - 30,
-            height = itemwidth - itemspacing - 30,
+            width = itemheight - itemspacing - 30,
+            height = itemheight - itemspacing - 30,
             material = RegisterMaterial("icon_lock_mini") 
         })
 
-        local textwidth = menuwidth - itemwidth - itemspacing * 2
+        local textwidth = itemwidth - itemheight - itemspacing * 2
         local title = LUI.UIText.new({
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing + 5,
-            left = itemwidth + 5 + 10,
+            left = itemheight + 5 + 10,
             color = {
                 r = 0.7,
                 g = 0.7,
@@ -180,7 +230,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             topAnchor = true,
             leftAnchor = true,
             top = itemspacing + CoD.TextSettings.Font23.Height + 10,
-            left = itemwidth + 5 + 10,
+            left = itemheight + 5 + 10,
             width = textwidth,
             alignment = LUI.Alignment.Left,
             color = {
@@ -208,8 +258,15 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
             raritystrip:animateToState("hide")
         end
 
+        local background = achievements.getbackground(i)
         achievementcontainer:registerEventHandler("mouseenter", function()
             Engine.PlaySound(CoD.SFX.MouseOver)
+
+            if (background ~= nil) then
+                changebackground(background, false)
+            else
+                changebackground("sp_menus_bg_regular", true)
+            end
 
             if (locked) then
                 btnbg:setImage(RegisterMaterial("h2_btn_focused_locked"))
@@ -258,7 +315,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
     })
 
     local createprogressbar = function()
-        local barwidth = menuwidth + 17
+        local barwidth = itemwidth + 17
         local progressbar = LUI.UIElement.new({
             bottomAnchor = true,
             leftAnchor = true,

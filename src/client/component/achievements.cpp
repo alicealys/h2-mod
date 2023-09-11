@@ -356,6 +356,18 @@ namespace achievements
 		return utils::string::va("ACHIEVEMENT_DETAIL_%i", id);
 	}
 
+	std::optional<std::string> get_background(int id)
+	{
+		const std::string name = utils::string::va("achievement_bg_%i", id);
+		if (game::DB_XAssetExists(game::ASSET_TYPE_MATERIAL, name.data()) &&
+			!game::DB_IsXAssetDefault(game::ASSET_TYPE_MATERIAL, name.data()))
+		{
+			return {name};
+		}
+
+		return {};
+	}
+
 	int get_rarity(int id)
 	{
 		if (id >= ACHIEVEMENT_TOTAL_COUNT)
