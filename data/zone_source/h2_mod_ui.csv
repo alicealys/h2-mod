@@ -93,6 +93,7 @@ material,trophy_50
 material,trophy_51
 material,trophy_52
 
+material,achievement_bg_0
 material,achievement_bg_1
 material,achievement_bg_2
 material,achievement_bg_3
@@ -143,6 +144,8 @@ material,achievement_bg_47
 material,achievement_bg_48
 material,achievement_bg_49
 material,achievement_bg_50
+material,achievement_bg_51
+material,achievement_bg_52
 
 localize,english
 sound,ui_achievement_unlocked

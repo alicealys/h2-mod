@@ -262,7 +262,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         achievementcontainer:registerEventHandler("mouseenter", function()
             Engine.PlaySound(CoD.SFX.MouseOver)
 
-            if (background ~= nil) then
+            if (background ~= nil and achievementtable[i]) then
                 changebackground(background, false)
             else
                 changebackground("sp_menus_bg_regular", true)
