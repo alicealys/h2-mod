@@ -75,6 +75,7 @@ namespace achievements
 		achievement_id id;
 		std::string_view code;
 		achievement_rarity rarity;
+		bool secret{};
 	};
 
 	struct achievement_file_t
@@ -93,4 +94,5 @@ namespace achievements
 	std::string get_details(int id);
 	std::optional<std::string> get_background(int id);
 	int get_rarity(int id);
+	bool is_secret(int id);
 }

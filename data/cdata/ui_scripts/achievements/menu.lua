@@ -54,7 +54,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
 			},
 			{
 				"Faded",
-				500
+				1000
 			}
 		})
 	end
@@ -300,7 +300,11 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
         if (locked) then
             btnbg:animateToState("locked")
             image:animateToState("locked")
-            desc:setText("")
+
+            if (achievements.issecret(i)) then
+                title:setText(Engine.ToUpperCase(Engine.Localize("ACHIEVEMENT_HIDDEN")))
+                desc:setText(Engine.Localize("ACHIEVEMENT_HIDDEN_DESC"))
+            end
         end
 
         addelement(achievementcontainer)
