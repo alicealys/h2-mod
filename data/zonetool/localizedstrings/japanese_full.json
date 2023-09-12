@@ -31,6 +31,8 @@
     "LUA_MENU_ACHIEVEMENTS": "実績",
     "LUA_MENU_ACHIEVEMENTS_DESC": "実績の状況。",
 
+    "ACHIEVEMENT_HIDDEN": "秘密の実績",
+    "ACHIEVEMENT_HIDDEN_DESC": "もっとプレイして実績を解除しましょう",
     "ACHIEVEMENT_EARNED": "実績のロックを解除しました!",
     "ACHIEVEMENT_NAME_0": "全部でこれだけ？",
     "ACHIEVEMENT_DETAIL_0": "Call of Duty®: Modern Warfare® 2 Campaign Remasteredでアンロックできるトロフィーを全て獲得",

@@ -442,6 +442,8 @@
     "LUA_MENU_ACHIEVEMENTS": "ДОСТИЖЕНИЯ",
     "LUA_MENU_ACHIEVEMENTS_DESC": "Посмотреть прогресс ваших достижений.",
 
+    "ACHIEVEMENT_HIDDEN": "Секретное достижение",
+    "ACHIEVEMENT_HIDDEN_DESC": "Играйте больше, чтобы разблокировать его",
     "ACHIEVEMENT_EARNED": "Получено достижение!",
     "ACHIEVEMENT_NAME_0": "Это всë, на что вы способны?",
     "ACHIEVEMENT_DETAIL_0": "Открыть все достижения игры «Call of Duty®: Modern Warfare® 2. Обновлëнная кампания».",
