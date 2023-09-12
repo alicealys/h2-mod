@@ -31,6 +31,8 @@
     "LUA_MENU_ACHIEVEMENTS": "ERRUNGENSCHAFTEN",
     "LUA_MENU_ACHIEVEMENTS_DESC": "Ihr Errungenschaftsfortschritt.",
 
+    "ACHIEVEMENT_HIDDEN": "Geheimer Erfolg",
+    "ACHIEVEMENT_HIDDEN_DESC": "Spielen Sie weiter, um diesen Erfolg freizuschalten.",
     "ACHIEVEMENT_EARNED": "Errungenschaft freigeschaltet!",
     "ACHIEVEMENT_NAME_0": "Mehr hast du nicht drauf?",
     "ACHIEVEMENT_DETAIL_0": "Erlangen Sie alle Trophäen von Call of Duty®: Modern Warfare® 2 Campaign Remastered.",

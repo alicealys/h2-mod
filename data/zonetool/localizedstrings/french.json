@@ -48,6 +48,8 @@
     "LUA_MENU_ACHIEVEMENTS": "SUCCÈS",
     "LUA_MENU_ACHIEVEMENTS_DESC": "Vos succès remportés jusqu'à présent.",
 
+    "ACHIEVEMENT_HIDDEN": "Succès secret",
+    "ACHIEVEMENT_HIDDEN_DESC": "Continuer de jouer pour le déverrouiller",
     "ACHIEVEMENT_EARNED": "Succès déverrouillé !",
     "ACHIEVEMENT_NAME_0": "Quoi, c'est tout ?",
     "ACHIEVEMENT_DETAIL_0": "Gagnez tous les trophées disponibles de Call of Duty®: Modern Warfare® 2 Campaign Remastered.",

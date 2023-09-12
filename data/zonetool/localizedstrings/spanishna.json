@@ -31,6 +31,8 @@
     "LUA_MENU_ACHIEVEMENTS": "LOGROS",
     "LUA_MENU_ACHIEVEMENTS_DESC": "Avance en tus logros.",
 
+    "ACHIEVEMENT_HIDDEN": "Logro secreto",
+    "ACHIEVEMENT_HIDDEN_DESC": "Sigue jugando para desbloquearlo",
     "ACHIEVEMENT_EARNED": "¡Logro desbloqueado!",
     "ACHIEVEMENT_NAME_0": "¿Eso es todo?",
     "ACHIEVEMENT_DETAIL_0": "Consigue todos los trofeos disponibles en Call of Duty®: Modern Warfare® 2 Campaign Remastered.",
