@@ -694,6 +694,7 @@ namespace ui_scripting
 			achievements_table["getname"] = achievements::get_name;
 			achievements_table["getdetails"] = achievements::get_details;
 			achievements_table["getbackground"] = achievements::get_background;
+			achievements_table["issecret"] = achievements::is_secret;
 			achievements_table["count"] = achievements::get_count;
 
 			achievements_table["table"] = []()

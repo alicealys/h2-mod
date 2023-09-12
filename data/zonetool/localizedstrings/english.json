@@ -128,6 +128,8 @@
     "LUA_MENU_ACHIEVEMENTS_DESC": "View achievements.",
     "LUA_MENU_UNKNOWN_ACHIEVEMENT": "???",
 
+    "ACHIEVEMENT_HIDDEN": "Secret achievement",
+    "ACHIEVEMENT_HIDDEN_DESC": "Keep playing to unlock it",
     "ACHIEVEMENT_EARNED": "Achievement Unlocked!",
     "ACHIEVEMENT_NAME_0": "Is That All You Got?",
     "ACHIEVEMENT_DETAIL_0": "Earn all available trophies for Call of Duty®: Modern Warfare® 2 Campaign Remastered.",

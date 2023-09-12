@@ -70,13 +70,13 @@ namespace achievements
 			achievement_t(ACHIEVEMENT_40, "NIGHT_MUSEUM", ACHIEVEMENT_RARITY_1),
 			achievement_t(ACHIEVEMENT_41, "STUDENT_MASTER", ACHIEVEMENT_RARITY_1),
 			achievement_t(ACHIEVEMENT_42, "REAL_GUN_GAME", ACHIEVEMENT_RARITY_1),
-			achievement_t(ACHIEVEMENT_43, "PRECOGNITIVE_PARANOIA", ACHIEVEMENT_RARITY_0),
+			achievement_t(ACHIEVEMENT_43, "PRECOGNITIVE_PARANOIA", ACHIEVEMENT_RARITY_0, true),
 			achievement_t(ACHIEVEMENT_44, "IMMORTAL", ACHIEVEMENT_RARITY_2),
 			achievement_t(ACHIEVEMENT_45, "SILENT_SKIES", ACHIEVEMENT_RARITY_0),
 			achievement_t(ACHIEVEMENT_46, "CLAYMORE", ACHIEVEMENT_RARITY_0),
 			achievement_t(ACHIEVEMENT_47, "BIRD_HUNTER", ACHIEVEMENT_RARITY_1),
 			achievement_t(ACHIEVEMENT_48, "HOT_POTATO", ACHIEVEMENT_RARITY_0),
-			achievement_t(ACHIEVEMENT_49, "CLOWN_IN_TRAINING", ACHIEVEMENT_RARITY_0),
+			achievement_t(ACHIEVEMENT_49, "CLOWN_IN_TRAINING", ACHIEVEMENT_RARITY_0, true),
 			achievement_t(ACHIEVEMENT_50, "HEADBANGER", ACHIEVEMENT_RARITY_0),
 			achievement_t(ACHIEVEMENT_51, "BRAINS", ACHIEVEMENT_RARITY_2),
 			achievement_t(ACHIEVEMENT_52, "RAMIREZ", ACHIEVEMENT_RARITY_2),
@@ -376,6 +376,16 @@ namespace achievements
 		}
 
 		return achievements[id].rarity;
+	}
+
+	bool is_secret(int id)
+	{
+		if (id >= ACHIEVEMENT_TOTAL_COUNT)
+		{
+			return false;
+		}
+
+		return achievements[id].secret;
 	}
 
 	class component final : public component_interface
