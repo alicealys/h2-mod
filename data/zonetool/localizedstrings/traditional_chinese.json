@@ -31,6 +31,8 @@
     "LUA_MENU_ACHIEVEMENTS": "成就",
     "LUA_MENU_ACHIEVEMENTS_DESC": "您的成就進度。",
 
+    "ACHIEVEMENT_HIDDEN": "秘密成就",
+    "ACHIEVEMENT_HIDDEN_DESC": "繼續玩以將此解除鎖定",
     "ACHIEVEMENT_EARNED": "成就解除鎖定！",
     "ACHIEVEMENT_NAME_0": "就這點本事？",
     "ACHIEVEMENT_DETAIL_0": "獲得《決勝時刻®：現代戰爭®2》劇情戰役重製版的所有獎盃。",

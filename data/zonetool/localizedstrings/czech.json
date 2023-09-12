@@ -21,6 +21,8 @@
     "LUA_MENU_ACHIEVEMENTS": "ACHIEVEMENTY",
     "LUA_MENU_ACHIEVEMENTS_DESC": "Vaše odemčené achievementy.",
 
+    "ACHIEVEMENT_HIDDEN": "Tajný herní úspěch",
+    "ACHIEVEMENT_HIDDEN_DESC": "Hrajte dál a odemkněte ho",
     "ACHIEVEMENT_EARNED": "Achievement odemčen!",
 
     "LUA_MENU_FALLBACK_DISABLE": "Používat výchozí písma",
