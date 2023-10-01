@@ -79,8 +79,9 @@ namespace patches
 	public:
 		void post_unpack() override
 		{
-			// Fix startup crash (bnet)
+			// Fix startup crashes
 			utils::hook::set(0x140272F70, 0xC301B0);
+			utils::hook::jump(0x140046148, sub_46148);
 
 			// Fix shutdown crash
 			utils::hook::jump(0x1408B1CD0, 0x1408B1BA0);
