@@ -154,7 +154,7 @@ namespace motd
 					{
 						const auto& image = image_data.value();
 						console::debug("Downloaded featured tab image %i\n", index);
-						images::override_texture(image_name + std::format("_{}", index), image);
+						images::override_texture(std::format("{}_{}", image_name, index), image);
 					}
 				};
 

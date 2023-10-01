@@ -364,12 +364,7 @@ namespace ui_scripting
 			{
 				const auto links = motd::get_links();
 				const auto link = links.find(name);
-				if (link == links.end())
-				{
-					return false;
-				}
-
-				return true;
+				return link != links.end();
 			};
 
 			lua["string"]["escapelocalization"] = [](const std::string& str)
