@@ -28,8 +28,6 @@ namespace dvars
 
 	game::dvar_t* g_enableElevators = nullptr;
 
-	game::dvar_t** cg_draw_2d = reinterpret_cast<game::dvar_t**>(0x141E39EC0);
-
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain)
 	{
 		if (domain.vector.min == -FLT_MAX)
