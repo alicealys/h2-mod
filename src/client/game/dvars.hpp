@@ -1,6 +1,7 @@
 #pragma once
 
 #include "structs.hpp"
+#include "game.hpp"
 #include <string>
 
 namespace dvars
@@ -36,7 +37,8 @@ namespace dvars
 
 	extern game::dvar_t* g_enableElevators;
 
-	extern game::dvar_t** cg_draw_2d;
+	WEAK game::symbol<game::dvar_t*> com_max_fps{0x14AE2C890};
+	WEAK game::symbol<game::dvar_t*> cg_draw_2d{0x141E39EC0};
 
 	extern std::vector<dvar_info> dvar_list;
 
