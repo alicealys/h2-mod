@@ -13,6 +13,8 @@ namespace gameplay
 		utils::hook::detour pm_player_trace_hook;
 		utils::hook::detour pm_crashland_hook;
 
+		game::dvar_t* pm_snap_vector = nullptr;
+
 		void pm_player_trace_stub(game::pmove_t* pm, game::trace_t* results, const float* start,
 			const float* end, const game::Bounds* bounds, int passEntityNum, int contentMask)
 		{
@@ -111,6 +113,51 @@ namespace gameplay
 			a.bind(loc_140691518);
 			a.jmp(0x140691518);
 		}
+
+		void sys_snap_vector(float* velocity)
+		{
+			if (!pm_snap_vector->current.enabled)
+			{
+				return;
+			}
+
+			velocity[0] = std::floorf(velocity[0] + 0.5f);
+			velocity[1] = std::floorf(velocity[1] + 0.5f);
+			velocity[2] = std::floorf(velocity[2] + 0.5f);
+		}
+
+		void add_snap_vector_call(utils::hook::assembler& a)
+		{
+			a.pushad64();
+			a.mov(rcx, rsi);
+			a.call_aligned(sys_snap_vector);
+			a.popad64();
+		}
+
+		void pmove_single_stub1(utils::hook::assembler& a)
+		{
+			const auto loc_14068FEBD = a.newLabel();
+
+			a.comiss(xmm5, xmm4);
+			a.jbe(loc_14068FEBD);
+			a.mov(rax, 0x3F800000);
+			a.movq(xmm1, rax);
+			a.jmp(0x14068FE99);
+
+			a.bind(loc_14068FEBD);
+			add_snap_vector_call(a);
+			a.jmp(0x14068FEBD);
+		}
+
+		void pmove_single_stub2(utils::hook::assembler& a)
+		{
+			a.movss(dword_ptr(rsi, 8), xmm1);
+			a.movss(dword_ptr(rsi, 4), xmm0);
+			a.movss(dword_ptr(rsi), xmm6);
+
+			add_snap_vector_call(a);
+			a.jmp(0x14068FEBD);
+		}
 	}
 
 	class component final : public component_interface
@@ -154,6 +201,11 @@ namespace gameplay
 				game::DVAR_FLAG_REPLICATED, "Game gravity in inches per second squared");
 			dvars::register_int("g_speed", 190, 0, 1000, 
 				game::DVAR_FLAG_REPLICATED, "Player speed");
+
+			pm_snap_vector = dvars::register_bool("pm_snapVector", false, game::DVAR_FLAG_REPLICATED, "Snap velocity vector (mp movement)");
+
+			utils::hook::jump(0x14068FE8C, utils::hook::assemble(pmove_single_stub1), true);
+			utils::hook::jump(0x14068FEAF, utils::hook::assemble(pmove_single_stub2), true);
 		}
 	};
 }
