@@ -15,12 +15,6 @@ namespace patches
 		utils::hook::detour gscr_set_save_dvar_hook;
 		utils::hook::detour dvar_register_float_hook;
 
-		void* sub_46148()
-		{
-			static uint64_t off_11C52460 = 0x140AD0C58;
-			return &off_11C52460;
-		}
-
 		DECLSPEC_NORETURN void quit_stub()
 		{
 			utils::hook::invoke<void>(0x1408B1BA0);
@@ -79,10 +73,10 @@ namespace patches
 	public:
 		void post_unpack() override
 		{
-			// Fix startup crashes
-			utils::hook::set(0x140272F70, 0xC301B0);
-			utils::hook::jump(0x140046148, sub_46148);
-
+			// Disable battle net game service
+			utils::hook::set<std::uint32_t>(0x140272F70, 0xC301B0);
+			// 'Fix' tls index conflict crash
+			utils::hook::set<std::uint8_t>(0x140046166, 0xEB);
 			// Fix shutdown crash
 			utils::hook::jump(0x1408B1CD0, 0x1408B1BA0);
 

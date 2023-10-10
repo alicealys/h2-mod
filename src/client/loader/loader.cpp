@@ -180,24 +180,25 @@ void loader::load_tls(const utils::nt::library& target, const utils::nt::library
 {
 	if (source.get_optional_header()->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].Size)
 	{
-		auto* target_tls = tls::allocate_tls_index();
-		/* target_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(library.get_ptr() + library.get_optional_header()
-				   ->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress); */
-		auto* const source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(target.get_ptr() + source.get_optional_header()
+		const auto target_tls = tls::allocate_tls_index();
+
+		const auto source_tls = reinterpret_cast<PIMAGE_TLS_DIRECTORY>(target.get_ptr() + source.get_optional_header()
 			->DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress);
 
 		const auto tls_size = source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData;
 		const auto tls_index = *reinterpret_cast<DWORD*>(target_tls->AddressOfIndex);
 		utils::hook::set<DWORD>(source_tls->AddressOfIndex, tls_index);
 
-		DWORD old_protect;
-		VirtualProtect(PVOID(target_tls->StartAddressOfRawData),
-		               source_tls->EndAddressOfRawData - source_tls->StartAddressOfRawData, PAGE_READWRITE,
-		               &old_protect);
+		const auto target_start = PVOID(target_tls->StartAddressOfRawData);
+		const auto source_start = PVOID(source_tls->StartAddressOfRawData);
 
-		auto* const tls_base = *reinterpret_cast<LPVOID*>(__readgsqword(0x58) + 8ull * tls_index);
-		std::memmove(tls_base, PVOID(source_tls->StartAddressOfRawData), tls_size);
-		std::memmove(PVOID(target_tls->StartAddressOfRawData), PVOID(source_tls->StartAddressOfRawData), tls_size);
+		DWORD old_protect;
+		VirtualProtect(target_start, tls_size, PAGE_READWRITE, &old_protect);
+
+		const auto tls_base = *reinterpret_cast<LPVOID*>(__readgsqword(0x58) + 8ull * tls_index);
+
+		std::memmove(tls_base, source_start, tls_size);
+		std::memmove(target_start, source_start, tls_size);
 
 		VirtualProtect(target_tls, sizeof(*target_tls), PAGE_READWRITE, &old_protect);
 		*target_tls = *source_tls;

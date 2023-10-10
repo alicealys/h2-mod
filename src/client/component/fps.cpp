@@ -33,7 +33,7 @@ namespace fps
 
 		game::dvar_t* cg_draw_game_time = nullptr;
 
-		game::dvar_t* com_accurate_fps = nullptr;
+		game::dvar_t* com_accurate_max_fps = nullptr;
 
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
@@ -363,7 +363,7 @@ namespace fps
 
 		void r_process_workers_with_timeout_stub(void* a1, void* a2)
 		{
-			if (com_accurate_fps->current.enabled)
+			if (com_accurate_max_fps->current.enabled)
 			{
 				return;
 			}
@@ -373,7 +373,7 @@ namespace fps
 
 		void com_frame_stub()
 		{
-			if (!com_accurate_fps->current.enabled)
+			if (!com_accurate_max_fps->current.enabled)
 			{
 				return com_frame_hook.invoke<void>();
 			}
@@ -434,7 +434,7 @@ namespace fps
 			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
 
 			// Make fps capping accurate
-			com_accurate_fps = dvars::register_bool("com_accurateFps", false, game::DVAR_FLAG_SAVED, "Accurate fps capping");
+			com_accurate_max_fps = dvars::register_bool("com_accurateMaxFps", false, game::DVAR_FLAG_SAVED, "Accurate fps capping");
 			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
 			com_frame_hook.create(0x1405A3740, com_frame_stub);
 		}

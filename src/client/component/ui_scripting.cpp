@@ -931,12 +931,17 @@ namespace ui_scripting
 			utils::hook::jump(0x14031E700, 0x1402D86E0);
 
 			utils::hook::jump(0x1402BFCC0, removed_function_stub); // io
-			utils::hook::jump(0x14017EE60, removed_function_stub); // profile
 			utils::hook::jump(0x1402C0150, removed_function_stub); // os
-			utils::hook::jump(0x14017F730, removed_function_stub); // serialize
+			utils::hook::jump(0x1402C1020, removed_function_stub); // serialize
 			utils::hook::jump(0x1402C0FF0, removed_function_stub); // hks
-			utils::hook::jump(0x14017EC60, removed_function_stub); // debug
+			utils::hook::jump(0x1402C0470, removed_function_stub); // debug
 			utils::hook::nop(0x1402BFC48, 5); // coroutine
+
+			// profile
+			utils::hook::jump(0x1402B6250, removed_function_stub);
+			utils::hook::jump(0x1402B6260, removed_function_stub);
+			utils::hook::jump(0x1402B6270, removed_function_stub);
+			utils::hook::jump(0x1402B6330, removed_function_stub);
 
 			utils::hook::jump(0x1402B7FD0, removed_function_stub);
 			utils::hook::jump(0x1402B7C40, removed_function_stub);
