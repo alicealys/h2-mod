@@ -18,20 +18,22 @@ namespace fps
 {
 	namespace
 	{
-		game::dvar_t* cg_draw_fps;
-		game::dvar_t* cg_draw_speed;
+		game::dvar_t* cg_draw_fps = nullptr;
+		game::dvar_t* cg_draw_speed = nullptr;
 
-		game::dvar_t* cg_speed_graph;
-		game::dvar_t* cg_speed_graph_color;
-		game::dvar_t* cg_speed_graph_font_color;
-		game::dvar_t* cg_speed_graph_background_color;
-		game::dvar_t* cg_speed_graph_x;
-		game::dvar_t* cg_speed_graph_y;
-		game::dvar_t* cg_speed_graph_width;
-		game::dvar_t* cg_speed_graph_height;
-		game::dvar_t* cg_speed_graph_include_zaxis;
+		game::dvar_t* cg_speed_graph = nullptr;
+		game::dvar_t* cg_speed_graph_color = nullptr;
+		game::dvar_t* cg_speed_graph_font_color = nullptr;
+		game::dvar_t* cg_speed_graph_background_color = nullptr;
+		game::dvar_t* cg_speed_graph_x = nullptr;
+		game::dvar_t* cg_speed_graph_y = nullptr;
+		game::dvar_t* cg_speed_graph_width = nullptr;
+		game::dvar_t* cg_speed_graph_height = nullptr;
+		game::dvar_t* cg_speed_graph_include_zaxis = nullptr;
 
-		game::dvar_t* cg_draw_game_time;
+		game::dvar_t* cg_draw_game_time = nullptr;
+
+		game::dvar_t* com_accurate_fps = nullptr;
 
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
@@ -359,8 +361,23 @@ namespace fps
 			draw_game_time();
 		}
 
+		void r_process_workers_with_timeout_stub(void* a1, void* a2)
+		{
+			if (com_accurate_fps->current.enabled)
+			{
+				return;
+			}
+
+			utils::hook::invoke<void>(0x140793DE0, a1, a2);
+		}
+
 		void com_frame_stub()
 		{
+			if (!com_accurate_fps->current.enabled)
+			{
+				return com_frame_hook.invoke<void>();
+			}
+
 			const auto start = std::chrono::high_resolution_clock::now();
 			com_frame_hook.invoke<void>();
 
@@ -372,11 +389,15 @@ namespace fps
 
 			constexpr auto nano_secs = std::chrono::duration_cast<std::chrono::nanoseconds>(1s);
 			const auto frame_time = nano_secs / max_fps;
-
-			while (std::chrono::high_resolution_clock::now() - start < frame_time)
+			
+			const auto diff = (std::chrono::high_resolution_clock::now() - start);
+			if (diff > frame_time)
 			{
-				std::this_thread::sleep_for(100ns);
+				return;
 			}
+
+			const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff).count();
+			Sleep(static_cast<int>(ms));
 		}
 	}
 
@@ -413,7 +434,8 @@ namespace fps
 			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
 
 			// Make fps capping accurate
-			utils::hook::nop(0x1405A38B9, 5);
+			com_accurate_fps = dvars::register_bool("com_accurateFps", false, game::DVAR_FLAG_SAVED, "Accurate fps capping");
+			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
 			com_frame_hook.create(0x1405A3740, com_frame_stub);
 		}
 	};
