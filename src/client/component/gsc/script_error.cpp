@@ -289,7 +289,7 @@ namespace gsc
 
 		void g_model_index_no_cache_error_stub(const char* model)
 		{
-			scr_error(true, "model \"%s\" must be precached", model);
+			scr_error(false, "model \"%s\" must be precached", model);
 		}
 	}
 

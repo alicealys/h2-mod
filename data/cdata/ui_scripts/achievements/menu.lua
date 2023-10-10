@@ -34,7 +34,7 @@ LUI.MenuBuilder.registerType("achievements_menu", function(root, controller)
 
     local currentbackground = nil
 	local changebackground = function(background, isvideobg)
-        if (currentbackground == background) then
+        if (not Engine.InFrontend() or currentbackground == background) then
             return
         end
 
