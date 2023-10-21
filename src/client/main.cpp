@@ -125,10 +125,10 @@ FARPROC load_binary(const launcher::mode mode)
 	return loader.load(self, data);
 #endif
 }
+
 void remove_crash_file()
 {
 	utils::io::remove_file("__h2Exe");
-	utils::io::remove_file("h2_sp_patched.exe"); // remove this at some point
 }
 
 void verify_version()
