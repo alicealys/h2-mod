@@ -4,6 +4,8 @@
 
 namespace updater
 {
+	std::optional<std::string> get_server_file(const std::string& endpoint);
+
 	void relaunch();
 
 	void set_has_tried_update(bool tried);
