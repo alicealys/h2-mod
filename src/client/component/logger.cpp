@@ -14,7 +14,6 @@ namespace logger
 	namespace
 	{
 		utils::hook::detour com_error_hook;
-		utils::hook::detour nullsub_48_hook;
 		utils::hook::detour sub_32AEF0;
 
 		game::dvar_t* logger_dev = nullptr;

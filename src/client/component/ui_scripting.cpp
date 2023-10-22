@@ -37,7 +37,8 @@ namespace ui_scripting
 		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 		const auto lua_json = utils::nt::load_resource(LUA_JSON);
 
-		std::unordered_map<game::hks::cclosure*, std::function<arguments(const function_arguments& args)>> converted_functions;
+		using converted_func_t = std::function<arguments(const function_arguments& args)>;
+		std::unordered_map<game::hks::cclosure*, converted_func_t> converted_functions;
 
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
@@ -852,10 +853,10 @@ namespace ui_scripting
 			return utils::hook::invoke<int>(0x1402D9410, state, compiler_options, reader, reader_data, chunk_name);
 		}
 		
-		std::string current_error;
 		int main_handler(game::hks::lua_State* state)
 		{
-			bool error = false;
+			static std::string error_str;
+			auto error = false;
 
 			try
 			{
@@ -866,15 +867,14 @@ namespace ui_scripting
 				}
 
 				const auto closure = value.v.cClosure;
-				if (!converted_functions.contains(closure))
+				if (closure->m_numUpvalues < 1)
 				{
 					return 0;
 				}
 
-				const auto& function = converted_functions[closure];
-
+				const auto function = reinterpret_cast<converted_func_t*>(closure->m_upvalues->v.i64);
 				const auto args = get_return_values();
-				const auto results = function(args);
+				const auto results = function->operator()(args);
 
 				for (const auto& result : results)
 				{
@@ -885,13 +885,13 @@ namespace ui_scripting
 			}
 			catch (const std::exception& e)
 			{
-				current_error = e.what();
+				error_str = e.what();
 				error = true;
 			}
 
 			if (error)
 			{
-				game::hks::hksi_luaL_error(state, current_error.data());
+				game::hks::hksi_luaL_error(state, error_str.data());
 			}
 
 			return 0;
@@ -907,8 +907,23 @@ namespace ui_scripting
 	game::hks::cclosure* convert_function(F f)
 	{
 		const auto state = *game::hks::lua_state;
-		const auto closure = game::hks::cclosure_Create(state, main_handler, 0, 0, 0);
-		converted_functions[closure] = wrap_function(f);
+		const auto top = state->m_apistack.top;
+
+		game::hks::HksObject func_ptr{};
+		func_ptr.t = game::hks::TUI64;
+		func_ptr.v.i64 = 0;
+
+		push_value(func_ptr);
+		const auto closure = game::hks::cclosure_Create(state, main_handler, 1, 0, 0);
+		state->m_apistack.top = top;
+
+		const auto function = wrap_function(f);
+		const auto [iterator, was_inserted] = converted_functions.insert(std::make_pair(closure, function));
+		const auto ptr = &iterator->second;
+
+		closure->m_upvalues[0].t = game::hks::TUI64;
+		closure->m_upvalues[0].v.i64 = reinterpret_cast<size_t>(ptr);
+
 		return closure;
 	}
 

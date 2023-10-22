@@ -508,17 +508,10 @@ namespace pathnodes
 
 		void restore_code(const size_t ptr, char* data, const size_t size)
 		{
-			const auto ptr_ = reinterpret_cast<char*>(ptr);
-			DWORD old_protect;
-			VirtualProtect(ptr_, size, PAGE_EXECUTE_READWRITE, &old_protect);
-
 			for (auto i = 0; i < size; i++)
 			{
-				ptr_[i] = data[i];
+				utils::hook::set<char>(ptr + i, data[i]);
 			}
-
-			VirtualProtect(ptr_, size, old_protect, &old_protect);
-			FlushInstructionCache(GetCurrentProcess(), ptr_, size);
 		}
 
 		void restore_functions()
