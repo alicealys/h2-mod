@@ -73,10 +73,6 @@ namespace patches
 	public:
 		void post_unpack() override
 		{
-			// Disable battle net game service
-			utils::hook::set<std::uint32_t>(0x140272F70, 0xC301B0);
-			// 'Fix' tls index conflict crash
-			utils::hook::set<std::uint8_t>(0x140046166, 0xEB);
 			// Fix shutdown crash
 			utils::hook::jump(0x1408B1CD0, 0x1408B1BA0);
 
@@ -85,9 +81,6 @@ namespace patches
 
 			// Unlock fps in main menu
 			utils::hook::set<BYTE>(0x1403D8E1B, 0xEB);
-
-			// Disable battle net popup
-			utils::hook::nop(0x1405F4496, 5);
 
 			// Allow kbam input when gamepad is enabled
 			utils::hook::nop(0x1403D2F8E, 2);

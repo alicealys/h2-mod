@@ -15,6 +15,7 @@ namespace logger
 	{
 		utils::hook::detour com_error_hook;
 		utils::hook::detour sub_32AEF0;
+		utils::hook::detour bnet_print_hook;
 
 		game::dvar_t* logger_dev = nullptr;
 
@@ -145,6 +146,17 @@ namespace logger
 			vsnprintf(buffer, buffer_length, msg, va);
 			console::warn(buffer);
 		}
+
+		struct bnet_unk_t
+		{
+			const char* string;
+		};
+
+		void bnet_print_stub(bnet_unk_t* a1)
+		{
+			console::debug("[BNET] %s\n", a1->string);
+			bnet_print_hook.invoke<void>(a1);
+		}
 	}
 
 	class component final : public component_interface
@@ -161,6 +173,8 @@ namespace logger
 			utils::hook::jump(0x14013A98C, print);
 
 			utils::hook::call(0x140791A01, r_warn_once_per_frame_vsnprintf_stub);
+
+			bnet_print_hook.create(0x1402736D0, bnet_print_stub);
 
 			logger_dev = dvars::register_bool("logger_dev", false, game::DVAR_FLAG_SAVED, "Print dev stuff");
 		}
