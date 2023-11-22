@@ -9,14 +9,10 @@
 #include <utils/io.hpp>
 #include <utils/hook.hpp>
 
-#pragma section("code_buf", read, execute)
-
 namespace tls
 {
 	namespace
 	{
-		__declspec(allocate("code_buf")) char code_buffer[0x100]{};
-
 		DWORD get_tls_index()
 		{
 			const auto game = game_module::get_game_module();
@@ -40,9 +36,8 @@ namespace tls
 		void post_unpack() override
 		{
 			// Add tls_index * 8 offset to tls access where it's missing (it was optimized away in the bnet code)
-			utils::hook::jump(code_buffer, utils::hook::assemble(get_tls_stub), true);
 
-			static std::vector<std::size_t> address_list =
+			std::vector<std::size_t> address_list =
 			{
 				0x14004614C,
 				0x140047A85,
@@ -114,10 +109,12 @@ namespace tls
 				0x14020C5A3,
 			};
 
+			const auto tls_stub_ptr = utils::hook::assemble(get_tls_stub);
+
 			for (const auto& address : address_list)
 			{
 				utils::hook::nop(address, 0x9);
-				utils::hook::call(address, code_buffer);
+				utils::hook::far_call<BASE_ADDRESS>(address, tls_stub_ptr);
 			}
 		}
 	};
