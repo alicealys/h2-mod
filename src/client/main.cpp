@@ -24,7 +24,15 @@ FARPROC WINAPI get_proc_address(const HMODULE hModule, const LPCSTR lpProcName)
 {
 	if (lpProcName == "InitializeCriticalSectionEx"s)
 	{
-		component_loader::post_unpack();
+		try
+		{
+			component_loader::post_unpack();
+		}
+		catch (const std::exception& e)
+		{
+			MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
+			std::exit(1);
+		}
 	}
 
 	return GetProcAddress(hModule, lpProcName);
