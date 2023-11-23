@@ -7,6 +7,8 @@
 
 using namespace asmjit::x86;
 
+Mem seg_ptr(const SReg& segment, const uint64_t off);
+
 namespace utils::hook
 {
 	namespace detail

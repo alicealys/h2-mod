@@ -23,8 +23,7 @@ namespace tls
 
 		void get_tls_stub(utils::hook::assembler& a)
 		{
-			std::uint8_t bytes[] = {0x65, 0x48, 0x8B, 0x04, 0x25, 0x58, 0x00, 0x00, 0x00}; // mov rax, gs:58h
-			a.embed(bytes, sizeof(bytes));
+			a.mov(rax, seg_ptr(gs, 0x58));
 			a.add(rax, get_tls_index() * 8);
 			a.ret();
 		}
