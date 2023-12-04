@@ -37,8 +37,8 @@ namespace ui_scripting
 		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 		const auto lua_json = utils::nt::load_resource(LUA_JSON);
 
-		using converted_func_t = std::function<arguments(const function_arguments& args)>;
-		std::unordered_map<game::hks::cclosure*, converted_func_t> converted_functions;
+		using lua_function_t = std::function<arguments(const function_arguments& args)>;
+		std::vector<std::unique_ptr<lua_function_t>> lua_functions;
 
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
@@ -802,7 +802,7 @@ namespace ui_scripting
 		void hks_shutdown_stub()
 		{
 			camera::clear_lua();
-			converted_functions.clear();
+			lua_functions.clear();
 			globals = {};
 			hks_shutdown_hook.invoke<void>();
 		}
@@ -872,7 +872,7 @@ namespace ui_scripting
 					return 0;
 				}
 
-				const auto function = reinterpret_cast<converted_func_t*>(closure->m_upvalues->v.i64);
+				const auto function = reinterpret_cast<lua_function_t*>(closure->m_upvalues->v.i64);
 				const auto args = get_return_values();
 				const auto results = function->operator()(args);
 
@@ -918,8 +918,8 @@ namespace ui_scripting
 		state->m_apistack.top = top;
 
 		const auto function = wrap_function(f);
-		const auto [iterator, was_inserted] = converted_functions.insert(std::make_pair(closure, function));
-		const auto ptr = &iterator->second;
+		const auto& iterator = lua_functions.insert(lua_functions.end(), std::make_unique<lua_function_t>(function));
+		const auto ptr = iterator->get();
 
 		closure->m_upvalues[0].t = game::hks::TUI64;
 		closure->m_upvalues[0].v.i64 = reinterpret_cast<size_t>(ptr);
