@@ -36,6 +36,8 @@ namespace motd
 			cached_file_header header{};
 			std::string data;
 		};
+		
+		std::atomic_bool killed;
 
 		std::filesystem::path get_cache_folder()
 		{
@@ -147,6 +149,11 @@ namespace motd
 
 		std::optional<std::string> download_image(const std::string& url)
 		{
+			if (killed)
+			{
+				return {};
+			}
+
 			const auto cached = read_cached_file(url);
 			if (cached.has_value())
 			{
@@ -368,12 +375,25 @@ namespace motd
 		});
 	}
 
+	std::thread init_thread;
+
 	class component final : public component_interface
 	{
 	public:
+		void post_start() override
+		{
+			init_thread = std::thread([]
+			{
+				init();
+			});
+		}
+
 		void post_unpack() override
 		{
-			init();
+			if (init_thread.joinable())
+			{
+				init_thread.join();
+			}
 
 			command::add("reloadmotd", []()
 			{
@@ -384,6 +404,15 @@ namespace motd
 			{
 				init(false);
 			});
+		}
+
+		void pre_destroy() override
+		{
+			killed = true;
+			if (init_thread.joinable())
+			{
+				init_thread.join();
+			}
 		}
 	};
 }
