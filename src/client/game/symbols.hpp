@@ -75,11 +75,11 @@ namespace game
 	WEAK symbol<const char*(const dvar_t* dvar)> Dvar_DisplayableValue{0x140618EA0};
 	WEAK symbol<const char*(dvar_t* dvar, void* a2, void* value)> Dvar_ValueToString{0x14061B8F0};
 	WEAK symbol<void(int hash, const char* name, const char* buffer)> Dvar_SetCommand{0x14061A5C0};
-	WEAK symbol<void(const char* dvarName, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x14061A910};
+	WEAK symbol<void(const dvar_t* dvar, const char* string, DvarSetSource source)> Dvar_SetFromStringFromSource{0x14061A910};
 	WEAK symbol<void(const dvar_t* dvar, const char* value)> Dvar_SetString{0x14061ABF0};
 	WEAK symbol<void(const dvar_t* dvar, DvarSetSource source)> Dvar_Reset{0x140619FE0};
 
-	WEAK symbol<int(const char* fname)> generateHashValue{0x140343D20};
+	WEAK symbol<unsigned int(const char* fname)> generateHashValue{0x140343D20};
 
 	WEAK symbol<bool()> CL_IsCgameInitialized{0x1403CA0C0};
 	WEAK symbol<void(const char* text, int maxChars, Font_s* font, float x, float y, float xScale, float yScale,

@@ -8,12 +8,12 @@ namespace dvars
 {
 	struct dvar_info
 	{
-		dvar_info(const std::string& name, const std::string& description);
-
 		std::string name;
 		std::string description;
-		int hash;
+		std::uint32_t hash;
 	};
+
+	extern std::unordered_map<std::uint32_t, dvar_info> dvar_map;
 
 	extern game::dvar_t* con_inputBoxColor;
 	extern game::dvar_t* con_inputHintBoxColor;
@@ -40,12 +40,13 @@ namespace dvars
 	WEAK game::symbol<game::dvar_t*> com_max_fps{0x14AE2C890};
 	WEAK game::symbol<game::dvar_t*> cg_draw_2d{0x141E39EC0};
 
-	extern std::vector<dvar_info> dvar_list;
+	void insert_dvar_info(const std::uint32_t hash, const std::string& name, const std::string& description);
+	void insert_dvar_info(const std::string& name, const std::string& description);
 
 	std::string dvar_get_vector_domain(const int components, const game::dvar_limits& domain);
 	std::string dvar_get_domain(const game::dvar_type type, const game::dvar_limits& domain);
 	std::string dvar_get_description(const std::string& name);
-	std::optional<dvar_info> get_dvar_info_from_hash(const int hash);
+	std::optional<dvar_info> get_dvar_info_from_hash(const std::uint32_t hash);
 
 	game::dvar_t* register_int(const std::string& name, int value, int min, int max,
 		unsigned int flags, const std::string& description);
