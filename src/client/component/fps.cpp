@@ -373,7 +373,8 @@ namespace fps
 
 		void com_frame_stub()
 		{
-			if (!com_accurate_max_fps->current.enabled)
+			const auto value = com_accurate_max_fps->current.integer;
+			if (value == 0)
 			{
 				return com_frame_hook.invoke<void>();
 			}
@@ -390,14 +391,24 @@ namespace fps
 			constexpr auto nano_secs = std::chrono::duration_cast<std::chrono::nanoseconds>(1s);
 			const auto frame_time = nano_secs / max_fps;
 			
-			const auto diff = (std::chrono::high_resolution_clock::now() - start);
-			if (diff > frame_time)
+			if (value == 1)
 			{
-				return;
-			}
+				const auto diff = (std::chrono::high_resolution_clock::now() - start);
+				if (diff > frame_time)
+				{
+					return;
+				}
 
-			const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff).count();
-			Sleep(static_cast<int>(ms));
+				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff);
+				std::this_thread::sleep_for(ms);
+			}
+			else if (value == 2)
+			{
+				while (std::chrono::high_resolution_clock::now() - start < frame_time)
+				{
+					std::this_thread::sleep_for(0ms);
+				}
+			}
 		}
 	}
 
@@ -434,7 +445,7 @@ namespace fps
 			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
 
 			// Make fps capping accurate
-			com_accurate_max_fps = dvars::register_bool("com_accurateMaxFps", false, game::DVAR_FLAG_SAVED, "Accurate fps capping");
+			com_accurate_max_fps = dvars::register_int("com_accurateMaxFps", 0, 0, 2, game::DVAR_FLAG_SAVED, "Accurate fps capping");
 			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
 			com_frame_hook.create(0x1405A3740, com_frame_stub);
 		}
