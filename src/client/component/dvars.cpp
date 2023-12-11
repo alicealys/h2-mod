@@ -2,7 +2,10 @@
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
+#include "game/dvars.hpp"
+
 #include "dvars.hpp"
+#include "console.hpp"
 
 #include <utils/hook.hpp>
 
@@ -70,7 +73,7 @@ namespace dvars
 		}
 
 		template <typename T>
-		T* find_dvar(std::unordered_map<std::string, T>& map, const int hash)
+		T* find_dvar(std::unordered_map<std::string, T>& map, const std::uint32_t hash)
 		{
 			for (auto i = map.begin(); i != map.end(); ++i)
 			{
@@ -89,7 +92,7 @@ namespace dvars
 		}
 
 
-		bool find_dvar(std::unordered_set<std::string>& set, const int hash)
+		bool find_dvar(std::unordered_set<std::string>& set, const std::uint32_t hash)
 		{
 			for (auto i = set.begin(); i != set.end(); ++i)
 			{
@@ -423,6 +426,25 @@ namespace dvars
 	class component final : public component_interface
 	{
 	public:
+		void post_start() override
+		{
+			try
+			{
+				const auto list_json = utils::nt::load_resource(DVAR_LIST);
+				const auto list = nlohmann::json::parse(list_json);
+				for (const auto& dvar_info : list.array())
+				{
+					const auto name = dvar_info[0].get<std::string>();
+					const auto description = dvar_info[1].get<std::string>();
+					dvars::insert_dvar_info(name, description);
+				}
+			}
+			catch (const std::exception& e)
+			{
+				console::error("Failed to parse dvar list: %s\n", e.what());
+			}
+		}
+
 		void post_unpack() override
 		{
 			dvar_register_bool_hook.create(0x140617BB0, &dvar_register_bool);

@@ -12,3 +12,5 @@
 #define LUI_UPDATER           304
 
 #define LUA_JSON              305
+
+#define DVAR_LIST			  306

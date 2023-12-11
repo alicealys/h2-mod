@@ -706,7 +706,7 @@ namespace game_console
 	{
 		input = utils::string::to_lower(input);
 
-		for (const auto& dvar : dvars::dvar_list)
+		for (const auto& [hash, dvar] : dvars::dvar_map)
 		{
 			auto name = utils::string::to_lower(dvar.name);
 			if (game::Dvar_FindVar(name.data()) && match_compare(input, name, exact))
