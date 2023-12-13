@@ -6,7 +6,7 @@
 
 namespace dvars
 {
-	std::unordered_map<std::uint32_t, dvar_info> dvar_map;
+	std::unordered_map<std::int32_t, dvar_info> dvar_map;
 
 	game::dvar_t* con_inputBoxColor = nullptr;
 	game::dvar_t* con_inputHintBoxColor = nullptr;
@@ -132,49 +132,12 @@ namespace dvars
 		}
 	}
 
-	constexpr int generate_hash(const char* string)
+	std::int32_t generate_hash(const std::string& string)
 	{
-		const char* v1;
-		char v2, v6;
-		int v4, v5, v7;
-		char* end_ptr;
-
-		v1 = string;
-		v2 = *string;
-
-		if (v2 == 48 && v1[1] == 120)
-		{
-			return strtoul(v1 + 2, &end_ptr, 16);
-		}
-
-		v4 = v2;
-
-		if ((v2 - 65) <= 0x19u)
-		{
-			v4 = v2 + 32;
-		}
-
-		v5 = 0xB3CB2E29 * static_cast<unsigned int>(v4 ^ 0x319712C3);
-
-		if (v2)
-		{
-			do
-			{
-				v6 = *++v1;
-				v7 = v6;
-				if ((v6 - 65) <= 0x19u)
-				{
-					v7 = v6 + 32;
-				}
-
-				v5 = 0xB3CB2E29 * static_cast<unsigned int>(v5 ^ v7);
-			} while (v6);
-		}
-
-		return v5;
+		return generate_hash(string.data());
 	}
 
-	void insert_dvar_info(const std::uint32_t hash, const std::string& name, const std::string& description)
+	void insert_dvar_info(const std::int32_t hash, const std::string& name, const std::string& description)
 	{
 		dvar_info info{};
 		info.hash = hash;
@@ -185,10 +148,10 @@ namespace dvars
 
 	void insert_dvar_info(const std::string& name, const std::string& description)
 	{
-		insert_dvar_info(game::generateHashValue(name.data()), name, description);
+		insert_dvar_info(generate_hash(name), name, description);
 	}
 
-	std::optional<dvar_info> get_dvar_info_from_hash(const std::uint32_t hash)
+	std::optional<dvar_info> get_dvar_info_from_hash(const std::int32_t hash)
 	{
 		const auto iter = dvar_map.find(hash);
 		if (iter != dvar_map.end())
@@ -199,11 +162,15 @@ namespace dvars
 		return {};
 	}
 
+	std::optional<dvar_info> get_dvar_info(const std::string& name)
+	{
+		const auto hash = generate_hash(name);
+		return get_dvar_info_from_hash(hash);
+	}
+
 	std::string dvar_get_description(const std::string& name)
 	{
-		const auto hash = game::generateHashValue(name.data());
-		const auto info = get_dvar_info_from_hash(hash);
-
+		const auto info = get_dvar_info(name);	
 		if (info.has_value())
 		{
 			return info->description;
@@ -212,7 +179,7 @@ namespace dvars
 		return {};
 	}
 
-	std::string hash_to_string(const int hash)
+	std::string hash_to_string(const std::int32_t hash)
 	{
 		return utils::string::va("0x%lX", hash);
 	}
@@ -220,7 +187,7 @@ namespace dvars
 	game::dvar_t* register_int(const std::string& name, int value, int min, int max,
 		unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterInt(hash, "", value, min, max, flags);
 	}
@@ -228,7 +195,7 @@ namespace dvars
 	game::dvar_t* register_bool(const std::string& name, bool value,
 		unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterBool(hash, "", value, flags);
 	}
@@ -236,7 +203,7 @@ namespace dvars
 	game::dvar_t* register_string(const std::string& name, const char* value,
 		unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterString(hash, "", value, flags);
 	}
@@ -244,7 +211,7 @@ namespace dvars
 	game::dvar_t* register_float(const std::string& name, float value, float min,
 		float max, unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterFloat(hash, "", value, min, max, flags);
 	}
@@ -252,7 +219,7 @@ namespace dvars
 	game::dvar_t* register_vec4(const std::string& name, float x, float y, float z,
 		float w, float min, float max, unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterVec4(hash, "", x, y, z, w, min, max, flags);
 	}
@@ -260,7 +227,7 @@ namespace dvars
 	game::dvar_t* register_enum(const std::string& name, const char** value_list, int default_index, 
 		unsigned int flags, const std::string& description)
 	{
-		const auto hash = game::generateHashValue(name.data());
+		const auto hash = generate_hash(name);
 		insert_dvar_info(hash, name, description);
 		return game::Dvar_RegisterEnum(hash, "", value_list, default_index, flags);
 	}
