@@ -432,7 +432,7 @@ namespace dvars
 			{
 				const auto list_json = utils::nt::load_resource(DVAR_LIST);
 				const auto list = nlohmann::json::parse(list_json);
-				for (const auto& dvar_info : list.array())
+				for (const auto& [_0, dvar_info] : list.items())
 				{
 					const auto name = dvar_info[0].get<std::string>();
 					const auto description = dvar_info[1].get<std::string>();
