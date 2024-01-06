@@ -191,7 +191,7 @@ namespace fonts
 		}
 
 		const auto lang = language::current();
-		const std::string lang_name = game::languages[lang].name;
+		const std::string lang_name = language::languages[lang].name;
 		for (auto row = 0; row < table->rowCount; row++)
 		{
 			if (table->columnCount < 3)

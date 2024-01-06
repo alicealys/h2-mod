@@ -17,6 +17,8 @@
     "LOCALE_15": "Korean",
     "LOCALE_16": "English (Safe)",
     "LOCALE_17": "Russian (Partial)",
+    "LOCALE_18": "Turkish",
+    
     "LUA_MENU_FALLBACK_DISABLE": "Apply built-in fonts",
     "LUA_MENU_FALLBACK_ENABLE": "Apply h2-mod fonts",
 
@@ -90,6 +92,7 @@
     "MENU_KOREAN": "한국어",
     "MENU_ENGLISH_SAFE": "English (Safe)",
     "MENU_RUSSIAN_PARTIAL": "Русский (Англ. озвучка)",
+    "MENU_TURKISH": "Türkçe",
     
     "MENU_CREDITS_1": "momo5502",
     "MENU_CREDITS_2": "Vlad",

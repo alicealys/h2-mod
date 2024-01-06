@@ -4,6 +4,8 @@
 
 namespace language
 {
+	extern game::language_values languages[game::LANGUAGE_COUNT + 1];
+
 	std::string get_default_language();
 	bool is_valid_language(const std::string& name);
 	bool is_custom_language(const std::string& name);
