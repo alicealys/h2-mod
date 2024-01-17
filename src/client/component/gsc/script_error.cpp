@@ -76,7 +76,7 @@ namespace gsc
 			{
 				const auto& pos = function.value();
 				unknown_function_error = std::format(
-					"while processing function '{}' in script '{}':\nunknown script '{}'", pos.first, pos.second, scripting::current_file
+					"while processing function '{}' in script '{}':\nunknown script '{}'", pos.function, pos.file, scripting::current_file
 				);
 			}
 			else
@@ -293,16 +293,21 @@ namespace gsc
 		}
 	}
 
-	std::optional<std::pair<std::string, std::string>> find_function(const char* pos)
+	std::optional<script_info_t> find_function(const char* pos)
 	{
 		for (const auto& file : scripting::script_function_table_sort)
 		{
+			const auto first_function = file.second.begin();
 			for (auto i = file.second.begin(); i != file.second.end() && std::next(i) != file.second.end(); ++i)
 			{
 				const auto next = std::next(i);
 				if (pos >= i->second && pos < next->second)
 				{
-					return {std::make_pair(i->first, file.first)};
+					script_info_t info{};
+					info.function = i->first;
+					info.file = file.first;
+					info.script_start = first_function->second;
+					return {info};
 				}
 			}
 		}
