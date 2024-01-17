@@ -130,16 +130,39 @@ namespace gsc
 		{
 			for (auto frame = game::scr_VmPub->function_frame; frame != game::scr_VmPub->function_frame_start; --frame)
 			{
-				const auto pos = frame == game::scr_VmPub->function_frame ? game::scr_function_stack->pos : frame->fs.pos;
-				const auto function = find_function(frame->fs.pos);
+				const auto pos = frame == game::scr_VmPub->function_frame ? game::scr_function_stack->pos - 1 : frame->fs.pos;
+				const auto info = find_function(pos);
 
-				if (function.has_value())
+				if (!info.has_value())
 				{
-					console::warn("\tat function \"%s\" in file \"%s.gsc\"\n", function.value().first.data(), function.value().second.data());
+					console::warn("\tat unknown location %p\n", pos);
+					continue;
+				}
+
+				const auto& function = info->function;
+				const auto& file = info->file;
+				const auto devmap_opt = get_script_devmap(file);
+
+				if (devmap_opt.has_value())
+				{
+					const auto& devmap = devmap_opt.value();
+					const auto rel_pos = static_cast<std::uint32_t>(pos - info->script_start);
+					const auto& iter = devmap->find(rel_pos);
+
+					if (iter != devmap->end())
+					{
+						console::warn("\tat function \"%s\" in file \"%s.gsc\" (line %d, column %d)\n",
+							function.data(), file.data(),
+							iter->second.line, iter->second.column);
+					}
+					else
+					{
+						console::warn("\tat function \"%s\" in file \"%s.gsc\"\n", function.data(), file.data());
+					}
 				}
 				else
 				{
-					console::warn("\tat unknown location %p\n", pos);
+					console::warn("\tat function \"%s\" in file \"%s.gsc\"\n", function.data(), file.data());
 				}
 			}
 		}

@@ -27,7 +27,13 @@ namespace gsc
 		std::unordered_map<std::string, unsigned int> main_handles;
 		std::unordered_map<std::string, unsigned int> init_handles;
 
-		std::unordered_map<std::string, game::ScriptFile*> loaded_scripts;
+		struct loaded_script_t
+		{
+			game::ScriptFile* ptr;
+			std::map<std::uint32_t, col_line_t> devmap;
+		};
+
+		std::unordered_map<std::string, loaded_script_t> loaded_scripts;
 		utils::memory::allocator script_allocator;
 
 		struct
@@ -97,11 +103,44 @@ namespace gsc
 			return false;
 		}
 
+		std::map<std::uint32_t, col_line_t> parse_devmap(const xsk::gsc::buffer& devmap)
+		{
+			auto devmap_ptr = devmap.data;
+
+			const auto read_32 = [&]()
+			{
+				const auto val = *reinterpret_cast<const std::uint32_t*>(devmap_ptr);
+				devmap_ptr += sizeof(std::uint32_t);
+				return val;
+			};
+
+			const auto read_16 = [&]()
+			{
+				const auto val = *reinterpret_cast<const std::uint16_t*>(devmap_ptr);
+				devmap_ptr += sizeof(std::uint16_t);
+				return val;
+			};
+
+			std::map<std::uint32_t, col_line_t> pos_map;
+
+			const auto devmap_count = read_32();
+			for (auto i = 0u; i < devmap_count; i++)
+			{
+				const auto script_pos = read_32() - 1;
+				const auto line = read_16();
+				const auto col = read_16();
+
+				pos_map[script_pos] = {line, col};
+			}
+
+			return pos_map;
+		}
+
 		game::ScriptFile* load_custom_script(const char* file_name, const std::string& real_name)
 		{
 			if (const auto itr = loaded_scripts.find(file_name); itr != loaded_scripts.end())
 			{
-				return itr->second;
+				return itr->second.ptr;
 			}
 
 			try
@@ -119,26 +158,29 @@ namespace gsc
 				data.assign(source_buffer.begin(), source_buffer.end());
 
 				const auto assembly_ptr = compiler.compile(real_name, data);
-				const auto output_script = assembler.assemble(*assembly_ptr);
+				[[maybe_unused]] const auto& [script, stack, devmap] = assembler.assemble(*assembly_ptr);
 
 				const auto script_file_ptr = static_cast<game::ScriptFile*>(script_allocator.allocate(sizeof(game::ScriptFile)));
 				script_file_ptr->name = file_name;
 
-				script_file_ptr->len = static_cast<int>(output_script.second.size);
-				script_file_ptr->bytecodeLen = static_cast<int>(output_script.first.size);
+				script_file_ptr->len = static_cast<int>(stack.size);
+				script_file_ptr->bytecodeLen = static_cast<int>(script.size);
 
-				const auto stack_size = static_cast<std::uint32_t>(output_script.second.size + 1);
-				const auto byte_code_size = static_cast<std::uint32_t>(output_script.first.size + 1);
+				const auto stack_size = static_cast<std::uint32_t>(stack.size + 1);
+				const auto byte_code_size = static_cast<std::uint32_t>(script.size + 1);
 
 				script_file_ptr->buffer = static_cast<char*>(script_allocator.allocate(stack_size));
-				std::memcpy(const_cast<char*>(script_file_ptr->buffer), output_script.second.data, output_script.second.size);
+				std::memcpy(const_cast<char*>(script_file_ptr->buffer), stack.data, stack.size);
 
 				script_file_ptr->bytecode = allocate_buffer(byte_code_size);
-				std::memcpy(script_file_ptr->bytecode, output_script.first.data, output_script.first.size);
+				std::memcpy(script_file_ptr->bytecode, script.data, script.size);
 
 				script_file_ptr->compressedLen = 0;
 
-				loaded_scripts[file_name] = script_file_ptr;
+				loaded_script_t loaded_script{};
+				loaded_script.ptr = script_file_ptr;
+				loaded_script.devmap = parse_devmap(devmap);
+				loaded_scripts.insert(std::make_pair(file_name, loaded_script));
 
 				return script_file_ptr;
 			}
@@ -153,7 +195,7 @@ namespace gsc
 
 		std::string get_raw_script_file_name(const std::string& name)
 		{
-			if (name.ends_with(".gsh"))
+			if (name.ends_with(".gsh") || name.ends_with(".gsc"))
 			{
 				return name;
 			}
@@ -163,10 +205,17 @@ namespace gsc
 
 		std::string get_script_file_name(const std::string& name)
 		{
-			const auto id = gsc_ctx->token_id(name);
+			std::string script_name = name;
+			if (script_name.ends_with(".gsc"))
+			{
+				const auto dot_idx = script_name.find_last_of('.');
+				script_name = script_name.substr(0, dot_idx);
+			}
+
+			const auto id = gsc_ctx->token_id(script_name);
 			if (!id)
 			{
-				return name;
+				return script_name;
 			}
 
 			return std::to_string(id);
@@ -319,7 +368,7 @@ namespace gsc
 				? xsk::gsc::build::dev
 				: xsk::gsc::build::prod;
 
-			gsc_ctx->init(comp_mode, [](const std::string& include_name) 
+			gsc_ctx->init(comp_mode, [](const xsk::gsc::context* context, const std::string& include_name)
 				-> std::pair<xsk::gsc::buffer, std::vector<std::uint8_t>>
 			{
 				const auto real_name = get_raw_script_file_name(include_name);
@@ -386,6 +435,17 @@ namespace gsc
 		}
 
 		return game::DB_FindXAssetHeader(type, name, allow_create_default).scriptfile;
+	}
+
+	std::optional<std::map<std::uint32_t, col_line_t>*> get_script_devmap(const std::string& name)
+	{
+		const auto iter = loaded_scripts.find(name);
+		if (iter == loaded_scripts.end())
+		{
+			return {};
+		}
+
+		return {&iter->second.devmap};
 	}
 
 	class loading final : public component_interface
