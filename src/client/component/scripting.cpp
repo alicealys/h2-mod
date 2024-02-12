@@ -6,8 +6,10 @@
 
 #include "scheduler.hpp"
 #include "scripting.hpp"
-#include "gsc.hpp"
 #include "console.hpp"
+#include "command.hpp"
+
+#include "gsc/script_loading.hpp"
 
 #include "game/scripting/event.hpp"
 #include "game/scripting/functions.hpp"
@@ -162,9 +164,9 @@ namespace scripting
 		{
 			auto result = scripting::find_token(id);
 
-			if (canonical_string_table.find(id) != canonical_string_table.end())
+			if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
 			{
-				result.push_back(canonical_string_table[id]);
+				result.push_back(itr->second);
 			}
 
 			return result;
@@ -323,12 +325,22 @@ namespace scripting
 
 	std::optional<std::string> get_canonical_string(const unsigned int id)
 	{
-		if (canonical_string_table.find(id) == canonical_string_table.end())
+		if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
 		{
-			return {};
+			return itr->second;
 		}
 
-		return {canonical_string_table[id]};
+		return {};
+	}
+
+	std::string get_token(unsigned int id)
+	{
+		if (const auto itr = canonical_string_table.find(id); itr != canonical_string_table.end())
+		{
+			return itr->second;
+		}
+
+		return find_token_single(id);
 	}
 
 	class component final : public component_interface
@@ -357,6 +369,12 @@ namespace scripting
 			scr_delete_hook.create(0x1404F0460, scr_delete_stub);
 
 			utils::hook::call(0x1404B07D2, get_spawn_point_stub);
+
+			command::add("getfunctionptr", [](const command::params& params)
+			{
+				const auto func = find_function(params.get(1), false);
+				console::info("%p\n", func);
+			});
 
 			scheduler::loop([]()
 			{

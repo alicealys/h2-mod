@@ -216,9 +216,29 @@ namespace utils::string
 
 	std::string truncate(const std::string& text, const size_t length, const std::string& end)
 	{
-		return text.size() <= length
-			? text
-			: text.substr(0, length - end.size()) + end;
+		const auto new_line = text.find_first_of('\n');
+		if (text.size() <= length)
+		{
+			if (new_line == std::string::npos)
+			{
+				return text;
+			}
+			else
+			{
+				return text.substr(0, new_line + 1);
+			}
+		}
+		else
+		{
+			if (new_line == std::string::npos)
+			{
+				return text.substr(0, length - end.size()) + end;
+			}
+			else
+			{
+				return text.substr(0, std::min(new_line + 1, length) - end.size()) + end;
+			}
+		}
 	}
 
 	bool strstr_lower(const char* a, const char* b)
@@ -228,7 +248,7 @@ namespace utils::string
 
 		while (*a_ != '\0' && *b_ != '\0')
 		{
-			if (std::tolower(*a_) == std::tolower(*b_))
+			if (*b_ == '*' || std::tolower(*a_) == std::tolower(*b_))
 			{
 				b_++;
 			}
@@ -241,5 +261,10 @@ namespace utils::string
 		}
 
 		return *b_ == '\0';
+	}
+
+	bool is_numeric(const std::string& text)
+	{
+		return std::to_string(atoi(text.data())) == text;
 	}
 }

@@ -29,15 +29,6 @@ function string:truncate(length)
 	return self:sub(1, length - 3) .. "..."
 end
 
-LUI.addmenubutton("main_campaign", {
-	index = 6,
-	text = "@MENU_MODS",
-	description = Engine.Localize("@MENU_MODS_DESC"),
-	callback = function()
-		LUI.FlowManager.RequestAddMenu(nil, "mods_menu")
-	end
-})
-
 function getmodname(path)
 	local modinfo = mods.getinfo(path)
 

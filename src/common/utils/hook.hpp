@@ -1,10 +1,13 @@
 #pragma once
 #include "signature.hpp"
+#include "memory.hpp"
 
 #include <asmjit/core/jitruntime.h>
 #include <asmjit/x86/x86assembler.h>
 
 using namespace asmjit::x86;
+
+Mem seg_ptr(const SReg& segment, const uint64_t off);
 
 namespace utils::hook
 {
@@ -151,10 +154,12 @@ namespace utils::hook
 	bool is_relatively_far(const void* pointer, const void* data, int offset = 5);
 
 	void call(void* pointer, void* data);
+	void call(void* pointer, size_t data);
 	void call(size_t pointer, void* data);
 	void call(size_t pointer, size_t data);
 
 	void jump(void* pointer, void* data, bool use_far = false);
+	void jump(void* pointer, size_t data, bool use_far = false);
 	void jump(size_t pointer, void* data, bool use_far = false);
 	void jump(size_t pointer, size_t data, bool use_far = false);
 
@@ -201,5 +206,60 @@ namespace utils::hook
 	static T invoke(void* func, Args ... args)
 	{
 		return static_cast<T(*)(Args ...)>(func)(args...);
+	}
+
+	template <size_t Base>
+	void* allocate_far_jump()
+	{
+		constexpr auto alloc_size = 0x1000;
+		constexpr auto far_jmp_size = 0xC;
+
+		const auto alloc_jump_table = []
+		{
+			return reinterpret_cast<char*>(
+				memory::allocate_near(Base, alloc_size, PAGE_EXECUTE_READWRITE));
+		};
+
+		static auto jump_table = alloc_jump_table();
+		static auto current_pos = jump_table;
+
+		if (current_pos + far_jmp_size >= jump_table + alloc_size)
+		{
+			jump_table = alloc_jump_table();
+			current_pos = jump_table;
+		}
+
+		const auto ptr = current_pos;
+		current_pos += far_jmp_size;
+		return ptr;
+	}
+
+	template <size_t Base, typename T>
+	void* create_far_jump(const T dest)
+	{
+		static std::unordered_map<void*, void*> allocated_jumps;
+		if (const auto iter = allocated_jumps.find(reinterpret_cast<void*>(dest)); iter != allocated_jumps.end())
+		{
+			return iter->second;
+		}
+
+		const auto pos = allocate_far_jump<Base>();
+		jump(pos, dest, true);
+		allocated_jumps.insert(std::make_pair(dest, pos));
+		return pos;
+	}
+
+	template <size_t Base, typename T>
+	void far_jump(const size_t address, const T dest)
+	{
+		const auto pos = create_far_jump<Base>(dest);
+		jump(address, pos, false);
+	}
+
+	template <size_t Base, typename T>
+	void far_call(const size_t address, const T dest)
+	{
+		const auto pos = create_far_jump<Base>(dest);
+		call(address, pos);
 	}
 }

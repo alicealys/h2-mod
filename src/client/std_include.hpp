@@ -1,7 +1,10 @@
 #pragma once
 
 #define BINARY_PAYLOAD_SIZE 0x12000000
+#define BASE_ADDRESS 0x140000000
 #define INJECT_HOST_AS_LIB
+
+#define RVA(ptr) static_cast<std::uint32_t>(reinterpret_cast<std::size_t>(ptr) - BASE_ADDRESS)
 
 #pragma warning(push)
 #pragma warning(disable: 4100)
@@ -47,6 +50,7 @@
 #include <atlbase.h>
 #include <iphlpapi.h>
 #include <wincrypt.h>
+#include <dwmapi.h>
 
 // min and max is required by gdi, therefore NOMINMAX won't work
 #ifdef max

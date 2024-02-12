@@ -8,9 +8,6 @@
 #include "command.hpp"
 #include "game/scripting/functions.hpp"
 
-#include <xsk/gsc/types.hpp>
-#include <xsk/resolver.hpp>
-
 #include <utils/hook.hpp>
 #include <utils/string.hpp>
 #include <utils/io.hpp>
@@ -50,7 +47,7 @@ namespace mapents
 					continue;
 				}
 
-				const auto token = xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id));
+				const auto token = scripting::find_token_single(static_cast<std::uint16_t>(id));
 				const auto key = "\"" + token + "\"";
 
 				const auto new_line = key + line.substr(first_space);
@@ -76,14 +73,14 @@ namespace mapents
 
 				fastfiles::enum_assets(game::ASSET_TYPE_MAP_ENTS, [](game::XAssetHeader header)
 				{
-					if (header.mapents == nullptr)
+					if (header.mapEnts == nullptr)
 					{
 						console::info("Failed to dump mapents\n");
 						return;
 					}
 
-					const auto dest = utils::string::va("dumps/%s.ents", header.mapents->name);
-					const auto str = std::string(header.mapents->entityString, header.mapents->numEntityChars);
+					const auto dest = utils::string::va("dumps/%s.ents", header.mapEnts->name);
+					const auto str = std::string(header.mapEnts->entityString, header.mapEnts->numEntityChars);
 					const auto data = replace_mapents_keys(str);
 					utils::io::write_file(dest, data, false);
 					console::info("Mapents dumped to %s\n", dest);

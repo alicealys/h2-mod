@@ -5,34 +5,167 @@
 #include "console.hpp"
 #include "images.hpp"
 #include "command.hpp"
+#include "updater.hpp"
 
 #include <utils/string.hpp>
 #include <utils/http.hpp>
 #include <utils/concurrency.hpp>
-
-#define MAX_FEATURED_TABS 8
+#include <utils/properties.hpp>
+#include <utils/io.hpp>
+#include <utils/cryptography.hpp>
 
 namespace motd
 {
 	namespace
 	{
-		utils::concurrency::container<links_map_t> links;
+		constexpr auto max_featured_tabs = 8;
+		constexpr auto cache_max_age = 24h * 5; // 5 days
+		constexpr auto cache_file_signature = 'CM2H'; // H2MC (H2-MOD Cache);
 
+		utils::concurrency::container<links_map_t> links;
 		utils::concurrency::container<nlohmann::json, std::recursive_mutex> marketing;
 
-		std::unordered_map<std::string, std::string> image_cache;
+		struct cached_file_header
+		{
+			std::uint32_t signature;
+			time_t date_created;
+		};
+
+		struct parsed_cache_file
+		{
+			cached_file_header header{};
+			std::string data;
+		};
+		
+		std::atomic_bool killed;
+
+		std::filesystem::path get_cache_folder()
+		{
+			return utils::properties::get_appdata_path() / "cache";
+		}
+
+		std::string get_cached_file_name(const std::string& name)
+		{
+			const auto hash = utils::cryptography::sha1::compute(name, true);
+			return (get_cache_folder() / hash).generic_string();
+		}
+
+		void cache_file(const std::string& name, const std::string& data)
+		{
+			std::string buffer;
+			const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+
+			cached_file_header header{};
+			header.signature = cache_file_signature;
+			header.date_created = now;
+
+			buffer.append(reinterpret_cast<char*>(&header), sizeof(header));
+			buffer.append(data);
+
+			const auto path = get_cached_file_name(name);
+			utils::io::write_file(path, buffer, false);
+		}
+
+		std::optional<cached_file_header> parse_cached_file_header(std::string& data)
+		{
+			if (data.size() < sizeof(cached_file_header))
+			{
+				return {};
+			}
+
+			auto buffer = data.data();
+			const auto header = reinterpret_cast<cached_file_header*>(buffer);
+			return {*header};
+		}
+
+		std::optional<parsed_cache_file> parse_cached_file(const std::string& path)
+		{
+			parsed_cache_file parsed{};
+
+			auto data = utils::io::read_file(path);
+			const auto header = parse_cached_file_header(data);
+
+			if (!header.has_value())
+			{
+				return {};
+			}
+
+			if (header->signature != cache_file_signature)
+			{
+				return {};
+			}
+
+			const auto file_data = data.data() + sizeof(cached_file_header);
+			parsed.header = *header;
+			parsed.data = std::string{file_data, data.size() - sizeof(cached_file_header)};
+
+			return {parsed};
+		}
+
+		std::optional<std::string> read_cached_file(const std::string& name)
+		{
+			const auto path = get_cached_file_name(name);
+			if (!utils::io::file_exists(path))
+			{
+				return {};
+			}
+
+			const auto parsed = parse_cached_file(path);
+			if (!parsed.has_value())
+			{
+				return {};
+			}
+
+			return {parsed->data};
+		}
+
+		void delete_old_files()
+		{
+			const auto path = get_cache_folder().generic_string();
+			if (!utils::io::directory_exists(path))
+			{
+				return;
+			}
+
+			const auto now = std::chrono::system_clock::now();
+			const auto files = utils::io::list_files(path);
+
+			for (const auto& file : files)
+			{
+				std::string data{};
+				if (!utils::io::read_file(file, &data))
+				{
+					continue;
+				}
+
+				const auto header = parse_cached_file_header(data);
+				const auto date = std::chrono::system_clock::from_time_t(header->date_created);
+				if (now - date >= cache_max_age)
+				{
+					utils::io::remove_file(file);
+				}
+			}
+		}
 
 		std::optional<std::string> download_image(const std::string& url)
 		{
-			if (image_cache.contains(url))
+			if (killed)
 			{
-				return {image_cache.at(url)};
+				return {};
 			}
+
+			const auto cached = read_cached_file(url);
+			if (cached.has_value())
+			{
+				return {cached.value()};
+			}
+
+			console::debug("[HTTP] GET File \"%s\"\n", url.data());
 
 			const auto res = utils::http::get_data(url);
 			if (res.has_value())
 			{
-				image_cache[url] = res.value();
+				cache_file(url, res.value());
 			}
 
 			return res;
@@ -50,7 +183,6 @@ namespace motd
 			if (image_data.has_value())
 			{
 				const auto& image = image_data.value();
-				console::debug("Downloaded motd image\n");
 				images::override_texture("motd_image", image);
 			}
 		}
@@ -66,7 +198,7 @@ namespace motd
 			for (const auto& [key, tab] : data["featured"].items())
 			{
 				index++;
-				if (index >= MAX_FEATURED_TABS + 1)
+				if (index >= max_featured_tabs + 1)
 				{
 					return;
 				}
@@ -83,8 +215,7 @@ namespace motd
 					if (image_data.has_value())
 					{
 						const auto& image = image_data.value();
-						console::debug("Downloaded featured tab image %i\n", index);
-						images::override_texture(image_name + std::format("_{}", index), image);
+						images::override_texture(std::format("{}_{}", image_name, index), image);
 					}
 				};
 
@@ -110,6 +241,7 @@ namespace motd
 			{
 				{"github", "https://github.com/fedddddd/h2-mod"},
 				{"donate", "https://www.paypal.com/donate/?hosted_button_id=LM5BA9UABEV4Q"},
+				{"specops", "https://github.com/fedddddd/h2-specops-mod"},
 				{"credits_1", "https://github.com/momo5502"},
 				{"credits_2", "https://github.com/VladWinner"},
 				{"credits_3", "https://github.com/diamante0018"},
@@ -145,6 +277,8 @@ namespace motd
 
 		void init(bool load_images = true)
 		{
+			delete_old_files();
+
 			links.access([](links_map_t& map)
 			{
 				init_links(map);
@@ -152,10 +286,9 @@ namespace motd
 
 			marketing.access([&](nlohmann::json& data)
 			{
-				image_cache.clear();
 				data.clear();
 
-				const auto marketing_data = utils::http::get_data("https://master.fed0001.xyz/h2-mod/marketing.json");
+				const auto marketing_data = updater::get_server_file("h2-mod/marketing.json");
 				if (marketing_data.has_value())
 				{
 					try
@@ -196,7 +329,7 @@ namespace motd
 				return 0;
 			}
 
-			return std::min(MAX_FEATURED_TABS, static_cast<int>(data["featured"].size()));
+			return std::min(max_featured_tabs, static_cast<int>(data["featured"].size()));
 		});
 	}
 
@@ -233,12 +366,34 @@ namespace motd
 		});
 	}
 
+	bool has_motd()
+	{
+		return marketing.access<bool>([](nlohmann::json& data)
+			-> nlohmann::json
+		{
+			return data.is_object() && data["motd"].is_object();
+		});
+	}
+
+	std::thread init_thread;
+
 	class component final : public component_interface
 	{
 	public:
+		void post_start() override
+		{
+			init_thread = std::thread([]
+			{
+				init();
+			});
+		}
+
 		void post_unpack() override
 		{
-			init();
+			if (init_thread.joinable())
+			{
+				init_thread.join();
+			}
 
 			command::add("reloadmotd", []()
 			{
@@ -249,6 +404,15 @@ namespace motd
 			{
 				init(false);
 			});
+		}
+
+		void pre_destroy() override
+		{
+			killed = true;
+			if (init_thread.joinable())
+			{
+				init_thread.join();
+			}
 		}
 	};
 }

@@ -3,6 +3,13 @@
 
 #include <MinHook.h>
 
+Mem seg_ptr(const SReg& segment, const uint64_t off)
+{
+	auto mem = ptr_abs(off);
+	mem.setSegment(segment);
+	return mem;
+}
+
 namespace utils::hook
 {
 	namespace
@@ -220,6 +227,11 @@ namespace utils::hook
 		set<int32_t>(patch_pointer + 1, int32_t(size_t(data) - (size_t(pointer) + 5)));
 	}
 
+	void call(void* pointer, const size_t data)
+	{
+		return call(pointer, reinterpret_cast<void*>(data));
+	}
+
 	void call(const size_t pointer, void* data)
 	{
 		return call(reinterpret_cast<void*>(pointer), data);
@@ -253,6 +265,11 @@ namespace utils::hook
 			set<uint8_t>(patch_pointer, 0xE9);
 			set<int32_t>(patch_pointer + 1, int32_t(size_t(data) - (size_t(pointer) + 5)));
 		}
+	}
+
+	void jump(void* pointer, const size_t data, const bool use_far)
+	{
+		return jump(pointer, reinterpret_cast<void*>(data), use_far);
 	}
 
 	void jump(const size_t pointer, void* data, const bool use_far)

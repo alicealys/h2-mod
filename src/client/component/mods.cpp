@@ -9,11 +9,13 @@
 #include "filesystem.hpp"
 #include "fonts.hpp"
 #include "mods.hpp"
+#include "mod_stats.hpp"
 #include "loadscreen.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
 #include <utils/string.hpp>
+#include <utils/concurrency.hpp>
 
 #define MOD_FOLDER "mods"
 #define MOD_STATS_FOLDER "players2/modstats"
@@ -40,15 +42,52 @@ namespace mods
 			{"game", game::DB_ZONE_GAME},
 		};
 
+		std::unordered_map<std::string, zone_priority> priority_map =
+		{
+			{"none", zone_priority::none},
+
+			{"pre_gfx", zone_priority::post_gfx},
+			{"post_gfx", zone_priority::post_gfx},
+			{"post_common", zone_priority::post_common},
+
+			{"pre_map", zone_priority::pre_map},
+			{"post_map", zone_priority::post_map},
+		};
+
 		unsigned int get_alloc_flag(const std::string& name)
 		{
 			const auto lower = utils::string::to_lower(name);
-			if (alloc_flags_map.find(lower) != alloc_flags_map.end())
+			if (const auto iter = alloc_flags_map.find(lower); iter != alloc_flags_map.end())
 			{
-				return alloc_flags_map[lower];
+				return iter->second;
 			}
 
 			return game::DB_ZONE_COMMON;
+		}
+		
+		zone_priority get_default_zone_priority(unsigned int alloc_flags)
+		{
+			if (alloc_flags & game::DB_ZONE_COMMON)
+			{
+				return zone_priority::post_common;
+			}
+			else if (alloc_flags & game::DB_ZONE_GAME)
+			{
+				return zone_priority::pre_map;
+			}
+
+			return zone_priority::none;
+		}
+
+		zone_priority get_zone_priority(const std::string& name, unsigned int alloc_flags)
+		{
+			const auto lower = utils::string::to_lower(name);
+			if (const auto iter = priority_map.find(lower); iter != priority_map.end())
+			{
+				return iter->second;
+			}
+
+			return get_default_zone_priority(alloc_flags);
 		}
 
 		utils::hook::detour db_release_xassets_hook;
@@ -113,106 +152,30 @@ namespace mods
 					continue;
 				}
 
+				mod_zone zone{};
+
 				const auto alloc_flags = get_alloc_flag(values[0]) | game::DB_ZONE_CUSTOM;
 				if (alloc_flags & game::DB_ZONE_COMMON)
 				{
 					mod_info.zone_info.has_common_zones = true;
 				}
 
-				mod_info.zone_info.zones.emplace_back(values[1], alloc_flags);
+				zone.alloc_flags = alloc_flags;
+
+				if (values.size() <= 2)
+				{
+					zone.name = values[1];
+					zone.priority = get_default_zone_priority(zone.alloc_flags);
+					mod_info.zone_info.zones.emplace_back(zone);
+				}
+				else
+				{
+					zone.name = values[2];
+					zone.priority = get_zone_priority(values[1], zone.alloc_flags);
+					mod_info.zone_info.zones.emplace_back(zone);
+				}
 			}
 		}
-
-		std::optional<std::string> get_mod_basename()
-		{
-			const auto mod = get_mod();
-			if (!mod.has_value())
-			{
-				return {};
-			}
-
-			const auto& value = mod.value();
-			const auto last_index = value.find_last_of('/');
-			const auto basename = value.substr(last_index + 1);
-			return {basename};
-		}
-
-		nlohmann::json default_mod_stats()
-		{
-			nlohmann::json json;
-			json["maps"] = {};
-			return json;
-		}
-
-		nlohmann::json verify_mod_stats(nlohmann::json& json)
-		{
-			if (!json.is_object())
-			{
-				json = {};
-			}
-
-			if (!json.contains("maps") || !json["maps"].is_object())
-			{
-				json["maps"] = {};
-			}
-
-			return json;
-		}
-
-		nlohmann::json parse_mod_stats()
-		{
-			const auto name = get_mod_basename();
-			if (!name.has_value())
-			{
-				return default_mod_stats();
-			}
-
-			const auto& name_value = name.value();
-			const auto stat_file = MOD_STATS_FOLDER "/" + name_value + ".json";
-			if (!utils::io::file_exists(stat_file))
-			{
-				return default_mod_stats();
-			}
-
-			const auto data = utils::io::read_file(stat_file);
-			try
-			{
-				auto json = nlohmann::json::parse(data);
-				return verify_mod_stats(json);
-			}
-			catch (const std::exception& e)
-			{
-				console::error("Failed to parse json mod stat file \"%s.json\": %s", 
-					name_value.data(), e.what());
-			}
-
-			return default_mod_stats();
-		}
-
-		void initialize_stats()
-		{
-			get_current_stats() = parse_mod_stats();
-		}
-	}
-
-	nlohmann::json& get_current_stats()
-	{
-		static nlohmann::json stats;
-		stats = verify_mod_stats(stats);
-		return stats;
-	}
-
-	void write_mod_stats()
-	{
-		const auto name = get_mod_basename();
-		if (!name.has_value())
-		{
-			return;
-		}
-
-		const auto& name_value = name.value();
-		const auto stat_file = MOD_STATS_FOLDER "/" + name_value + ".json";
-		utils::io::write_file(stat_file, get_current_stats().dump(), false);
 	}
 
 	bool mod_requires_restart(const std::string& path)
@@ -229,9 +192,9 @@ namespace mods
 			filesystem::unregister_path(mod_info.path.value());
 		}
 
-		write_mod_stats();
-		initialize_stats();
+		mod_stats::write();
 		mod_info.path = path;
+		mod_stats::initialize();
 		filesystem::register_path(path);
 		parse_mod_zones();
 	}
@@ -280,6 +243,11 @@ namespace mods
 		return mod_list;
 	}
 
+	bool mod_exists(const std::string& folder)
+	{
+		return utils::io::directory_exists(utils::string::va("%s\\%s", MOD_FOLDER, folder.data()));
+	}
+
 	std::optional<nlohmann::json> get_mod_info(const std::string& name)
 	{
 		const auto info_file = name + "/info.json";
@@ -301,6 +269,46 @@ namespace mods
 		return {};
 	}
 
+	void load(const std::string& path)
+	{
+		if (!utils::io::directory_exists(path))
+		{
+			console::error("Mod %s not found!\n", path.data());
+			return;
+		}
+
+		console::info("Loading mod %s\n", path.data());
+		set_mod(path);
+
+		if ((mod_info.path.has_value() && mod_requires_restart(mod_info.path.value())) ||
+			mod_requires_restart(path))
+		{
+			// vid_restart is still broken :(
+			console::info("Restarting...\n");
+			full_restart("-mod "s + path);
+		}
+		else
+		{
+			restart();
+		}
+	}
+
+	void unload()
+	{
+		console::info("Unloading mod %s\n", mod_info.path.value().data());
+
+		if (mod_requires_restart(mod_info.path.value()))
+		{
+			console::info("Restarting...\n");
+			full_restart("");
+		}
+		else
+		{
+			clear_mod();
+			restart();
+		}
+	}
+
 	class component final : public component_interface
 	{
 	public:
@@ -309,11 +317,6 @@ namespace mods
 			if (!utils::io::directory_exists(MOD_FOLDER))
 			{
 				utils::io::create_directory(MOD_FOLDER);
-			}
-
-			if (!utils::io::directory_exists(MOD_STATS_FOLDER))
-			{
-				utils::io::create_directory(MOD_STATS_FOLDER);
 			}
 
 			db_release_xassets_hook.create(0x140416A80, db_release_xassets_stub);
@@ -334,26 +337,7 @@ namespace mods
 				}
 
 				const auto path = params.get(1);
-				if (!utils::io::directory_exists(path))
-				{
-					console::error("Mod %s not found!\n", path);
-					return;
-				}
-
-				console::info("Loading mod %s\n", path);
-				set_mod(path);
-
-				if ((mod_info.path.has_value() && mod_requires_restart(mod_info.path.value())) || 
-					mod_requires_restart(path))
-				{
-					// vid_restart is still broken :(
-					console::info("Restarting...\n");
-					full_restart("-mod "s + path);
-				}
-				else
-				{
-					restart();
-				}
+				load(path);
 			});
 
 			command::add("unloadmod", [](const command::params& params)
@@ -371,18 +355,7 @@ namespace mods
 					return;
 				}
 
-				console::info("Unloading mod %s\n", mod_info.path.value().data());
-
-				if (mod_requires_restart(mod_info.path.value()))
-				{
-					console::info("Restarting...\n");
-					full_restart("");
-				}
-				else
-				{
-					clear_mod();
-					restart();
-				}
+				unload();
 			});
 
 			command::add("com_restart", []()

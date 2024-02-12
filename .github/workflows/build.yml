@@ -8,6 +8,9 @@ on:
     branches:
       - "*"
     types: [opened, synchronize, reopened]
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   build:
     name: Build binaries
@@ -18,20 +21,11 @@ jobs:
           - Debug
           - Release
     steps:
-      - name: Wait for previous workflows
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
-        uses: softprops/turnstyle@v1
-        with:
-          poll-interval-seconds: 10
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Check out files
         uses: actions/checkout@v3
         with:
           submodules: true
           fetch-depth: 0
-          # NOTE - If LFS ever starts getting used during builds, switch this to true!
           lfs: false
 
       - name: Add msbuild to PATH

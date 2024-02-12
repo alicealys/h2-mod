@@ -11,11 +11,14 @@
 #include "scripting.hpp"
 #include "fastfiles.hpp"
 #include "mods.hpp"
+#include "mod_stats.hpp"
 #include "updater.hpp"
 #include "console.hpp"
 #include "language.hpp"
 #include "config.hpp"
 #include "motd.hpp"
+#include "achievements.hpp"
+#include "camera.hpp"
 
 #include "game/ui_scripting/execution.hpp"
 #include "game/scripting/execution.hpp"
@@ -34,7 +37,8 @@ namespace ui_scripting
 		const auto lui_updater = utils::nt::load_resource(LUI_UPDATER);
 		const auto lua_json = utils::nt::load_resource(LUA_JSON);
 
-		std::unordered_map<game::hks::cclosure*, std::function<arguments(const function_arguments& args)>> converted_functions;
+		using lua_function_t = std::function<arguments(const function_arguments& args)>;
+		std::vector<std::unique_ptr<lua_function_t>> lua_functions;
 
 		utils::hook::detour hks_start_hook;
 		utils::hook::detour hks_shutdown_hook;
@@ -361,12 +365,7 @@ namespace ui_scripting
 			{
 				const auto links = motd::get_links();
 				const auto link = links.find(name);
-				if (link == links.end())
-				{
-					return false;
-				}
-
-				return true;
+				return link != links.end();
 			};
 
 			lua["string"]["escapelocalization"] = [](const std::string& str)
@@ -442,6 +441,7 @@ namespace ui_scripting
 			updater_table["getupdatedownloadstatus"] = updater::get_update_download_status;
 			updater_table["cancelupdate"] = updater::cancel_update;
 			updater_table["isrestartrequired"] = updater::is_restart_required;
+			updater_table["shouldforceupdate"] = updater::should_force_update;
 
 			updater_table["getlasterror"] = updater::get_last_error;
 			updater_table["getcurrentfile"] = updater::get_current_file;
@@ -481,6 +481,22 @@ namespace ui_scripting
 
 				return info_table;
 			};
+
+			mods_table["load"] = [](const std::string& mod)
+			{
+				scheduler::once([=]()
+				{
+					mods::load(mod);
+				}, scheduler::main);
+			};
+
+			mods_table["unload"] = []
+			{
+				scheduler::once([]()
+				{
+					mods::unload();
+				}, scheduler::main);
+			};
 			
 			auto mods_stats_table = table();
 			mods_table["stats"] = mods_stats_table;
@@ -488,41 +504,50 @@ namespace ui_scripting
 			mods_stats_table["set"] = [](const std::string& key, const script_value& value)
 			{
 				const auto json_value = lua_to_json(value);
-				mods::get_current_stats()[key] = json_value;
-				mods::write_mod_stats();
+				mod_stats::set(key, json_value);
 			};
 			
 			mods_stats_table["get"] = [](const std::string& key)
 			{
-				return json_to_lua(mods::get_current_stats());
+				return json_to_lua(mod_stats::get(key));
 			};
 
-			mods_stats_table["mapset"] = [](const std::string& mapname,
+			mods_stats_table["getor"] = [](const std::string& key, const script_value& default_value)
+			{
+				const auto json_default_value = lua_to_json(default_value);
+				return json_to_lua(mod_stats::get(key, json_default_value));
+			};
+
+			mods_stats_table["setstruct"] = [](const std::string& mapname,
 				const std::string& key, const script_value& value)
 			{
 				const auto json_value = lua_to_json(value);
-				auto& stats = mods::get_current_stats();
-				stats["maps"][mapname][key] = json_value;
-				mods::write_mod_stats();
+				mod_stats::set_struct(mapname, key, json_value);
 			};
 
-			mods_stats_table["mapget"] = [](const std::string& mapname,
+			mods_stats_table["getstruct"] = [](const std::string& mapname,
 				const std::string& key)
 			{
-				auto& stats = mods::get_current_stats();
-				return json_to_lua(stats["maps"][mapname][key]);
+				return json_to_lua(mod_stats::get_struct(mapname, key));
 			};
 
-			mods_stats_table["save"] = mods::write_mod_stats;
+			mods_stats_table["getstructor"] = [](const std::string& mapname,
+				const std::string& key, const script_value& default_value)
+			{
+				const auto json_default_value = lua_to_json(default_value);
+				return json_to_lua(mod_stats::get_struct(mapname, key, json_default_value));
+			};
+
+			mods_stats_table["save"] = mod_stats::write;
 			mods_stats_table["getall"] = []()
 			{
-				return json_to_lua(mods::get_current_stats());
+				return json_to_lua(mod_stats::get_all());
 			};
 
 			mods_stats_table["setfromjson"] = [](const std::string& data)
 			{
 				const auto json = nlohmann::json::parse(data);
-				mods::get_current_stats() = json;
+				mod_stats::set_all(json);
 			};
 
 			auto config_table = table();
@@ -654,6 +679,48 @@ namespace ui_scripting
 				const auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 				config::set<uint64_t>("motd_last_seen", static_cast<uint64_t>(now));
 			};
+
+			motd_table["hasmotd"] = motd::has_motd;
+
+			auto achievements_table = table();
+			lua["achievements"] = achievements_table;
+
+			achievements_table["hasachievement"] = achievements::has_achievement;
+			achievements_table["getrarity"] = achievements::get_rarity;
+			achievements_table["getname"] = achievements::get_name;
+			achievements_table["getdetails"] = achievements::get_details;
+			achievements_table["getbackground"] = achievements::get_background;
+			achievements_table["issecret"] = achievements::is_secret;
+			achievements_table["count"] = achievements::get_count;
+
+			achievements_table["table"] = []()
+			{
+				table table{};
+
+				achievements::achievement_file_t file{};
+				achievements::get_achievements(&file);
+
+				for (auto i = 0; i < achievements::ACHIEVEMENT_TOTAL_COUNT; i++)
+				{
+					table[i] = file.achievements[i];
+				}
+
+				return table;
+			};
+
+			table camera_table;
+			lua["camera"] = camera_table;
+
+			camera::clear_lua();
+			camera_table["enablefreemove"] = camera::enable_free_move;
+			camera_table["disablefreemove"] = camera::disable_free_move;
+			camera_table["isfreemoveenabled"] = camera::is_free_move_enabled;
+			camera_table["setposition"] = camera::set_camera_position;
+			camera_table["setangles"] = camera::set_camera_angles;
+			camera_table["getposition"] = camera::get_camera_position;
+			camera_table["setusingoriginoverride"] = camera::set_using_origin_override;
+			camera_table["setusinganglesoverride"] = camera::set_using_angles_override;
+			camera_table["setcallback"] = camera::set_callback;
 		}
 
 		void start()
@@ -699,6 +766,11 @@ namespace ui_scripting
 			lua["table"]["unpack"] = lua["unpack"];
 			lua["luiglobals"] = lua;
 
+			lua["printmemoryusage"] = []()
+			{
+				utils::hook::invoke<void>(0x14031F470);
+			};
+
 			load_script("lui_common", lui_common);
 			load_script("lui_updater", lui_updater);
 			load_script("lua_json", lua_json);
@@ -729,7 +801,8 @@ namespace ui_scripting
 
 		void hks_shutdown_stub()
 		{
-			converted_functions.clear();
+			camera::clear_lua();
+			lua_functions.clear();
 			globals = {};
 			hks_shutdown_hook.invoke<void>();
 		}
@@ -780,10 +853,10 @@ namespace ui_scripting
 			return utils::hook::invoke<int>(0x1402D9410, state, compiler_options, reader, reader_data, chunk_name);
 		}
 		
-		std::string current_error;
 		int main_handler(game::hks::lua_State* state)
 		{
-			bool error = false;
+			static std::string error_str;
+			auto error = false;
 
 			try
 			{
@@ -794,15 +867,14 @@ namespace ui_scripting
 				}
 
 				const auto closure = value.v.cClosure;
-				if (!converted_functions.contains(closure))
+				if (closure->m_numUpvalues < 1)
 				{
 					return 0;
 				}
 
-				const auto& function = converted_functions[closure];
-
+				const auto function = reinterpret_cast<lua_function_t*>(closure->m_upvalues->v.i64);
 				const auto args = get_return_values();
-				const auto results = function(args);
+				const auto results = function->operator()(args);
 
 				for (const auto& result : results)
 				{
@@ -813,13 +885,13 @@ namespace ui_scripting
 			}
 			catch (const std::exception& e)
 			{
-				current_error = e.what();
+				error_str = e.what();
 				error = true;
 			}
 
 			if (error)
 			{
-				game::hks::hksi_luaL_error(state, current_error.data());
+				game::hks::hksi_luaL_error(state, error_str.data());
 			}
 
 			return 0;
@@ -835,8 +907,23 @@ namespace ui_scripting
 	game::hks::cclosure* convert_function(F f)
 	{
 		const auto state = *game::hks::lua_state;
-		const auto closure = game::hks::cclosure_Create(state, main_handler, 0, 0, 0);
-		converted_functions[closure] = wrap_function(f);
+		const auto top = state->m_apistack.top;
+
+		game::hks::HksObject func_ptr{};
+		func_ptr.t = game::hks::TUI64;
+		func_ptr.v.i64 = 0;
+
+		push_value(func_ptr);
+		const auto closure = game::hks::cclosure_Create(state, main_handler, 1, 0, 0);
+		state->m_apistack.top = top;
+
+		const auto function = wrap_function(f);
+		const auto& iterator = lua_functions.insert(lua_functions.end(), std::make_unique<lua_function_t>(function));
+		const auto ptr = iterator->get();
+
+		closure->m_upvalues[0].t = game::hks::TUI64;
+		closure->m_upvalues[0].v.i64 = reinterpret_cast<size_t>(ptr);
+
 		return closure;
 	}
 
@@ -859,12 +946,17 @@ namespace ui_scripting
 			utils::hook::jump(0x14031E700, 0x1402D86E0);
 
 			utils::hook::jump(0x1402BFCC0, removed_function_stub); // io
-			utils::hook::jump(0x14017EE60, removed_function_stub); // profile
 			utils::hook::jump(0x1402C0150, removed_function_stub); // os
-			utils::hook::jump(0x14017F730, removed_function_stub); // serialize
+			utils::hook::jump(0x1402C1020, removed_function_stub); // serialize
 			utils::hook::jump(0x1402C0FF0, removed_function_stub); // hks
-			utils::hook::jump(0x14017EC60, removed_function_stub); // debug
+			utils::hook::jump(0x1402C0470, removed_function_stub); // debug
 			utils::hook::nop(0x1402BFC48, 5); // coroutine
+
+			// profile
+			utils::hook::jump(0x1402B6250, removed_function_stub);
+			utils::hook::jump(0x1402B6260, removed_function_stub);
+			utils::hook::jump(0x1402B6270, removed_function_stub);
+			utils::hook::jump(0x1402B6330, removed_function_stub);
 
 			utils::hook::jump(0x1402B7FD0, removed_function_stub);
 			utils::hook::jump(0x1402B7C40, removed_function_stub);

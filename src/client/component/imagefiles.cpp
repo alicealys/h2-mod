@@ -26,6 +26,7 @@ namespace imagefiles
 			char __pad0[88];
 		};
 
+		utils::memory::allocator image_file_allocator;
 		std::unordered_map<std::string, image_file_unk*> image_file_unk_map;
 		std::unordered_map<std::string, game::DB_IFileSysFile*> image_file_handles;
 
@@ -44,7 +45,7 @@ namespace imagefiles
 			const auto name = get_image_file_name();
 			if (image_file_unk_map.find(name) == image_file_unk_map.end())
 			{
-				const auto unk = utils::memory::get_allocator()->allocate<image_file_unk>();
+				const auto unk = image_file_allocator.allocate<image_file_unk>();
 				image_file_unk_map[name] = unk;
 				return unk;
 			}
@@ -65,7 +66,6 @@ namespace imagefiles
 
 		void db_create_gfx_image_stream_stub(utils::hook::assembler& a)
 		{
-			const auto check_image_file_handle = a.newLabel();
 			const auto handle_is_open = a.newLabel();
 
 			a.movzx(eax, cx);
@@ -127,6 +127,41 @@ namespace imagefiles
 			const auto name = get_image_file_name();
 			utils::hook::invoke<void>(0x140620480, buffer, len, "%s.pak", name.data());
 		}
+	}
+
+	void close_custom_handles()
+	{
+		const auto db_fs = game::DB_FSInitialize();
+		for (const auto& handle : image_file_handles)
+		{
+			if (handle.second != nullptr)
+			{
+				db_fs->vftbl->Close(db_fs, handle.second);
+			}
+		}
+
+		image_file_handles.clear();
+		image_file_unk_map.clear();
+		image_file_allocator.clear();
+	}
+
+	void close_handle(const std::string& fastfile)
+	{
+		if (!image_file_handles.contains(fastfile))
+		{
+			return;
+		}
+
+		const auto db_fs = game::DB_FSInitialize();
+		const auto handle = image_file_handles[fastfile];
+		if (handle != nullptr)
+		{
+			db_fs->vftbl->Close(db_fs, handle);
+		}
+
+		image_file_handles.erase(fastfile);
+		image_file_allocator.free(image_file_unk_map[fastfile]);
+		image_file_unk_map.erase(fastfile);
 	}
 
 	class component final : public component_interface

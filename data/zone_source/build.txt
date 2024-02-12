@@ -33,3 +33,4 @@ sna_h2_mod_common
 sna_h2_mod_patch_af_caves
 spa_h2_mod_common
 tch_h2_mod_common
+tur_h2_mod_common

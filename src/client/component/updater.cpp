@@ -52,6 +52,12 @@ namespace updater
 			std::string data;
 		};
 
+		struct file_info
+		{
+			std::string name;
+			std::string hash;
+		};
+
 		struct update_data_t
 		{
 			bool restart_required{};
@@ -60,14 +66,8 @@ namespace updater
 			status download{};
 			std::string error{};
 			std::string current_file{};
-			std::vector<std::string> required_files{};
+			std::vector<file_info> required_files{};
 			std::vector<std::string> garbage_files{};
-		};
-
-		// remove this at some point
-		std::vector<std::string> old_data_files =
-		{
-			{"./cdata"},
 		};
 
 		utils::concurrency::container<update_data_t> update_data;
@@ -159,31 +159,16 @@ namespace updater
 			return utils::string::va("%i", uint32_t(time(nullptr)));
 		}
 
-		std::optional<std::string> download_file(const std::string& name)
+		std::optional<std::string> download_data_file(const std::string& name)
 		{
-			return utils::http::get_data(MASTER + select(DATA_PATH, DATA_PATH_DEV) + name + "?" + get_time_str());
+			const auto file = std::format("{}{}?{}", select(DATA_PATH, DATA_PATH_DEV), name, get_time_str());
+			return updater::get_server_file(file);
 		}
 
-		bool has_old_data_files()
+		std::optional<std::string> download_file_list()
 		{
-			bool has = false;
-			for (const auto& file : old_data_files)
-			{
-				if (utils::io::directory_exists(file))
-				{
-					has = true;
-				}
-			}
-
-			return has;
-		}
-
-		void delete_old_data_files()
-		{
-			for (const auto& file : old_data_files)
-			{
-				std::filesystem::remove_all(file);
-			}
+			const auto file = std::format("{}?{}", select(FILES_PATH, FILES_PATH_DEV), get_time_str());
+			return updater::get_server_file(file);
 		}
 
 		bool is_update_cancelled()
@@ -279,6 +264,34 @@ namespace updater
 		}
 	}
 
+	std::optional<std::string> get_server_file(const std::string& endpoint)
+	{
+		static std::vector<std::string> server_urls =
+		{
+			{"https://h2-mod.fed.cat/"},
+			{"https://master.fed0001.xyz/"}, // remove this at some point
+		};
+
+		const auto try_url = [&](const std::string& base_url)
+		{
+			const auto url = base_url + endpoint;
+			console::debug("[HTTP] GET file \"%s\"\n", url.data());
+			const auto result = utils::http::get_data(url);
+			return result;
+		};
+
+		for (const auto& url : server_urls)
+		{
+			const auto result = try_url(url);
+			if (result.has_value())
+			{
+				return result;
+			}
+		}
+
+		return {};
+	}
+
 	void relaunch()
 	{
 		utils::nt::relaunch_self("-singleplayer");
@@ -336,7 +349,7 @@ namespace updater
 	{
 		return update_data.access<bool>([](update_data_t& data_)
 		{
-			return data_.required_files.size() > 0 || data_.garbage_files.size() > 0 || has_old_data_files();
+			return data_.required_files.size() > 0 || data_.garbage_files.size() > 0;
 		});
 	}
 
@@ -387,7 +400,7 @@ namespace updater
 
 		scheduler::once([]()
 		{
-			const auto files_data = utils::http::get_data(MASTER + select(FILES_PATH, FILES_PATH_DEV) + "?" + get_time_str());
+			const auto files_data = download_file_list();
 
 			if (is_update_cancelled())
 			{
@@ -410,7 +423,7 @@ namespace updater
 				return;
 			}
 
-			std::vector<std::string> required_files;
+			std::vector<file_info> required_files;
 			std::vector<std::string> update_files;
 
 			const auto files = j.GetArray();
@@ -449,7 +462,7 @@ namespace updater
 					console::info("[Updater] need file %s\n", name);
 #endif
 
-					required_files.push_back(name);
+					required_files.emplace_back(name, sha);
 				}
 			}
 
@@ -478,8 +491,6 @@ namespace updater
 			return;
 		}
 
-		delete_old_data_files();
-
 		const auto garbage_files = update_data.access<std::vector<std::string>>([](update_data_t& data_)
 		{
 			return data_.garbage_files;
@@ -507,7 +518,7 @@ namespace updater
 
 		scheduler::once([]()
 		{
-			const auto required_files = update_data.access<std::vector<std::string>>([](update_data_t& data_)
+			const auto required_files = update_data.access<std::vector<file_info>>([](update_data_t& data_)
 			{
 				return data_.required_files;
 			});
@@ -516,16 +527,16 @@ namespace updater
 
 			for (const auto& file : required_files)
 			{
-				update_data.access([file](update_data_t& data_)
+				update_data.access([&](update_data_t& data_)
 				{
-					data_.current_file = file;
+					data_.current_file = file.name;
 				});
 
 #ifdef DEBUG
-				console::info("[Updater] downloading file %s\n", file.data());
+				console::info("[Updater] downloading file %s\n", file.name.data());
 #endif
 
-				const auto data = download_file(file);
+				const auto data = download_data_file(file.name);
 
 				if (is_update_cancelled())
 				{
@@ -535,11 +546,18 @@ namespace updater
 
 				if (!data.has_value())
 				{
-					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file);
+					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file.name);
 					return;
 				}
 
-				downloads.push_back({file, data.value()});
+				const auto& value = data.value();
+				if (file.hash != utils::cryptography::sha1::compute(value, true))
+				{
+					set_update_download_status(true, false, ERR_DOWNLOAD_FAIL + file.name);
+					return;
+				}
+
+				downloads.emplace_back(file.name, data.value());
 			}
 
 			for (const auto& download : downloads)
@@ -553,6 +571,12 @@ namespace updater
 
 			set_update_download_status(true, true);
 		}, scheduler::pipeline::async);
+	}
+
+	bool should_force_update()
+	{
+		const auto folder = (utils::properties::get_appdata_path() / CLIENT_DATA_FOLDER).generic_string();
+		return !utils::io::directory_exists(folder) || utils::io::directory_is_empty(folder);
 	}
 
 	class component final : public component_interface

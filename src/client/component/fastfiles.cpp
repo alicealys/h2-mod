@@ -7,6 +7,7 @@
 #include "console.hpp"
 #include "mods.hpp"
 #include "fonts.hpp"
+#include "imagefiles.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
@@ -29,8 +30,9 @@ namespace fastfiles
 		};
 
 		utils::hook::detour db_try_load_x_file_internal_hook;
-		utils::hook::detour db_find_xasset_header;
+		utils::hook::detour db_find_xasset_header_hook;
 		utils::hook::detour load_xasset_header_hook;
+		utils::hook::detour db_unload_x_zones_hook;
 
 		void db_try_load_x_file_internal(const char* zone_name, const int flags)
 		{
@@ -45,8 +47,19 @@ namespace fastfiles
 		game::XAssetHeader db_find_xasset_header_stub(game::XAssetType type, const char* name, int allow_create_default)
 		{
 			const auto start = game::Sys_Milliseconds();
-			const auto result = db_find_xasset_header.invoke<game::XAssetHeader>(type, name, allow_create_default);
+			auto result = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, name, allow_create_default);
 			const auto diff = game::Sys_Milliseconds() - start;
+
+			if (type == game::ASSET_TYPE_RAWFILE && result.rawfile)
+			{
+				const std::string override_rawfile_name = "override/"s + name;
+				const auto override_rawfile = db_find_xasset_header_hook.invoke<game::XAssetHeader>(type, override_rawfile_name.data(), 0);
+				if (override_rawfile.rawfile)
+				{
+					result.rawfile = override_rawfile.rawfile;
+					console::debug("using override asset for rawfile: \"%s\"\n", name);
+				}
+			}
 
 			if (db_print_default_assets->current.enabled && game::DB_IsXAssetDefault(type, name))
 			{
@@ -128,13 +141,21 @@ namespace fastfiles
 			return true;
 		}
 
-		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator)
+		void add_mod_zones(std::vector<game::XZoneInfo>& zones, utils::memory::allocator& allocator, 
+			const mods::zone_priority priority)
 		{
-			try_add_zone(zones, allocator, "mod", true);
+			if (priority == mods::zone_priority::post_common)
+			{
+				if (mods::get_mod().has_value())
+				{
+					try_add_zone(zones, allocator, "mod", true);
+				}
+			}
+
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
 			{
-				if (zone.alloc_flags & game::DB_ZONE_COMMON)
+				if ((zone.alloc_flags & game::DB_ZONE_COMMON) && zone.priority == priority)
 				{
 					try_add_zone(zones, allocator, zone.name, true);
 				}
@@ -153,12 +174,16 @@ namespace fastfiles
 		void load_pre_gfx_zones(game::XZoneInfo* zone_info,
 			unsigned int zone_count, game::DBSyncMode sync_mode)
 		{
+			imagefiles::close_custom_handles();
+
 			// code_pre_gfx
 
 			utils::memory::allocator allocator;
 			std::vector<game::XZoneInfo> zones;
+
 			try_add_zone(zones, allocator, "h2_mod_pre_gfx", true);
 			push_zones(zones, zone_info, zone_count);
+			add_mod_zones(zones, allocator, mods::zone_priority::pre_gfx);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 			fonts::load_font_zones();
@@ -175,6 +200,8 @@ namespace fastfiles
 			std::vector<game::XZoneInfo> zones;
 
 			try_add_zone(zones, allocator, "h2_mod_common", true);
+			add_mod_zones(zones, allocator, mods::zone_priority::post_gfx);
+
 			for (auto i = 0u; i < zone_count; i++)
 			{
 				zones.push_back(zone_info[i]);
@@ -185,7 +212,7 @@ namespace fastfiles
 				}
 			}
 
-			add_mod_zones(zones, allocator);
+			add_mod_zones(zones, allocator, mods::zone_priority::post_common);
 
 			game::DB_LoadXAssets(zones.data(), static_cast<int>(zones.size()), sync_mode);
 		}
@@ -248,8 +275,6 @@ namespace fastfiles
 			constexpr auto pool_size = get_pool_type_size(Type);
 			return reallocate_asset_pool<Type, pool_size * Multiplier>();
 		}
-
-#define RVA(ptr) static_cast<uint32_t>(reinterpret_cast<size_t>(ptr) - 0x140000000)
 
 		void reallocate_xmodel_pool()
 		{
@@ -433,12 +458,12 @@ namespace fastfiles
 		void reallocate_asset_pools()
 		{
 			reallocate_xmodel_pool();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODELSURFS, 2>();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_WEAPON, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XMODEL_SURFS, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOADED_SOUND, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
-			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE_ENTRY, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND_CURVE, 2>();
 		}
 
 		void add_custom_level_load_zone(game::LevelLoad* load, const std::string& name, const size_t size_est)
@@ -460,12 +485,12 @@ namespace fastfiles
 			add_custom_level_load_zone(load, name, size_est);
 		}
 
-		void add_mod_zones_to_load(game::LevelLoad* load)
+		void add_mod_zones_to_load(game::LevelLoad* load, const mods::zone_priority priority)
 		{
 			const auto mod_zones = mods::get_mod_zones();
 			for (const auto& zone : mod_zones)
 			{
-				if (zone.alloc_flags & game::DB_ZONE_GAME)
+				if ((zone.alloc_flags & game::DB_ZONE_GAME) && zone.priority == priority)
 				{
 					add_custom_level_load_zone(load, zone.name.data(), 0x40000);
 				}
@@ -478,6 +503,7 @@ namespace fastfiles
 
 			a.pushad64();
 			a.mov(rcx, rbx);
+			a.mov(rdx, mods::zone_priority::pre_map);
 			a.call_aligned(add_mod_zones_to_load);
 			a.popad64();
 
@@ -531,6 +557,8 @@ namespace fastfiles
 			{
 				add_custom_level_load_zone(load, name, size_est);
 			}
+
+			add_mod_zones_to_load(load, mods::zone_priority::post_map);
 		}
 
 		void db_load_xassets_stub(game::XZoneInfo* info, unsigned int zone_count, game::DBSyncMode sync_mode)
@@ -561,6 +589,21 @@ namespace fastfiles
 
 			load_xasset_header_hook.invoke<void>(a1);
 		}
+
+		void db_unload_x_zones_stub(const unsigned short* unload_zones,
+			const unsigned int unload_count, const bool create_default)
+		{
+			for (auto i = 0u; i < unload_count; i++)
+			{
+				const auto zone_name = game::g_zones[unload_zones[i]].name;
+				if (zone_name[0] != '\0')
+				{
+					imagefiles::close_handle(zone_name);
+				}
+			}
+
+			db_unload_x_zones_hook.invoke<void>(unload_zones, unload_count, create_default);
+		}
 	}
 
 	bool exists(const std::string& zone)
@@ -576,7 +619,6 @@ namespace fastfiles
 			{
 				db_fs->vftbl->Close(db_fs, handle);
 			}
-
 		});
 
 		return handle != nullptr;
@@ -589,6 +631,39 @@ namespace fastfiles
 			const auto& cb = *static_cast<const std::function<void(game::XAssetHeader)>*>(data);
 			cb(header);
 		}), &callback, includeOverride);
+	}
+
+	void enum_asset_entries(const game::XAssetType type, const std::function<void(game::XAssetEntry*)>& callback, bool include_override)
+	{
+		constexpr auto max_asset_count = 0x25D78;
+		auto hash = &game::db_hashTable[0];
+		for (auto c = 0; c < max_asset_count; c++)
+		{
+			for (auto i = *hash; i; )
+			{
+				const auto entry = &game::g_assetEntryPool[i];
+
+				if (entry->asset.type == type)
+				{
+					callback(entry);
+
+					if (include_override && entry->nextOverride)
+					{
+						auto next_ovveride = entry->nextOverride;
+						while (next_ovveride)
+						{
+							const auto override = &game::g_assetEntryPool[next_ovveride];
+							callback(override);
+							next_ovveride = override->nextOverride;
+						}
+					}
+				}
+
+				i = entry->nextHash;
+			}
+
+			++hash;
+		}
 	}
 
 	std::string get_current_fastfile()
@@ -633,7 +708,9 @@ namespace fastfiles
 				false, game::DVAR_FLAG_NONE, "Print asset types being loaded");
 
 			db_try_load_x_file_internal_hook.create(0x1404173B0, db_try_load_x_file_internal);
-			db_find_xasset_header.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
+			db_find_xasset_header_hook.create(game::DB_FindXAssetHeader, db_find_xasset_header_stub);
+
+			db_unload_x_zones_hook.create(0x140417D80, db_unload_x_zones_stub);
 
 			// Allow loading of mixed compressor types
 			utils::hook::nop(0x1403E66A7, 2);

@@ -1,3 +1,5 @@
+#include maps\_endmission;
+
 main()
 {
     replacefunc(maps\_credit_h2_autogen::_id_B775, ::initiwcredits);

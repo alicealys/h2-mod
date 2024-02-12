@@ -4,6 +4,8 @@
 
 namespace updater
 {
+	std::optional<std::string> get_server_file(const std::string& endpoint);
+
 	void relaunch();
 
 	void set_has_tried_update(bool tried);
@@ -25,4 +27,6 @@ namespace updater
 	void start_update_check();
 	void start_update_download();
 	void cancel_update();
+
+	bool should_force_update();
 }

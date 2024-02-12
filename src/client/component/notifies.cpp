@@ -20,7 +20,9 @@ namespace notifies
 		struct gsc_hook_t
 		{
 			bool is_lua_hook{};
+			bool is_variable{};
 			const char* target_pos{};
+			size_t rel_source_pos{};
 			sol::protected_function lua_function;
 		};
 
@@ -30,39 +32,54 @@ namespace notifies
 
 		char empty_function[2] = {0x32, 0x34}; // CHECK_CLEAR_PARAMS, END
 		const char* target_function = nullptr;
+		bool gsc_hooks_buffer[0x1400000]{};
 
-		unsigned int local_id_to_entity(unsigned int local_id)
+		scripting::entity local_id_to_entity(unsigned int local_id)
 		{
-			const auto variable = game::scr_VarGlob->objectVariableValue[local_id];
-			return variable.u.f.next;
+			return game::scr_VarGlob->objectVariableValue[local_id].u.f.next;
+		}
+
+		char* get_program_buffer()
+		{
+			return *reinterpret_cast<char**>(0x14B5E0B78);
+		}
+
+		size_t get_program_buffer_offset(const char* pos)
+		{
+			const auto rel_offset = pos - get_program_buffer();
+			return rel_offset;
 		}
 
 		bool execute_vm_hook(const char* pos)
 		{
-			if (vm_execute_hooks.find(pos) == vm_execute_hooks.end())
+			const auto program_buffer = get_program_buffer();
+			if (pos >= program_buffer && (pos - program_buffer < 0x1400000))
+			{
+				const auto rel_offset = pos - program_buffer;
+				if (!gsc_hooks_buffer[rel_offset])
+				{
+					hook_enabled = true;
+					return false;
+				}
+			}
+
+			const auto iter = vm_execute_hooks.find(pos);
+			if (iter == vm_execute_hooks.end() || (!hook_enabled && !iter->second.is_variable))
 			{
 				hook_enabled = true;
 				return false;
 			}
 
-			if (!hook_enabled && pos > reinterpret_cast<char*>(vm_execute_hooks.size()))
-			{
-				hook_enabled = true;
-				return false;
-			}
-
-			const auto& hook = vm_execute_hooks[pos];
+			const auto& hook = iter->second;
 			if (hook.is_lua_hook)
 			{
 				const auto& function = hook.lua_function;
 				const auto state = function.lua_state();
 
-				const scripting::entity self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
-
+				const auto self = local_id_to_entity(game::scr_VmPub->function_frame->fs.localId);
 				std::vector<sol::lua_value> args;
 
 				const auto top = game::scr_function_stack->top;
-
 				for (auto* value = top; value->type != game::SCRIPT_END; --value)
 				{
 					args.push_back(scripting::lua::convert(state, *value));
@@ -119,16 +136,14 @@ namespace notifies
 				return {};
 			}
 
-			const auto player = scripting::call("getentbynum", {ent->s.entityNum});
-
-			return scripting::lua::convert(state, player);
+			const scripting::entity entity{game::scr_entref_t(ent->s.entityNum, 0)};
+			return scripting::lua::convert(state, entity);
 		}
 
 		std::string get_weapon_name(unsigned int weapon, bool isAlternate)
 		{
 			char output[1024] = {0};
 			game::BG_GetWeaponNameComplete(weapon, isAlternate, output, 1024);
-
 			return output;
 		}
 
@@ -139,37 +154,34 @@ namespace notifies
 				return {};
 			}
 
-			const auto _vec = scripting::vector(vec);
-
-			return scripting::lua::convert(state, _vec);
+			return scripting::lua::convert(state, scripting::vector(vec));
 		}
 
 		std::string convert_mod(const int meansOfDeath)
 		{
 			const auto value = reinterpret_cast<game::scr_string_t**>(0x140BF49B0)[meansOfDeath];
-			const auto string = game::SL_ConvertToString(*value);
-
-			return string;
+			return game::SL_ConvertToString(*value);
 		}
 
-		void scr_entity_damage_stub(game::gentity_s* self, game::gentity_s* inflictor, game::gentity_s* attacker, const float* vDir, const float* vPoint, 
-			int damage, int dflags, const unsigned int meansOfDeath, const unsigned int weapon, bool isAlternate, unsigned int a11, const int hitLoc, unsigned int a13, unsigned int a14)
+		void scr_entity_damage_stub(game::gentity_s* self, game::gentity_s* inflictor, game::gentity_s* attacker, const float* v_dir, const float* v_point,
+			int damage, int dflags, const unsigned int means_of_death, const unsigned int weapon, bool is_alternate, 
+			unsigned int a11, const int hit_loc, unsigned int a13, unsigned int a14)
 		{
 			{
-				const std::string _hitLoc = reinterpret_cast<const char**>(0x140BF4AA0)[hitLoc];
-				const auto _mod = convert_mod(meansOfDeath);
-				const auto _weapon = get_weapon_name(weapon, isAlternate);
+				const std::string hit_loc_str = reinterpret_cast<const char**>(0x140BF4AA0)[hit_loc];
+				const auto mod_str = convert_mod(means_of_death);
+				const auto weapon_str = get_weapon_name(weapon, is_alternate);
 
 				for (const auto& callback : entity_damage_callbacks)
 				{
 					const auto state = callback.lua_state();
 
-					const auto _self = convert_entity(state, self);
-					const auto _inflictor = convert_entity(state, inflictor);
-					const auto _attacker = convert_entity(state, attacker);
-					const auto _vDir = convert_vector(state, vDir);
+					const auto self_ent = convert_entity(state, self);
+					const auto inflictor_ent = convert_entity(state, inflictor);
+					const auto attacker_ent = convert_entity(state, attacker);
+					const auto v_dir_vec = convert_vector(state, v_dir);
 
-					const auto result = callback(_self, _inflictor, _attacker, damage, _mod, _weapon, _vDir, _hitLoc);
+					const auto result = callback(self_ent, inflictor_ent, attacker_ent, damage, mod_str, weapon_str, v_dir_vec, hit_loc_str);
 					scripting::lua::handle_error(result);
 
 					if (result.valid())
@@ -188,8 +200,20 @@ namespace notifies
 				}
 			}
 
-			scr_entity_damage_hook.invoke<void>(self,inflictor, attacker, vDir, vPoint, damage, dflags, 
-				meansOfDeath, weapon, isAlternate, a11, hitLoc, a13, a14);
+			scr_entity_damage_hook.invoke<void>(self, inflictor, attacker, v_dir, v_point, damage, dflags, 
+				means_of_death, weapon, is_alternate, a11, hit_loc, a13, a14);
+		}
+
+		void set_hook(const char* pos, gsc_hook_t& hook)
+		{
+			if (!hook.is_variable)
+			{
+				const auto rel_pos = get_program_buffer_offset(pos);
+				gsc_hooks_buffer[rel_pos] = true;
+				hook.rel_source_pos = rel_pos;
+			}
+
+			vm_execute_hooks[pos] = hook;
 		}
 	}
 
@@ -204,6 +228,11 @@ namespace notifies
 		{
 			if (i->second.is_lua_hook)
 			{
+				if (!i->second.is_variable)
+				{
+					gsc_hooks_buffer[i->second.rel_source_pos] = false;
+				}
+
 				i = vm_execute_hooks.erase(i);
 			}
 			else
@@ -215,24 +244,27 @@ namespace notifies
 		entity_damage_callbacks.clear();
 	}
 
-	void set_lua_hook(const char* pos, const sol::protected_function& callback)
+	void set_lua_hook(const char* pos, const sol::protected_function& callback, bool is_variable)
 	{
-		gsc_hook_t hook;
+		gsc_hook_t hook{};
 		hook.is_lua_hook = true;
+		hook.is_variable = is_variable;
 		hook.lua_function = callback;
-		vm_execute_hooks[pos] = hook;
+		set_hook(pos, hook);
 	}
 
 	void set_gsc_hook(const char* source, const char* target)
 	{
-		gsc_hook_t hook;
+		gsc_hook_t hook{};
 		hook.is_lua_hook = false;
 		hook.target_pos = target;
-		vm_execute_hooks[source] = hook;
+		set_hook(source, hook);
 	}
 
 	void clear_hook(const char* pos)
 	{
+		const auto rel_offset = get_program_buffer_offset(pos);
+		gsc_hooks_buffer[rel_offset] = false;
 		vm_execute_hooks.erase(pos);
 	}
 
@@ -254,6 +286,7 @@ namespace notifies
 			{
 				if (free_scripts && !post_shutdown)
 				{
+					std::memset(gsc_hooks_buffer, 0, sizeof(gsc_hooks_buffer));
 					vm_execute_hooks.clear();
 				}
 			});

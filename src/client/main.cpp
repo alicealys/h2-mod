@@ -24,7 +24,15 @@ FARPROC WINAPI get_proc_address(const HMODULE hModule, const LPCSTR lpProcName)
 {
 	if (lpProcName == "InitializeCriticalSectionEx"s)
 	{
-		component_loader::post_unpack();
+		try
+		{
+			component_loader::post_unpack();
+		}
+		catch (const std::exception& e)
+		{
+			MessageBoxA(nullptr, e.what(), "ERROR", MB_ICONERROR);
+			std::exit(1);
+		}
 	}
 
 	return GetProcAddress(hModule, lpProcName);
@@ -125,10 +133,10 @@ FARPROC load_binary(const launcher::mode mode)
 	return loader.load(self, data);
 #endif
 }
+
 void remove_crash_file()
 {
 	utils::io::remove_file("__h2Exe");
-	utils::io::remove_file("h2_sp_patched.exe"); // remove this at some point
 }
 
 void verify_version()

@@ -11,27 +11,29 @@
 #include <utils/hook.hpp>
 
 #define fps_font game::R_RegisterFont("fonts/fira_mono_regular.ttf", 25)
-#define speed_font game::R_RegisterFont("fonts/fira_mono_regular.ttf", 50)
+#define speed_font game::R_RegisterFont("fonts/bank.ttf", 70)
 #define material_white game::Material_RegisterHandle("white")
 
 namespace fps
 {
 	namespace
 	{
-		game::dvar_t* cg_drawFps;
-		game::dvar_t* cg_drawSpeed;
+		game::dvar_t* cg_draw_fps = nullptr;
+		game::dvar_t* cg_draw_speed = nullptr;
 
-		game::dvar_t* cg_speedGraph;
-		game::dvar_t* cg_speedGraphColor;
-		game::dvar_t* cg_speedGraphFontColor;
-		game::dvar_t* cg_speedGraphBackgroundColor;
-		game::dvar_t* cg_speedGraphX;
-		game::dvar_t* cg_speedGraphY;
-		game::dvar_t* cg_speedGraphWidth;
-		game::dvar_t* cg_speedGraphHeight;
-		game::dvar_t* cg_speedGraphIncludeZAxis;
+		game::dvar_t* cg_speed_graph = nullptr;
+		game::dvar_t* cg_speed_graph_color = nullptr;
+		game::dvar_t* cg_speed_graph_font_color = nullptr;
+		game::dvar_t* cg_speed_graph_background_color = nullptr;
+		game::dvar_t* cg_speed_graph_x = nullptr;
+		game::dvar_t* cg_speed_graph_y = nullptr;
+		game::dvar_t* cg_speed_graph_width = nullptr;
+		game::dvar_t* cg_speed_graph_height = nullptr;
+		game::dvar_t* cg_speed_graph_include_zaxis = nullptr;
 
-		game::dvar_t* cg_drawGameTime;
+		game::dvar_t* cg_draw_game_time = nullptr;
+
+		game::dvar_t* com_wait_end_frame_mode = nullptr;
 
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
@@ -46,7 +48,8 @@ namespace fps
 
 		std::deque<float> speed_history;
 
-		utils::hook::detour sub_7C55D0_hook;
+		utils::hook::detour sub_1407C55D0_hook;
+		utils::hook::detour com_frame_hook;
 
 		struct cg_perf_data
 		{
@@ -114,7 +117,7 @@ namespace fps
 
 			perf_calc_fps(&cg_perf, cg_perf.frame_ms);
 
-			sub_7C55D0_hook.invoke<void>();
+			sub_1407C55D0_hook.invoke<void>();
 		}
 
 		void check_resize()
@@ -131,38 +134,42 @@ namespace fps
 		void draw_line(float x, float y, float width, float height)
 		{
 			game::R_AddCmdDrawStretchPic(x, y, width, height, 0.0f, 0.0f, 0.0f, 0.0f, 
-				cg_speedGraphColor->current.vector, material_white);
+				cg_speed_graph_color->current.vector, material_white);
 		}
 
 		std::chrono::high_resolution_clock::time_point last_speed_sample;
 
 		void draw_speed()
 		{
-			if (!cg_drawSpeed->current.enabled)
+			if (!cg_draw_speed->current.enabled)
 			{
 				return;
 			}
 
-			const auto speed = static_cast<float>(sqrt(
-				pow(game::g_clients[0].velocity[0], 2) +
-				pow(game::g_clients[0].velocity[1], 2) +
-				pow(game::g_clients[0].velocity[2], 2)
+			static auto prev_speed = 0.f;
+
+			const auto ps = game::CG_GetPredictedPlayerState(0);
+			const auto speed = static_cast<float>(std::sqrt(
+				std::pow(ps->velocity[0], 2) +
+				std::pow(ps->velocity[1], 2)
 			));
 
 			const auto font = speed_font;
-			const auto speed_string = utils::string::va("%i\n", static_cast<int>(speed));
+			const auto speed_string = utils::string::va("%i", static_cast<int>(speed));
 
 			const auto width = game::R_TextWidth(speed_string, 0x7FFFFFFF, font);
 
 			const auto x = (screen_max[0] / 2) - (width / 2);
-			const auto y = screen_max[1] - 400.f;
+			const auto y = screen_max[1] - 300.f;
 
-			const auto color = speed >= 300.f
+			const auto color = speed >= prev_speed
 				? color_blue
 				: fps_color_bad;
 
+			prev_speed = speed;
+
 			game::R_AddCmdDrawText(speed_string, 0x7FFFFFFF, font, x,
-				y, 1.0f, 1.0f, 0.0f, color, 0);
+				y, 1.0f, 1.0f, 0.0f, color, 4);
 		}
 
 		void draw_box(const float x, const float y, const float w, const float h, float* color)
@@ -185,7 +192,7 @@ namespace fps
 
 		void draw_speed_graph()
 		{
-			if (!cg_speedGraph->current.enabled)
+			if (!cg_speed_graph->current.enabled)
 			{
 				return;
 			}
@@ -193,11 +200,11 @@ namespace fps
 			const auto speed = static_cast<float>(sqrt(
 				pow(game::g_clients[0].velocity[0], 2) +
 				pow(game::g_clients[0].velocity[1], 2) +
-				(cg_speedGraphIncludeZAxis->current.enabled ? pow(game::g_clients[0].velocity[2], 2) : 0)
+				(cg_speed_graph_include_zaxis->current.enabled ? pow(game::g_clients[0].velocity[2], 2) : 0)
 			));
 
-			const auto base_width = relative(cg_speedGraphWidth->current.integer);
-			const auto base_height = relative(cg_speedGraphHeight->current.integer);
+			const auto base_width = relative(cg_speed_graph_width->current.integer);
+			const auto base_height = relative(cg_speed_graph_height->current.integer);
 			const auto max = static_cast<int>(base_width);
 
 			if (static_cast<int>(speed_history.size()) > max)
@@ -221,12 +228,12 @@ namespace fps
 				}
 			}
 
-			const auto base_x = relative(cg_speedGraphX->current.integer);
-			const auto base_y = screen_max[1] - relative(cg_speedGraphY->current.integer);
+			const auto base_x = relative(cg_speed_graph_x->current.integer);
+			const auto base_y = screen_max[1] - relative(cg_speed_graph_y->current.integer);
 			const auto width = 1.f;
 
 			draw_box(base_x, base_y - base_height - 4.f, base_width + 5.f, 
-				base_height + 4.f, cg_speedGraphBackgroundColor->current.vector);
+				base_height + 4.f, cg_speed_graph_background_color->current.vector);
 
 			const auto diff = max - static_cast<int>(speed_history.size());
 
@@ -251,12 +258,12 @@ namespace fps
 			const auto text_y = base_y - (base_height / 2.f) + (font_height / 2.f);
 
 			game::R_AddCmdDrawText(speed_string, 0x7FFFFFFF, font, text_x,
-				text_y, 1.0f, 1.0f, 0.0f, cg_speedGraphFontColor->current.vector, 0);
+				text_y, 1.0f, 1.0f, 0.0f, cg_speed_graph_font_color->current.vector, 0);
 		}
 
 		void draw_fps()
 		{
-			if (cg_drawFps->current.integer < 1)
+			if (cg_draw_fps->current.integer < 1)
 			{
 				return;
 			}
@@ -275,17 +282,16 @@ namespace fps
 
 		void draw_pos()
 		{
-			if (cg_drawFps->current.integer < 2)
+			if (cg_draw_fps->current.integer < 2)
 			{
 				return;
 			}
 
 			const auto font = fps_font;
-
 			const auto pos_string = utils::string::va("%f %f %f",
-													  game::g_entities[0].origin[0],
-													  game::g_entities[0].origin[1],
-													  game::g_entities[0].origin[2]);
+				game::refdef->org[0],
+				game::refdef->org[1],
+				game::refdef->org[2]);
 
 			const auto x = screen_max[0] - 15.f - game::R_TextWidth(pos_string, 0x7FFFFFFF, font);
 
@@ -295,7 +301,7 @@ namespace fps
 
 		void draw_game_time()
 		{
-			if (!cg_drawGameTime->current.enabled)
+			if (!cg_draw_game_time->current.enabled)
 			{
 				return;
 			}
@@ -314,24 +320,24 @@ namespace fps
 			const auto text = utils::string::va("%d:%02d.%02d", m, s, ms);
 
 			const auto height = relative(24);
-			const auto base_width = relative(cg_speedGraphWidth->current.integer);
-			const auto base_height = cg_speedGraph->current.enabled ? relative(cg_speedGraphHeight->current.integer) : 0;
+			const auto base_width = relative(cg_speed_graph_width->current.integer);
+			const auto base_height = cg_speed_graph->current.enabled ? relative(cg_speed_graph_height->current.integer) : 0;
 
-			const auto base_x = relative(cg_speedGraphX->current.integer);
-			const auto base_y = screen_max[1] - relative(cg_speedGraphY->current.integer) - base_height - height
-				- (cg_speedGraph->current.enabled ? 2.f : 0.f);
+			const auto base_x = relative(cg_speed_graph_x->current.integer);
+			const auto base_y = screen_max[1] - relative(cg_speed_graph_y->current.integer) - base_height - height
+				- (cg_speed_graph->current.enabled ? 2.f : 0.f);
 
 			const auto font_height = relative(20);
 			const auto font = game::R_RegisterFont("fonts/default.otf", static_cast<int>(font_height));
 			const auto text_width = game::R_TextWidth(text, 0x7FFFFFFF, font);
 
 			draw_box(base_x, base_y, base_width + 5.f,
-				height, cg_speedGraphBackgroundColor->current.vector);
+				height, cg_speed_graph_background_color->current.vector);
 
 			const auto text_y = base_y + (height / 2.f) + ((font_height + relative(5)) / 2.f);
 
 			game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, base_x + base_width - text_width,
-				text_y, 1.0f, 1.0f, 0.0f, cg_speedGraphFontColor->current.vector, 0);
+				text_y, 1.0f, 1.0f, 0.0f, cg_speed_graph_font_color->current.vector, 0);
 		}
 
 		void draw()
@@ -354,6 +360,56 @@ namespace fps
 			draw_speed_graph();
 			draw_game_time();
 		}
+
+		void r_process_workers_with_timeout_stub(void* a1, void* a2)
+		{
+			if (com_wait_end_frame_mode->current.enabled)
+			{
+				return;
+			}
+
+			utils::hook::invoke<void>(0x140793DE0, a1, a2);
+		}
+
+		void com_frame_stub()
+		{
+			const auto value = com_wait_end_frame_mode->current.integer;
+			if (value == 0)
+			{
+				return com_frame_hook.invoke<void>();
+			}
+
+			const auto start = std::chrono::high_resolution_clock::now();
+			com_frame_hook.invoke<void>();
+
+			auto max_fps = (*dvars::com_max_fps)->current.integer;
+			if (max_fps == 0)
+			{
+				max_fps = 1000;
+			}
+
+			constexpr auto nano_secs = std::chrono::duration_cast<std::chrono::nanoseconds>(1s);
+			const auto frame_time = nano_secs / max_fps;
+			
+			if (value == 1)
+			{
+				const auto diff = (std::chrono::high_resolution_clock::now() - start);
+				if (diff > frame_time)
+				{
+					return;
+				}
+
+				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff);
+				std::this_thread::sleep_for(ms);
+			}
+			else if (value == 2)
+			{
+				while (std::chrono::high_resolution_clock::now() - start < frame_time)
+				{
+					std::this_thread::sleep_for(0ms);
+				}
+			}
+		}
 	}
 
 	class component final : public component_interface
@@ -363,30 +419,35 @@ namespace fps
 		{
 			scheduler::loop(draw, scheduler::pipeline::renderer);
 
-			sub_7C55D0_hook.create(0x1407C55D0, perf_update);
+			sub_1407C55D0_hook.create(0x1407C55D0, perf_update);
 
-			cg_drawSpeed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED, "Draw speed");
-			cg_drawFps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED, "Draw fps");
+			cg_draw_speed = dvars::register_bool("cg_drawSpeed", 0, game::DVAR_FLAG_SAVED, "Draw speed");
+			cg_draw_fps = dvars::register_int("cg_drawFPS", 0, 0, 4, game::DVAR_FLAG_SAVED, "Draw fps");
 
-			cg_speedGraph = dvars::register_bool("cg_speedGraph", 0, game::DVAR_FLAG_SAVED, "Enable speed graph");
+			cg_speed_graph = dvars::register_bool("cg_speedGraph", 0, game::DVAR_FLAG_SAVED, "Enable speed graph");
 
-			cg_speedGraphColor = dvars::register_vec4("cg_speedGraphColor", 
+			cg_speed_graph_color = dvars::register_vec4("cg_speedGraphColor", 
 				1.f, 0.f, 0.f, 1.0f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph color");
-			cg_speedGraphFontColor = dvars::register_vec4("cg_speedGraphFontColor", 
+			cg_speed_graph_font_color = dvars::register_vec4("cg_speedGraphFontColor", 
 				1.f, 1.f, 1.f, 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph font color");
-			cg_speedGraphBackgroundColor = dvars::register_vec4("cg_speedGraphBackgroundColor", 
+			cg_speed_graph_background_color = dvars::register_vec4("cg_speedGraphBackgroundColor", 
 				0.f, 0.f, 0.f, 0.8f, 0.f, 1.f, game::DVAR_FLAG_SAVED, "Speed graph background color");
 
-			cg_speedGraphX = dvars::register_int("cg_speedGraphX", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph x position");
-			cg_speedGraphY = dvars::register_int("cg_speedGraphY", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph y position");
+			cg_speed_graph_x = dvars::register_int("cg_speedGraphX", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph x position");
+			cg_speed_graph_y = dvars::register_int("cg_speedGraphY", 15, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph y position");
 
-			cg_speedGraphWidth = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph width");
-			cg_speedGraphHeight = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph height");
+			cg_speed_graph_width = dvars::register_int("cg_speedGraphWidth", 200, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph width");
+			cg_speed_graph_height = dvars::register_int("cg_speedGraphHeight", 80, 0, 1000, game::DVAR_FLAG_SAVED, "Speed graph height");
 
-			cg_speedGraphIncludeZAxis = dvars::register_bool("cg_speedGraphIncludeZAxis", false, game::DVAR_FLAG_SAVED, 
+			cg_speed_graph_include_zaxis = dvars::register_bool("cg_speedGraphIncludeZAxis", false, game::DVAR_FLAG_SAVED, 
 				"Include velocity on the z axis when calculating the speed");
 
-			cg_drawGameTime = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
+			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
+
+			// Make fps capping accurate
+			com_wait_end_frame_mode = dvars::register_int("com_waitEndFrameMode", 0, 0, 2, game::DVAR_FLAG_SAVED, "Wait end frame mode (0 = default, 1 = sleep(n), 2 = loop sleep(0)");
+			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
+			com_frame_hook.create(0x1405A3740, com_frame_stub);
 		}
 	};
 }

@@ -82,7 +82,7 @@ namespace game_console
 					con.display_line_offset++;
 				}
 
-				output.push_back(data);
+				output.emplace_back(data);
 				if (output.size() > 512)
 				{
 					output.pop_front();
@@ -239,7 +239,15 @@ namespace game_console
 			else if (matches.size() == 1)
 			{
 				auto* const dvar = game::Dvar_FindVar(matches[0].name.data());
-				const auto line_count = dvar ? 3 : 1;
+				auto line_count = dvar ? 3 : 1;
+
+				for (const auto& c : matches[0].description)
+				{
+					if (c == '\n')
+					{
+						++line_count;
+					}
+				}
 
 				const auto height = draw_hint_box(line_count, dvars::con_inputHintBoxColor->current.vector);
 				draw_hint_text(0, matches[0].name.data(), dvar
@@ -290,11 +298,12 @@ namespace game_console
 					{
 						const auto value = game::Dvar_ValueToString(dvar, nullptr, &dvar->current);
 						const auto truncated = utils::string::truncate(value, 34, "...");
+						const auto truncated_desc = utils::string::truncate(matches[i].description, 160, "...");
 
 						draw_hint_text(static_cast<int>(i), truncated.data(),
 							dvars::con_inputDvarValueColor->current.vector, offset);
 
-						draw_hint_text(static_cast<int>(i), matches[i].description.data(),
+						draw_hint_text(static_cast<int>(i), truncated_desc.data(),
 							dvars::con_inputDvarValueColor->current.vector, offset * 1.5f);
 					}
 				}
@@ -697,12 +706,12 @@ namespace game_console
 	{
 		input = utils::string::to_lower(input);
 
-		for (const auto& dvar : dvars::dvar_list)
+		for (const auto& [hash, dvar] : dvars::dvar_map)
 		{
 			auto name = utils::string::to_lower(dvar.name);
 			if (game::Dvar_FindVar(name.data()) && match_compare(input, name, exact))
 			{
-				suggestions.push_back(dvar);
+				suggestions.emplace_back(dvar);
 			}
 
 			if (exact && suggestions.size() > 1)
@@ -713,7 +722,7 @@ namespace game_console
 
 		if (suggestions.size() == 0 && game::Dvar_FindVar(input.data()))
 		{
-			suggestions.push_back({ input, "" });
+			suggestions.emplace_back(input, "");
 		}
 
 		game::cmd_function_s* cmd = (*game::cmd_functions);
@@ -725,7 +734,7 @@ namespace game_console
 
 				if (match_compare(input, name, exact))
 				{
-					suggestions.push_back({cmd->name, ""});
+					suggestions.emplace_back(cmd->name, "");
 				}
 
 				if (exact && suggestions.size() > 1)

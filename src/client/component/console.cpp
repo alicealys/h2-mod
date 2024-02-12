@@ -26,7 +26,7 @@ namespace console
 
 		struct
 		{
-			bool kill;
+			std::atomic_bool kill;
 			std::thread thread;
 			HANDLE kill_event;
 			char buffer[512]{};
@@ -288,6 +288,13 @@ namespace console
 				update();
 				break;
 			}
+			case VK_ESCAPE:
+			{
+				con.cursor = 0;
+				clear_output();
+				strncpy_s(con.buffer, "", sizeof(con.buffer));
+				break;
+			}
 			default:
 			{
 				const auto c = record.Event.KeyEvent.uChar.AsciiChar;
@@ -321,6 +328,25 @@ namespace console
 
 			return dispatch_message(con_type_info, result);
 		}
+
+		BOOL WINAPI console_ctrl_handler(DWORD ctrl_type)
+		{
+			if (ctrl_type == CTRL_CLOSE_EVENT)
+			{
+				if (command::is_game_initialized())
+				{
+					command::execute("quit");
+					while (!con.kill)
+					{
+						std::this_thread::sleep_for(10ms);
+					}
+
+					return TRUE;
+				}
+			}
+
+			return FALSE;
+		}
 	}
 
 	void print(const int type, const char* fmt, ...)
@@ -351,12 +377,16 @@ namespace console
 			ShowWindow(GetConsoleWindow(), SW_SHOW);
 			SetConsoleTitle("H2-Mod");
 
+#ifndef DEBUG
+			SetConsoleCtrlHandler(console_ctrl_handler, TRUE);
+#endif
+
 			con.kill_event = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 			con.thread = utils::thread::create_named_thread("Console", []()
 			{
 				const auto handle = GetStdHandle(STD_INPUT_HANDLE);
-				HANDLE handles[2] = { handle, con.kill_event };
+				HANDLE handles[2] = {handle, con.kill_event};
 				MSG msg{};
 
 				INPUT_RECORD record{};

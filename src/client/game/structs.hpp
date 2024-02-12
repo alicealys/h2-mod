@@ -1,20 +1,23 @@
 #pragma once
 #include <d3d11.h>
+#include "assets.hpp"
 
 namespace game
 {
-	typedef float vec_t;
-	typedef vec_t vec2_t[2];
-	typedef vec_t vec3_t[3];
-	typedef vec_t vec4_t[4];
-
 	struct gclient_s
 	{
-		char __pad0[0x8C];
+		char __pad0[140];
 		vec3_t velocity;
-		char __pad1[0xE870];
+		char __pad1[112];
+		vec3_t angles;
+		char __pad2[59380];
 		char flags;
 	};
+
+	static_assert(sizeof(gclient_s) == 59660);
+	static_assert(offsetof(gclient_s, flags) == 59656);
+	static_assert(offsetof(gclient_s, velocity) == 140);
+	static_assert(offsetof(gclient_s, angles) == 264);
 
 	struct client_t
 	{
@@ -62,22 +65,12 @@ namespace game
 		uint16_t entityNum;
 	};
 
-	enum scr_string_t
-	{
-		scr_string_t_dummy = 0x0,
-	};
-
-	struct Bounds
-	{
-		vec3_t midPoint;
-		vec3_t halfSize;
-	};
-
 	struct gentity_s
 	{
 		char __pad0[26];
 		vec3_t origin;
-		char __pad1[100];
+		vec3_t angles;
+		char __pad1[88];
 		EntityState s;
 		char __pad2[50];
 		Bounds box;
@@ -102,266 +95,6 @@ namespace game
 	static_assert(offsetof(gentity_s, script_classname) == 336);
 	static_assert(offsetof(gentity_s, flags) == 364);
 	static_assert(offsetof(gentity_s, s) == 140);
-
-	struct pathnode_yaworient_t
-	{
-		float fLocalAngle;
-		float localForward[2];
-	};
-
-	union $3936EE84564F75EDA6DCBAC77A545FC8
-	{
-		pathnode_yaworient_t yaw_orient;
-		float angles[3];
-	};
-
-	union PathNodeParentUnion
-	{
-		scr_string_t name;
-		unsigned short index;
-	};
-
-	enum nodeType
-	{
-		NODE_ERROR = 0x0,
-		NODE_PATHNODE = 0x1,
-		NODE_NEGOTIATION_BEGIN = 0x13,
-		NODE_NEGOTIATION_END = 0x14
-	};
-
-	enum PathNodeErrorCode : std::int32_t
-	{
-		PNERR_NONE = 0x0,
-		PNERR_INSOLID = 0x1,
-		PNERR_FLOATING = 0x2,
-		PNERR_NOLINK = 0x3,
-		PNERR_DUPLICATE = 0x4,
-		PNERR_NOSTANCE = 0x5,
-		PNERR_INVALIDDOOR = 0x6,
-		PNERR_NOANGLES = 0x7,
-		PNERR_BADPLACEMENT = 0x8,
-		NUM_PATH_NODE_ERRORS = 0x9,
-	};
-
-	union $5F11B9753862CE791E23553F99FA1738
-	{
-		float minUseDistSq;
-		PathNodeErrorCode error;
-	};
-
-	struct pathlink_s
-	{
-		float fDist;
-		unsigned short nodeNum;
-		unsigned char disconnectCount;
-		unsigned char negotiationLink;
-		unsigned char flags;
-		unsigned char ubBadPlaceCount[3];
-	};
-
-	struct pathnode_constant_t
-	{
-		unsigned short type;
-		unsigned int spawnflags;
-		scr_string_t targetname;
-		scr_string_t script_linkName;
-		scr_string_t script_noteworthy;
-		scr_string_t target;
-		scr_string_t animscript;
-		int animscriptfunc;
-		float vLocalOrigin[3];
-		$3936EE84564F75EDA6DCBAC77A545FC8 ___u9;
-		PathNodeParentUnion parent;
-		$5F11B9753862CE791E23553F99FA1738 ___u11;
-		short wOverlapNode[2];
-		char __pad0[4];
-		unsigned short totalLinkCount;
-		pathlink_s* Links;
-		scr_string_t unk;
-		char __pad1[4];
-	};
-
-	struct SentientHandle
-	{
-		unsigned short number;
-		unsigned short infoIndex;
-	};
-
-	struct pathnode_dynamic_t
-	{
-		SentientHandle pOwner;
-		int iFreeTime;
-		int iValidTime[3];
-		short wLinkCount;
-		short wOverlapCount;
-		short turretEntNumber;
-		unsigned char userCount;
-		unsigned char hasBadPlaceLink;
-		int spreadUsedTime[2];
-		short flags;
-		short dangerousCount;
-		int recentUseProxTime;
-	};
-
-	union $73F238679C0419BE2C31C6559E8604FC
-	{
-		float nodeCost;
-		int linkIndex;
-	};
-
-	struct pathnode_t;
-	struct pathnode_transient_t
-	{
-		int iSearchFrame;
-		pathnode_t* pNextOpen;
-		pathnode_t* pPrevOpen;
-		pathnode_t* pParent;
-		float fCost;
-		float fHeuristic;
-		$73F238679C0419BE2C31C6559E8604FC ___u6;
-	};
-
-	struct pathnode_t
-	{
-		pathnode_constant_t constant;
-		pathnode_dynamic_t dynamic;
-		pathnode_transient_t transient;
-	};
-
-	struct pathnode_tree_nodes_t
-	{
-		int nodeCount;
-		unsigned short* nodes;
-	};
-
-	struct pathnode_tree_t;
-	union pathnode_tree_info_t
-	{
-		pathnode_tree_t* child[2];
-		pathnode_tree_nodes_t s;
-	};
-
-	struct pathnode_tree_t
-	{
-		int axis;
-		float dist;
-		pathnode_tree_info_t u;
-	};
-
-	struct PathDynamicNodeGroup
-	{
-		unsigned short parentIndex;
-		int nodeTreeCount;
-		pathnode_tree_t* nodeTree;
-	};
-
-	struct PathData
-	{
-		const char* name;
-		unsigned int nodeCount;
-		pathnode_t* nodes;
-		bool parentIndexResolved;
-		unsigned short version;
-		int visBytes;
-		unsigned char* pathVis;
-		int nodeTreeCount;
-		pathnode_tree_t* nodeTree;
-		int dynamicNodeGroupCount;
-		PathDynamicNodeGroup* dynamicNodeGroups;
-		int exposureBytes;
-		unsigned char* pathExposure;
-		int noPeekVisBytes;
-		unsigned char* pathNoPeekVis;
-		int zoneCount;
-		int zonesBytes;
-		unsigned char* pathZones;
-		int dynStatesBytes;
-		unsigned char* pathDynStates;
-	};
-
-	struct GfxImage;
-
-	union MaterialTextureDefInfo
-	{
-		GfxImage* image;
-		void* water;
-	};
-
-	struct MaterialTextureDef
-	{
-		unsigned int nameHash;
-		char nameStart;
-		char nameEnd;
-		char samplerState;
-		char semantic;
-		MaterialTextureDefInfo u;
-	};
-
-	struct MaterialPass
-	{
-		void* vertexShader;
-		void* vertexDecl;
-		void* hullShader;
-		void* domainShader;
-		void* pixelShader;
-		char pixelOutputMask;
-		char perPrimArgCount;
-		char perObjArgCount;
-		char stableArgCount;
-		unsigned __int16 perPrimArgSize;
-		unsigned __int16 perObjArgSize;
-		unsigned __int16 stableArgSize;
-		char zone;
-		char perPrimConstantBuffer;
-		char perObjConstantBuffer;
-		char stableConstantBuffer;
-		unsigned int customBufferFlags;
-		char customSamplerFlags;
-		char precompiledIndex;
-		char stageConfig;
-		void* args;
-	};
-
-	struct MaterialTechnique
-	{
-		const char* name;
-		unsigned __int16 flags;
-		unsigned __int16 passCount;
-		MaterialPass passArray[1];
-	};
-
-	struct MaterialTechniqueSet
-	{
-		const char* name;
-		unsigned __int16 flags;
-		char worldVertFormat;
-		char preDisplacementOnlyCount;
-		MaterialTechnique* techniques[309];
-	};
-
-	struct GfxStateBits
-	{
-		unsigned int loadBits[3];
-		char zone;
-		char depthStencilState[11];
-		char blendState;
-		char rasterizerState;
-	};
-
-	struct Material
-	{
-		const char* name;
-		char __pad0[0x124];
-		char textureCount;
-		char __pad1[0xB];
-		MaterialTechniqueSet* techniqueSet;
-		MaterialTextureDef* textureTable;
-		void* constantTable;
-		GfxStateBits* stateBitsTable;
-		char __pad2[0x118];
-	};
-
-	static_assert(sizeof(Material) == 0x270);
 
 	struct point
 	{
@@ -582,11 +315,14 @@ namespace game
 		THREAD_CONTEXT_TRACE_COUNT = 0xB,
 		THREAD_CONTEXT_TRACE_LAST = 0xA,
 		THREAD_CONTEXT_CINEMATIC = 0xB,
-		THREAD_CONTEXT_DATABASE = 0xC,
-		THREAD_CONTEXT_STREAM = 0xD,
-		THREAD_CONTEXT_SNDSTREAMPACKETCALLBACK = 0xE,
-		THREAD_CONTEXT_STATS_WRITE = 0xF,
-		THREAD_CONTEXT_COUNT = 0x10,
+		THREAD_CONTEXT_WINDOW = 0xC,
+		THREAD_CONTEXT_INPUT = 0xD,
+		THREAD_CONTEXT_DATABASE = 0xE,
+		THREAD_CONTEXT_STREAM = 0xF,
+		THREAD_CONTEXT_UNK_16 = 0x10,
+		THREAD_CONTEXT_UNK_17 = 0x11,
+		THREAD_CONTEXT_UNK_18 = 0x12,
+		THREAD_COUNT,
 	};
 
 	struct KeyState
@@ -677,7 +413,11 @@ namespace game
 
 	struct dvar_t
 	{
-		int name; //00
+		union
+		{
+			int name;
+			int hash;
+		};
 		unsigned int flags; //08
 		dvar_type type; //0C
 		bool modified; //0D
@@ -731,437 +471,15 @@ namespace game
 		const char* name;
 		void(__cdecl* function)();
 	};
-
-	enum XAssetType
+	
+	struct XZone
 	{
-		ASSET_TYPE_PHYSPRESET,
-		ASSET_TYPE_PHYS_COLLMAP,
-		ASSET_TYPE_PHYSWATERPRESET,
-		ASSET_TYPE_PHYS_WORLDMAP,
-		ASSET_TYPE_PHYSCONSTRAINT,
-		ASSET_TYPE_XANIM,
-		ASSET_TYPE_XMODELSURFS,
-		ASSET_TYPE_XMODEL,
-		ASSET_TYPE_MATERIAL,
-		ASSET_TYPE_COMPUTESHADER,
-		ASSET_TYPE_VERTEXSHADER,
-		ASSET_TYPE_HULLSHADER,
-		ASSET_TYPE_DOMAINSHADER,
-		ASSET_TYPE_PIXELSHADER,
-		ASSET_TYPE_VERTEXDECL,
-		ASSET_TYPE_TECHSET,
-		ASSET_TYPE_IMAGE,
-		ASSET_TYPE_SOUND,
-		ASSET_TYPE_SOUNDSUBMIX,
-		ASSET_TYPE_SNDCURVE,
-		ASSET_TYPE_LPFCURVE,
-		ASSET_TYPE_REVERBSENDCURVE,
-		ASSET_TYPE_SNDCONTEXT,
-		ASSET_TYPE_LOADED_SOUND,
-		ASSET_TYPE_COL_MAP_SP,
-		ASSET_TYPE_COM_MAP,
-		ASSET_TYPE_GLASS_MAP,
-		ASSET_TYPE_AIPATHS,
-		ASSET_TYPE_VEHICLE_TRACK,
-		ASSET_TYPE_MAP_ENTS,
-		ASSET_TYPE_FX_MAP,
-		ASSET_TYPE_GFX_MAP,
-		ASSET_TYPE_LIGHTDEF,
-		ASSET_TYPE_UI_MAP,
-		ASSET_TYPE_MENUFILE,
-		ASSET_TYPE_MENU,
-		ASSET_TYPE_ANIMCLASS,
-		ASSET_TYPE_LOCALIZE,
-		ASSET_TYPE_ATTACHMENT,
-		ASSET_TYPE_WEAPON,
-		ASSET_TYPE_SNDDRIVERGLOBALS,
-		ASSET_TYPE_FX,
-		ASSET_TYPE_IMPACTFX,
-		ASSET_TYPE_SURFACEFX,
-		ASSET_TYPE_AITYPE,
-		ASSET_TYPE_MPTYPE,
-		ASSET_TYPE_CHARACTER,
-		ASSET_TYPE_XMODELALIAS,
-		ASSET_TYPE_RAWFILE,
-		ASSET_TYPE_SCRIPTFILE,
-		ASSET_TYPE_STRINGTABLE,
-		ASSET_TYPE_LEADERBOARDDEF,
-		ASSET_TYPE_VIRTUALLEADERBOARDDEF,
-		ASSET_TYPE_STRUCTUREDDATADEF,
-		ASSET_TYPE_DDL,
-		ASSET_TYPE_PROTO,
-		ASSET_TYPE_TRACER,
-		ASSET_TYPE_VEHICLE,
-		ASSET_TYPE_ADDON_MAP_ENTS,
-		ASSET_TYPE_NETCONSTSTRINGS,
-		ASSET_TYPE_REVERBPRESET,
-		ASSET_TYPE_LUAFILE,
-		ASSET_TYPE_SCRIPTABLE,
-		ASSET_TYPE_EQUIPSNDTABLE,
-		ASSET_TYPE_VECTORFIELD,
-		ASSET_TYPE_DOPPLERPRESET,
-		ASSET_TYPE_PARTICLESIMANIMATION,
-		ASSET_TYPE_LASER,
-		ASSET_TYPE_SKELETONSCRIPT,
-		ASSET_TYPE_CLUT,
-		ASSET_TYPE_TTF,
-		ASSET_TYPE_COUNT,
+		char __pad0[24];
+		char name[64];
+		char __pad1[128];
 	};
 
-	struct StreamFileNameRaw
-	{
-		const char* dir;
-		const char* name;
-	};
-
-	struct StreamFileNamePacked
-	{
-		unsigned __int64 offset;
-		unsigned __int64 length;
-	};
-
-	union StreamFileInfo
-	{
-		StreamFileNameRaw raw;
-		StreamFileNamePacked packed;
-	};
-
-	struct SpeakerLevels
-	{
-		char speaker;
-		char numLevels;
-		float levels[2];
-	};
-
-	struct ChannelMap
-	{
-		int speakerCount;
-		SpeakerLevels speakers[6];
-	};
-
-	struct SpeakerMap
-	{
-		bool isDefault;
-		const char* name;
-		int a;
-		ChannelMap channelMaps[2][2];
-	}; //static_assert(sizeof(SpeakerMap) == 0x148);
-
-	struct StreamFileName
-	{
-		bool isLocalized;
-		bool isStreamed;
-		unsigned __int16 fileIndex;
-		StreamFileInfo info;
-	};
-
-	struct StreamedSound
-	{
-		StreamFileName filename;
-		unsigned int totalMsec;
-	};
-
-	struct StreamFile
-	{
-		void* handle;
-		__int64 length;
-		__int64 startOffset;
-		bool isPacked;
-	};
-
-	struct LoadedSoundInfo
-	{
-		char* data;
-		unsigned int sampleRate;
-		unsigned int dataByteCount;
-		unsigned int numSamples;
-		char channels;
-		char numBits;
-		char blockAlign;
-		short format;
-		int loadedSize;
-	}; static_assert(sizeof(LoadedSoundInfo) == 0x20);
-
-	struct LoadedSound
-	{
-		const char* name;
-		StreamFileName filename;
-		LoadedSoundInfo info;
-	}; static_assert(sizeof(LoadedSound) == 0x40);
-
-	union SoundFileRef
-	{
-		LoadedSound* loadSnd;
-		StreamedSound streamSnd;
-	};
-
-	enum snd_alias_type_t : std::int8_t
-	{
-		SAT_UNKNOWN = 0x0,
-		SAT_LOADED = 0x1,
-		SAT_STREAMED = 0x2,
-		SAT_PRIMED = 0x3,
-		SAT_COUNT = 0x4,
-	};
-
-	struct SoundFile
-	{
-		snd_alias_type_t type;
-		char exists;
-		SoundFileRef u;
-	};
-
-	struct SndContext
-	{
-		const char* name;
-		char __pad0[8];
-	};
-
-	struct SndCurve
-	{
-		bool isDefault;
-		union
-		{
-			const char* filename;
-			const char* name;
-		};
-		unsigned short knotCount;
-		float knots[16][2];
-	}; static_assert(sizeof(SndCurve) == 0x98);
-
-	struct DopplerPreset
-	{
-		const char* name;
-		float speedOfSound;
-		float playerVelocityScale;
-		float minPitch;
-		float maxPitch;
-		float smoothing;
-	}; static_assert(sizeof(DopplerPreset) == 0x20);
-
-	struct snd_alias_t
-	{
-		const char* aliasName;
-		const char* subtitle;
-		const char* secondaryAliasName;
-		const char* chainAliasName;
-		SoundFile* soundFile;
-		const char* mixerGroup;
-		char __pad0[8];
-		int sequence;
-		int u4;
-		int u5;
-		float volMin;
-		float volMax;
-		int volModIndex;
-		float pitchMin;
-		float pitchMax;
-		float distMin;
-		float distMax;
-		float velocityMin;
-		int flags;
-		char masterPriority;
-		float masterPercentage;
-		float slavePercentage;
-		char u18;
-		float probability;
-		char u20; // value: 0-4
-		SndContext* sndContext;
-		char __pad1[12];
-		int startDelay;
-		SndCurve* sndCurve;
-		char __pad2[8];
-		SndCurve* lpfCurve;
-		SndCurve* hpfCurve;
-		SndCurve* reverbSendCurve;
-		SpeakerMap* speakerMap;
-		char __pad3[47];
-		float u34;
-	};
-
-	static_assert(sizeof(snd_alias_t) == 256);
-
-	struct snd_alias_list_t
-	{
-		const char* aliasName;
-		snd_alias_t* head;
-		short* unk;
-		unsigned char count;
-		unsigned char unkCount;
-		char __pad0[6];
-	};
-
-	struct RawFile
-	{
-		const char* name;
-		int compressedLen;
-		int len;
-		const char* buffer;
-	};
-
-	struct ScriptFile
-	{
-		const char* name;
-		int compressedLen;
-		int len;
-		int bytecodeLen;
-		char* buffer;
-		char* bytecode;
-	};
-
-	struct StringTableCell
-	{
-		const char* string;
-		int hash;
-	};
-
-	struct StringTable
-	{
-		const char* name;
-		int columnCount;
-		int rowCount;
-		StringTableCell* values;
-	};
-
-	struct LuaFile
-	{
-		const char* name;
-		int len;
-		char strippingType;
-		const char* buffer;
-	};
-
-	struct TTF
-	{
-		const char* name;
-		int len;
-		const char* buffer;
-		int fontFace;
-	};
-
-	struct MapEnts
-	{
-		const char* name;
-		char* entityString;
-		int numEntityChars;
-	};
-
-	struct TriggerModel
-	{
-		int contents;
-		unsigned __int16 hullCount;
-		unsigned __int16 firstHull;
-	};
-
-	struct TriggerHull
-	{
-		Bounds bounds;
-		int contents;
-		unsigned __int16 slabCount;
-		unsigned __int16 firstSlab;
-	};
-
-	struct TriggerSlab
-	{
-		float dir[3];
-		float midPoint;
-		float halfSize;
-	};
-
-	struct MapTriggers
-	{
-		unsigned int modelCount;
-		TriggerModel* models;
-		unsigned int hullCount;
-		TriggerHull* hulls;
-		unsigned int slabCount;
-		TriggerSlab* slabs;
-	};
-
-	struct AddonMapEnts
-	{
-		const char* name;
-		char* entityString;
-		int numEntityChars;
-		MapTriggers trigger;
-		void* info;
-		unsigned int numSubModels;
-		void* cmodels;
-		void* models;
-	};
-
-	struct LocalizeEntry
-	{
-		const char* value;
-		const char* name;
-	};
-
-	union XAssetHeader
-	{
-		void* data;
-		Material* material;
-		Font_s* font;
-		RawFile* rawfile;
-		ScriptFile* scriptfile;
-		StringTable* stringTable;
-		LuaFile* luaFile;
-		TTF* ttf;
-		MapEnts* mapents;
-		AddonMapEnts* addon_mapents;
-		LocalizeEntry* localize;
-		snd_alias_list_t* sound;
-		DopplerPreset* doppler_preset;
-		SndContext* snd_context;
-		SndCurve* snd_curve;
-		LoadedSound* loaded_sound;
-	};
-
-	struct XAsset
-	{
-		XAssetType type;
-		XAssetHeader header;
-	};
-
-	struct XAssetEntry
-	{
-		XAsset asset;
-		char zoneIndex;
-		volatile char inuseMask;
-		unsigned int nextHash;
-		unsigned int nextOverride;
-		unsigned int nextPoolEntry;
-	};
-
-	enum DBSyncMode
-	{
-		DB_LOAD_ASYNC = 0x0,
-		DB_LOAD_SYNC = 0x1,
-		DB_LOAD_ASYNC_WAIT_ALLOC = 0x2,
-		DB_LOAD_ASYNC_FORCE_FREE = 0x3,
-		DB_LOAD_ASYNC_NO_SYNC_THREADS = 0x4,
-		DB_LOAD_SYNC_SKIP_ALWAYS_LOADED = 0x5,
-	};
-
-	enum DBAllocFlags : std::int32_t
-	{
-		DB_ZONE_NONE = 0x0,
-		DB_ZONE_COMMON = 0x1,
-		DB_ZONE_UI = 0x2,
-		DB_ZONE_GAME = 0x4,
-		DB_ZONE_LOAD = 0x8,
-		DB_ZONE_DEV = 0x10,
-		DB_ZONE_BASEMAP = 0x20,
-		DB_ZONE_TRANSIENT_POOL = 0x40,
-		DB_ZONE_TRANSIENT_MASK = 0x40,
-		DB_ZONE_CUSTOM = 0x1000 // added for custom zone loading
-	};
-
-	struct XZoneInfo
-	{
-		const char* name;
-		int allocFlags;
-		int freeFlags;
-	};
+	static_assert(sizeof(XZone) == 216);
 
 	struct LevelLoad
 	{
@@ -1177,6 +495,44 @@ namespace game
 	{
 		unsigned short entnum;
 		unsigned short classnum;
+	};
+
+	typedef void(*BuiltinMethod)(scr_entref_t);
+	typedef void(*BuiltinFunction)();
+
+	enum
+	{
+		VAR_UNDEFINED = 0x0,
+		VAR_BEGIN_REF = 0x1,
+		VAR_POINTER = 0x1,
+		VAR_STRING = 0x2,
+		VAR_ISTRING = 0x3,
+		VAR_VECTOR = 0x4,
+		VAR_END_REF = 0x5,
+		VAR_FLOAT = 0x5,
+		VAR_INTEGER = 0x6,
+		VAR_CODEPOS = 0x7,
+		VAR_PRECODEPOS = 0x8,
+		VAR_FUNCTION = 0x9,
+		VAR_BUILTIN_FUNCTION = 0xA,
+		VAR_BUILTIN_METHOD = 0xB,
+		VAR_STACK = 0xC,
+		VAR_ANIMATION = 0xD,
+		VAR_PRE_ANIMATION = 0xE,
+		VAR_THREAD = 0xF,
+		VAR_NOTIFY_THREAD = 0x10,
+		VAR_TIME_THREAD = 0x11,
+		VAR_CHILD_THREAD = 0x12,
+		VAR_OBJECT = 0x13,
+		VAR_DEAD_ENTITY = 0x14,
+		VAR_ENTITY = 0x15,
+		VAR_ARRAY = 0x16,
+		VAR_DEAD_THREAD = 0x17,
+		VAR_COUNT = 0x18,
+		VAR_FREE = 0x18,
+		VAR_THREAD_LIST = 0x19,
+		VAR_ENDON_LIST = 0x1A,
+		VAR_TOTAL_COUNT = 0x1B,
 	};
 
 	enum scriptType_e
@@ -1356,11 +712,12 @@ namespace game
 		GFX_DRAW_SCENE_STANDARD = 0x0,
 	};
 
-	enum MaterialTechniqueType
+	struct GfxVertex
 	{
-		TECHNIQUE_UNLIT = 8,
-		TECHNIQUE_EMISSIVE = 9,
-		TECHNIQUE_LIT = 13,
+		float xyzw[4];
+		GfxColor color;
+		float texCoord[2];
+		PackedUnitVec normal;
 	};
 
 	struct GfxDrawMethod_s
@@ -1371,67 +728,21 @@ namespace game
 		int forceTechType;
 	};
 
-	struct GfxImageLoadDef
+	struct materialCommands_t
 	{
-		char levelCount;
-		char numElements;
-		char pad[2];
-		int flags;
-		int format;
-		int resourceSize;
-		char data[1];
+		GfxVertex verts[5450];
+		unsigned __int16 indices[1048576];
+		int vertDeclType;
+		unsigned int vertexSize;
+		unsigned int indexCount;
+		unsigned int vertexCount;
+		unsigned int firstVertex;
+		unsigned int lastVertex;
 	};
 
-	union $3FA29451CE6F1FA138A5ABAB84BE9676
-	{
-		ID3D11Texture1D* linemap;
-		ID3D11Texture2D* map;
-		ID3D11Texture3D* volmap;
-		ID3D11Texture2D* cubemap;
-		GfxImageLoadDef* loadDef;
-	};
-
-	struct GfxTexture
-	{
-		$3FA29451CE6F1FA138A5ABAB84BE9676 ___u0;
-		ID3D11ShaderResourceView* shaderView;
-		ID3D11ShaderResourceView* shaderViewAlternate;
-	};
-
-	struct Picmip
-	{
-		char platform[2];
-	};
-
-	struct CardMemory
-	{
-		int platform[2];
-	};
-
-	struct GfxImage
-	{
-		GfxTexture textures;
-		int flags;
-		int imageFormat;
-		int resourceSize;
-		char mapType;
-		char semantic;
-		char category;
-		char flags2;
-		Picmip picmip;
-		char track;
-		//CardMemory cardMemory;
-		unsigned short width;
-		unsigned short height;
-		unsigned short depth;
-		unsigned short numElements;
-		char pad3[4];
-		void* pixelData;
-		//GfxImageLoadDef *loadDef;
-		uint64_t streams[4];
-		const char* name;
-	};
-
+	static_assert(offsetof(materialCommands_t, indices) == 174400);
+	static_assert(offsetof(materialCommands_t, indexCount) == 2271560);
+	static_assert(offsetof(materialCommands_t, vertexCount) == 2271564);
 
 	struct playerState_s
 	{
@@ -1442,9 +753,21 @@ namespace game
 		char __pad2[40];
 		vec3_t origin;
 		vec3_t velocity;
+		char __pad3[128];
+		float viewHeightCurrent;
+		char __pad4[12];
+		vec3_t delta_angles;
 	};
 
 	static_assert(offsetof(playerState_s, origin) == 128);
+	static_assert(offsetof(playerState_s, viewHeightCurrent) == 280);
+	static_assert(offsetof(playerState_s, delta_angles) == 296);
+
+	struct cg_s
+	{
+		char __pad0[507228];
+		float refdefViewAngles[3];
+	};
 
 	struct SprintState_s
 	{
@@ -1459,7 +782,9 @@ namespace game
 	{
 		int serverTime;
 		int buttons;
-		char __pad0[20];
+		int angles[3];
+		unsigned int weapon;
+		unsigned int offHand;
 		char forwardmove;
 		char rightmove;
 		char __pad1[2];
@@ -1616,6 +941,8 @@ namespace game
 		LANGUAGE_KOREAN = 15,
 		LANGUAGE_ENGLISH_SAFE = 16,
 		LANGUAGE_RUSSIAN_PARTIAL = 17,
+		LANGUAGE_COUNT_ORIGINAL = 18,
+		LANGUAGE_TURKISH = 18,
 		LANGUAGE_COUNT
 	};
 
@@ -1629,6 +956,13 @@ namespace game
 		int vertAlign;
 	};
 
+	enum PMem_Direction
+	{
+		PHYS_ALLOC_LOW = 0x0,
+		PHYS_ALLOC_HIGH = 0x1,
+		PHYS_ALLOC_COUNT = 0x2,
+	};
+
 	enum PMem_Source
 	{
 		PMEM_SOURCE_EXTERNAL = 0x0,
@@ -1637,19 +971,130 @@ namespace game
 		PMEM_SOURCE_DEFAULT_HIGH = 0x3,
 		PMEM_SOURCE_MOVIE = 0x4,
 		PMEM_SOURCE_SCRIPT = 0x5,
+		PMEM_SOURCE_UNK5 = 0x5,
+		PMEM_SOURCE_UNK6 = 0x6,
+		PMEM_SOURCE_UNK7 = 0x7,
+		PMEM_SOURCE_UNK8 = 0x8,
+		PMEM_SOURCE_CUSTOMIZATION = 0x9,
 	};
 
-	struct physical_memory
+	struct PhysicalMemoryAllocation
 	{
-		char __pad0[0x10];
-		char* buf;
-		char __pad1[0x8];
+		const char* name;
+		char __pad0[16];
+		unsigned __int64 pos;
+		char __pad1[8];
+	}; static_assert(sizeof(PhysicalMemoryAllocation) == 40);
+
+	struct PhysicalMemoryPrim
+	{
+		const char* name;
+		unsigned int allocListCount;
+		char __pad0[4];
+		unsigned char* buf;
+		char __pad1[8];
 		int unk1;
-		size_t size;
-		char __pad2[0x500];
+		char __pad2[4];
+		unsigned __int64 pos;
+		PhysicalMemoryAllocation allocList[32];
+	}; static_assert(sizeof(PhysicalMemoryPrim) == 1328);
+
+	struct PhysicalMemory
+	{
+		PhysicalMemoryPrim prim[2];
+	}; static_assert(sizeof(PhysicalMemory) == 0xA60);
+
+	union GamerProfileDataUnion
+	{
+		unsigned __int8 byteVal;
+		bool boolVal;
+		__int16 shortVal;
+		int intVal;
+		float floatVal;
+		const char* stringVal;
 	};
 
-	static_assert(sizeof(physical_memory) == 0x530);
+	enum level_number
+	{
+		LEVEL_TRAINER,
+		LEVEL_ROADKILL,
+		LEVEL_CLIFFHANGER,
+		LEVEL_AIRPORT,
+		LEVEL_FAVELA,
+
+		LEVEL_INVASION,
+		LEVEL_FAVELA_ESCAPE,
+		LEVEL_ARCADIA,
+		LEVEL_OILRIG,
+		LEVEL_GULAG,
+		LEVEL_DCBURNING,
+
+		LEVEL_CONTINGENCY,
+		LEVEL_DCEMP,
+		LEVEL_DC_WHITEHOUSE,
+		LEVEL_ESTATE,
+		LEVEL_BONEYARD,
+		LEVEL_AF_CAVES,
+		LEVEL_AF_CHASE,
+
+		LEVEL_ENDING,
+
+		LEVEL_COUNT,
+	};
+
+	enum GamerProfileDataType : __int32
+	{
+		TYPE_INVALID = 0x0,
+		TYPE_BYTE = 0x1,
+		TYPE_BOOL = 0x2,
+		TYPE_SHORT = 0x3,
+		TYPE_INT = 0x4,
+		TYPE_FLOAT = 0x5,
+		TYPE_STRING = 0x6,
+		TYPE_BUFFER = 0x7,
+		TYPE_FLAG = 0x8,
+	};
+
+	struct GamerProfileData
+	{
+		GamerProfileDataType type;
+		GamerProfileDataUnion u;
+	};
+
+	enum HeFont
+	{
+		HE_FONT_DEFAULT = 0x0,
+		HE_FONT_BIGFIXED = 0x1,
+		HE_FONT_SMALLFIXED = 0x2,
+		HE_FONT_OBJECTIVE = 0x3,
+		HE_FONT_BIG = 0x4,
+		HE_FONT_SMALL = 0x5,
+		HE_FONT_HUDBIG = 0x6,
+		HE_FONT_HUDSMALL = 0x7,
+		HE_FONT_BUTTONPROMPT = 0x8,
+		HE_FONT_SUBTITLE = 0x9,
+		HE_FONT_TIMER = 0xA,
+		HE_FONT_NAMEPLATE = 0xB,
+		HE_FONT_BANK = 0xC,
+		HE_FONT_BANKSHADOW = 0xD,
+		HE_FONT_BANKSHADOWMORE = 0xE,
+		HE_FONT_COUNT,
+	};
+
+	struct volmod_t
+	{
+		char name[64];
+		float value;
+		float headroom;
+		float mixExclusion;
+	};
+
+	struct sound_data_t
+	{
+		char __pad0[163720];
+		volmod_t volmods[180];
+		// ...
+	};
 
 	namespace hks
 	{

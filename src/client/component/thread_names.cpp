@@ -27,10 +27,13 @@ namespace thread_names
 				{game::THREAD_CONTEXT_WORKER7, "Worker7"},
 				{game::THREAD_CONTEXT_SERVER, "Server"},
 				{game::THREAD_CONTEXT_CINEMATIC, "Cinematic"},
+				{game::THREAD_CONTEXT_WINDOW, "Window"},
+				{game::THREAD_CONTEXT_INPUT, "Input"},
 				{game::THREAD_CONTEXT_DATABASE, "Database"},
-				{game::THREAD_CONTEXT_STREAM, "Stream"},
-				{game::THREAD_CONTEXT_SNDSTREAMPACKETCALLBACK, "Snd stream packet callback"},
-				{game::THREAD_CONTEXT_STATS_WRITE, "Stats write"},
+				{game::THREAD_CONTEXT_STREAM, "Sound"},
+				{game::THREAD_CONTEXT_UNK_16, "Thread 16"}, // not used?
+				{game::THREAD_CONTEXT_UNK_17, "Thread 17"}, // sound stream related
+				{game::THREAD_CONTEXT_UNK_18, "Thread 18"}, // ^
 			};
 
 			for (const auto& thread_name : thread_names)

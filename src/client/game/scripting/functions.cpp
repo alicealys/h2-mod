@@ -1,10 +1,8 @@
 #include <std_include.hpp>
 #include "functions.hpp"
 
-#include "../../component/gsc.hpp"
-
-#include <xsk/gsc/types.hpp>
-#include <xsk/resolver.hpp>
+#include "component/gsc/script_extension.hpp"
+#include "component/gsc/script_loading.hpp"
 
 #include <utils/string.hpp>
 
@@ -15,23 +13,17 @@ namespace scripting
 		int find_function_index(const std::string& name, const bool prefer_global)
 		{
 			const auto target = utils::string::to_lower(name);
-			auto first = xsk::gsc::h2::resolver::function_id;
-			auto second = xsk::gsc::h2::resolver::method_id;
-			if (!prefer_global)
+			auto const& first = gsc::gsc_ctx->func_map();
+			auto const& second = gsc::gsc_ctx->meth_map();
+
+			if (const auto itr = first.find(name); itr != first.end())
 			{
-				std::swap(first, second);
+				return static_cast<int>(itr->second);
 			}
 
-			const auto first_res = first(target);
-			if (first_res)
+			if (const auto itr = second.find(name); itr != second.end())
 			{
-				return first_res;
-			}
-
-			const auto second_res = second(target);
-			if (second_res)
-			{
-				return second_res;
+				return static_cast<int>(itr->second);
 			}
 
 			return -1;
@@ -67,20 +59,20 @@ namespace scripting
 
 		results.push_back(utils::string::va("_ID%i", id));
 		results.push_back(utils::string::va("_id_%04X", id));
-		results.push_back(xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id)));
+		results.push_back(gsc::gsc_ctx->token_name(id));
 
 		return results;
 	}
 
 	std::string find_token_single(unsigned int id)
 	{
-		return xsk::gsc::h2::resolver::token_name(static_cast<std::uint16_t>(id));
+		return gsc::gsc_ctx->token_name(id);
 	}
 
 	unsigned int find_token_id(const std::string& name)
 	{
-		const auto id = xsk::gsc::h2::resolver::token_id(name);
-		if (id != 0)
+		const auto id = gsc::gsc_ctx->token_id(name);
+		if (id)
 		{
 			return id;
 		}

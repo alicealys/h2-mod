@@ -4,7 +4,7 @@
 #include "game/game.hpp"
 
 #include "game_console.hpp"
-#include "gui.hpp"
+#include "gui/gui.hpp"
 #include "game/ui_scripting/execution.hpp"
 
 #include <utils/hook.hpp>

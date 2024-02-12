@@ -39,10 +39,6 @@ namespace database
 
 		utils::memory::allocator handle_allocator;
 
-		using sound_file_t = std::unordered_map<uint64_t, std::string>;
-		std::unordered_map<unsigned short, sound_file_t> sound_files = {};
-		std::unordered_map<std::string, uint64_t> sound_sizes = {};
-
 		game::dvar_t* db_filesysImpl = nullptr;
 		utils::hook::detour db_fs_initialize_hook;
 
@@ -466,6 +462,31 @@ namespace database
 			}
 
 			sys_set_folder_hook.create(0x140623830, sys_set_folder_stub);
+
+			command::add("extractFile", [](const command::params& params)
+			{
+				const std::string file = params.get(1);
+				const auto fs_inst = game::DB_FSInitialize();
+				const auto handle = fs_inst->vftbl->OpenFile(fs_inst, game::SF_ZONE, file.data());
+				const auto _0 = gsl::finally([&]
+				{
+					if (handle != nullptr)
+					{
+						fs_inst->vftbl->Close(fs_inst, handle);
+					}
+				});
+
+				if (handle == nullptr)
+				{
+					return;
+				}
+
+				const auto size = fs_inst->vftbl->Size(fs_inst, handle);
+				std::string buffer;
+				buffer.resize(size);
+				fs_inst->vftbl->Read(fs_inst, handle, 0, size, buffer.data());
+				utils::io::write_file("bnet/" + file, buffer);
+			});
 		}
 	};
 }
