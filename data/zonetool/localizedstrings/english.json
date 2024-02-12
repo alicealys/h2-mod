@@ -65,6 +65,9 @@
     "LUA_MENU_MODE3": "Debug shader",
     "LUA_MENU_INTRO": "Intro movie",
     "LUA_MENU_INTRO_DESC": "Show or skip intro movie with companies' logos on startup.",
+    "LUA_MENU_SWITCH_TO_DEVELOP": "Switch to the ^3Develop^7 branch",
+    "LUA_MENU_SWITCH_TO_MAIN": "Switch to the ^3Main^7 branch",
+    "LUA_MENU_SWITCH_BRANCH_DESC": "Switch the h2-mod branch (develop: latest changes, main: latest stable release).",
 
     "MENU_MUSIC_VOLUME": "Music Volume",
     "MENU_MUSIC_VOLUME_DESC": "Move the slider to adjust the volume of the music.",

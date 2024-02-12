@@ -7,6 +7,7 @@
 #include "console.hpp"
 #include "command.hpp"
 #include "database.hpp"
+#include "config.hpp"
 
 #include "version.h"
 
@@ -72,11 +73,33 @@ namespace updater
 
 		utils::concurrency::container<update_data_t> update_data;
 
+		std::unordered_map<std::string, git_branch> git_branches =
+		{
+			{"develop", branch_develop},
+			{"main", branch_main},
+		};
+
+		std::string get_branch_name(const git_branch branch)
+		{
+			for (const auto& [name, b] : git_branches)
+			{
+				if (branch == b)
+				{
+					return name;
+				}
+			}
+
+			throw std::runtime_error("invalid branch");
+		}
+
 		std::string select(const std::string& main, const std::string& develop)
 		{
-			if (GIT_BRANCH == "develop"s)
+			switch (updater::get_current_branch())
 			{
+			case branch_develop:
 				return develop;
+			case branch_main:
+				return main;
 			}
 
 			return main;
@@ -577,6 +600,45 @@ namespace updater
 	{
 		const auto folder = (utils::properties::get_appdata_path() / CLIENT_DATA_FOLDER).generic_string();
 		return !utils::io::directory_exists(folder) || utils::io::directory_is_empty(folder);
+	}
+
+	bool is_valid_git_branch(const std::string& branch)
+	{
+		return git_branches.contains(branch);
+	}
+
+	std::string get_git_branch()
+	{
+		return GIT_BRANCH;
+	}
+
+	git_branch get_current_branch()
+	{
+		const auto get_branch_name = []()
+			-> std::string
+		{
+			const auto branch_opt = config::get<std::string>("branch");
+			if (!branch_opt.has_value())
+			{
+				return GIT_BRANCH;
+			}
+
+			return branch_opt.value();
+		};
+
+		const auto branch_name = get_branch_name();
+		return git_branches.at(branch_name);
+	}
+
+	void set_branch(const git_branch branch)
+	{
+		if (branch >= branch_count)
+		{
+			return;
+		}
+
+		const auto name = get_branch_name(branch);
+		config::set("branch", name);
 	}
 
 	class component final : public component_interface

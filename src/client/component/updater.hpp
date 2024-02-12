@@ -4,6 +4,13 @@
 
 namespace updater
 {
+	enum git_branch
+	{
+		branch_develop,
+		branch_main,
+		branch_count
+	};
+
 	std::optional<std::string> get_server_file(const std::string& endpoint);
 
 	void relaunch();
@@ -29,4 +36,9 @@ namespace updater
 	void cancel_update();
 
 	bool should_force_update();
+
+	bool is_valid_git_branch(const std::string& branch);
+	std::string get_git_branch();
+	git_branch get_current_branch();
+	void set_branch(const git_branch branch);
 }
