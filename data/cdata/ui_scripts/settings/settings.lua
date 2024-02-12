@@ -61,6 +61,31 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         })
     end
 
+    if (Engine.InFrontend()) then
+        local dev = "@LUA_MENU_SWITCH_TO_DEVELOP"
+        local main = "@LUA_MENU_SWITCH_TO_MAIN"
+
+        local text = nil
+        local branch = updater.getcurrentbranch()
+
+        local oppositebranch = nil
+        
+        if (branch == updater.develop) then
+            text = main
+            oppositebranch = updater.main
+        else
+            text = dev
+            oppositebranch = updater.develop
+        end
+
+        menu:AddButton(text, function()
+            updater.setbranch(oppositebranch)
+            LUI.tryupdating(false)
+        end, nil, true, nil, {
+            desc_text = Engine.Localize("@LUA_MENU_SWITCH_BRANCH_DESC")
+        })
+    end
+
     createdivider(menu, "@LUA_MENU_DRAWING")
 
     LUI.Options.CreateOptionButton(
