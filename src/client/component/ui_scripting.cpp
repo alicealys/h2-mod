@@ -446,6 +446,20 @@ namespace ui_scripting
 			updater_table["getlasterror"] = updater::get_last_error;
 			updater_table["getcurrentfile"] = updater::get_current_file;
 
+			updater_table["getcurrentbranch"] = []()
+			{
+				const auto branch = updater::get_current_branch();
+				return static_cast<int>(branch);
+			};
+
+			updater_table["setbranch"] = [](const std::uint32_t branch)
+			{
+				updater::set_branch(static_cast<updater::git_branch>(branch));
+			};
+
+			updater_table["develop"] = static_cast<int>(updater::branch_develop);
+			updater_table["main"] = static_cast<int>(updater::branch_main);
+
 			auto mods_table = table();
 			lua["mods"] = mods_table;
 
