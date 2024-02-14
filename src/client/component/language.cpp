@@ -154,13 +154,6 @@ namespace language
 		{
 			utils::hook::call(0x14060AFFB, get_loc_language_string);
 
-			if (utils::io::file_exists(OLD_LANGUAGE_FILE))
-			{
-				const auto lang = utils::io::read_file(OLD_LANGUAGE_FILE);
-				config::set("language", lang);
-				utils::io::remove_file(OLD_LANGUAGE_FILE);
-			}
-
 			std::memcpy(languages, game::languages.get(), sizeof(game::language_values) * game::LANGUAGE_COUNT_ORIGINAL);
 			languages[game::LANGUAGE_TURKISH].name = "turkish";
 			languages[game::LANGUAGE_TURKISH].shortname = "tur";
