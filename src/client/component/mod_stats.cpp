@@ -7,6 +7,7 @@
 #include "filesystem.hpp"
 #include "mods.hpp"
 #include "mod_stats.hpp"
+#include "command.hpp"
 
 #include <utils/hook.hpp>
 #include <utils/io.hpp>
@@ -56,21 +57,14 @@ namespace mod_stats
 
 		nlohmann::json default_mod_stats()
 		{
-			nlohmann::json json;
-			json["maps"] = {};
-			return json;
+			return nlohmann::json::object();
 		}
 
-		nlohmann::json verify_mod_stats(nlohmann::json& json)
+		nlohmann::json verify_mod_stats(const nlohmann::json& json)
 		{
 			if (!json.is_object())
 			{
-				json = {};
-			}
-
-			if (!json.contains("maps") || !json["maps"].is_object())
-			{
-				json["maps"] = {};
+				return default_mod_stats();
 			}
 
 			return json;
@@ -136,7 +130,8 @@ namespace mod_stats
 		console::debug("[Mod stats] writing stats\n");
 		globals.current_stats.access([&](mod_stats_t& stats)
 		{
-			const auto dump = stats.dump(4);
+			const auto verified_stats = verify_mod_stats(stats);
+			const auto dump = verified_stats.dump(4);
 			const auto& path_value = path.value();
 			utils::io::write_file(path_value, dump, false);
 			globals.modified_stats = false;
@@ -229,6 +224,8 @@ namespace mod_stats
 					write();
 				}
 			});
+
+			command::add("stats_initialize", initialize);
 		}
 
 		void pre_destroy() override
