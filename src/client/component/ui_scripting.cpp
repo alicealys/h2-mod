@@ -515,21 +515,113 @@ namespace ui_scripting
 			auto mods_stats_table = table();
 			mods_table["stats"] = mods_stats_table;
 			
-			mods_stats_table["set"] = [](const std::string& key, const script_value& value)
+			const auto set_stats_func = [](const variadic_args& va)
 			{
-				const auto json_value = lua_to_json(value);
-				mod_stats::set(key, json_value);
-			};
-			
-			mods_stats_table["get"] = [](const std::string& key)
-			{
-				return json_to_lua(mod_stats::get(key));
+				mod_stats::get_stats().access([&](mod_stats::mod_stats_t& stats)
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < va.size() - 1; i++)
+					{
+						const auto key = va[i].as<std::string>();
+
+						if (!obj->contains(key))
+						{
+							obj->operator[](key) = nlohmann::json::object();
+						}
+
+						obj = &obj->at(key);
+					}
+
+					const auto json_value = lua_to_json(va.back());
+					*obj = json_value;
+
+					mod_stats::set_modified();
+				});
 			};
 
-			mods_stats_table["getor"] = [](const std::string& key, const script_value& default_value)
+			mods_stats_table["set"] = set_stats_func;
+			game_type["statsset"] = [&](const game&, const variadic_args& va)
 			{
-				const auto json_default_value = lua_to_json(default_value);
-				return json_to_lua(mod_stats::get(key, json_default_value));
+				return set_stats_func(va);
+			};
+
+			const auto get_stats_func = [](const variadic_args& va, int offset)
+			{
+				const auto value = mod_stats::get_stats().access<nlohmann::json>([&](mod_stats::mod_stats_t& stats)
+					-> nlohmann::json
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < va.size() - offset; i++)
+					{
+						const auto key = va[i].as<std::string>();
+
+						if (!obj->contains(key))
+						{
+							return {};
+						}
+
+						obj = &obj->at(key);
+					}
+
+					return *obj;
+				});
+
+				return value;
+			};
+
+			mods_stats_table["get"] = [&](const variadic_args& va)
+			{
+				return json_to_lua(get_stats_func(va, 0));
+			};
+
+			game_type["statsget"] = [&](const game&, const variadic_args& va)
+			{
+				return json_to_lua(get_stats_func(va, 0));
+			};
+
+			const auto has_stats_func = [](const variadic_args& va)
+			{
+				const auto value = mod_stats::get_stats().access<bool>([&](mod_stats::mod_stats_t& stats)
+					-> nlohmann::json
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < va.size(); i++)
+					{
+						const auto key = va[i].as<std::string>();
+
+						if (!obj->contains(key))
+						{
+							return false;
+						}
+
+						obj = &obj->at(key);
+					}
+
+					return !obj->is_null();
+				});
+
+				return value;
+			};
+
+			mods_stats_table["has"] = has_stats_func;
+			game_type["statshas"] = [&](const game&, const variadic_args& va)
+			{
+				return has_stats_func(va);
+			};
+
+			mods_stats_table["getor"] = [&](const variadic_args& va)
+			{
+				const auto& default_value = va.back();
+				const auto value = get_stats_func(va, 1);
+
+				if (value.is_null())
+				{
+					return default_value;
+				}
+				else
+				{
+					return json_to_lua(value);
+				}
 			};
 
 			mods_stats_table["setstruct"] = [](const std::string& mapname,

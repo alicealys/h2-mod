@@ -412,14 +412,86 @@ namespace gsc
 
 			add_function("statsset", []()
 			{
-				const auto key = game::Scr_GetString(0);
-				const auto value = get_argument(1);
-				const auto json_value = gsc_to_json(value);
-				mod_stats::set(key, json_value);
+				const auto num_args = game::Scr_GetNumParam();
+
+				mod_stats::get_stats().access([&](mod_stats::mod_stats_t& stats)
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < num_args - 1; i++)
+					{
+						const auto key = game::Scr_GetString(i);
+
+						if (!obj->contains(key))
+						{
+							obj->operator[](key) = nlohmann::json::object();
+						}
+
+						obj = &obj->at(key);
+					}
+
+					const auto value = get_argument(num_args - 1);
+					const auto json_value = gsc_to_json(value);
+					*obj = json_value;
+
+					mod_stats::set_modified();
+				});
+			});
+
+			add_function("statsget", []()
+			{
+				const auto num_args = game::Scr_GetNumParam();
+
+				const auto value = mod_stats::get_stats().access<nlohmann::json>([&](mod_stats::mod_stats_t& stats)
+					-> nlohmann::json
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < num_args; i++)
+					{
+						const auto key = game::Scr_GetString(i);
+
+						if (!obj->contains(key))
+						{
+							return {};
+						}
+
+						obj = &obj->at(key);
+					}
+
+					return *obj;
+				});
+
+				return_value(json_to_gsc(value));
+			});
+
+			add_function("statshas", []()
+			{
+				const auto num_args = game::Scr_GetNumParam();
+
+				const auto value = mod_stats::get_stats().access<bool>([&](mod_stats::mod_stats_t& stats)
+					-> nlohmann::json
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < num_args; i++)
+					{
+						const auto key = game::Scr_GetString(i);
+
+						if (!obj->contains(key))
+						{
+							return false;
+						}
+
+						obj = &obj->at(key);
+					}
+
+					return !obj->is_null();
+				});
+
+				return_value(value);
 			});
 
 			add_function("statssetstruct", []()
 			{
+				console::warn("statssetstruct is deprecated, use statset\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto value = get_argument(2);
@@ -427,24 +499,35 @@ namespace gsc
 				mod_stats::set_struct(struct_, field, json_value);
 			});
 
-			add_function("statsget", []()
-			{
-				const auto key = game::Scr_GetString(0);
-				const auto& value = mod_stats::get(key);
-				return_value(json_to_gsc(value));
-			});
-
 			add_function("statsgetor", []()
 			{
-				const auto key = game::Scr_GetString(0);
-				const auto default_value = get_argument(1);
-				const auto json_default_value = gsc_to_json(default_value);
-				const auto value = mod_stats::get(key, json_default_value);
-				return_value(json_to_gsc(value));
+				const auto num_args = game::Scr_GetNumParam();
+				const auto default_value = get_argument(num_args - 1);
+
+				const auto value = mod_stats::get_stats().access<scripting::script_value>([&](mod_stats::mod_stats_t& stats)
+				{
+					auto obj = &stats;
+					for (auto i = 0u; i < num_args - 1; i++)
+					{
+						const auto key = game::Scr_GetString(i);
+
+						if (!obj->contains(key))
+						{
+							return default_value;
+						}
+
+						obj = &obj->at(key);
+					}
+
+					return json_to_gsc(*obj);
+				});
+
+				return_value(value);
 			});
 
 			add_function("statsgetstruct", []()
 			{
+				console::warn("statsgetstruct is deprecated, use statget\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto value = mod_stats::get_struct(struct_, field);
@@ -453,6 +536,7 @@ namespace gsc
 
 			add_function("statsgetstructor", []()
 			{
+				console::warn("statsgetstructor is deprecated, use statgetor\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto default_value = get_argument(2);
