@@ -291,7 +291,8 @@ namespace updater
 	{
 		static std::vector<std::string> server_urls =
 		{
-			{"https://h2-mod.fed.cat/"},
+			{"https://h2-mod.alicent.cat/"},
+			{"https://h2-mod.fed.cat/"},	 // remove this at some point
 			{"https://master.fed0001.xyz/"}, // remove this at some point
 		};
 
