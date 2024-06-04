@@ -90,7 +90,7 @@ namespace sound
 	public:
 		void post_unpack() override
 		{
-			snd_music_volume = dvars::register_float("snd_musicVolume", 1.f, 0.0f, 1.f, game::DVAR_FLAG_SAVED, "Music volume scale");
+			snd_music_volume = dvars::register_float("snd_musicVolume", 1.f, 0.0f, 5.f, game::DVAR_FLAG_SAVED, "Music volume scale");
 			snd_music_disabled_for_custom_sndtrack = reinterpret_cast<game::dvar_t**>(0x151B818C8);
 
 			// remove raw/sound or raw/language/sound prefix when loading raw sounds
