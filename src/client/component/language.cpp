@@ -78,7 +78,7 @@ namespace language
 		const auto lower = utils::string::to_lower(name);
 		for (auto i = 0; i < game::LANGUAGE_COUNT; i++)
 		{
-			if (languages[i].name == lower)
+			if (languages[i].name != nullptr && languages[i].name == lower)
 			{
 				return true;
 			}
@@ -91,7 +91,7 @@ namespace language
 	{
 		for (const auto& language : custom_languages)
 		{
-			if (languages[language].name == name || languages[language].shortname == name)
+			if (languages[language].name != nullptr && (languages[language].name == name || languages[language].shortname == name))
 			{
 				return true;
 			}
@@ -144,7 +144,10 @@ namespace language
 		}
 
 		const auto language = languages[index];
-		set(language.name);
+		if (language.name != nullptr)
+		{
+			set(language.name);
+		}
 	}
 
 	class component final : public component_interface
@@ -153,13 +156,6 @@ namespace language
 		void post_unpack() override
 		{
 			utils::hook::call(0x14060AFFB, get_loc_language_string);
-
-			if (utils::io::file_exists(OLD_LANGUAGE_FILE))
-			{
-				const auto lang = utils::io::read_file(OLD_LANGUAGE_FILE);
-				config::set("language", lang);
-				utils::io::remove_file(OLD_LANGUAGE_FILE);
-			}
 
 			std::memcpy(languages, game::languages.get(), sizeof(game::language_values) * game::LANGUAGE_COUNT_ORIGINAL);
 			languages[game::LANGUAGE_TURKISH].name = "turkish";
@@ -212,6 +208,13 @@ namespace language
 			for (const auto& language : custom_languages)
 			{
 				languages[language].is_supported = 1;
+			}
+
+			if (utils::io::file_exists(OLD_LANGUAGE_FILE))
+			{
+				const auto lang = utils::io::read_file(OLD_LANGUAGE_FILE);
+				utils::io::remove_file(OLD_LANGUAGE_FILE);
+				config::set("language", lang);
 			}
 		}
 	};
