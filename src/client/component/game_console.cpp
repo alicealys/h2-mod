@@ -541,23 +541,9 @@ namespace game_console
 		return true;
 	}
 
-	void execute(const char* cmd)
-	{
-		if (game::CL_IsCgameInitialized())
-		{
-			std::string cmd_ = cmd;
-			scheduler::once([cmd_]()
-			{
-				scripting::notify(*game::levelEntityId, "console_command", {cmd_});
-			}, scheduler::pipeline::server);
-		}
-
-		game::Cbuf_AddText(0, utils::string::va("%s \n", cmd));
-	}
-
 	void add(const std::string& cmd)
 	{
-		execute(cmd.data());
+		command::execute(cmd);
 
 		history.push_front(cmd);
 		if (history.size() > 10)
@@ -671,7 +657,7 @@ namespace game_console
 
 				if (key == game::keyNum_t::K_ENTER)
 				{
-					execute(fixed_input.data());
+					command::execute(fixed_input);
 
 					if (history_index != -1)
 					{
