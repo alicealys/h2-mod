@@ -14,21 +14,21 @@ local function dvarmenuoption(name, min, max, step)
     Engine.SetDvarFloat(name, math.min(max, math.max(min, Engine.GetDvarFloat(name) + step)))
 end
 
-local function getvolumefunc(name)
+local function getvolumefunc(name, vars)
     return function()
-        return (Engine.GetDvarFloat(name) - SliderBounds.Volume.Min) / (SliderBounds.Volume.Max - SliderBounds.Volume.Min)
+        return (Engine.GetDvarFloat(name) - vars.Min) / (vars.Max - vars.Min)
     end
 end
 
-local function getvolumelessfunc(name)
+local function getvolumelessfunc(name, vars)
     return function()
-        dvarmenuoption(name, SliderBounds.Volume.Min, SliderBounds.Volume.Max, -SliderBounds.Volume.Step)
+        dvarmenuoption(name, vars.Min, vars.Max, -vars.Step)
     end
 end
 
-local function getvolumemorefunc(name)
+local function getvolumemorefunc(name, vars)
     return function()
-        dvarmenuoption(name, SliderBounds.Volume.Min, SliderBounds.Volume.Max, SliderBounds.Volume.Step)
+        dvarmenuoption(name, vars.Min, vars.Max, vars.Step)
     end
 end
 
@@ -54,9 +54,25 @@ LUI.PCAudio.new = function (a1)
         GenericButtonSettings.Variants.Slider, 
         "@MENU_MUSIC_VOLUME", 
         "@MENU_MUSIC_VOLUME_DESC", 
-        getvolumefunc("snd_musicVolume"), 
-        getvolumelessfunc("snd_musicVolume"), 
-        getvolumemorefunc("snd_musicVolume")
+        getvolumefunc("snd_musicVolume", SliderBounds.Volume), 
+        getvolumelessfunc("snd_musicVolume", SliderBounds.Volume), 
+        getvolumemorefunc("snd_musicVolume", SliderBounds.Volume)
+    )
+
+    local boostvars = {
+        Min = 1.0,
+        Max = 5.0,
+        Step = SliderBounds.Volume.Step
+    }
+
+    LUI.Options.AddButtonOptionVariant(
+        menu, 
+        GenericButtonSettings.Variants.Slider, 
+        "@MENU_MUSIC_VOLUME_BOOST", 
+        "@MENU_MUSIC_VOLUME_BOOST_DESC", 
+        getvolumefunc("snd_musicVolumeBoost", boostvars), 
+        getvolumelessfunc("snd_musicVolumeBoost", boostvars), 
+        getvolumemorefunc("snd_musicVolumeBoost", boostvars)
     )
 
 	local speakeroptions = {

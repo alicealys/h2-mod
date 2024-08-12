@@ -14,6 +14,7 @@ namespace sound
 	namespace
 	{
 		game::dvar_t* snd_music_volume = nullptr;
+		game::dvar_t* snd_music_volume_boost = nullptr;
 		game::dvar_t** snd_music_disabled_for_custom_sndtrack = nullptr;
 		int music_volmod_index = -1;
 
@@ -57,7 +58,7 @@ namespace sound
 
 			if (is_sound_music(sound))
 			{
-				return original_volume * snd_music_volume->current.value;
+				return original_volume * snd_music_volume->current.value * snd_music_volume_boost->current.value;
 			}
 
 			return original_volume;
@@ -91,6 +92,7 @@ namespace sound
 		void post_unpack() override
 		{
 			snd_music_volume = dvars::register_float("snd_musicVolume", 1.f, 0.0f, 1.f, game::DVAR_FLAG_SAVED, "Music volume scale");
+			snd_music_volume_boost = dvars::register_float("snd_musicVolumeBoost", 1.f, 0.0f, 5.f, game::DVAR_FLAG_SAVED, "Music volume boost");
 			snd_music_disabled_for_custom_sndtrack = reinterpret_cast<game::dvar_t**>(0x151B818C8);
 
 			// remove raw/sound or raw/language/sound prefix when loading raw sounds

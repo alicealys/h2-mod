@@ -18,7 +18,7 @@
 #include <utils/concurrency.hpp>
 
 #define MOD_FOLDER "mods"
-#define MOD_STATS_FOLDER "players2/modstats"
+#define OLD_MOD_STATS_FOLDER "players2/modstats"
 
 namespace mods
 {
@@ -258,15 +258,13 @@ namespace mods
 
 		std::unordered_map<std::string, std::string> info;
 		const auto data = utils::io::read_file(info_file);
-		try
+		const auto parsed = nlohmann::json::parse(data, {}, false);
+		if (parsed.is_discarded())
 		{
-			return {nlohmann::json::parse(data)};
-		}
-		catch (const std::exception&)
-		{
+			return {};
 		}
 
-		return {};
+		return {parsed};
 	}
 
 	void load(const std::string& path)
@@ -312,6 +310,11 @@ namespace mods
 	class component final : public component_interface
 	{
 	public:
+		void post_start() override
+		{
+			utils::io::remove_directory(OLD_MOD_STATS_FOLDER);
+		}
+
 		void post_unpack() override
 		{
 			if (!utils::io::directory_exists(MOD_FOLDER))
