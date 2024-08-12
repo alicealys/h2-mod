@@ -15,7 +15,7 @@
 
 **NOTE**: You must legally own Call of Duty®: Modern Warfare® 2 Campaign Remastered to run this mod. Cracked/Pirated versions of the game are **NOT** supported.
 
-1. Download the latest **[release](https://h2-mod.fed.cat/data/h2-mod.exe)** or **[develop](https://h2-mod.fed.cat/data-dev/h2-mod.exe)** build
+1. Download the latest **[release](https://h2-mod.alicent.cat/data/h2-mod.exe)** or **[develop](https://h2-mod.alicent.cat/data-dev/h2-mod.exe)** build
 2. Drop the file in your **Call of Duty: Modern Warfare 2 Campaign Remastered** installation folder.  
 3. Run **h2-mod.exe** and make sure you press **"YES"** when asked whether to install updates.
 
