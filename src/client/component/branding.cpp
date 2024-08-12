@@ -15,9 +15,11 @@ namespace branding
 {
 	namespace
 	{
-		float color[4] = {0.9f, 0.9f, 0.5f, 1.f};
+		float color[4] = {0.5f, 0.5f, 0.5f, 0.9f};
 
 		utils::hook::detour ui_get_formatted_build_number_hook;
+
+		game::dvar_t* cg_draw_branding = nullptr;
 
 		const char* ui_get_formatted_build_number_stub()
 		{
@@ -27,13 +29,19 @@ namespace branding
 
 		void draw()
 		{
-			const auto font = game::R_RegisterFont("fonts/fira_mono_bold.ttf", 22);
-			if (!font)
+			const auto font = game::R_RegisterFont("fonts/fira_mono_regular.ttf", 22);
+			if (!font || !cg_draw_branding->current.enabled)
 			{
 				return;
 			}
 
 			const auto placement = game::ScrPlace_GetViewPlacement();
+
+#ifdef DEBUG
+			const auto text = "h2-mod " GIT_BRANCH ": " VERSION " (" __DATE__ " " __TIME__ ")";
+#else
+			const auto text = "h2-mod " GIT_BRANCH ": " VERSION;
+#endif
 
 			game::rectDef_s rect{};
 			rect.x = 0;
@@ -44,8 +52,8 @@ namespace branding
 
 			game::rectDef_s text_rect{};
 
-			game::UI_DrawWrappedText(placement, "h2-mod", &rect, font,
-				5.f, 12.f, 0.17f, color, 0, 0, &text_rect, 0);
+			game::UI_DrawWrappedText(placement, text, &rect, font,
+				5.f, 10.f, 0.12f, color, 0, 0, &text_rect, 0);
 		}
 	}
 
@@ -55,6 +63,8 @@ namespace branding
 		void post_unpack() override
 		{
 			scheduler::loop(draw, scheduler::pipeline::renderer);
+
+			cg_draw_branding = dvars::register_bool("cg_drawBranding", true, game::DVAR_FLAG_SAVED, "Draw h2-mod branding");
 
 			ui_get_formatted_build_number_hook.create(0x1406057D0, ui_get_formatted_build_number_stub);
 		}
