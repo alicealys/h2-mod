@@ -319,6 +319,8 @@ namespace game
 	WEAK symbol<int> volmod_index{0x151BADFD8};
 	WEAK symbol<int> music_dsp_bus_index{0x151B9AA40};
 
+	WEAK symbol<WeaponDef*> weapon_defs{0x14CE01580};
+
 	namespace hks
 	{
 		WEAK symbol<lua_State*> lua_state{0x1419D83E8};

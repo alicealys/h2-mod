@@ -388,7 +388,12 @@ namespace command
 							const auto wp = game::G_GetWeaponForName(arg.data());
 							if (wp)
 							{
-								if (game::G_GivePlayerWeapon(ps, wp, 0, 0, 0, 0))
+								const auto def = game::weapon_defs[wp];
+
+								const auto want_dual_wield = std::atoi(params.get(2));
+								const auto dual_wield = !def->noDualWield && want_dual_wield;
+
+								if (game::G_GivePlayerWeapon(ps, wp, dual_wield, 0, 0, 0))
 								{
 									game::G_InitializeAmmo(ps, wp, 0);
 									game::G_SelectWeapon(0, wp);
