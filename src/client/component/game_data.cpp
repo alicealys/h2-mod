@@ -46,6 +46,11 @@ namespace game_data
 
 		void initialize_players_folder()
 		{
+			if (!utils::io::directory_exists(PLAYERS_FOLDER))
+			{
+				return;
+			}
+
 			if (utils::io::directory_exists(H2_MOD_PLAYERS_FOLDER))
 			{
 				return;

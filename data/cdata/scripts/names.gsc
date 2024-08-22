@@ -46,7 +46,7 @@ get_random_pronouns()
 
         pronouns_second = level.__pronouns__.pronouns_first[index_second];
     }
-    
+
     return pronouns_first + "/" + pronouns_second;
 }
 
@@ -68,7 +68,7 @@ get_name(var_0)
         if ( self.script_friendname == "none" )
             return;
 
-        self.name = self.script_friendname+ pronouns;
+        self.name = self.script_friendname + pronouns;
         maps\_names::getrankfromname( self.name );
         self notify( "set name and rank" );
         return;
