@@ -239,9 +239,9 @@ namespace motd
 		{
 			map =
 			{
-				{"github", "https://github.com/fedddddd/h2-mod"},
+				{"github", "https://github.com/alicealys/h2-mod"},
 				{"donate", "https://www.paypal.com/donate/?hosted_button_id=LM5BA9UABEV4Q"},
-				{"specops", "https://github.com/fedddddd/h2-specops-mod"},
+				{"specops", "https://github.com/alicealys/h2-specops-mod"},
 				{"credits_1", "https://github.com/momo5502"},
 				{"credits_2", "https://github.com/VladWinner"},
 				{"credits_3", "https://github.com/diamante0018"},
