@@ -287,7 +287,6 @@ LUI.MenuBuilder.registerType("credits_menu", function(f6_arg0, f6_arg1)
 	luiglobals.GenericMenuDims.OptionMenuWidth = optionmenuwidth + extrawidth
 
 	addlinkinfo(menu, "MENU_SYSINFO_CUSTOMER_SUPPORT_LINK", "MENU_SYSINFO_CUSTOMER_SUPPORT_URL", "github")
-	addlinkinfo(menu, "MENU_SYSINFO_DONATION_LINK", "MENU_SYSINFO_DONATION_URL", "donate")
 
 	addcredits(menu)
 
