@@ -29,7 +29,7 @@ namespace utils
 
 			instance->setAppName(L"H2-Mod");
 			instance->setAppUserModelId(
-				WinToastLib::WinToast::configureAUMI(L"fed", L"h2-mod", L"", L"20201212"));
+				WinToastLib::WinToast::configureAUMI(L"h2-mod", L"h2-mod", L"", L"20201212"));
 
 			WinToastLib::WinToast::WinToastError error;
 			success = instance->initialize(&error);

@@ -70,13 +70,13 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "fed"
+            VALUE "CompanyName", "h2-mod"
             VALUE "FileDescription", "H2-Mod"
             VALUE "FileVersion", VERSION_FILE
             VALUE "InternalName", "H2-Mod"
-            VALUE "LegalCopyright", "Copyright (C) 2021 fed. All rights reserved."
+            VALUE "LegalCopyright", "Copyright (C) 2024 h2-mod. All rights reserved."
             VALUE "Licence", "GPLv3"
-            VALUE "Info", "https://github.com/fedddddd/h2-mod"
+            VALUE "Info", "https://github.com/alicealys/h2-mod"
             VALUE "OriginalFilename", "h2-mod.exe"
             VALUE "ProductName", "h2-mod"
             VALUE "ProductVersion", VERSION_PRODUCT
