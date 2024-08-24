@@ -1,6 +1,6 @@
-![license](https://img.shields.io/github/license/fedddddd/h2-mod.svg)
-[![open bugs](https://img.shields.io/github/issues/fedddddd/h2-mod/bug?label=bugs)](https://github.com/fedddddd/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Build](https://github.com/fedddddd/h2-mod/workflows/Build/badge.svg)](https://github.com/fedddddd/h2-mod/actions)
+![license](https://img.shields.io/github/license/alicealys/h2-mod.svg)
+[![open bugs](https://img.shields.io/github/issues/alicealys/h2-mod/bug?label=bugs)](https://github.com/alicealys/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Build](https://github.com/alicealys/h2-mod/workflows/Build/badge.svg)](https://github.com/alicealys/h2-mod/actions)
 [![Discord](https://img.shields.io/discord/955362057581129738?color=%237289DA&label=members&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/dpnRn2tKT9)
 [![Revolt](https://img.shields.io/badge/Revolt.chat-ff4655?style=for-the-badge&logo=Revolt.chat&logoColor=white)](https://rvlt.gg/24n6PDEw)
 
@@ -15,7 +15,7 @@
 
 **NOTE**: You must legally own Call of Duty®: Modern Warfare® 2 Campaign Remastered to run this mod. Cracked/Pirated versions of the game are **NOT** supported.
 
-1. Download the latest **[release](https://h2-mod.fed.cat/data/h2-mod.exe)** or **[develop](https://h2-mod.fed.cat/data-dev/h2-mod.exe)** build
+1. Download the latest **[release](https://h2-mod.alicent.cat/data/h2-mod.exe)** or **[develop](https://h2-mod.alicent.cat/data-dev/h2-mod.exe)** build
 2. Drop the file in your **Call of Duty: Modern Warfare 2 Campaign Remastered** installation folder.  
 3. Run **h2-mod.exe** and make sure you press **"YES"** when asked whether to install updates.
 
