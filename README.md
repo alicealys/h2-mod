@@ -1,6 +1,6 @@
-![license](https://img.shields.io/github/license/fedddddd/h2-mod.svg)
-[![open bugs](https://img.shields.io/github/issues/fedddddd/h2-mod/bug?label=bugs)](https://github.com/fedddddd/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
-[![Build](https://github.com/fedddddd/h2-mod/workflows/Build/badge.svg)](https://github.com/fedddddd/h2-mod/actions)
+![license](https://img.shields.io/github/license/alicealys/h2-mod.svg)
+[![open bugs](https://img.shields.io/github/issues/alicealys/h2-mod/bug?label=bugs)](https://github.com/alicealys/h2-mod/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+[![Build](https://github.com/alicealys/h2-mod/workflows/Build/badge.svg)](https://github.com/alicealys/h2-mod/actions)
 [![Discord](https://img.shields.io/discord/955362057581129738?color=%237289DA&label=members&logo=discord&logoColor=%23FFFFFF)](https://discord.gg/dpnRn2tKT9)
 [![Revolt](https://img.shields.io/badge/Revolt.chat-ff4655?style=for-the-badge&logo=Revolt.chat&logoColor=white)](https://rvlt.gg/24n6PDEw)
 
@@ -53,7 +53,7 @@ liable for misuse of the software. Use responsibly.
 
 ## Credits
 
-This project is based on [IW6x](https://github.com/XLabsProject/iw6x-client) and [S1x](https://github.com/XLabsProject/s1x-client)
+This project is based on [IW6x](https://git.alterware.dev/alterware/iw6-mod) and [S1x](https://git.alterware.dev/alterware/s1-mod)
 * [momo5502](https://github.com/momo5502)
 * [JariKCoding](https://github.com/JariKCoding/CoDLuaDecompiler)
 * [xensik](https://github.com/xensik/gsc-tool/)
