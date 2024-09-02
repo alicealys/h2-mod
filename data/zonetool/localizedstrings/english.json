@@ -68,8 +68,6 @@
     "LUA_MENU_SWITCH_TO_DEVELOP": "Switch to the ^3Develop^7 branch",
     "LUA_MENU_SWITCH_TO_MAIN": "Switch to the ^3Main^7 branch",
     "LUA_MENU_SWITCH_BRANCH_DESC": "Switch the h2-mod branch (develop: latest changes, main: latest stable release).",
-    "LUA_MENU_SOLDIER_PRONOUNS": "Soldier pronouns",
-    "LUA_MENU_SOLDIER_PRONOUNS_DESC": "Show random soldier pronouns.",
 
     "MENU_MUSIC_VOLUME": "Music Volume",
     "MENU_MUSIC_VOLUME_DESC": "Move the slider to adjust the volume of the music.",
