@@ -1,21 +1,21 @@
 function createdivider(menu, text)
-	local element = LUI.UIElement.new({
-		leftAnchor = true,
-		rightAnchor = true,
-		left = 0,
-		right = 0,
-		topAnchor = true,
-		bottomAnchor = false,
-		top = 0,
-		bottom = 33.33
-	})
+    local element = LUI.UIElement.new({
+        leftAnchor = true,
+        rightAnchor = true,
+        left = 0,
+        right = 0,
+        topAnchor = true,
+        bottomAnchor = false,
+        top = 0,
+        bottom = 33.33
+    })
 
-	element.scrollingToNext = true
-	element:addElement(LUI.MenuBuilder.BuildRegisteredType("h1_option_menu_titlebar", {
-		title_bar_text = Engine.ToUpperCase(Engine.Localize(text))
-	}))
+    element.scrollingToNext = true
+    element:addElement(LUI.MenuBuilder.BuildRegisteredType("h1_option_menu_titlebar", {
+        title_bar_text = Engine.ToUpperCase(Engine.Localize(text))
+    }))
 
-	menu.list:addElement(element)
+    menu.list:addElement(element)
 end
 
 LUI.addmenubutton("pc_controls", {
@@ -29,10 +29,10 @@ LUI.addmenubutton("pc_controls", {
 
 LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
     local menu = LUI.MenuTemplate.new(a1, {
-		menu_title = "@MENU_GENERAL",
-		menu_list_divider_top_offset = -(LUI.H1MenuTab.tabChangeHoldingElementHeight + H1MenuDims.spacing),
-		menu_width = GenericMenuDims.OptionMenuWidth
-	})
+        menu_title = "@MENU_GENERAL",
+        menu_list_divider_top_offset = -(LUI.H1MenuTab.tabChangeHoldingElementHeight + H1MenuDims.spacing),
+        menu_width = GenericMenuDims.OptionMenuWidth
+    })
 
     createdivider(menu, "@LUA_MENU_UPDATES")
 
@@ -208,8 +208,27 @@ LUI.MenuBuilder.m_types_build["settings_menu"] = function(a1)
         }
     )
 
-	LUI.Options.InitScrollingList(menu.list, nil)
-	LUI.Options.AddOptionTextInfo(menu)
+    createdivider(menu, "@PLATFORM_UI_MISCELLANEOUS_OPTIONS")
+
+    LUI.Options.CreateOptionButton(
+        menu,
+        "g_soldierPronouns",
+        "@LUA_MENU_SOLDIER_PRONOUNS",
+        "@LUA_MENU_SOLDIER_PRONOUNS_DESC",
+        {
+            {
+                text = "@LUA_MENU_DISABLED",
+                value = false
+            },
+            {
+                text = "@LUA_MENU_ENABLED",
+                value = true
+            },
+        }
+    )
+
+    LUI.Options.InitScrollingList(menu.list, nil)
+    LUI.Options.AddOptionTextInfo(menu)
 
     menu:AddBackButton()
 

@@ -616,6 +616,17 @@ namespace gsc
 					!game::DB_IsXAssetDefault(type_index, name);
 				game::Scr_AddInt(result);
 			});
+
+			add_function("hashstring", []()
+			{
+				if (game::Scr_GetNumParam() < 1)
+				{
+					return game::Scr_AddInt(0);
+				}
+
+				const auto hash = game::generateHashValue(game::Scr_GetString(0));
+				game::Scr_AddInt(hash);
+			});
 		}
 	};
 }
