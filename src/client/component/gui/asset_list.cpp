@@ -24,6 +24,7 @@ namespace gui::asset_list
 		std::string zone_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
 
 		std::unordered_map<game::XAssetType, std::function<void(const std::string&)>> asset_view_callbacks;
+		std::unordered_map<game::XAssetType, std::function<std::string(const std::string&)>> asset_name_override_callbacks;
 
 		bool default_only[game::ASSET_TYPE_COUNT] = {};
 		int asset_count[game::ASSET_TYPE_COUNT] = {};
@@ -98,9 +99,21 @@ namespace gui::asset_list
 
 			ImGui::TableSetColumnIndex(col_index++);
 
-			if (ImGui::Button(asset_name))
+			std::string asset_name_view;
+
+			const auto& name_override_cb = asset_name_override_callbacks.find(type);
+			if (name_override_cb != asset_name_override_callbacks.end())
 			{
-				gui::copy_to_clipboard(asset_name);
+				asset_name_view = name_override_cb->second.operator()(asset_name);
+			}
+			else
+			{
+				asset_name_view = asset_name;
+			}
+
+			if (ImGui::Button(asset_name_view.data()))
+			{
+				gui::copy_to_clipboard(asset_name_view);
 			}
 
 			if (type == game::ASSET_TYPE_LOCALIZE_ENTRY)
@@ -263,6 +276,11 @@ namespace gui::asset_list
 	void add_asset_view_callback(game::XAssetType type, const std::function<void(const std::string&)>& callback)
 	{
 		asset_view_callbacks.insert(std::make_pair(type, callback));
+	}
+
+	void add_asset_name_override_callback(game::XAssetType type, const std::function<std::string(const std::string&)>& callback)
+	{
+		asset_name_override_callbacks.insert(std::make_pair(type, callback));
 	}
 
 	class component final : public component_interface
