@@ -6,6 +6,8 @@
 namespace gui::asset_list
 {
 	void add_asset_view_callback(game::XAssetType, const std::function<void(const std::string&)>& callback);
+	void add_asset_name_override_callback(game::XAssetType type, const std::function<std::string(const std::string&)>& callback);
+	
 	void add_view_button(int id, game::XAssetType type, const char* name);
 
 	template <typename T>
