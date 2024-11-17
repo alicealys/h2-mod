@@ -5466,12 +5466,12 @@ namespace game
 
 	struct GfxLightGridColors
 	{
-		unsigned char rgb[56][6];
+		unsigned short rgb[56][3];
 	}; assert_sizeof(GfxLightGridColors, 336);
 
 	struct GfxLightGridColorsHDR
 	{
-		unsigned char rgb[56][6];
+		unsigned short rgb[56][3];
 	}; assert_sizeof(GfxLightGridColorsHDR, 336);
 
 	struct GfxLightGridTree
