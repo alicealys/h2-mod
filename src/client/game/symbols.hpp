@@ -208,6 +208,8 @@ namespace game
 
 	WEAK symbol<bool()> SV_Loaded{0x1406B3860};
 	WEAK symbol<void(char client_num, const char* cmd)> SV_SendGameServerCommand{0x1406B2F40};
+	WEAK game::symbol<int(int, float const* const, float const* const, struct game::Bounds const*, unsigned int, int)> SV_BrushModelSightTrace{0x1403C6580};
+
 
 	WEAK symbol<void()> Sys_ShowConsole{0x140633080};
 	WEAK symbol<bool()> Sys_IsDatabaseReady2{0x1405A9FE0};
@@ -237,6 +239,7 @@ namespace game
 	WEAK symbol<void(pmove_t*, pml_t*)> PM_GroundTrace{0x140689AA0};
 
 	WEAK symbol<float(float*)> Vec2Normalize{0x140611D80};
+	WEAK game::symbol<void(float*)> Vec3Normalize{0x140282800};
 
 	WEAK symbol<void*(jmp_buf* Buf, int Value)> longjmp{0x14089EED0};
 	WEAK symbol<int(jmp_buf* Buf)> _setjmp{0x1408EC2E0};

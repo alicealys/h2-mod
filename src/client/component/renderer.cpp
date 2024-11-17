@@ -56,21 +56,6 @@ namespace renderer
 
 			return r_update_front_end_dvar_options_hook.invoke<bool>();
 		}
-
-		utils::hook::detour r_filter_things_into_cells_r_hook;
-		void r_filter_things_into_cells_r_stub(void* node, unsigned int dyn_ent_index, game::Bounds* bounds, unsigned int* cell_bits, unsigned int word_count)
-		{
-			const auto gfx_world = *reinterpret_cast<size_t*>(0x14EE49000);
-			const auto bsp_version = *reinterpret_cast<unsigned int*>(gfx_world + 16);
-			if (bsp_version == 115) // h2 bsp version
-			{
-				return r_filter_things_into_cells_r_hook.invoke<void>(node, dyn_ent_index, bounds, cell_bits, word_count);
-			}
-
-			constexpr auto cell_index = 0;
-			const auto index = (dyn_ent_index >> 5) + word_count * cell_index;
-			cell_bits[index] |= 0x80000000 >> (dyn_ent_index & 0x1F);
-		}
 	}
 
 	class component final : public component_interface
@@ -82,9 +67,6 @@ namespace renderer
 
 			r_init_draw_method_hook.create(0x14072F950, &r_init_draw_method_stub);
 			r_update_front_end_dvar_options_hook.create(0x14076EE70, &r_update_front_end_dvar_options_stub);
-
-			// workaround for zonetool issue
-			r_filter_things_into_cells_r_hook.create(0x140724720, r_filter_things_into_cells_r_stub);
 		}
 	};
 }
