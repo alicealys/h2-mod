@@ -19,13 +19,7 @@ namespace game
 		float data[N];
 	};
 
-	struct dummy
-	{
-	};
-
-	enum scr_string_t : std::int32_t
-	{
-	};
+	typedef std::int32_t scr_string_t;
 
 	enum XAssetType
 	{
@@ -119,106 +113,47 @@ namespace game
 		char __pad1[48];
 	}; static_assert(sizeof(PhysPreset) == 0x60);
 
-	typedef std::int8_t dm_int8;
-	typedef std::uint8_t dm_uint8;
-	typedef std::int16_t dm_int16;
-	typedef std::uint16_t dm_uint16;
-	typedef std::int32_t dm_int32;
-	typedef std::uint32_t dm_uint32;
-	typedef std::int64_t dm_int64;
-	typedef std::uint64_t dm_uint64;
-	typedef float dm_float32;
-
-	struct dmFloat3
+	struct dmMeshNode_array_t
 	{
-		dm_float32 x;
-		dm_float32 y;
-		dm_float32 z;
+		char __pad0[16];
 	};
-
-	struct dmFloat4
-	{
-		dm_float32 x;
-		dm_float32 y;
-		dm_float32 z;
-		dm_float32 w;
-	};
-
-	struct dmMeshNode_anon_fields
-	{
-		unsigned int axis : 2;
-		unsigned int triangleCount : 4;
-		unsigned int index : 26;
-	};
-
-	union dmMeshNode_anon
-	{
-		dmMeshNode_anon_fields fields;
-		unsigned int packed;
-	};
-
-	struct dmMeshNode
-	{
-		dm_int16 lowerX;
-		dm_int16 lowerY;
-		dm_int16 lowerZ;
-		dm_int16 upperX;
-		dm_int16 upperY;
-		dm_int16 upperZ;
-		dmMeshNode_anon anon;
-	}; assert_sizeof(dmMeshNode, 16);
 
 	struct dmMeshTriangle
 	{
-		dm_int32 i1;
-		dm_int32 i2;
-		dm_int32 i3;
-		dm_int32 w1;
-		dm_int32 w2;
-		dm_int32 w3;
-		dm_int32 materialIndex;
-		dm_int32 collisionFlags;
-	}; assert_sizeof(dmMeshTriangle, 32);
+		char __pad0[32];
+	};
 
 	struct dmMeshData
 	{
-		dmMeshNode* m_pRoot;
-		dmFloat4* m_aVertices;
-		dmMeshTriangle* m_aTriangles;
-		dmFloat3 m_center;
-		dmFloat3 m_extents;
-		dmFloat3 m_unquantize;
-		dm_int32 m_nodeCount;
-		dm_int32 m_vertexCount;
-		dm_int32 m_triangleCount;
-		dm_int32 m_height;
-		dm_int32 contents;
-	}; assert_sizeof(dmMeshData, 0x50);
+		dmMeshNode_array_t* meshNodes;
+		vec4_t* vec4_array0;
+		dmMeshTriangle* meshTriangles;
+		char __pad0[36];
+		unsigned int count0;
+		unsigned int count1;
+		unsigned int count2;
+		char __pad1[8];
+	}; static_assert(sizeof(dmMeshData) == 0x50);
 
 	struct dmSubEdge
 	{
-		dm_int8 twinOffset;
-		dm_uint8 tail;
-		dm_uint8 left;
-		dm_uint8 next;
-	}; assert_sizeof(dmSubEdge, 4);
+		int value;
+	};
 
 	struct dmPolytopeData
 	{
-		dmFloat4* vec4_array0; // count: m_vertexCount, m_aVertices?
-		dmFloat4* vec4_array1; // count: m_faceCount, m_aPlanes?
-		dm_uint16* uint16_array0; // count: m_faceCount, m_vertexMaterials? surfaceType? // ALWAYS 0
-		dm_uint16* uint16_array1; // count: m_vertexCount, m_vertexMaterials? // ALWAYS 0
-		dmSubEdge* m_aSubEdges; // count: m_subEdgeCount
-		dm_uint8* m_aFaceSubEdges; // count: m_faceCount
-		dmFloat3 m_centroid;
-		dm_int32 m_vertexCount;
-		dm_int32 m_faceCount;
-		dm_int32 m_subEdgeCount;
-		float pad1[8];
-		int contents;
-		int pad2;
-	}; assert_sizeof(dmPolytopeData, 0x70);
+		vec4_t* vec4_array0;
+		vec4_t* vec4_array1;
+		unsigned short* uint16_array0;
+		unsigned short* uint16_array1;
+		dmSubEdge* edges;
+		unsigned char* uint8_array0;
+		char __pad0[12];
+		unsigned int count0;
+		unsigned int count1;
+		unsigned int count2;
+		char __pad1[40];
+	}; static_assert(sizeof(dmPolytopeData) == 0x70);
 
 	struct PhysGeomInfo
 	{
@@ -239,7 +174,7 @@ namespace game
 		PhysGeomInfo* geoms;
 		PhysMass mass;
 		Bounds bounds;
-	}; assert_sizeof(PhysCollmap, 0x58);
+	}; static_assert(sizeof(PhysCollmap) == 0x58);
 
 	struct PhysWaterPreset
 	{
@@ -252,50 +187,34 @@ namespace game
 		FxEffectDef* fx4;
 		FxEffectDef* fx5;
 		FxEffectDef* fx6;
-	}; assert_sizeof(PhysWaterPreset, 0x80);
+	}; static_assert(sizeof(PhysWaterPreset) == 0x80);
 
 	struct PhysWaterVolumeDef
 	{
 		PhysWaterPreset* physWaterPreset;
 		char __pad0[12];
 		scr_string_t string;
-		short brushModelIndex;
-		char __pad1[6];
-	}; assert_sizeof(PhysWaterVolumeDef, 0x20);
-	assert_offsetof(PhysWaterVolumeDef, string, 20);
+		char __pad1[8];
+	}; static_assert(sizeof(PhysWaterVolumeDef) == 0x20);
+	static_assert(offsetof(PhysWaterVolumeDef, string) == 20);
 
-	struct PhysBrushModelPacked
+	struct PhysBrushModel
 	{
-		std::uint64_t p;
+		char __pad0[8];
 	};
 
-	struct PhysBrushModelFields
-	{
-		short polytopeIndex;
-		short unk;
-		short worldIndex;
-		short meshIndex;
-	};
-
-	union PhysBrushModel
-	{
-		PhysBrushModelPacked packed;
-		PhysBrushModelFields fields;
-	}; assert_sizeof(PhysBrushModel, 8);
-
-	struct PhysWorld // PhysicsWorld
+	struct PhysWorld
 	{
 		const char* name;
-		PhysBrushModel* brushModels;
+		PhysBrushModel* models;
 		dmPolytopeData* polytopeDatas;
 		dmMeshData* meshDatas;
-		PhysWaterVolumeDef* waterVolumeDefs;
-		unsigned int brushModelCount;
-		unsigned int polytopeCount;
-		unsigned int meshDataCount;
-		unsigned int waterVolumeDefCount;
-	}; assert_sizeof(PhysWorld, 0x38);
-
+		PhysWaterVolumeDef* waterVolumes;
+		unsigned int modelsCount;
+		unsigned int polytopeDatasCount;
+		unsigned int meshDatasCount;
+		unsigned int waterVolumesCount;
+	}; static_assert(sizeof(PhysWorld) == 0x38);
 
 	struct PhysConstraint
 	{
@@ -317,10 +236,260 @@ namespace game
 
 	enum MaterialTechniqueType : std::int32_t
 	{
-		TECHNIQUE_UNLIT = 8,
-		TECHNIQUE_EMISSIVE = 9,
-		TECHNIQUE_LIT = 13,
-		TECHNIQUE_WIREFRAME = 53,
+		TECHNIQUE_ZPREPASS = 0x0,
+		TECHNIQUE_ZPREPASS_VELOCITY_RIGID = 0x1,
+		TECHNIQUE_ZPREPASS_VELOCITY_SKINNED = 0x2,
+		TECHNIQUE_ZPREPASS_HIDIR = 0x3,
+		TECHNIQUE_ZPREPASS_HIDIR_VELOCITY_RIGID = 0x4,
+		TECHNIQUE_ZPREPASS_HIDIR_VELOCITY_SKINNED = 0x5,
+		TECHNIQUE_BUILD_SHADOWMAP_DEPTH = 0x6,
+		TECHNIQUE_BUILD_SHADOWMAP_COLOR = 0x7,
+		TECHNIQUE_UNLIT = 0x8,
+		TECHNIQUE_EMISSIVE = 0x9,
+		TECHNIQUE_EMISSIVE_DFOG = 0xA,
+		TECHNIQUE_EMISSIVE_SHADOW = 0xB,
+		TECHNIQUE_EMISSIVE_SHADOW_DFOG = 0xC,
+		TECHNIQUE_LIT = 0xD,
+		TECHNIQUE_LIT_DIR = 0xE,
+		TECHNIQUE_LIT_DIR_SHADOW = 0xF,
+		TECHNIQUE_LIT_SPOT = 0x10,
+		TECHNIQUE_LIT_SPOT_SHADOW = 0x11,
+		TECHNIQUE_LIT_SPOT_SHADOW_CUCOLORIS = 0x12,
+		TECHNIQUE_LIT_OMNI = 0x13,
+		TECHNIQUE_LIT_OMNI_SHADOW = 0x14,
+		TECHNIQUE_LIT_DYNAMIC_BRANCHING_CUCOLORIS = 0x15,
+		TECHNIQUE_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS = 0x16,
+		TECHNIQUE_LIT_DYNAMIC_BRANCHING = 0x17,
+		TECHNIQUE_LIT_SUN_DYNAMIC_BRANCHING = 0x18,
+		TECHNIQUE_LIT_DFOG = 0x19,
+		TECHNIQUE_LIT_DIR_DFOG = 0x1A,
+		TECHNIQUE_LIT_DIR_SHADOW_DFOG = 0x1B,
+		TECHNIQUE_LIT_SPOT_DFOG = 0x1C,
+		TECHNIQUE_LIT_SPOT_SHADOW_DFOG = 0x1D,
+		TECHNIQUE_LIT_SPOT_SHADOW_CUCOLORIS_DFOG = 0x1E,
+		TECHNIQUE_LIT_OMNI_DFOG = 0x1F,
+		TECHNIQUE_LIT_OMNI_SHADOW_DFOG = 0x20,
+		TECHNIQUE_LIT_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0x21,
+		TECHNIQUE_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0x22,
+		TECHNIQUE_LIT_DYNAMIC_BRANCHING_DFOG = 0x23,
+		TECHNIQUE_LIT_SUN_DYNAMIC_BRANCHING_DFOG = 0x24,
+		TECHNIQUE_LIGHT_SPOT = 0x25,
+		TECHNIQUE_LIGHT_OMNI = 0x26,
+		TECHNIQUE_LIGHT_SPOT_SHADOW = 0x27,
+		TECHNIQUE_LIGHT_SPOT_SHADOW_CUCOLORIS = 0x28,
+		TECHNIQUE_LIGHT_SPOT_STENCIL = 0x29,
+		TECHNIQUE_LIGHT_OMNI_STENCIL = 0x2A,
+		TECHNIQUE_LIGHT_SPOT_DFOG = 0x2B,
+		TECHNIQUE_LIGHT_OMNI_DFOG = 0x2C,
+		TECHNIQUE_LIGHT_SPOT_SHADOW_DFOG = 0x2D,
+		TECHNIQUE_LIGHT_SPOT_SHADOW_CUCOLORIS_DFOG = 0x2E,
+		TECHNIQUE_LIGHT_SPOT_STENCIL_DFOG = 0x2F,
+		TECHNIQUE_LIGHT_OMNI_STENCIL_DFOG = 0x30,
+		TECHNIQUE_FAKELIGHT_NORMAL = 0x31,
+		TECHNIQUE_FAKELIGHT_VIEW = 0x32,
+		TECHNIQUE_SUNLIGHT_PREVIEW = 0x33,
+		TECHNIQUE_CASE_TEXTURE = 0x34,
+		TECHNIQUE_WIREFRAME_SOLID = 0x35,
+		TECHNIQUE_WIREFRAME_SHADED = 0x36,
+		TECHNIQUE_THERMAL = 0x37,
+		TECHNIQUE_CTQ = 0x38,
+		TECHNIQUE_VELOCITY_RIGID = 0x39,
+		TECHNIQUE_VELOCITY_SKINNED = 0x3A,
+		TECHNIQUE_DEBUG_TEXDENSITY = 0x3B,
+		TECHNIQUE_DEBUG_PIXELCONST = 0x3C,
+		TECHNIQUE_DEBUG_PIXELCONST_ADD = 0x3D,
+		TECHNIQUE_DEBUG_BUMPMAP = 0x3E,
+		TECHNIQUE_INSTANCED_ZPREPASS = 0x3F,
+		TECHNIQUE_INSTANCED_ZPREPASS_VELOCITY_RIGID = 0x40,
+		TECHNIQUE_INSTANCED_ZPREPASS_VELOCITY_SKINNED = 0x41,
+		TECHNIQUE_INSTANCED_ZPREPASS_HIDIR = 0x42,
+		TECHNIQUE_INSTANCED_ZPREPASS_HIDIR_VELOCITY_RIGID = 0x43,
+		TECHNIQUE_INSTANCED_ZPREPASS_HIDIR_VELOCITY_SKINNED = 0x44,
+		TECHNIQUE_INSTANCED_BUILD_SHADOWMAP_DEPTH = 0x45,
+		TECHNIQUE_INSTANCED_BUILD_SHADOWMAP_COLOR = 0x46,
+		TECHNIQUE_INSTANCED_UNLIT = 0x47,
+		TECHNIQUE_INSTANCED_EMISSIVE = 0x48,
+		TECHNIQUE_INSTANCED_EMISSIVE_DFOG = 0x49,
+		TECHNIQUE_INSTANCED_EMISSIVE_SHADOW = 0x4A,
+		TECHNIQUE_INSTANCED_EMISSIVE_SHADOW_DFOG = 0x4B,
+		TECHNIQUE_INSTANCED_LIT = 0x4C,
+		TECHNIQUE_INSTANCED_LIT_DIR = 0x4D,
+		TECHNIQUE_INSTANCED_LIT_DIR_SHADOW = 0x4E,
+		TECHNIQUE_INSTANCED_LIT_SPOT = 0x4F,
+		TECHNIQUE_INSTANCED_LIT_SPOT_SHADOW = 0x50,
+		TECHNIQUE_INSTANCED_LIT_SPOT_SHADOW_CUCOLORIS = 0x51,
+		TECHNIQUE_INSTANCED_LIT_OMNI = 0x52,
+		TECHNIQUE_INSTANCED_LIT_OMNI_SHADOW = 0x53,
+		TECHNIQUE_INSTANCED_LIT_DYNAMIC_BRANCHING_CUCOLORIS = 0x54,
+		TECHNIQUE_INSTANCED_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS = 0x55,
+		TECHNIQUE_INSTANCED_LIT_DYNAMIC_BRANCHING = 0x56,
+		TECHNIQUE_INSTANCED_LIT_SUN_DYNAMIC_BRANCHING = 0x57,
+		TECHNIQUE_INSTANCED_LIT_DFOG = 0x58,
+		TECHNIQUE_INSTANCED_LIT_DIR_DFOG = 0x59,
+		TECHNIQUE_INSTANCED_LIT_DIR_SHADOW_DFOG = 0x5A,
+		TECHNIQUE_INSTANCED_LIT_SPOT_DFOG = 0x5B,
+		TECHNIQUE_INSTANCED_LIT_SPOT_SHADOW_DFOG = 0x5C,
+		TECHNIQUE_INSTANCED_LIT_SPOT_SHADOW_CUCOLORIS_DFOG = 0x5D,
+		TECHNIQUE_INSTANCED_LIT_OMNI_DFOG = 0x5E,
+		TECHNIQUE_INSTANCED_LIT_OMNI_SHADOW_DFOG = 0x5F,
+		TECHNIQUE_INSTANCED_LIT_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0x60,
+		TECHNIQUE_INSTANCED_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0x61,
+		TECHNIQUE_INSTANCED_LIT_DYNAMIC_BRANCHING_DFOG = 0x62,
+		TECHNIQUE_INSTANCED_LIT_SUN_DYNAMIC_BRANCHING_DFOG = 0x63,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT = 0x64,
+		TECHNIQUE_INSTANCED_LIGHT_OMNI = 0x65,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_SHADOW = 0x66,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_SHADOW_CUCOLORIS = 0x67,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_STENCIL = 0x68,
+		TECHNIQUE_INSTANCED_LIGHT_OMNI_STENCIL = 0x69,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_DFOG = 0x6A,
+		TECHNIQUE_INSTANCED_LIGHT_OMNI_DFOG = 0x6B,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_SHADOW_DFOG = 0x6C,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_SHADOW_CUCOLORIS_DFOG = 0x6D,
+		TECHNIQUE_INSTANCED_LIGHT_SPOT_STENCIL_DFOG = 0x6E,
+		TECHNIQUE_INSTANCED_LIGHT_OMNI_STENCIL_DFOG = 0x6F,
+		TECHNIQUE_INSTANCED_FAKELIGHT_NORMAL = 0x70,
+		TECHNIQUE_INSTANCED_FAKELIGHT_VIEW = 0x71,
+		TECHNIQUE_INSTANCED_SUNLIGHT_PREVIEW = 0x72,
+		TECHNIQUE_INSTANCED_CASE_TEXTURE = 0x73,
+		TECHNIQUE_INSTANCED_WIREFRAME_SOLID = 0x74,
+		TECHNIQUE_INSTANCED_WIREFRAME_SHADED = 0x75,
+		TECHNIQUE_INSTANCED_THERMAL = 0x76,
+		TECHNIQUE_INSTANCED_CTQ = 0x77,
+		TECHNIQUE_INSTANCED_VELOCITY_RIGID = 0x78,
+		TECHNIQUE_INSTANCED_VELOCITY_SKINNED = 0x79,
+		TECHNIQUE_INSTANCED_DEBUG_TEXDENSITY = 0x7A,
+		TECHNIQUE_INSTANCED_DEBUG_PIXELCONST = 0x7B,
+		TECHNIQUE_INSTANCED_DEBUG_PIXELCONST_ADD = 0x7C,
+		TECHNIQUE_INSTANCED_DEBUG_BUMPMAP = 0x7D,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS = 0x7E,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS_VELOCITY_RIGID = 0x7F,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS_VELOCITY_SKINNED = 0x80,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS_HIDIR = 0x81,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS_HIDIR_VELOCITY_RIGID = 0x82,
+		TECHNIQUE_SUBDIV_PATCH_ZPREPASS_HIDIR_VELOCITY_SKINNED = 0x83,
+		TECHNIQUE_SUBDIV_PATCH_BUILD_SHADOWMAP_DEPTH = 0x84,
+		TECHNIQUE_SUBDIV_PATCH_BUILD_SHADOWMAP_COLOR = 0x85,
+		TECHNIQUE_SUBDIV_PATCH_UNLIT = 0x86,
+		TECHNIQUE_SUBDIV_PATCH_EMISSIVE = 0x87,
+		TECHNIQUE_SUBDIV_PATCH_EMISSIVE_DFOG = 0x88,
+		TECHNIQUE_SUBDIV_PATCH_EMISSIVE_SHADOW = 0x89,
+		TECHNIQUE_SUBDIV_PATCH_EMISSIVE_SHADOW_DFOG = 0x8A,
+		TECHNIQUE_SUBDIV_PATCH_LIT = 0x8B,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DIR = 0x8C,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DIR_SHADOW = 0x8D,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT = 0x8E,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT_SHADOW = 0x8F,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT_SHADOW_CUCOLORIS = 0x90,
+		TECHNIQUE_SUBDIV_PATCH_LIT_OMNI = 0x91,
+		TECHNIQUE_SUBDIV_PATCH_LIT_OMNI_SHADOW = 0x92,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DYNAMIC_BRANCHING_CUCOLORIS = 0x93,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS = 0x94,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DYNAMIC_BRANCHING = 0x95,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SUN_DYNAMIC_BRANCHING = 0x96,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DFOG = 0x97,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DIR_DFOG = 0x98,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DIR_SHADOW_DFOG = 0x99,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT_DFOG = 0x9A,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT_SHADOW_DFOG = 0x9B,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SPOT_SHADOW_CUCOLORIS_DFOG = 0x9C,
+		TECHNIQUE_SUBDIV_PATCH_LIT_OMNI_DFOG = 0x9D,
+		TECHNIQUE_SUBDIV_PATCH_LIT_OMNI_SHADOW_DFOG = 0x9E,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0x9F,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0xA0,
+		TECHNIQUE_SUBDIV_PATCH_LIT_DYNAMIC_BRANCHING_DFOG = 0xA1,
+		TECHNIQUE_SUBDIV_PATCH_LIT_SUN_DYNAMIC_BRANCHING_DFOG = 0xA2,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT = 0xA3,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_OMNI = 0xA4,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_SHADOW = 0xA5,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_SHADOW_CUCOLORIS = 0xA6,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_STENCIL = 0xA7,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_OMNI_STENCIL = 0xA8,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_DFOG = 0xA9,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_OMNI_DFOG = 0xAA,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_SHADOW_DFOG = 0xAB,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_SHADOW_CUCOLORIS_DFOG = 0xAC,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_SPOT_STENCIL_DFOG = 0xAD,
+		TECHNIQUE_SUBDIV_PATCH_LIGHT_OMNI_STENCIL_DFOG = 0xAE,
+		TECHNIQUE_SUBDIV_PATCH_FAKELIGHT_NORMAL = 0xAF,
+		TECHNIQUE_SUBDIV_PATCH_FAKELIGHT_VIEW = 0xB0,
+		TECHNIQUE_SUBDIV_PATCH_SUNLIGHT_PREVIEW = 0xB1,
+		TECHNIQUE_SUBDIV_PATCH_CASE_TEXTURE = 0xB2,
+		TECHNIQUE_SUBDIV_PATCH_WIREFRAME_SOLID = 0xB3,
+		TECHNIQUE_SUBDIV_PATCH_WIREFRAME_SHADED = 0xB4,
+		TECHNIQUE_SUBDIV_PATCH_THERMAL = 0xB5,
+		TECHNIQUE_SUBDIV_PATCH_CTQ = 0xB6,
+		TECHNIQUE_SUBDIV_PATCH_VELOCITY_RIGID = 0xB7,
+		TECHNIQUE_SUBDIV_PATCH_VELOCITY_SKINNED = 0xB8,
+		TECHNIQUE_SUBDIV_PATCH_DEBUG_TEXDENSITY = 0xB9,
+		TECHNIQUE_SUBDIV_PATCH_DEBUG_PIXELCONST = 0xBA,
+		TECHNIQUE_SUBDIV_PATCH_DEBUG_PIXELCONST_ADD = 0xBB,
+		TECHNIQUE_SUBDIV_PATCH_DEBUG_BUMPMAP = 0xBC,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS = 0xBD,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS_VELOCITY_RIGID = 0xBE,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS_VELOCITY_SKINNED = 0xBF,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS_HIDIR = 0xC0,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS_HIDIR_VELOCITY_RIGID = 0xC1,
+		TECHNIQUE_NO_DISPLACEMENT_ZPREPASS_HIDIR_VELOCITY_SKINNED = 0xC2,
+		TECHNIQUE_NO_DISPLACEMENT_BUILD_SHADOWMAP_DEPTH = 0xC3,
+		TECHNIQUE_NO_DISPLACEMENT_BUILD_SHADOWMAP_COLOR = 0xC4,
+		TECHNIQUE_NO_DISPLACEMENT_UNLIT = 0xC5,
+		TECHNIQUE_NO_DISPLACEMENT_EMISSIVE = 0xC6,
+		TECHNIQUE_NO_DISPLACEMENT_EMISSIVE_DFOG = 0xC7,
+		TECHNIQUE_NO_DISPLACEMENT_EMISSIVE_SHADOW = 0xC8,
+		TECHNIQUE_NO_DISPLACEMENT_EMISSIVE_SHADOW_DFOG = 0xC9,
+		TECHNIQUE_NO_DISPLACEMENT_LIT = 0xCA,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DIR = 0xCB,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DIR_SHADOW = 0xCC,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT = 0xCD,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT_SHADOW = 0xCE,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT_SHADOW_CUCOLORIS = 0xCF,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_OMNI = 0xD0,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_OMNI_SHADOW = 0xD1,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DYNAMIC_BRANCHING_CUCOLORIS = 0xD2,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS = 0xD3,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DYNAMIC_BRANCHING = 0xD4,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SUN_DYNAMIC_BRANCHING = 0xD5,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DFOG = 0xD6,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DIR_DFOG = 0xD7,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DIR_SHADOW_DFOG = 0xD8,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT_DFOG = 0xD9,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT_SHADOW_DFOG = 0xDA,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SPOT_SHADOW_CUCOLORIS_DFOG = 0xDB,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_OMNI_DFOG = 0xDC,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_OMNI_SHADOW_DFOG = 0xDD,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0xDE,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SUN_DYNAMIC_BRANCHING_CUCOLORIS_DFOG = 0xDF,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_DYNAMIC_BRANCHING_DFOG = 0xE0,
+		TECHNIQUE_NO_DISPLACEMENT_LIT_SUN_DYNAMIC_BRANCHING_DFOG = 0xE1,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT = 0xE2,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_OMNI = 0xE3,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_SHADOW = 0xE4,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_SHADOW_CUCOLORIS = 0xE5,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_STENCIL = 0xE6,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_OMNI_STENCIL = 0xE7,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_DFOG = 0xE8,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_OMNI_DFOG = 0xE9,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_SHADOW_DFOG = 0xEA,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_SHADOW_CUCOLORIS_DFOG = 0xEB,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_SPOT_STENCIL_DFOG = 0xEC,
+		TECHNIQUE_NO_DISPLACEMENT_LIGHT_OMNI_STENCIL_DFOG = 0xED,
+		TECHNIQUE_NO_DISPLACEMENT_FAKELIGHT_NORMAL = 0xEE,
+		TECHNIQUE_NO_DISPLACEMENT_FAKELIGHT_VIEW = 0xEF,
+		TECHNIQUE_NO_DISPLACEMENT_SUNLIGHT_PREVIEW = 0xF0,
+		TECHNIQUE_NO_DISPLACEMENT_CASE_TEXTURE = 0xF1,
+		TECHNIQUE_NO_DISPLACEMENT_WIREFRAME_SOLID = 0xF2,
+		TECHNIQUE_NO_DISPLACEMENT_WIREFRAME_SHADED = 0xF3,
+		TECHNIQUE_NO_DISPLACEMENT_THERMAL = 0xF4,
+		TECHNIQUE_NO_DISPLACEMENT_CTQ = 0xF5,
+		TECHNIQUE_NO_DISPLACEMENT_VELOCITY_RIGID = 0xF6,
+		TECHNIQUE_NO_DISPLACEMENT_VELOCITY_SKINNED = 0xF7,
+		TECHNIQUE_NO_DISPLACEMENT_DEBUG_TEXDENSITY = 0xF8,
+		TECHNIQUE_NO_DISPLACEMENT_DEBUG_PIXELCONST = 0xF9,
+		TECHNIQUE_NO_DISPLACEMENT_DEBUG_PIXELCONST_ADD = 0xFA,
+		TECHNIQUE_NO_DISPLACEMENT_DEBUG_BUMPMAP = 0xFB,
+
+		TECHNIQUE_COUNT = 252,
 	};
 
 	struct GfxComputeShaderLoadDef
@@ -1130,7 +1299,7 @@ namespace game
 		MaterialTechniqueSet* techniqueSet;
 		MaterialTextureDef* textureTable;
 		MaterialConstantDef* constantTable;
-		GfxStateBits* stateBitsTable; 
+		GfxStateBits* stateBitsTable;
 		unsigned char constantBufferIndex[252];
 		char __pad0[4];
 		MaterialConstantBufferDef* constantBufferTable;
@@ -1368,7 +1537,7 @@ namespace game
 	{
 		bool isDefault;
 		const char* name;
-		int unknown;
+		unsigned char orientation;
 		ChannelMap channelMaps[2][2];
 	}; static_assert(sizeof(SpeakerMap) == 0x148);
 
@@ -1404,14 +1573,16 @@ namespace game
 		const char* secondaryAliasName;
 		const char* chainAliasName;
 		SoundFile* soundFile;
-		const char* mixerGroup;
-		short poly;
-		short polyGlobal;
+		const char* squelchName;
+		short polyCount;
+		short polyGlobalCount;
 		char polyEntityType;
 		char polyGlobalType;
-		char dspBusIndex;
-		char priority;
-		char __pad0[12]; // unknown
+		unsigned char dspBusIndex;
+		unsigned char priority;
+		int playCount;
+		int polyClass;
+		int unk;
 		float volMin;
 		float volMax;
 		short volModIndex;
@@ -1426,41 +1597,42 @@ namespace game
 		float slavePercentage;
 		char playbackPercentage;
 		float probability;
-		char u1; // value: 0-4
+		unsigned char variationType; // value: 0-4
 		SndContext* sndContext;
 		int sequence;
 		float lfePercentage;
 		float centerPercentage;
 		int startDelay;
-		SndCurve* sndCurve;
+		SndCurve* volumeFalloffCurve;
 		float envelopMin;
 		float envelopMax;
 		SndCurve* lpfCurve;
 		SndCurve* hpfCurve;
 		SndCurve* reverbSendCurve;
 		SpeakerMap* speakerMap;
-		float reverbWetMixOverride;
-		float reverbMultiplier;
-		float smartPanDistance2d;
-		float smartPanDistance3d;
-		float smartPanAttenuation3d;
-		float envelopPercentage;
-		short stereo3dAngle;
+		float wetMixOverride;
+		float focusPercentage;
+		float smartpanDistance2d;
+		float smartpanDistance3d;
+		float smartpanAttenuation3d;
+		float minSmartpan2dContribution;
+		short stereo3DAngle;
 		//char __padding4[2]; // padding
-		float stereo3dStart;
-		float stereo3dEnd;
+		float stereo3DStart;
+		float stereo3DEnd;
 		unsigned char allowDoppler;
 		//char __padding5[3]; // padding
 		DopplerPreset* dopplerPreset;
-		float u2;
-		//char __padding6[4]; // padding
+		float threshold;
+		int lockedLoopTime;
 	};
 
 	static_assert(sizeof(snd_alias_t) == 256);
 
 	struct snd_alias_context_list
 	{
-		short unk;
+		unsigned char aliasOffset;
+		unsigned char count;
 	};
 
 	struct snd_alias_list_t
@@ -1530,13 +1702,13 @@ namespace game
 		unsigned int triggerStringLength;
 		char* triggerString;
 		short* visionSetTriggers;
-		short* blendLookup;
 		short* unk1;
+		short* unk2;
 		short* triggerType;
 		vec3_t* origins;
 		float* scriptDelay;
 		short* audioTriggers;
-		short* unk2;
+		short* blendLookup;
 		short* unk3;
 		short* unk4;
 		short* unk5;
@@ -2128,6 +2300,72 @@ namespace game
 		FX_ELEM_TYPE_VECTORFIELD = 17,
 	};
 
+	enum FxElemLitType : std::uint8_t
+	{
+		FX_ELEM_LIT_TYPE_NONE = 0x0,
+		FX_ELEM_LIT_TYPE_LIGHTGRID_SPAWN_SINGLE = 0x1,
+		FX_ELEM_LIT_TYPE_LIGHTGRID_FRAME_SINGLE = 0x2,
+		FX_ELEM_LIT_TYPE_LIGHTGRID_FRAME_SPRITE = 0x3,
+		FX_ELEM_LIT_TYPE_LIGHTGRID_FRAME_VERTEX = 0x4,
+		FX_ELEM_LIT_TYPE_COUNT = 0x5,
+	};
+
+	enum FxElemDefFlags : std::uint32_t
+	{
+		FX_ELEM_SPAWN_RELATIVE_TO_EFFECT = 0x2,
+		FX_ELEM_SPAWN_FRUSTUM_CULL = 0x4,
+		FX_ELEM_RUNNER_USES_RAND_ROT = 0x8,
+		FX_ELEM_SPAWN_OFFSET_NONE = 0x0,
+		FX_ELEM_SPAWN_OFFSET_SPHERE = 0x10,
+		FX_ELEM_SPAWN_OFFSET_CYLINDER = 0x20,
+		FX_ELEM_SPAWN_OFFSET_MASK = 0x30,
+		FX_ELEM_RUN_RELATIVE_TO_WORLD = 0x0,
+		FX_ELEM_RUN_RELATIVE_TO_SPAWN = 0x40,
+		FX_ELEM_RUN_RELATIVE_TO_EFFECT = 0x80,
+		FX_ELEM_RUN_RELATIVE_TO_OFFSET = 0xC0,
+		FX_ELEM_RUN_RELATIVE_TO_CAMERA = 0x100,
+		FX_ELEM_RUN_MASK = 0x1C0,
+		FX_ELEM_DIE_ON_TOUCH = 0x200,
+		FX_ELEM_DRAW_PAST_FOG = 0x400,
+		FX_ELEM_DRAW_WITH_VIEWMODEL = 0x800,
+		FX_ELEM_BLOCK_SIGHT = 0x1000,
+		FX_ELEM_DRAW_IN_THERMAL_VIEW_ONLY = 0x2000,
+		FX_ELEM_TRAIL_ORIENT_BY_VELOCITY = 0x4000,
+		FX_ELEM_EMIT_BOLT = 0x80000000,
+		FX_ELEM_EMIT_ORIENT_BY_ELEM = 0x8000,
+		FX_ELEM_USE_OCCLUSION_QUERY = 0x10000,
+		FX_ELEM_USE_CAST_SHADOW = 0x20000,
+		FX_ELEM_NODRAW_IN_THERMAL_VIEW = 0x40000,
+		FX_ELEM_THERMAL_MASK = 0x42000,
+		FX_ELEM_SPAWN_IMPACT_FX_WITH_SURFACE_NAME = 0x80000,
+		FX_ELEM_RECEIVE_DYNAMIC_LIGHT = 0x100000,
+		FX_ELEM_VOLUMETRIC_TRAIL = 0x200000,
+		FX_ELEM_USE_COLLISION = 0x400000,
+		FX_ELEM_USE_VECTORFIELDS = 0x800000,
+		FX_ELEM_HAS_VELOCITY_GRAPH_LOCAL = 0x1000000,
+		FX_ELEM_HAS_VELOCITY_GRAPH_WORLD = 0x2000000,
+		FX_ELEM_HAS_GRAVITY = 0x4000000,
+		FX_ELEM_USE_MODEL_PHYSICS = 0x8000000,
+		FX_ELEM_NONUNIFORM_SCALE = 0x10000000,
+		FX_ELEM_CLOUD_SHAPE_CUBE = 0x0,
+		FX_ELEM_CLOUD_SHAPE_SPHERE_LARGE = 0x20000000,
+		FX_ELEM_CLOUD_SHAPE_SPHERE_MEDIUM = 0x40000000,
+		FX_ELEM_CLOUD_SHAPE_SPHERE_SMALL = 0x60000000,
+		FX_ELEM_CLOUD_SHAPE_MASK = 0x60000000,
+		FX_ELEM_FOUNTAIN_DISABLE_COLLISION = 0x80000000,
+	};
+
+	enum FxElemDefExtraFlags : std::uint32_t
+	{
+		FX_ELEM2_BILLBOARD_FACING_CAMERA_PERPENDICULAR = 0x1,
+		FX_ELEM2_BILLBOARD_FACING_PLAYER = 0x2,
+		FX_ELEM2_BILLBOARD_FACING_MASK = 0x3,
+		FX_ELEM2_EMIT_TRAILS = 0x4,
+		FX_ELEM2_USE_EMISSIVE_DRAW = 0x8,
+		FX_ELEM2_USE_EFFECT_MODEL_COLOR = 0x20,
+		FX_ELEM2_DECAL_EXPONENTIAL_FADE_OUT = 0x80,
+	};
+
 	struct FxFloatRange
 	{
 		float base;
@@ -2185,24 +2423,24 @@ namespace game
 	{
 		FxElemVec3Range velocity;
 		FxElemVec3Range totalDelta;
-		FxElemVec3Range unk_range;
 	};
 
 	struct FxElemVelStateSample
 	{
 		FxElemVelStateInFrame local;
 		FxElemVelStateInFrame world;
+		FxElemVelStateInFrame unk;
 	}; static_assert(sizeof(FxElemVelStateSample) == 144);
 
 	struct FxElemVisualState
 	{
 		float color[4];
-		float pad1[3];
+		float emissiveScale[3];
 		float rotationDelta;
 		float rotationTotal;
 		float size[2];
 		float scale;
-		float pad2[2];
+		float pivot[2];
 	};
 
 	static_assert(sizeof(FxElemVisualState) == 56);
@@ -2243,7 +2481,7 @@ namespace game
 		float pos[2];
 		float normal[2];
 		float texCoord[2];
-		char __pad0[8];
+		float radialNormal[2];
 	}; static_assert(sizeof(FxTrailVertex) == 32);
 
 	struct FxTrailDef
@@ -2283,18 +2521,27 @@ namespace game
 
 	struct FxSpotLightDef
 	{
-		float fovInnerFraction;
-		float startRadius;
-		float endRadius;
+		float halfFovOuter;
+		float halfFovInner;
+		float radius;
 		float brightness;
 		float maxLength;
 		int exponent;
-		char __pad0[24];
+		float nearClip;
+		float bulbRadius;
+		float bulbLength;
+		float fadeOffsetRt[2];
+		char unk1;
+		char opl;
+		char unk2;
+		char unused;
 	}; static_assert(sizeof(FxSpotLightDef) == 0x30);
 
 	struct FxOmniLightDef
 	{
-		char __pad0[16];
+		float bulbRadius;
+		float bulbLength;
+		float fadeOffsetRt[2];
 	}; static_assert(sizeof(FxOmniLightDef) == 0x10);
 
 	struct FxFlareDef
@@ -2375,8 +2622,11 @@ namespace game
 		unsigned char lightingFrac;
 		unsigned char useItemClip;
 		unsigned char fadeInfo;
+		unsigned char fadeOutInfo;
 		int randomSeed;
-		float unk_floats[4];
+		float emissiveScaleScale;
+		float hdrLightingFrac;
+		float shadowDensityScale;
 	}; static_assert(sizeof(FxElemDef) == 0x140);
 
 	static_assert(offsetof(FxElemDef, spawnOrigin) == 60);
@@ -2616,6 +2866,12 @@ namespace game
 	{
 		unsigned char array[4];
 		unsigned int packed;
+	};
+
+	union GfxColorHdr
+	{
+		unsigned short array[4];
+		unsigned __int64 packed;
 	};
 
 	struct GfxPackedVertex
@@ -3028,41 +3284,41 @@ namespace game
 
 	enum weapType_t : std::int32_t
 	{
-		WEAPCLASS_NONE = 0x0,
-		WEAPCLASS_BULLET = 0x1,
-		WEAPCLASS_GRENADE = 0x2,
-		WEAPCLASS_PROJECTILE = 0x3,
-		WEAPCLASS_RIOTSHIELD = 0x4,
-		WEAPCLASS_ENERGY = 0x5,
-		WEAPCLASS_NUM = 0x6,
+		WEAPTYPE_NONE = 0x0,
+		WEAPTYPE_BULLET = 0x1,
+		WEAPTYPE_GRENADE = 0x2,
+		WEAPTYPE_PROJECTILE = 0x3,
+		WEAPTYPE_RIOTSHIELD = 0x4,
+		WEAPTYPE_ENERGY = 0x5,
+		WEAPTYPE_NUM = 0x6,
 	};
 
 	enum weapClass_t : std::int32_t
 	{
-		WEAPTYPE_RIFLE = 0x1,
-		WEAPTYPE_SNIPER = 0x2,
-		WEAPTYPE_MG = 0x3,
-		WEAPTYPE_SMG = 0x4,
-		WEAPTYPE_SPREAD = 0x5,
-		WEAPTYPE_PISTOL = 0x6,
-		WEAPTYPE_ROCKETLAUNCHER = 0x7,
-		WEAPTYPE_TURRET = 0x8,
-		WEAPTYPE_THROWINGKNIFE = 0x9,
-		WEAPTYPE_NON_PLAYER = 0xA,
-		WEAPTYPE_ITEM = 0xB,
-		WEAPTYPE_CONE = 0xC,
-		WEAPTYPE_BEAM = 0xD,
-		WEAPTYPE_SHIELD = 0xE,
-		WEAPTYPE_HOVER = 0xF,
-		WEAPTYPE_CLOAK = 0x10,
-		WEAPTYPE_PING = 0x11,
-		WEAPTYPE_REPULSOR = 0x12,
-		WEAPTYPE_ADRENALINE = 0x13,
-		WEAPTYPE_HEALTH = 0x14,
-		WEAPTYPE_MUTE = 0x15,
-		WEAPTYPE_UNDERWATER = 0x16,
-		WEAPTYPE_BALL = 0x17,
-		WEAPTYPE_NUM = 0x18,
+		WEAPCLASS_RIFLE = 0x1,
+		WEAPCLASS_SNIPER = 0x2,
+		WEAPCLASS_MG = 0x3,
+		WEAPCLASS_SMG = 0x4,
+		WEAPCLASS_SPREAD = 0x5,
+		WEAPCLASS_PISTOL = 0x6,
+		WEAPCLASS_ROCKETLAUNCHER = 0x7,
+		WEAPCLASS_TURRET = 0x8,
+		WEAPCLASS_THROWINGKNIFE = 0x9,
+		WEAPCLASS_NON_PLAYER = 0xA,
+		WEAPCLASS_ITEM = 0xB,
+		WEAPCLASS_CONE = 0xC,
+		WEAPCLASS_BEAM = 0xD,
+		WEAPCLASS_SHIELD = 0xE,
+		WEAPCLASS_HOVER = 0xF,
+		WEAPCLASS_CLOAK = 0x10,
+		WEAPCLASS_PING = 0x11,
+		WEAPCLASS_REPULSOR = 0x12,
+		WEAPCLASS_ADRENALINE = 0x13,
+		WEAPCLASS_HEALTH = 0x14,
+		WEAPCLASS_MUTE = 0x15,
+		WEAPCLASS_UNDERWATER = 0x16,
+		WEAPCLASS_BALL = 0x17,
+		WEAPCLASS_NUM = 0x18,
 	};
 
 	enum weapInventoryType_t : std::int32_t
@@ -3325,11 +3581,26 @@ namespace game
 		const char* name;
 		Material* laserMaterial;
 		Material* laserLightMaterial;
-		FxEffectDef* effect;
-		LaserDef* altLaser;
-		scr_string_t value;
-		float float_values[17];
-		char char_values[4];
+		FxEffectDef* laserEndEffect;
+		LaserDef* friendlyTeamLaser;
+		scr_string_t laserTag;
+		float hdrColorScale[4];
+		float laserLightHdrColorScale[4];
+		float range;
+		float radius;
+		float endOffset;
+		float flarePct;
+		float texCoordOffset;
+		float laserLightRadius;
+		float laserLightBeginOffset;
+		float laserLightEndOffset;
+		float laserLightBodyTweak;
+		bool ownerOnly;
+		bool nightvisionOnly;
+		bool useHalfCylinderGeometry;
+		bool laserLight;
+		bool laserLightNvgOnly;
+		bool laserSightLaser;
 	}; static_assert(sizeof(LaserDef) == 120);
 
 	struct TurretHydraulicSettings
@@ -4123,7 +4394,7 @@ namespace game
 		float explosionReactiveMotionParts[5]; // 
 		char __pad_unknown[12]; //
 	}; static_assert(sizeof(WeaponDef) == 0xF08);
-	
+
 	static_assert(offsetof(WeaponDef, viewFlashEffect) == 248);
 	static_assert(offsetof(WeaponDef, usesSniperScope) == 3791);
 	static_assert(offsetof(WeaponDef, adsHideWeapon) == 3787);
@@ -4859,12 +5130,13 @@ namespace game
 		ScriptableInstanceTargetData* targetData;
 		float origin[3];
 		float angles[3];
-		char __pad0[24];
+		float startOrigin[3];
+		float startAngles[3];
 		scr_string_t targetname;
 		unsigned short preBrushModel;
 		unsigned short postBrushModel;
 		unsigned char flags;
-		unsigned char targetDataCount;
+		unsigned char targetCount;
 		char __pad1[6];
 		XModel* currentModel;
 		ScriptableInstancePartState* partStates;
@@ -4901,40 +5173,44 @@ namespace game
 
 	struct sphere_tree_t
 	{
-		char __pad0[8];
-		int unk_count;
-		char __pad1[4];
-		unsigned int* unk;
-		char __pad2[8];
-	}; assert_sizeof(sphere_tree_t, 32);
-	assert_offsetof(sphere_tree_t, unk_count, 8);
-	assert_offsetof(sphere_tree_t, unk, 16);
+		int axis;
+		float dist;
+		int numObjects;
+		unsigned int* objIdx;
+		unsigned int child[2];
+	};
 
 	struct sphere_tree_obj_t
 	{
-		char __pad0[20];
-	}; assert_sizeof(sphere_tree_obj_t, 20);
+		float origin[3];
+		float radius;
+		unsigned int object;
+	};
 
 	struct sphere_tree_data_t
 	{
-		int sphereTreeCount;
-		sphere_tree_t* sphereTree;
-		int sphereTreeObjCount;
-		sphere_tree_obj_t* sphereTreeObj;
-	}; assert_sizeof(sphere_tree_data_t, 32);
+		int treeCount;
+		sphere_tree_t* tree;
+		int numObjects;
+		sphere_tree_obj_t* objects;
+	};
 
 	struct grapple_magnet_t
 	{
-		char __pad0[40];
-	}; assert_sizeof(grapple_magnet_t, 40);
+		unsigned int flags;
+		float origin[3];
+		float normal[3];
+		float length;
+		int next;
+		int prev;
+	};
 
 	struct grapple_data_t
 	{
-		sphere_tree_data_t sphereTreeData;
-		grapple_magnet_t* magnet;
+		sphere_tree_data_t magnetTree;
+		grapple_magnet_t* magnets;
 		unsigned int magnetCount;
-		char __pad0[4];
-	}; assert_sizeof(grapple_data_t, 48);
+	};
 
 	struct /*alignas(128)*/ clipMap_t
 	{
@@ -4960,7 +5236,7 @@ namespace game
 		unsigned int dynEntAnchorCount; // 464
 		scr_string_t* dynEntAnchorNames; // 472
 		ScriptableMapEnts scriptableMapEnts; // 480
-		grapple_data_t grappleData; // 528
+		grapple_data_t grapple; // 528
 		unsigned int checksum;
 		char __pad0[60]; // alignment padding
 	}; assert_sizeof(clipMap_t, 0x280);
@@ -4971,7 +5247,7 @@ namespace game
 	assert_offsetof(clipMap_t, cmodels, 312);
 	assert_offsetof(clipMap_t, stageTrigger, 344);
 	assert_offsetof(clipMap_t, scriptableMapEnts, 480);
-	assert_offsetof(clipMap_t, grappleData, 528);
+	assert_offsetof(clipMap_t, grapple, 528);
 
 
 	enum GfxLightType : std::uint8_t
@@ -4993,9 +5269,9 @@ namespace game
 	{
 		GfxLightType type; // 0
 		unsigned char canUseShadowMap; // 1
-		unsigned char needsDynamicShadows; // 2
+		unsigned char physicallyBased; // 2
 		unsigned char exponent; // 3
-		unsigned char isVolumetric; // 4
+		unsigned char lightingState; // 4
 		char __pad0[3];
 		float color[3]; // 8 12 16
 		float color2[3]; // 8 12 16
@@ -5017,8 +5293,8 @@ namespace game
 		float cucScaleVector[2]; // 120 124
 		float cucTransVector[2]; // 128 132
 		const char* defName; // 136
-	}; 
-	
+	};
+
 	assert_sizeof(ComPrimaryLight, 160);
 	assert_offsetof(ComPrimaryLight, defName, 152);
 	assert_offsetof(ComPrimaryLight, origin, 56);
@@ -5091,7 +5367,8 @@ namespace game
 		snd_alias_list_t* damagedSound;
 		snd_alias_list_t* destroyedSound;
 		snd_alias_list_t* destroyedQuietSound;
-		char __pad[8];
+		float invHighMipRadius;
+		float shatteredInvHighMipRadius;
 		int numCrackRings;
 		bool isOpaque;
 	}; assert_sizeof(FxGlassDef, 120);
@@ -5329,19 +5606,20 @@ namespace game
 
 	struct GfxPortalGroupInfo
 	{
-		char __pad0[4];
+		unsigned short cellIndex;
+		unsigned short portalIndex;
 	};
 
 	struct GfxPortalGroup
 	{
-		const char* group;
-		GfxPortalGroupInfo* info;
+		const char* targetName;
+		GfxPortalGroupInfo* gfxPortalArray;
 		char __pad0[8];
-		int infoCount;
-	}; 
-	
+		unsigned short numPortals;
+	};
+
 	assert_sizeof(GfxPortalGroup, 32);
-	assert_offsetof(GfxPortalGroup, infoCount, 24);
+	assert_offsetof(GfxPortalGroup, numPortals, 24);
 
 	struct GfxReflectionProbeVolume
 	{
@@ -5413,6 +5691,15 @@ namespace game
 		char __pad0[16];
 	}; assert_sizeof(GfxDisplacementParms, 16);
 
+	struct GfxLightmapParameters
+	{
+		int lightmapWidthPrimary;
+		int lightmapHeightPrimary;
+		int lightmapWidthSecondary;
+		int lightmapHeightSecondary;
+		int lightmapModelUnitsPerTexel;
+	};
+
 	struct GfxWorldDraw
 	{
 		unsigned int reflectionProbeCount;
@@ -5428,9 +5715,7 @@ namespace game
 		GfxRawTexture* lightmapSecondaryTextures;
 		GfxImage* lightmapOverridePrimary;
 		GfxImage* lightmapOverrideSecondary;
-		int u1[2];
-		int u2[2];
-		int u3;
+		GfxLightmapParameters lightmapParameters;
 		unsigned int trisType;
 		unsigned int vertexCount;
 		GfxWorldVertexData vd;
@@ -5745,26 +6030,24 @@ namespace game
 
 	struct GfxStaticModelLightmapInfo
 	{
-		unsigned short smodelCacheIndex[4];
-		unsigned short unk1;
-		unsigned short unk2;
-		float unk3;
-		int unk4;
-		int unk5;
-		/*
-		unsigned short V0[4];
-		unsigned short V1[4];
-		unsigned short V2[4];
-		*/
+		float offset[2];
+		float scale[2];
+		unsigned int lightmapIndex;
 	};
 
-	struct GfxStaticModelLighting
+	struct GfxStaticModelAmbientLightingInfo
 	{
-		union
-		{
-			GfxStaticModelVertexLightingInfo info;
-			GfxStaticModelLightmapInfo info2;
-		};
+		GfxColorHdr groundLighting;
+		unsigned int colorIndex;
+		float primaryLightWeight;
+	};
+
+	union GfxStaticModelLighting
+	{
+		GfxStaticModelAmbientLightingInfo ambientLightingInfo;
+		GfxStaticModelVertexLightingInfo vertexLightingInfo;
+		GfxStaticModelLightmapInfo modelLightmapInfo;
+		char pad[24];
 	}; assert_sizeof(GfxStaticModelLighting, 24);
 
 	struct GfxSubdivVertexLightingInfo
@@ -5826,7 +6109,7 @@ namespace game
 		GfxStaticModelDrawInst* smodelDrawInsts; // 688
 		unsigned int* unknownSModelVisData1; // 696
 		unsigned int* unknownSModelVisData2; // 704
-		GfxStaticModelLighting* smodelLighting; // 712 (array)
+		GfxStaticModelLighting* smodelLightingInsts; // 712 (array)
 		GfxSubdivVertexLightingInfo* subdivVertexLighting; // 720 (array)
 		GfxDrawSurf* surfaceMaterials; // 728
 		unsigned int* surfaceCastsSunShadow; // 736
@@ -5886,10 +6169,10 @@ namespace game
 
 	struct GfxBuildInfo
 	{
-		const char* args0;
-		const char* args1;
-		const char* buildStartTime;
-		const char* buildEndTime;
+		const char* bspCommandline;
+		const char* lightCommandline;
+		const char* bspTimestamp;
+		const char* lightTimestamp;
 	}; assert_sizeof(GfxBuildInfo, 32);
 
 	struct GfxWorld
@@ -5920,14 +6203,14 @@ namespace game
 		GfxCellTree* aabbTrees; // 152
 		GfxCell* cells; // 160
 		GfxPortalGroup* portalGroup; // 168
-		int unk_vec4_count_0; // 176
+		int portalDistanceAnchorCount; // 176
 		char __pad2[4]; // 180
-		vec4_t* unk_vec4_0; // 184
+		vec4_t* portalDistanceAnchorsAndCloseDistSquared; // 184
 		GfxWorldDraw draw; // 192
 		GfxLightGrid lightGrid; // 448
 		int modelCount; // 1528
 		GfxBrushModel* models; // 1536
-		Bounds unkBounds;
+		Bounds bounds;
 		Bounds shadowBounds;
 		unsigned int checksum; // 1592
 		int materialMemoryCount; // 1596
@@ -6192,6 +6475,82 @@ namespace game
 	static_assert(offsetof(VehicleDef, soundTriggerOverrideZone) == 2264);
 	static_assert(sizeof(VehicleDef) == 0x8E8);
 
+
+	struct DDLMember
+	{
+		const char* name;
+		int index;
+		void* parent;
+		int bitSize;
+		int limitSize;
+		int offset;
+		int type;
+		int externalIndex;
+		unsigned int rangeLimit;
+		unsigned int serverDelta;
+		unsigned int clientDelta;
+		int arraySize;
+		int enumIndex;
+		int permission;
+	};
+
+	struct DDLHash
+	{
+		unsigned int hash;
+		int index;
+	};
+
+	struct DDLHashTable
+	{
+		DDLHash* list;
+		int count;
+		int max;
+	};
+
+	struct DDLStruct
+	{
+		const char* name;
+		int bitSize;
+		int memberCount;
+		DDLMember* members;
+		DDLHashTable hashTableUpper;
+		DDLHashTable hashTableLower;
+	};
+
+	struct DDLEnum
+	{
+		const char* name;
+		int memberCount;
+		const char** members;
+		DDLHashTable hashTable;
+	};
+
+	struct DDLDef
+	{
+		char* name;
+		unsigned short version;
+		unsigned int checksum;
+		unsigned char flags;
+		int bitSize;
+		int byteSize;
+		DDLStruct* structList;
+		int structCount;
+		DDLEnum* enumList;
+		int enumCount;
+		DDLDef* next;
+		int headerBitSize;
+		int headerByteSize;
+		int reserveSize;
+		int userFlagsSize;
+		bool paddingUsed;
+	};
+
+	struct DDLRoot
+	{
+		const char* name;
+		DDLDef* ddlDef;
+	};
+
 	union XAssetHeader
 	{
 		void* data;
@@ -6213,32 +6572,59 @@ namespace game
 		MaterialTechniqueSet* techniqueSet;
 		GfxImage* image;
 		snd_alias_list_t* sound;
+		// submix
 		SndCurve* sndCurve;
 		SndCurve* lpfCurve;
 		SndCurve* reverbCurve;
 		SndContext* sndContext;
-		LaserDef* laser;
 		LoadedSound* loadSnd;
-		LocalizeEntry* localize;
+		clipMap_t* clipMap;
+		ComWorld* comWorld;
+		GlassWorld* glassWorld;
+		PathData* pathData;
+		// vehicle track
 		MapEnts* mapEnts;
+		FxWorld* fxWorld;
+		GfxWorld* gfxWorld;
 		GfxLightDef* lightDef;
+		// ui map
+		// menulist
+		// menu
+		// anim class
+		LocalizeEntry* localize;
 		WeaponAttachment* attachment;
 		WeaponDef* weapon;
-		VehicleDef* vehicle;
+		// snd driver globals
 		FxEffectDef* fx;
+		// impact fx
+		// surface fx
+		// ai type
+		// mp type
+		// character
+		// xmodel alias
 		RawFile* rawfile;
 		ScriptFile* scriptfile;
 		StringTable* stringTable;
+		// leaderboard
+		// virtual leaderboard
 		StructuredDataDefSet* structuredDataDefSet;
-		NetConstStrings* netConstStrings;
+		DDLRoot* ddlRoot;
+		// proto
 		TracerDef* tracerDef;
+		VehicleDef* vehicle;
+		AddonMapEnts* addonMapEnts;
+		NetConstStrings* netConstStrings;
+		// reverb preset
 		LuaFile* luaFile;
+		ScriptableDef* scriptable;
+		// equipment snd table
+		// vector field
 		DopplerPreset* doppler;
 		FxParticleSimAnimation* particleSimAnimation;
+		LaserDef* laser;
 		SkeletonScript* skeletonScript;
 		Clut* clut;
 		TTFDef* ttfDef;
-		PathData* aipaths;
 	};
 
 	struct XAsset
