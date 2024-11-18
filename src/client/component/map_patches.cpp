@@ -933,6 +933,10 @@ namespace map_patches
 	public:
 		void post_unpack() override
 		{
+			// skip fx name prefix checks
+			utils::hook::set<uint8_t>(0x1404E34A7, 0xEB); // createfx parse
+			utils::hook::set<uint8_t>(0x1404E34C0, 0xEB); // scr_loadfx
+
 			// patch iw6 leafTable decoding
 			r_decode_light_grid_block_hook.create(0x140765420, r_decode_light_grid_block_stub);
 
