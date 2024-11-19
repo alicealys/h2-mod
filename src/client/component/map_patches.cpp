@@ -140,27 +140,30 @@ namespace map_patches
 
 		namespace
 		{
-			typedef unsigned short ushort;
-			typedef unsigned int uint;
-
-			uint as_uint(const float x) {
-				return *(uint*)&x;
-			}
-			float as_float(const uint x) {
-				return *(float*)&x;
+			std::uint32_t as_uint(const float x)
+			{
+				return *reinterpret_cast<const std::uint32_t*>(&x);
 			}
 
-			float half_to_float(const ushort x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
-				const uint e = (x & 0x7C00) >> 10; // exponent
-				const uint m = (x & 0x03FF) << 13; // mantissa
-				const uint v = as_uint((float)m) >> 23; // evil log2 bit hack to count leading zeros in denormalized format
-				return as_float((x & 0x8000) << 16 | (e != 0) * ((e + 112) << 23 | m) | ((e == 0) & (m != 0)) * ((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000))); // sign : normalized : denormalized
+			float as_float(const std::uint32_t x)
+			{
+				return *reinterpret_cast<const float*>(&x);
 			}
-			ushort float_to_half(const float x) { // IEEE-754 16-bit floating-point format (without infinity): 1-5-10, exp-15, +-131008.0, +-6.1035156E-5, +-5.9604645E-8, 3.311 digits
-				const uint b = as_uint(x) + 0x00001000; // round-to-nearest-even: add last bit after truncated mantissa
-				const uint e = (b & 0x7F800000) >> 23; // exponent
-				const uint m = b & 0x007FFFFF; // mantissa; in line below: 0x007FF000 = 0x00800000-0x00001000 = decimal indicator flag - initial rounding
-				return (ushort)((b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF); // sign : normalized : denormalized : saturate
+
+			float half_to_float(const std::uint16_t x) 
+			{
+				const std::uint32_t e = (x & 0x7C00) >> 10;
+				const std::uint32_t m = (x & 0x03FF) << 13;
+				const std::uint32_t v = as_uint((float)m) >> 23;
+				return as_float((x & 0x8000) << 16 | (e != 0) * ((e + 112) << 23 | m) | ((e == 0) & (m != 0)) * ((v - 37) << 23 | ((m << (150 - v)) & 0x007FE000)));
+			}
+
+			std::uint16_t float_to_half(const float x)
+			{
+				const std::uint32_t b = as_uint(x) + 0x00001000;
+				const std::uint32_t e = (b & 0x7F800000) >> 23;
+				const std::uint32_t m = b & 0x007FFFFF;
+				return static_cast<std::uint16_t>(((b & 0x80000000) >> 16 | (e > 112) * ((((e - 112) << 10) & 0x7C00) | m >> 13) | ((e < 113) & (e > 101)) * ((((0x007FF000 + m) >> (125 - e)) + 1) >> 1) | (e > 143) * 0x7FFF));
 			}
 		}
 
@@ -205,21 +208,29 @@ namespace map_patches
 		bool R_IsBetterPrimaryLightEnv(unsigned short oldPrimaryLightEnvIndex, unsigned short newPrimaryLightEnvIndex, float oldWeight, float newWeight)
 		{
 			if (!oldPrimaryLightEnvIndex)
+			{
 				return true;
+			}
+
 			if (!newPrimaryLightEnvIndex)
+			{
 				return false;
+			}
+
 			if (game::comWorld->primaryLightEnvs[oldPrimaryLightEnvIndex].numIndices == 1
 				&& game::comWorld->primaryLightEnvs[oldPrimaryLightEnvIndex].primaryLightIndices[0] >= 2048
 				- (*game::gfx_map)->lastSunPrimaryLightIndex)
 			{
 				return true;
 			}
+
 			if (game::comWorld->primaryLightEnvs[newPrimaryLightEnvIndex].numIndices == 1
 				&& game::comWorld->primaryLightEnvs[newPrimaryLightEnvIndex].primaryLightIndices[0] >= 2048
 				- (*game::gfx_map)->lastSunPrimaryLightIndex)
 			{
 				return false;
 			}
+
 			return newWeight > oldWeight;
 		}
 
@@ -268,6 +279,7 @@ namespace map_patches
 			v4 = lightGrid->rowAxis;
 			v7 = lightGrid->mins[v4];
 			v8 = pos[v4] - v7;
+
 			if ((unsigned int)v8 >= (unsigned int)lightGrid->maxs[v4] - v7 + 1
 				|| (v10 = lightGrid->rowDataStart[v8], v10 == 0xFFFF))
 			{
@@ -277,10 +289,12 @@ namespace map_patches
 				entries[3] = 0i64;
 				return;
 			}
+
 			v11 = 0i64;
 			v12 = &lightGrid->rawRowData[4 * v10];
 			v13 = pos[lightGrid->colAxis] - *(unsigned short*)v12;
 			v14 = pos[2] - *((unsigned short*)v12 + 2);
+
 			if (v13 + 1 > *((unsigned short*)v12 + 1))
 			{
 				*entries = 0i64;
@@ -289,6 +303,7 @@ namespace map_patches
 				entries[3] = 0i64;
 				return;
 			}
+
 			v15 = *((unsigned short*)v12 + 3);
 			if (v14 + 1 > v15)
 			{
@@ -296,10 +311,15 @@ namespace map_patches
 				entries[1] = 0i64;
 				entries[2] = 0i64;
 				entries[3] = 0i64;
+
 				if (pos[2] < *((unsigned short*)v12 + 2) && !lightGrid->useSkyForLowZ)
+				{
 					*defaultGridEntry = 0;
+				}
+
 				return;
 			}
+
 			v16 = *((int*)v12 + 2);
 			v17 = v12 + 12;
 			if (v13 != -1)
@@ -314,39 +334,67 @@ namespace map_patches
 						v16 += v24 * v17[1];
 						v25 = v23;
 						if (!v17[1])
+						{
 							v25 = 2i64;
+						}
+
 						v17 += v25;
 					} while (v13 >= *v17);
+
 					v15 = *((short*)v12 + 3);
 				}
+
 				if (v17[1])
 				{
 					v29 = v17[2];
 					if ((unsigned short)v15 > 0xFFu)
+					{
 						v29 += v17[3] << 8;
+					}
+
 					if (v14 < v29)
+					{
 						*defaultGridEntry = 0;
+					}
+
 					v30 = v14 - v29;
 					v31 = v16 + v14 - v29 + v13 * v17[1];
+
 					if (v14 - v29 < v17[1])
+					{
 						v32 = &lightGrid->entries[v31];
+					}
 					else
+					{
 						v32 = 0i64;
+					}
+
 					*entries = v32;
 					if (v30 + 1 < v17[1])
+					{
 						v33 = &lightGrid->entries[(unsigned int)(v31 + 1)];
+					}
 					else
+					{
 						v33 = 0i64;
+					}
+
 					entries[1] = v33;
 					v28 = *v17;
+
 					if (v13 + 1 < v28)
 					{
 						v34 = v17[1];
 						v35 = v34 + (unsigned int)v31;
 						if (v30 < v34)
+						{
 							entries[2] = &lightGrid->entries[v35];
+						}
 						else
+						{
 							entries[2] = 0i64;
+						}
+
 						v36 = v30 + 1 < v17[1];
 						goto LABEL_59;
 					}
@@ -360,14 +408,23 @@ namespace map_patches
 					{
 						v27 = v17[4];
 						if (*((unsigned short*)v12 + 3) > 0xFFu)
+						{
 							v27 += v17[5] << 8;
+						}
+
 						if (v14 < v27 + (unsigned int)v26)
+						{
 							*defaultGridEntry = 0;
+						}
 					}
+
 					v28 = *v17;
 					if (v13 + 1 < v28)
+					{
 						goto LABEL_32;
+					}
 				}
+
 				if (pos[lightGrid->colAxis] + 1u == (unsigned int)(*((unsigned short*)v12 + 1u) + *(unsigned short*)v12))
 				{
 				LABEL_32:
@@ -376,45 +433,76 @@ namespace map_patches
 					entries[3] = v11;
 					return;
 				}
+
 				v37 = v28 * v17[1] + v16;
 				if (!v17[1])
+				{
 					v23 = 2;
+				}
+
 				v38 = &v17[v23];
 				v39 = v38[2];
+
 				if (*((unsigned short*)v12 + 3) > 0xFFu)
+				{
 					v39 += v38[3] << 8;
+				}
+
 				v40 = v14 - v39;
 				v35 = v40 + v37;
 				if (v40 < v38[1])
+				{
 					v41 = &lightGrid->entries[v35];
+				}
 				else
+				{
 					v41 = 0i64;
+				}
+
 				entries[2] = v41;
 				v36 = v40 + 1 < v38[1];
 			LABEL_59:
 				if (v36)
+				{
 					v11 = &lightGrid->entries[(unsigned int)(v35 + 1)];
+				}
+
 				goto LABEL_33;
 			}
 			*entries = 0i64;
 			entries[1] = 0i64;
 			v18 = v12[14];
+
 			if (*((unsigned short*)v12 + 3) > 0xFFu)
+			{
 				v18 += v12[15] << 8;
+			}
+
 			v19 = v12[13];
 			v20 = v14 - v18 + v16;
 			if (v14 - v18 < v19)
+			{
 				v21 = &lightGrid->entries[v20];
+			}
 			else
+			{
 				v21 = 0i64;
+			}
 			entries[2] = v21;
 			if (v14 - v18 + 1 < v17[1])
+			{
 				v22 = &lightGrid->entries[(unsigned int)(v20 + 1)];
+			}
 			else
+			{
 				v22 = 0i64;
+			}
+
 			entries[3] = v22;
 			if (v14 < v18)
+			{
 				*defaultGridEntry = 0;
+			}
 		}
 
 		void fixup_entries(const game::GfxLightGrid* lightGrid, game::GfxLightGridEntry** entries)
@@ -438,33 +526,38 @@ namespace map_patches
 
 		BOOL R_IsValidLightGridSample(const game::GfxLightGrid* lightGrid, const game::GfxLightGridEntry* entry, int cornerIndex, const unsigned int* pos, const float* samplePos)
 		{
-			float traceDir[3];
-			float gridPos[3];
-			float nudgedGridPos[3];
+			float trace_dir[3]{};
+			float grid_pos[3]{};
+			float nudged_grid_pos[3]{};
 
-			gridPos[0] = pos[0] * 32.0f + -131072.0f;
-			gridPos[1] = pos[1] * 32.0f + -131072.0f;
-			gridPos[2] = pos[2] * 64.0f + -131072.0f;
-			gridPos[lightGrid->rowAxis] = (float)((cornerIndex & 4) != 0 ? 0x20 : 0) + gridPos[lightGrid->rowAxis];
-			gridPos[lightGrid->colAxis] = (float)((cornerIndex & 2) != 0 ? 0x20 : 0) + gridPos[lightGrid->colAxis];
-			gridPos[2] = (float)((cornerIndex & 1) != 0 ? 0x40 : 0) + gridPos[2];
-			traceDir[0] = *samplePos - gridPos[0];
-			traceDir[1] = samplePos[1] - gridPos[1];
-			traceDir[2] = samplePos[2] - gridPos[2];
-			game::Vec3Normalize(traceDir);
-			nudgedGridPos[0] = (0.0099999998f * traceDir[0]) + gridPos[0];
-			nudgedGridPos[1] = (0.0099999998f * traceDir[1]) + gridPos[1];
-			nudgedGridPos[2] = (0.0099999998f * traceDir[2]) + gridPos[2];
+			grid_pos[0] = pos[0] * 32.0f + -131072.0f;
+			grid_pos[1] = pos[1] * 32.0f + -131072.0f;
+			grid_pos[2] = pos[2] * 64.0f + -131072.0f;
+			grid_pos[lightGrid->rowAxis] = (float)((cornerIndex & 4) != 0 ? 0x20 : 0) + grid_pos[lightGrid->rowAxis];
+			grid_pos[lightGrid->colAxis] = (float)((cornerIndex & 2) != 0 ? 0x20 : 0) + grid_pos[lightGrid->colAxis];
+			grid_pos[2] = (float)((cornerIndex & 1) != 0 ? 0x40 : 0) + grid_pos[2];
+
+			trace_dir[0] = *samplePos - grid_pos[0];
+			trace_dir[1] = samplePos[1] - grid_pos[1];
+			trace_dir[2] = samplePos[2] - grid_pos[2];
+
+			game::Vec3Normalize(trace_dir);
+
+			nudged_grid_pos[0] = (0.0099999998f * trace_dir[0]) + grid_pos[0];
+			nudged_grid_pos[1] = (0.0099999998f * trace_dir[1]) + grid_pos[1];
+			nudged_grid_pos[2] = (0.0099999998f * trace_dir[2]) + grid_pos[2];
+
 			game::Bounds bounds{};
-			return game::SV_BrushModelSightTrace(0, samplePos, nudgedGridPos, &bounds, 0, 8193) == 0;
+
+			return game::SV_BrushModelSightTrace(0, samplePos, nudged_grid_pos, &bounds, 0, 8193) == 0;
 		}
 
 		int R_LightGridLookup_IW(const game::GfxLightGrid* lightGrid, const float* samplePos, float* cornerWeight,
 			const game::GfxLightGridEntry** cornerEntryOut, unsigned short* defaultGridEntry)
 		{
-			// Early null checks for pointers
-			if (!lightGrid || !samplePos || !cornerWeight || !cornerEntryOut || !defaultGridEntry) {
-				return 0xFF;  // Invalid input data
+			if (!lightGrid || !samplePos || !cornerWeight || !cornerEntryOut || !defaultGridEntry) 
+			{
+				return 0xFF;
 			}
 
 			unsigned int pos[3];
@@ -487,14 +580,14 @@ namespace map_patches
 			axisLerp[lightGrid->colAxis] = (samplePos[lightGrid->colAxis] - -131072.0f) * 0.03125f - (float)pos[lightGrid->colAxis];
 			axisLerp[2] = (samplePos[2] - -131072.0f) * 0.015625f - (float)pos[2];
 
-			// Check that axisLerp values are within a valid range
-			for (int i = 0; i < 3; ++i) {
-				if (axisLerp[i] < 0.0f || axisLerp[i] > 1.0f) {
-					axisLerp[i] = std::clamp(axisLerp[i], 0.0f, 1.0f); // Clamp values between 0 and 1
+			for (int i = 0; i < 3; ++i) 
+			{
+				if (axisLerp[i] < 0.0f || axisLerp[i] > 1.0f)
+				{
+					axisLerp[i] = std::clamp(axisLerp[i], 0.0f, 1.0f);
 				}
 			}
 
-			// Calculate corner weights based on the axis interpolation
 			quadWeight = (1.0f - axisLerp[lightGrid->colAxis]) * (1.0f - axisLerp[2]);
 			cornerWeight[0] = (1.0f - axisLerp[lightGrid->rowAxis]) * quadWeight;
 			cornerWeight[4] = quadWeight * axisLerp[lightGrid->rowAxis];
@@ -513,7 +606,6 @@ namespace map_patches
 
 			*defaultGridEntry = 1;
 
-			// Sample light grid entries at the corners
 			R_GetLightGridSampleEntryQuad(lightGrid, pos, cornerEntryOut, defaultGridEntry);
 			++pos[lightGrid->rowAxis];
 			R_GetLightGridSampleEntryQuad(lightGrid, pos, cornerEntryOut + 4, defaultGridEntry);
@@ -521,31 +613,33 @@ namespace map_patches
 
 			fixup_entries(lightGrid, const_cast<game::GfxLightGridEntry**>(cornerEntryOut));
 
-			// Evaluate light grid entries at each corner
 			for (int i = 0; i < 8; ++i) {
 				const game::GfxLightGridEntry* entry = *(cornerEntryOut + i);
 
-				// Null entry check
-				if (!entry || cornerWeight[i] < 0.001f) {
+				if (!entry || cornerWeight[i] < 0.001f) 
+				{
 					cornerWeight[i] = 0.0f;
 					continue;
 				}
 
-				if (entry->needsTrace && !R_IsValidLightGridSample(lightGrid, entry, i, pos, samplePos)) {
-					if (isDefaultEntryUsed) {
+				if (entry->needsTrace && !R_IsValidLightGridSample(lightGrid, entry, i, pos, samplePos))
+				{
+					if (isDefaultEntryUsed) 
+					{
 						cornerWeight[i] = 0.0f;
 						continue;
 					}
 				}
-				else if (!isDefaultEntryUsed) {
+				else if (!isDefaultEntryUsed) 
+				{
 					primaryLightEnvWeight = cornerWeight[i];
 					primaryLightEnvIndex = entry->primaryLightEnvIndex;
 					isDefaultEntryUsed = true;
-					memset(cornerEntryOut, 0, i * sizeof(game::GfxLightGridEntry*)); // Properly reset the array
+					std::memset(cornerEntryOut, 0, i * sizeof(game::GfxLightGridEntry*));
 				}
 
-				// Check if this entry is a better primary light environment
-				if (R_IsBetterPrimaryLightEnv(primaryLightEnvIndex, entry->primaryLightEnvIndex, primaryLightEnvWeight, cornerWeight[i])) {
+				if (R_IsBetterPrimaryLightEnv(primaryLightEnvIndex, entry->primaryLightEnvIndex, primaryLightEnvWeight, cornerWeight[i])) 
+				{
 					primaryLightEnvWeight = cornerWeight[i];
 					primaryLightEnvIndex = entry->primaryLightEnvIndex;
 				}
@@ -558,10 +652,12 @@ namespace map_patches
 		int r_lightgrid_lookup_stub(game::GfxLightGrid* lightGrid, float* samplePos, GfxLightGridRaw* lightGridRaw, float* cornerWeight,
 			game::GfxLightGridEntry* cornerEntry, unsigned short* defaultGridEntry, float* referencePos, unsigned int smoothFetch)
 		{
-			auto primaryLightIndex = r_lightgrid_lookup_hook.invoke<int>(lightGrid, samplePos, lightGridRaw, cornerWeight, cornerEntry, defaultGridEntry, referencePos, smoothFetch);
+			auto primaryLightIndex = r_lightgrid_lookup_hook.invoke<int>(lightGrid, samplePos, lightGridRaw, cornerWeight, 
+				cornerEntry, defaultGridEntry, referencePos, smoothFetch);
 
 			bool effect_callback = false;
 			auto address = _ReturnAddress();
+
 			if (address == (void*)0x1407AD7F6)
 			{
 				effect_callback = true;
@@ -574,11 +670,12 @@ namespace map_patches
 				{
 					game::GfxLightGridEntry* entries[8] = {nullptr};
 					primaryLightIndex = R_LightGridLookup_IW(lightGrid, samplePos, cornerWeight, (const game::GfxLightGridEntry**)entries, defaultGridEntry);
+
 					for (auto i = 0; i < 8; i++)
 					{
 						if (entries[i])
 						{
-							memcpy(&cornerEntry[i], entries[i], sizeof(game::GfxLightGridEntry));
+							std::memcpy(&cornerEntry[i], entries[i], sizeof(game::GfxLightGridEntry));
 						}
 					}
 
@@ -944,7 +1041,7 @@ namespace map_patches
 			r_filter_things_into_cells_r_hook.create(0x140724720, r_filter_things_into_cells_r_stub);
 
 #ifdef DEBUG
-			r_lightGridNonCompressed = dvars::register_bool("r_lightGridNonCompressed", false, game::DVAR_FLAG_REPLICATED, "Use old lightgrid data, if available.");
+			r_lightGridNonCompressed = dvars::register_bool("r_lightGridNonCompressed", false, game::DVAR_FLAG_NONE, "Use old lightgrid data, if available.");
 
 			r_lightgrid_lookup_hook.create(0x1407AEE50, r_lightgrid_lookup_stub);
 
