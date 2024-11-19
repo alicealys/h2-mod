@@ -3,6 +3,7 @@
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
+#include "component/console.hpp"
 
 #include <utils/hook.hpp>
 
@@ -1023,6 +1024,27 @@ namespace map_patches
 
 			r_get_lighting_info_for_effects_hook.invoke<void>(samplePos, tryUseCache, radiometricUnit, outColor, outPrimaryLightsAndWeights, a6);
 		}
+
+		utils::hook::detour material_compare_hook;
+
+		char material_compare_stub(unsigned int index_a, unsigned int index_b)
+		{
+			char result = 0;
+
+			__try
+			{
+				result = material_compare_hook.invoke<char>(index_a, index_b);
+			}
+			__except (EXCEPTION_EXECUTE_HANDLER)
+			{
+				const auto* material_a = utils::hook::invoke<game::Material*>(0x140413BA0, index_a);
+				const auto* material_b = utils::hook::invoke<game::Material*>(0x140413BA0, index_b);
+				console::error("Material_Compare: %s - %s (%d - %d)\n",
+					material_a->name, material_b->name, material_a->info.sortKey, material_b->info.sortKey);
+			}
+
+			return result;
+		}
 	}
 
 	class component final : public component_interface
@@ -1050,6 +1072,8 @@ namespace map_patches
 			r_get_lightgrid_average_color_hook.create(0x1407ACDD0, r_get_lightgrid_average_color_stub);
 
 			r_get_lighting_info_for_effects_hook.create(0x1407AD640, r_get_lighting_info_for_effects_stub);
+
+			material_compare_hook.create(0x14075B0E0, material_compare_stub);
 #endif
 		}
 	};
