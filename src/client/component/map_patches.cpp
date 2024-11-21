@@ -1062,7 +1062,6 @@ namespace map_patches
 			// workaround for zonetool issue
 			r_filter_things_into_cells_r_hook.create(0x140724720, r_filter_things_into_cells_r_stub);
 
-#ifdef DEBUG
 			r_lightGridNonCompressed = dvars::register_bool("r_lightGridNonCompressed", false, game::DVAR_FLAG_NONE, "Use old lightgrid data, if available.");
 
 			r_lightgrid_lookup_hook.create(0x1407AEE50, r_lightgrid_lookup_stub);
@@ -1074,7 +1073,6 @@ namespace map_patches
 			r_get_lighting_info_for_effects_hook.create(0x1407AD640, r_get_lighting_info_for_effects_stub);
 
 			material_compare_hook.create(0x14075B0E0, material_compare_stub);
-#endif
 		}
 	};
 }
