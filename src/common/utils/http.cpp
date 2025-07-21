@@ -17,7 +17,7 @@ namespace utils::http
 		{
 			const std::function<void(size_t, size_t, size_t)>* callback{};
 			std::exception_ptr exception{};
-			std::chrono::high_resolution_clock::time_point start{};
+			std::chrono::steady_clock::time_point start{};
 		};
 
 		int progress_callback(void *clientp, const curl_off_t dltotal, const curl_off_t dlnow, const curl_off_t /*ultotal*/, const curl_off_t /*ulnow*/)
@@ -26,7 +26,7 @@ namespace utils::http
 
 			try
 			{
-				const auto now = std::chrono::high_resolution_clock::now();
+				const auto now = std::chrono::steady_clock::now();
 				const auto count = std::max(1, static_cast<int>(std::chrono::duration_cast<
 					std::chrono::seconds>(now - helper->start).count()));
 				const auto speed = dlnow / count;
@@ -80,7 +80,7 @@ namespace utils::http
 		std::string buffer{};
 		progress_helper helper{};
 		helper.callback = &callback;
-		helper.start = std::chrono::high_resolution_clock::now();
+		helper.start = std::chrono::steady_clock::now();
 		
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, header_list);
 		curl_easy_setopt(curl, CURLOPT_URL, url.data());
