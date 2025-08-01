@@ -453,7 +453,7 @@ namespace gsc
 	public:
 		void post_load() override
 		{
-			gsc_ctx = std::make_unique<xsk::gsc::h2::context>();
+			gsc_ctx = std::make_unique<xsk::gsc::h2::context>(xsk::gsc::instance::server);
 		}
 
 		void post_unpack() override
