@@ -307,6 +307,10 @@ namespace updater
 			{
 				return result;
 			}
+			else
+			{
+				console::error("[updater] failed to get file \"%s\" from server \"%s\"\n", endpoint.data(), url.data());
+			}
 		}
 
 		return {};
