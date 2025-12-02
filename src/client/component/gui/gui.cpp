@@ -46,10 +46,13 @@ namespace gui
 		utils::concurrency::container<std::vector<event>> event_queue;
 		std::vector<menu_t> menus;
 
-		ID3D11Device* device;
-		ID3D11DeviceContext* device_context;
-		bool initialized = false;
-		bool toggled = false;
+		struct
+		{
+			ID3D11Device* device;
+			ID3D11DeviceContext* device_context;
+			bool initialized = false;
+			bool toggled = false;
+		} globals;
 
 		void initialize_gui_context()
 		{
@@ -57,9 +60,9 @@ namespace gui
 			ImGui::StyleColorsDark();
 
 			ImGui_ImplWin32_Init(*game::hWnd);
-			ImGui_ImplDX11_Init(device, device_context);
+			ImGui_ImplDX11_Init(globals.device, globals.device_context);
 
-			initialized = true;
+			globals.initialized = true;
 		}
 
 		void run_event_queue()
@@ -134,8 +137,8 @@ namespace gui
 
 		void new_gui_frame()
 		{
-			ImGui::GetIO().MouseDrawCursor = toggled;
-			if (toggled)
+			ImGui::GetIO().MouseDrawCursor = globals.toggled;
+			if (globals.toggled)
 			{
 				*game::keyCatchers |= 0x10;
 			}
@@ -214,7 +217,7 @@ namespace gui
 			{
 				for (const auto& callback : callbacks)
 				{
-					if (callback.always || toggled)
+					if (callback.always || globals.toggled)
 					{
 						callback.callback();
 					}
@@ -247,7 +250,7 @@ namespace gui
 				return;
 			}
 
-			if (!initialized)
+			if (!globals.initialized)
 			{
 				console::info("[ImGui] Initializing\n");
 				initialize_gui_context();
@@ -260,39 +263,10 @@ namespace gui
 			}
 		}
 
-		void shutdown_gui()
-		{
-			if (initialized)
-			{
-				ImGui_ImplWin32_Shutdown();
-				ImGui::DestroyContext();
-			}
-
-			initialized = false;
-		}
-
-		HRESULT d3d11_create_device_stub(IDXGIAdapter* pAdapter, D3D_DRIVER_TYPE DriverType, HMODULE Software,
-			UINT Flags, const D3D_FEATURE_LEVEL* pFeatureLevels, UINT FeatureLevels, UINT SDKVersion, 
-			ID3D11Device** ppDevice, D3D_FEATURE_LEVEL* pFeatureLevel, ID3D11DeviceContext** ppImmediateContext)
-		{
-			shutdown_gui();
-
-			const auto result = D3D11CreateDevice(pAdapter, DriverType, Software, Flags, pFeatureLevels,
-				FeatureLevels, SDKVersion, ppDevice, pFeatureLevel, ppImmediateContext);
-
-			if (ppDevice != nullptr && ppImmediateContext != nullptr)
-			{
-				device = *ppDevice;
-				device_context = *ppImmediateContext;
-			}
-
-			return result;
-		}
-
 		utils::hook::detour wnd_proc_hook;
 		LRESULT wnd_proc_stub(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		{
-			if (wParam != VK_ESCAPE && toggled)
+			if (wParam != VK_ESCAPE && globals.toggled)
 			{
 				event_queue.access([hWnd, msg, wParam, lParam](std::vector<event>& queue)
 				{
@@ -308,27 +282,27 @@ namespace gui
 	{
 		if (key == game::K_F10 && down)
 		{
-			toggled = !toggled;
+			globals.toggled = !globals.toggled;
 			return false;
 		}
 
-		if (key == game::K_ESCAPE && down && toggled)
+		if (key == game::K_ESCAPE && down && globals.toggled)
 		{
-			toggled = false;
+			globals.toggled = false;
 			return false;
 		}
 
-		return !toggled;
+		return !globals.toggled;
 	}
 
 	bool gui_char_event(const int local_client_num, const int key)
 	{
-		return !toggled;
+		return !globals.toggled;
 	}
 
 	bool gui_mouse_event(const int local_client_num, int x, int y)
 	{
-		return !toggled;
+		return !globals.toggled;
 	}
 
 	void on_frame(const std::function<void()>& callback, bool always)
@@ -387,19 +361,26 @@ namespace gui
 		}, always);
 	}
 
+	void shutdown_gui()
+	{
+		if (globals.initialized)
+		{
+			ImGui_ImplWin32_Shutdown();
+			ImGui::DestroyContext();
+		}
+
+		globals.initialized = false;
+	}
+
+	void set_device(ID3D11Device* device, ID3D11DeviceContext* context)
+	{
+		globals.device = device;
+		globals.device_context = context;
+	}
+
 	class component final : public component_interface
 	{
 	public:
-		void* load_import(const std::string& library, const std::string& function) override
-		{
-			if (function == "D3D11CreateDevice")
-			{
-				return d3d11_create_device_stub;
-			}
-
-			return nullptr;
-		}
-
 		void post_unpack() override
 		{
 			utils::hook::nop(0x1407A14BB, 9);
@@ -411,6 +392,7 @@ namespace gui
 				show_notifications();
 				draw_main_menu_bar();
 			});
+
 		}
 
 		void pre_destroy() override
