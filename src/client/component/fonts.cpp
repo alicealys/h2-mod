@@ -149,8 +149,8 @@ namespace fonts
 
 		void get_hud_elem_text_style_stub(utils::hook::assembler& a)
 		{
-			const auto original = a.newLabel();
-			const auto loc_14037AF98 = a.newLabel();
+			const auto original = a.new_label();
+			const auto loc_14037AF98 = a.new_label();
 
 			a.mov(eax, dword_ptr(rdi, 4));
 			a.cmp(eax, 12);

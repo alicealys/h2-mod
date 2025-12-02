@@ -97,8 +97,8 @@ namespace fastfiles
 
 		void skip_extra_zones_stub(utils::hook::assembler& a)
 		{
-			const auto skip = a.newLabel();
-			const auto original = a.newLabel();
+			const auto skip = a.new_label();
+			const auto original = a.new_label();
 
 			a.pushad64();
 			a.test(r15d, game::DB_ZONE_CUSTOM); // allocFlags
@@ -499,7 +499,7 @@ namespace fastfiles
 
 		void db_decide_level_load_stub(utils::hook::assembler& a)
 		{
-			const auto loc_140412859 = a.newLabel();
+			const auto loc_140412859 = a.new_label();
 
 			a.pushad64();
 			a.mov(rcx, rbx);

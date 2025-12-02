@@ -99,8 +99,8 @@ namespace notifies
 
 		void vm_execute_stub(utils::hook::assembler& a)
 		{
-			const auto replace = a.newLabel();
-			const auto end = a.newLabel();
+			const auto replace = a.new_label();
+			const auto end = a.new_label();
 
 			a.pushad64();
 
