@@ -25,4 +25,7 @@ namespace gui
 		const std::function<void()>& callback, bool always = false);
 
 	void register_callback(const std::function<void()>& callback, bool always = false);
+
+	void shutdown_gui();
+	void set_device(ID3D11Device* device, ID3D11DeviceContext* context);
 }
