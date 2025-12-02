@@ -282,6 +282,8 @@ namespace utils::cryptography
 
 	std::string ecc::sign_message(const key& key, const std::string& message)
 	{
+#pragma warning(push)
+#pragma warning(disable: 4996)
 		if (!key.is_valid()) return "";
 
 		uint8_t buffer[512];
@@ -291,10 +293,13 @@ namespace utils::cryptography
 		              &key.get());
 
 		return std::string(cs(buffer), length);
+#pragma warning(pop)
 	}
 
 	bool ecc::verify_message(const key& key, const std::string& message, const std::string& signature)
 	{
+#pragma warning(push)
+#pragma warning(disable: 4996)
 		if (!key.is_valid()) return false;
 
 		auto result = 0;
@@ -303,6 +308,7 @@ namespace utils::cryptography
 		                        cs(message.data()),
 		                        ul(message.size()), &result,
 		                        &key.get()) == CRYPT_OK && result != 0);
+#pragma warning(pop)
 	}
 
 	bool ecc::encrypt(const key& key, std::string& data)
