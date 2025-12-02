@@ -209,7 +209,7 @@ namespace loadscreen
 
 		void ui_set_active_menu_stub(utils::hook::assembler& a)
 		{
-			const auto player_start = a.newLabel();
+			const auto player_start = a.new_label();
 
 			a.mov(rax, qword_ptr(reinterpret_cast<uint64_t>(&cl_disable_map_movies)));
 			a.mov(al, byte_ptr(rax, 0x10));
