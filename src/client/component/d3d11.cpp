@@ -1517,10 +1517,12 @@ namespace d3d11
 		{
 			gui::shutdown_gui();
 
+#ifdef DEBUG
 			if (d3d11_debug->current.enabled)
 			{
 				flags |= D3D11_CREATE_DEVICE_DEBUG;
 			}
+#endif
 
 			const auto result = D3D11CreateDevice(p_adapter, driver_type, software, flags, p_feature_levels,
 				feature_levels, sdk_version, pp_device, p_feature_level, pp_immediate_context);
@@ -1530,7 +1532,7 @@ namespace d3d11
 				gui::set_device(*pp_device, *pp_immediate_context);
 				device_context = *pp_immediate_context;
 
-#ifdef __d3d11sdklayers_h__
+#if defined(DEBUG) && defined(__d3d11sdklayers_h__)
 				hook_debug_info(*pp_device);
 #endif
 			}
