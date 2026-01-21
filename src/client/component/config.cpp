@@ -36,6 +36,8 @@ namespace config
 			{define_field("disable_custom_fonts", field_type::boolean, false)},
 			{define_field("language", field_type::string, language::get_default_language(), language::is_valid_language)},
 			{define_field("motd_last_seen", field_type::number_unsigned, 0)},
+			{define_field("motd_last_wordle", field_type::number_unsigned, 0)},
+			{define_field("motd_wordle_score", field_type::number_unsigned, 0)},
 			{define_field("branch", field_type::string, updater::get_git_branch(), updater::is_valid_git_branch)},
 		};
 

@@ -788,6 +788,14 @@ namespace ui_scripting
 
 			motd_table["hasmotd"] = motd::has_motd;
 
+			motd_table["haswordle"] = motd::has_wordle;
+			motd_table["hassolvedwordle"] = motd::has_solved_wordle;
+			motd_table["checkwordleword"] = motd::check_worlde_word;
+			motd_table["getwordlesolution"] = motd::get_wordle_solution;
+			motd_table["getwordleid"] = motd::get_wordle_id;
+			motd_table["getwordlescore"] = motd::get_wordle_score;
+			motd_table["solvewordle"] = motd::solve_wordle;
+
 			auto achievements_table = table();
 			lua["achievements"] = achievements_table;
 
