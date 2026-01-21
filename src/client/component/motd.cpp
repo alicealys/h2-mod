@@ -6,6 +6,7 @@
 #include "images.hpp"
 #include "command.hpp"
 #include "updater.hpp"
+#include "config.hpp"
 
 #include <utils/string.hpp>
 #include <utils/http.hpp>
@@ -22,8 +23,22 @@ namespace motd
 		constexpr auto cache_max_age = 24h * 5; // 5 days
 		constexpr auto cache_file_signature = 'CM2H'; // H2MC (H2-MOD Cache);
 
-		utils::concurrency::container<links_map_t> links;
-		utils::concurrency::container<nlohmann::json, std::recursive_mutex> marketing;
+		struct wordle_data_t
+		{
+			bool valid;
+			std::uint32_t id;
+			std::string solution;
+			std::unordered_set<std::string> word_list;
+		};
+
+		struct motd_data_t
+		{
+			links_map_t links;
+			nlohmann::json marketing;
+			wordle_data_t wordle;
+		};
+
+		utils::concurrency::container<motd_data_t, std::recursive_mutex> motd_data;
 
 		struct cached_file_header
 		{
@@ -147,7 +162,7 @@ namespace motd
 			}
 		}
 
-		std::optional<std::string> download_image(const std::string& url)
+		std::optional<std::string> download_file(const std::string& url, bool from_backend = false)
 		{
 			if (killed)
 			{
@@ -160,9 +175,14 @@ namespace motd
 				return {cached.value()};
 			}
 
-			console::debug("[HTTP] GET File \"%s\"\n", url.data());
+			if (!from_backend)
+			{
+				console::debug("[HTTP] GET File \"%s\"\n", url.data());
+			}
 
-			const auto res = utils::http::get_data(url);
+			const auto res = from_backend ?
+				updater::get_server_file(url) : 
+				utils::http::get_data(url);
 			if (res.has_value())
 			{
 				cache_file(url, res.value());
@@ -179,7 +199,7 @@ namespace motd
 			}
 
 			const auto url = data["motd"]["image_url"].get<std::string>();
-			const auto image_data = download_image(url);
+			const auto image_data = download_file(url);
 			if (image_data.has_value())
 			{
 				const auto& image = image_data.value();
@@ -211,7 +231,7 @@ namespace motd
 				const auto download_image_ = [&](const std::string& field, const std::string& image_name)
 				{
 					const auto url = tab[field].get<std::string>();
-					const auto image_data = download_image(url);
+					const auto image_data = download_file(url);
 					if (image_data.has_value())
 					{
 						const auto& image = image_data.value();
@@ -253,40 +273,95 @@ namespace motd
 			};
 		}
 
-		void add_links(nlohmann::json& data)
+		void add_links(motd_data_t& motd_data_)
 		{
-			links.access([&](links_map_t& map)
+			init_links(motd_data_.links);
+			if (!motd_data_.marketing.is_object() || !motd_data_.marketing["links"].is_object())
 			{
-				init_links(map);
-				if (!data.is_object() || !data["links"].is_object())
+				return;
+			}
+
+			for (const auto& [link, url] : motd_data_.marketing["links"].items())
+			{
+				if (!url.is_string())
 				{
-					return;
+					continue;
 				}
 
-				for (const auto& [link, url] : data["links"].items())
-				{
-					if (!url.is_string())
-					{
-						continue;
-					}
+				motd_data_.links.insert(std::make_pair(link, url.get<std::string>()));
+			}
+		}
 
-					map.insert(std::make_pair(link, url.get<std::string>()));
-				}
-			});
+		std::string get_wordle_url()
+		{
+			const auto now = std::chrono::system_clock::now();
+			const std::chrono::year_month_day ymd{std::chrono::floor<std::chrono::days>(now)};
+			const auto y = ymd.year();
+			const auto m = ymd.month();
+			const auto d = ymd.day();
+
+			return utils::string::va("https://www.nytimes.com/svc/wordle/v2/%04i-%02i-%02i.json", y, m, d);
+		}
+
+		bool get_wordle_list(motd_data_t& motd_data_)
+		{
+			const auto data = download_file("h2-mod/wordle_list.txt", true);
+			if (!data.has_value())
+			{
+				console::debug("failed to get wordle list\n");
+				return false;
+			}
+
+			const auto words = utils::string::split(data.value(), '\n');
+			for (const auto& word : words)
+			{
+				motd_data_.wordle.word_list.insert(word);
+			}
+
+			return !motd_data_.wordle.word_list.empty();
+		}
+
+		bool get_current_wordle(motd_data_t& motd_data_)
+		{
+			const auto url = get_wordle_url();
+			const auto data = utils::http::get_data(url);
+			if (!data.has_value())
+			{
+				console::debug("failed to get current wordle %s\n", url.data());
+				return false;
+			}
+
+			try
+			{
+				auto json = nlohmann::json::parse(data.value());
+				motd_data_.wordle.id = json["id"].get<std::uint32_t>();
+				motd_data_.wordle.solution = json["solution"].get<std::string>();
+				return true;
+			}
+			catch (const std::exception& e)
+			{
+				console::error("failed to parse wordle data: %s\n", e.what());
+				return false;
+			}
+		}
+		
+		void init_wordle(motd_data_t& motd_data_)
+		{
+			if (get_wordle_list(motd_data_) && get_current_wordle(motd_data_))
+			{
+				motd_data_.wordle.valid = true;
+			}
 		}
 
 		void init(bool load_images = true)
 		{
 			delete_old_files();
 
-			links.access([](links_map_t& map)
+			motd_data.access([&](motd_data_t& motd_data_)
 			{
-				init_links(map);
-			});
-
-			marketing.access([&](nlohmann::json& data)
-			{
-				data.clear();
+				init_links(motd_data_.links);
+				init_wordle(motd_data_);
+				motd_data_.marketing.clear();
 
 				const auto marketing_data = updater::get_server_file("h2-mod/marketing.json");
 				if (marketing_data.has_value())
@@ -294,12 +369,12 @@ namespace motd
 					try
 					{
 						const auto& value = marketing_data.value();
-						data = nlohmann::json::parse(value);
+						motd_data_.marketing = nlohmann::json::parse(value);
 
-						add_links(data);
+						add_links(motd_data_);
 						if (load_images)
 						{
-							download_images(data);
+							download_images(motd_data_.marketing);
 						}
 					}
 					catch (const std::exception& e)
@@ -313,65 +388,135 @@ namespace motd
 
 	links_map_t get_links()
 	{
-		return links.access<links_map_t>([&](links_map_t& map)
+		return motd_data.access<links_map_t>([&](motd_data_t& motd_data_)
 		{
-			return map;
+			return motd_data_.links;
 		});
 	}
 
 	int get_num_featured_tabs()
 	{
-		return marketing.access<nlohmann::json>([&](nlohmann::json& data)
+		return motd_data.access<nlohmann::json>([&](motd_data_t& motd_data_)
 			-> nlohmann::json
 		{
-			if (!data.is_object() || !data["featured"].is_array())
+			if (!motd_data_.marketing.is_object() || !motd_data_.marketing["featured"].is_array())
 			{
 				return 0;
 			}
 
-			return std::min(max_featured_tabs, static_cast<int>(data["featured"].size()));
+			return std::min(max_featured_tabs, static_cast<int>(motd_data_.marketing["featured"].size()));
 		});
 	}
 
 	nlohmann::json get_featured_tab(const int index)
 	{
-		return marketing.access<nlohmann::json>([&](nlohmann::json& data)
+		return motd_data.access<nlohmann::json>([&](motd_data_t& motd_data_)
 			-> nlohmann::json
 		{
-			if (!data.is_object() || !data["featured"].is_array())
+			if (!motd_data_.marketing.is_object() || !motd_data_.marketing["featured"].is_array())
 			{
 				return {};
 			}
 
-			if (index >= data["featured"].size())
+			if (index >= motd_data_.marketing["featured"].size())
 			{
 				return {};
 			}
 
-			return data["featured"][index];
+			return motd_data_.marketing["featured"][index];
 		});
 	}
 
 	nlohmann::json get_motd()
 	{
-		return marketing.access<nlohmann::json>([](nlohmann::json& data)
+		return motd_data.access<nlohmann::json>([](motd_data_t& motd_data_)
 			-> nlohmann::json
 		{
-			if (!data.is_object() || !data["motd"].is_object())
+			if (!motd_data_.marketing.is_object() || !motd_data_.marketing["motd"].is_object())
 			{
 				return {};
 			}
 
-			return data["motd"];
+			return motd_data_.marketing["motd"];
 		});
 	}
 
 	bool has_motd()
 	{
-		return marketing.access<bool>([](nlohmann::json& data)
-			-> nlohmann::json
+		return motd_data.access<bool>([](motd_data_t& motd_data_)
 		{
-			return data.is_object() && data["motd"].is_object();
+			return motd_data_.marketing.is_object() && motd_data_.marketing["motd"].is_object();
+		});
+	}
+
+	bool has_wordle()
+	{
+		return motd_data.access<bool>([](motd_data_t& motd_data_)
+		{
+			return motd_data_.wordle.valid;
+		});
+	}
+
+	std::string get_wordle_solution()
+	{
+		return motd_data.access<std::string>([](motd_data_t& motd_data_)
+		{
+			return motd_data_.wordle.solution;
+		});
+	}
+
+	std::uint32_t get_wordle_id()
+	{
+		return motd_data.access<std::uint32_t>([](motd_data_t& motd_data_)
+		{
+			return motd_data_.wordle.id;
+		});
+	}
+
+	bool has_solved_wordle()
+	{
+		return motd_data.access<bool>([](motd_data_t& motd_data_)
+		{
+			const auto last_wordle = config::get<std::uint32_t>("motd_last_wordle");
+			if (!last_wordle.has_value())
+			{
+				return false;
+			}
+
+			return last_wordle >= motd_data_.wordle.id;
+		});
+	}
+
+	std::uint32_t get_wordle_score()
+	{
+		const auto score_opt = config::get<std::uint32_t>("motd_wordle_score");
+		return score_opt.value_or(0u);
+	}
+
+	void solve_wordle(bool success)
+	{
+		motd_data.access([&](motd_data_t& motd_data_)
+		{
+			const auto last_wordle = config::get<std::uint32_t>("motd_last_wordle");
+			if (last_wordle.has_value() && last_wordle.value() >= motd_data_.wordle.id)
+			{
+				return;
+			}
+
+			config::set<std::uint32_t>("motd_last_wordle", motd_data_.wordle.id);
+			if (success)
+			{
+				config::set<std::uint32_t>("motd_wordle_score", get_wordle_score() + 1);
+			}
+		});
+	}
+
+	bool check_worlde_word(const std::string& word)
+	{
+		return motd_data.access<bool>([&](motd_data_t& motd_data_)
+		{
+			const auto lower = utils::string::to_lower(word);
+			return motd_data_.wordle.word_list.contains(lower);
 		});
 	}
 
