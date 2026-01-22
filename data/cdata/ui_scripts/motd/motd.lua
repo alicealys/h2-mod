@@ -30,15 +30,17 @@ LUI.onmenuopen("main_campaign", function(menu)
         LUI.FlowManager.RequestPopupMenu(nil, "motd")
     end)
     
-    menu:AddHelp({
-        name = "add_button_helper_text",
-        button_ref = "button_alt1",
-        helper_text = Engine.Localize("@MOTD_WORDLE_BUTTON"),
-        side = "right",
-        clickable = true
-    }, function()
-        LUI.FlowManager.RequestPopupMenu(nil, "wordle_widget")
-    end)
+    if (motd.haswordle()) then
+        menu:AddHelp({
+            name = "add_button_helper_text",
+            button_ref = "button_alt1",
+            helper_text = Engine.Localize("@MOTD_WORDLE_BUTTON"),
+            side = "right",
+            clickable = true
+        }, function()
+            LUI.FlowManager.RequestPopupMenu(nil, "wordle_widget")
+        end)
+    end
 end)
 
 LUI.common_menus.MarketingPopup.OnPopupAction = function(a1, a2)
