@@ -12,11 +12,6 @@ function startupdatecheck(popup, autoclose)
 		end
 
 		if (not updater.getupdatecheckstatus()) then
-			if (autoclose) then
-				LUI.FlowManager.RequestLeaveMenu(popup)
-				return
-			end
-
 			popup.text:setText(Engine.Localize("@MENU_ERROR") .. ": " .. updater.getlasterror())
 			return
 		end
