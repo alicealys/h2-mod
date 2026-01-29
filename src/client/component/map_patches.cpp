@@ -1072,7 +1072,9 @@ namespace map_patches
 
 			r_get_lighting_info_for_effects_hook.create(0x1407AD640, r_get_lighting_info_for_effects_stub);
 
+#ifdef DEBUG
 			material_compare_hook.create(0x14075B0E0, material_compare_stub);
+#endif
 		}
 	};
 }
