@@ -7,13 +7,14 @@
             "secondaryAliasName": null,
             "chainAliasName": null,
             "subtitle": null,
-            "mixerGroup": null,
+            "squelchName": null,
             "soundfile": {
                 "type": 1,
                 "exists": true,
                 "name": "ui/ui_achievement_unlocked"
             },
             "flags": 1048730,
+            "variationType": 4,
             "priority": 20,
             "dspBus": "interface",
             "volMod": "hud",
@@ -33,23 +34,28 @@
             "playbackPercentage": 100,
             "lfePercentage": 0.0,
             "centerPercentage": 0.0,
-            "poly": 1,
-            "polyGlobal": 174,
+            "polyCount": 1,
+            "polyGlobalCount": 174,
             "polyEntityType": 0,
             "polyGlobalType": 0,
+            "polyClass": 0,
+            "playCount": 0,
+            "unk": 0,
             "envelopMin": 0.0,
             "envelopMax": 0.0,
-            "envelopPercentage": 0.0,
-            "reverbWetMixOverride": 0.0,
-            "reverbMultiplier": 1.0,
-            "smartPanDistance2d": 0.0,
-            "smartPanDistance3d": 0.0,
-            "smartPanAttenuation3d": 1.0,
-            "stereo3dAngle": 0,
-            "stereo3dStart": 0.0,
-            "stereo3dEnd": 0.0,
+            "wetMixOverride": 0.0,
+            "focusPercentage": 1.0,
+            "smartpanDistance2d": 0.0,
+            "smartpanDistance3d": 0.0,
+            "smartpanAttenuation3d": 1.0,
+            "minSmartpan2dContribution": 0.0,
+            "stereo3DAngle": 0,
+            "stereo3DStart": 0.0,
+            "stereo3DEnd": 0.0,
+            "threshold": 0.5011872053146362,
+            "lockedLoopTime": 0,
             "sndContext": null,
-            "sndCurve": "$default",
+            "volumeFalloffCurve": "$default",
             "lpfCurve": "$default",
             "hpfCurve": "$defaultHpf",
             "reverbSendCurve": "$default",
@@ -173,20 +179,11 @@
                     }
                 ],
                 "isDefault": false,
-                "name": "front_only"
+                "name": "front_only",
+                "orientation": 0
             },
             "allowDoppler": 0,
-            "dopplerPreset": null,
-            "unknown": {
-                "pad": [
-                    {
-                        "bytes": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        "subtype": null
-                    }
-                ],
-                "u1": 4,
-                "u2": 0.5011872053146362
-            }
+            "dopplerPreset": null
         }
     ]
 }

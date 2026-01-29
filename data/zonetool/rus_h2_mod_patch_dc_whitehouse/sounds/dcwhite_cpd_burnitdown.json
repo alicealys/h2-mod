@@ -7,7 +7,7 @@
             "secondaryAliasName": null,
             "chainAliasName": null,
             "subtitle": "SUBTITLE_DCWHITE_CPD_BURNITDOWN215",
-            "mixerGroup": null,
+            "squelchName": null,
             "soundfile": {
                 "type": 2,
                 "exists": true,
@@ -15,12 +15,17 @@
                 "isLocalized": true,
                 "isStreamed": true,
                 "fileIndex": 0,
+                "packed": {
+                    "offset": 0,
+                    "length": 0
+                },
                 "raw": {
                     "dir": "voiceovers/dcwhite",
                     "name": "dcwhite_cpd_21_5"
                 }
             },
             "flags": 2162962,
+            "variationType": 4,
             "priority": 17,
             "dspBus": "voices_critical",
             "volMod": "voices_dialog",
@@ -40,23 +45,28 @@
             "playbackPercentage": 100,
             "lfePercentage": 0.0,
             "centerPercentage": 0.0,
-            "poly": 1,
-            "polyGlobal": 174,
+            "polyCount": 1,
+            "polyGlobalCount": 174,
             "polyEntityType": 0,
             "polyGlobalType": 0,
+            "polyClass": 0,
+            "playCount": 0,
+            "unk": 0,
             "envelopMin": 0.0,
             "envelopMax": 0.0,
-            "envelopPercentage": 0.0,
-            "reverbWetMixOverride": 0.7936999797821045,
-            "reverbMultiplier": 0.0,
-            "smartPanDistance2d": 0.0,
-            "smartPanDistance3d": 0.0,
-            "smartPanAttenuation3d": 1.0,
-            "stereo3dAngle": 0,
-            "stereo3dStart": 0.0,
-            "stereo3dEnd": 0.0,
+            "wetMixOverride": 0.7936999797821045,
+            "focusPercentage": 0.0,
+            "smartpanDistance2d": 0.0,
+            "smartpanDistance3d": 0.0,
+            "smartpanAttenuation3d": 1.0,
+            "minSmartpan2dContribution": 0.0,
+            "stereo3DAngle": 0,
+            "stereo3DStart": 0.0,
+            "stereo3DEnd": 0.0,
+            "threshold": 0.0010000000474974513,
+            "lockedLoopTime": 0,
             "sndContext": null,
-            "sndCurve": "h2_vo_critical",
+            "volumeFalloffCurve": "h2_vo_critical",
             "lpfCurve": "h2_vo_critical",
             "hpfCurve": "$defaultHpf",
             "reverbSendCurve": "h2_vo_critical",
@@ -180,20 +190,11 @@
                     }
                 ],
                 "isDefault": true,
-                "name": ""
+                "name": "",
+                "orientation": 0
             },
             "allowDoppler": 0,
-            "dopplerPreset": null,
-            "unknown": {
-                "pad": [
-                    {
-                        "bytes": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        "subtype": null
-                    }
-                ],
-                "u1": 4,
-                "u2": 0.0010000000474974513
-            }
+            "dopplerPreset": null
         }
     ]
 }
