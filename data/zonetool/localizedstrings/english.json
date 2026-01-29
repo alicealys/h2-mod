@@ -247,5 +247,11 @@
     "ACHIEVEMENT_NAME_51": "BRAAAINS...",
     "ACHIEVEMENT_DETAIL_51": "Check out Prisoner 227's cell in 'The Gulag'.",
     "ACHIEVEMENT_NAME_52": "Ramirez!",
-    "ACHIEVEMENT_DETAIL_52": "Turn on the radio in 'Museum'."
+    "ACHIEVEMENT_DETAIL_52": "Turn on the radio in 'Museum'.",
+
+    "MOTD_WORDLE_BUTTON": "Play Wordle",
+    "MOTD_WORDLE_TITLE": "WORDLE",
+    "MOTD_WORDLE_DESC": "No. &&1",
+    "MOTD_WORDLE_SCORE": "Score: &&1",
+    "MOTD_WORDLE_COMPLETED": "Puzzle already completed,\ncome back tomorrow."
 }

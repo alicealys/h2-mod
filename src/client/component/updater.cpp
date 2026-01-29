@@ -28,7 +28,7 @@
 #define DATA_PATH "data/"
 #define DATA_PATH_DEV "data-dev/"
 
-#define ERR_UPDATE_CHECK_FAIL "Failed to check for updates"
+#define ERR_UPDATE_CHECK_FAIL "Failed to check for updates!\nMake sure your ISP is not blocking our backend (try using a VPN).\nCheck the console for more information."
 #define ERR_DOWNLOAD_FAIL "Failed to download file "
 #define ERR_WRITE_FAIL "Failed to write file "
 
@@ -306,6 +306,10 @@ namespace updater
 			if (result.has_value())
 			{
 				return result;
+			}
+			else
+			{
+				console::error("[updater] failed to get file \"%s\" from server \"%s\"\n", endpoint.data(), url.data());
 			}
 		}
 

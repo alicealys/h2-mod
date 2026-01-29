@@ -1,5 +1,6 @@
 #include "http.hpp"
 #include <algorithm>
+#include <chrono>
 #include <curl/curl.h>
 #include <gsl/gsl>
 
@@ -89,6 +90,7 @@ namespace utils::http
 		curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
 		curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &helper);
 		curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+		curl_easy_setopt(curl, CURLOPT_DNS_LOCAL_IP4, "1.1.1.1");
 
 		if (curl_easy_perform(curl) == CURLE_OK)
 		{

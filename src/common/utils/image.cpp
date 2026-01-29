@@ -3,6 +3,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <gsl/gsl>
+#include <stdexcept>
 
 namespace utils
 {

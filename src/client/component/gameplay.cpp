@@ -29,8 +29,8 @@ namespace gameplay
 
 		void pm_trace_stub(utils::hook::assembler& a)
 		{
-			const auto stand = a.newLabel();
-			const auto allsolid = a.newLabel();
+			const auto stand = a.new_label();
+			const auto allsolid = a.new_label();
 
 			a.call(rsi); // Game code 
 
@@ -92,8 +92,8 @@ namespace gameplay
 
 		void pm_bouncing_stub_mp(utils::hook::assembler& a)
 		{
-			const auto no_bounce = a.newLabel();
-			const auto loc_140691518 = a.newLabel();
+			const auto no_bounce = a.new_label();
+			const auto loc_140691518 = a.new_label();
 
 			a.push(rax);
 
@@ -136,7 +136,7 @@ namespace gameplay
 
 		void pmove_single_stub1(utils::hook::assembler& a)
 		{
-			const auto loc_14068FEBD = a.newLabel();
+			const auto loc_14068FEBD = a.new_label();
 
 			a.comiss(xmm5, xmm4);
 			a.jbe(loc_14068FEBD);
