@@ -334,7 +334,7 @@ namespace motd
 			try
 			{
 				auto json = nlohmann::json::parse(data.value());
-				motd_data_.wordle.id = json["id"].get<std::uint32_t>();
+				motd_data_.wordle.id = json["days_since_launch"].get<std::uint32_t>();
 				motd_data_.wordle.solution = json["solution"].get<std::string>();
 				return true;
 			}
