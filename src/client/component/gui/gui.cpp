@@ -378,6 +378,79 @@ namespace gui
 		globals.device_context = context;
 	}
 
+	template<typename T>
+	bool checkbox_flags_t(const char* label, T* flags, T flags_value)
+	{
+		bool all_on = (*flags & flags_value) == flags_value;
+		bool any_on = (*flags & flags_value) != 0;
+		bool pressed;
+		if (!all_on && any_on)
+		{
+			ImGuiContext& g = *GImGui;
+			ImGuiItemFlags backup_item_flags = g.CurrentItemFlags;
+			g.CurrentItemFlags |= ImGuiItemFlags_MixedValue;
+			pressed = ImGui::Checkbox(label, &all_on);
+			g.CurrentItemFlags = backup_item_flags;
+		}
+		else
+		{
+			pressed = ImGui::Checkbox(label, &all_on);
+
+		}
+		if (pressed)
+		{
+			if (all_on)
+			{
+				*flags |= flags_value;
+			}
+			else
+			{
+				*flags &= ~flags_value;
+			}
+		}
+		return pressed;
+	}
+
+	void input_flags8(std::uint8_t* flags, const std::vector<const char*>& flag_names)
+	{
+		for (auto i = 0u; i < flag_names.size(); i++)
+		{
+			if (flag_names[i] != nullptr && flag_names[i][0] != 0)
+			{
+				checkbox_flags_t<std::uint8_t>(flag_names[i], flags, static_cast<std::uint8_t>(1 << i));
+			}
+		}
+	}
+
+	void input_flags(std::uint32_t* flags, const std::vector<const char*>& flag_names)
+	{
+		for (auto i = 0u; i < flag_names.size(); i++)
+		{
+			if (flag_names[i] != nullptr && flag_names[i][0] != 0)
+			{
+				ImGui::CheckboxFlags(flag_names[i], flags, (1 << i));
+			}
+		}
+	}
+
+	void input_flags(int* flags, const std::vector<const char*>& flag_names)
+	{
+		input_flags(reinterpret_cast<std::uint32_t*>(flags), flag_names);
+	}
+
+	bool input_u8(const char* label, unsigned char* v, int step, int step_fast, ImGuiInputTextFlags flags)
+	{
+		const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%d";
+		return ImGui::InputScalar(label, ImGuiDataType_U8, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+	}
+
+	bool input_u16(const char* label, unsigned short* v, int step, int step_fast, ImGuiInputTextFlags flags)
+	{
+		const char* format = (flags & ImGuiInputTextFlags_CharsHexadecimal) ? "%08X" : "%d";
+		return ImGui::InputScalar(label, ImGuiDataType_U16, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
+	}
+
+
 	class component final : public component_interface
 	{
 	public:
