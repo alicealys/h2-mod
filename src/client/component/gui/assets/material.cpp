@@ -1,4 +1,5 @@
 #include <std_include.hpp>
+
 #include "loader/component_loader.hpp"
 
 #include "game/game.hpp"
@@ -46,6 +47,37 @@ namespace gui::asset_list::material
 			return image_type_names[type];
 		}
 
+		void copy_constant_table_to_cbt(game::Material* mat)
+		{
+			for (auto i = 0u; i < mat->constantBufferCount; i++)
+			{
+				const auto cbt = &mat->constantBufferTable[i];
+				for (auto o = 0u; o < mat->constantCount; o++)
+				{
+#define COPY_CONSTANT_TABLE_VALUES(__data__, __offset_data__) \
+						if (cbt->__offset_data__ && cbt->__offset_data__[o] != 0xFFFF) \
+						{ \
+							const auto constant = reinterpret_cast<float*>(&cbt->__data__[cbt->__offset_data__[o]]); \
+							for (auto j = 0; j < 4; j++) \
+							{ \
+								constant[j] = mat->constantTable[o].literal[j]; \
+							} \
+						} \
+
+					COPY_CONSTANT_TABLE_VALUES(vsData, vsOffsetData);
+					COPY_CONSTANT_TABLE_VALUES(hsData, hsOffsetData);
+					COPY_CONSTANT_TABLE_VALUES(dsData, dsOffsetData);
+					COPY_CONSTANT_TABLE_VALUES(psData, psOffsetData);
+				}
+
+				// free buffers
+				utils::hook::invoke<void>(0x14074A710, &cbt->vsConstantBuffer);
+				utils::hook::invoke<void>(0x14074A710, &cbt->hsConstantBuffer);
+				utils::hook::invoke<void>(0x14074A710, &cbt->dsConstantBuffer);
+				utils::hook::invoke<void>(0x14074A710, &cbt->psConstantBuffer);
+			}
+		}
+
 		bool draw_material_window(game::Material* asset)
 		{
 			ImGui::SetNextItemOpen(true, ImGuiCond_FirstUseEver);
@@ -53,7 +85,7 @@ namespace gui::asset_list::material
 			{
 				for (auto i = 0; i < asset->textureCount; i++)
 				{
-					if (asset->textureTable && asset->textureTable->u.image && asset->textureTable->u.image->texture.shaderView)
+					if (asset->textureTable && asset->textureTable[i].u.image && asset->textureTable[i].u.image->texture.shaderView)
 					{
 						const auto type_name = get_image_type_name(asset->textureTable[i].semantic);
 
@@ -61,7 +93,7 @@ namespace gui::asset_list::material
 						ImGui::SameLine();
 						if (ImGui::Button(asset->textureTable[i].u.image->name))
 						{
-							gui::copy_to_clipboard(asset->textureTable->u.image->name);
+							gui::copy_to_clipboard(asset->textureTable[i].u.image->name);
 						}
 
 						const auto width = asset->textureTable[i].u.image->width;
@@ -78,6 +110,12 @@ namespace gui::asset_list::material
 				ImGui::TreePop();
 			}
 
+#define DRAW_ASSET_PROPERTY_INPUT_U8(__name__) \
+				ImGui::InputScalar(#__name__, ImGuiDataType_U8, &asset->__name__); \
+
+#define DRAW_ASSET_PROPERTY_INPUT_S32(__name__) \
+				ImGui::InputInt(#__name__, &asset->__name__); \
+
 #define DRAW_ASSET_PROPERTY(__name__, __fmt__) \
 				ImGui::Text(#__name__ ": " __fmt__, asset->__name__); \
 
@@ -91,11 +129,92 @@ namespace gui::asset_list::material
 
 			DRAW_ASSET_PROPERTY_COPY(name);
 			DRAW_ASSET_PROPERTY_COPY(techniqueSet->name);
+
+			add_view_button(0, game::ASSET_TYPE_TECHNIQUE_SET, asset->techniqueSet->name);
+
+			ImGui::Separator();
+
+			static std::unordered_map<game::Material*, game::MaterialTechniqueSet*> original_techs;
+
+			const auto modded_tech = original_techs.contains(asset);
+
+			static char buffer[64]{};
+			if (ImGui::InputText("techniqueSet", buffer, 64))
+			{
+				auto* tech = game::DB_FindXAssetHeader(game::ASSET_TYPE_TECHNIQUE_SET, buffer, 0).techniqueSet;
+				if (tech)
+				{
+					if (!modded_tech)
+					{
+						original_techs[asset] = asset->techniqueSet;
+					}
+
+					asset->techniqueSet = tech;
+					std::memset(buffer, 0, 64);
+				}
+			}
+
+			if (modded_tech && ImGui::Button("restore techset"))
+			{
+				asset->techniqueSet = original_techs[asset];
+				original_techs.erase(asset);
+			}
+
+			ImGui::Separator();
 			DRAW_ASSET_PROPERTY(textureCount, "%i");
 			DRAW_ASSET_PROPERTY(constantCount, "%i");
+			if (asset->constantCount > 0)
+			{
+				ImGui::Separator();
+				for (auto i = 0; i < asset->constantCount; i++)
+				{
+					char name[13]{};
+					std::memcpy(name, asset->constantTable[i].name, 12);
+					ImGui::Text(name);
+					ImGui::Text("%d", asset->constantTable[i].nameHash);
+
+					ImGui::PushID(i);
+					if (ImGui::DragFloat4("##constant", asset->constantTable[i].literal, 0.01f))
+					{
+						copy_constant_table_to_cbt(asset);
+						utils::hook::invoke<void>(0x140758BE0, asset->constantBufferCount, asset); // refresh buffers
+					}
+					ImGui::PopID();
+				}
+				ImGui::Separator();
+			}
+
 			DRAW_ASSET_PROPERTY(stateBitsCount, "%i");
-			DRAW_ASSET_PROPERTY(stateFlags, "%i");
-			DRAW_ASSET_PROPERTY(cameraRegion, "%i");
+			if (asset->stateBitsCount > 0)
+			{
+				ImGui::Separator();
+				for (auto i = 0; i < asset->stateBitsCount; i++)
+				{
+					ImGui::PushID(i);
+					if (ImGui::InputScalar("##loadBits", ImGuiDataType_U16, asset->stateBitsTable[i].loadBits))
+					{
+
+					}
+					ImGui::PopID();
+				}
+				ImGui::Separator();
+			}
+
+			if (ImGui::InputScalar("info.sortKey", ImGuiDataType_U8, &asset->info.sortKey))
+			{
+				utils::hook::invoke<void>(0x140758F80); // Material_DirtySort
+			}
+
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.gameFlags);
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.renderFlags);
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.textureAtlasRowCount);
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.textureAtlasColumnCount);
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.textureAtlasFrameBlend);
+			DRAW_ASSET_PROPERTY_INPUT_U8(info.textureAtlasAsArray);
+
+			DRAW_ASSET_PROPERTY_INPUT_U8(cameraRegion);
+			DRAW_ASSET_PROPERTY_INPUT_U8(stateFlags);
+
 			DRAW_ASSET_PROPERTY(materialType, "%i");
 			DRAW_ASSET_PROPERTY(layerCount, "%i");
 			DRAW_ASSET_PROPERTY(assetFlags, "%X");

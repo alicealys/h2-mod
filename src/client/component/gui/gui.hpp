@@ -28,4 +28,11 @@ namespace gui
 
 	void shutdown_gui();
 	void set_device(ID3D11Device* device, ID3D11DeviceContext* context);
+
+	void input_flags8(std::uint8_t* flags, const std::vector<const char*>& flag_names);
+	void input_flags(std::uint32_t* flags, const std::vector<const char*>& flag_names);
+	void input_flags(int* flags, const std::vector<const char*>& flag_names);
+
+	bool input_u8(const char* label, unsigned char* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
+	bool input_u16(const char* label, unsigned short* v, int step = 1, int step_fast = 100, ImGuiInputTextFlags flags = 0);
 }

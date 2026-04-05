@@ -4,11 +4,7 @@
 
 #include "game/game.hpp"
 #include "game/dvars.hpp"
-#include "game/assets.hpp"
 
-#include "component/scheduler.hpp"
-#include "component/command.hpp"
-#include "component/fastfiles.hpp"
 #include "../gui.hpp"
 #include "../asset_list.hpp"
 
@@ -19,7 +15,7 @@ namespace gui::asset_list::techet
 {
 	namespace
 	{
-		std::array<const char*, game::TECHNIQUE_COUNT> technique_names = 
+		std::array<const char*, game::TECHNIQUE_COUNT> technique_names =
 		{
 			"TECHNIQUE_ZPREPASS",
 			"TECHNIQUE_ZPREPASS_VELOCITY_RIGID",
@@ -322,14 +318,24 @@ namespace gui::asset_list::techet
 					ImGui::Text("null"); \
 				} \
 
-
 				if (ImGui::TreeNode(pass, "pass %i", o))
 				{
 					ADD_SHADER(vertexShader, game::ASSET_TYPE_VERTEXSHADER);
-					DRAW_SUB_ASSET_PROPERTY_NAME(pass, "%s", vertexDecl);
+					ADD_SHADER(vertexDecl, game::ASSET_TYPE_VERTEXDECL);
 					ADD_SHADER(hullShader, game::ASSET_TYPE_HULLSHADER);
 					ADD_SHADER(domainShader, game::ASSET_TYPE_DOMAINSHADER);
 					ADD_SHADER(pixelShader, game::ASSET_TYPE_PIXELSHADER);
+
+					static char buffer[64]{};
+					if (ImGui::InputText("vertexDecl", buffer, 64))
+					{
+						auto* decl = game::DB_FindXAssetHeader(game::ASSET_TYPE_VERTEXDECL, buffer, 0).vertexDecl;
+						if (decl)
+						{
+							pass->vertexDecl= decl;
+							std::memset(buffer, 0, 64);
+						} 
+					}
 
 					ImGui::NewLine();
 
@@ -455,8 +461,13 @@ namespace gui::asset_list::techet
 
 			static std::uint32_t inputs[game::TECHNIQUE_COUNT]{};
 
+			static auto show_null = false;
+			ImGui::Checkbox("show null techniques", &show_null);
+
 			static std::string technique_filter;
 			ImGui::InputText("filter", &technique_filter);
+
+			std::unordered_map<game::MaterialTechnique**, game::MaterialTechnique*> original_techs;
 
 			for (auto i = 0; i < game::TECHNIQUE_COUNT; i++)
 			{
@@ -467,15 +478,29 @@ namespace gui::asset_list::techet
 					continue;
 				}
 
-				if (ImGui::TreeNode(technique_names[i], "%s %s", technique_names[i], technique == nullptr ? "(null)" : ""))
+				if ((technique != nullptr || show_null) && 
+					ImGui::TreeNode(technique_names[i], "%i: %s %s", i, technique_names[i], technique == nullptr ? "(null)" : ""))
 				{
 					ImGui::InputScalarN("technique index", ImGuiDataType_U32, &inputs[i], 1);
 
 					ImGui::SameLine();
 
+					const auto modded_tech = original_techs.contains(&asset->techniques[i]);
+
 					if (ImGui::Button("copy technique") && inputs[i] < game::TECHNIQUE_COUNT)
 					{
+						if (!modded_tech)
+						{
+							original_techs[&asset->techniques[i]] = asset->techniques[i];
+						}
+
 						asset->techniques[i] = asset->techniques[inputs[i]];
+					}
+
+					if (modded_tech && ImGui::Button("restore technique"))
+					{
+						asset->techniques[i] = original_techs[&asset->techniques[i]];
+						original_techs.erase(&asset->techniques[i]);
 					}
 
 					if (technique != nullptr)
@@ -486,8 +511,6 @@ namespace gui::asset_list::techet
 					ImGui::TreePop();
 				}
 			}
-
-			ImGui::Separator();
 
 			return true;
 		}
