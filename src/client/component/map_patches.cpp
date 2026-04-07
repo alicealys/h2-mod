@@ -1045,6 +1045,24 @@ namespace map_patches
 
 			return result;
 		}
+
+		struct GfxCmdBufInput
+		{
+			float consts[363][4];
+		};
+
+		game::dvar_t* r_legacy_fog_patch = nullptr;
+		utils::hook::detour set_frame_fog_hook;
+
+		void set_frame_fog_stub(void* a1, GfxCmdBufInput* input, __m128* a3)
+		{
+			set_frame_fog_hook.invoke<void>(a1, input, a3);
+
+			if (r_legacy_fog_patch->current.enabled)
+			{
+				input->consts[game::CONST_SRC_CODE_ATMOS_FOG_PARMS_5][2] = 1.f;
+			}
+		}
 	}
 
 	class component final : public component_interface
@@ -1075,6 +1093,9 @@ namespace map_patches
 #ifdef DEBUG
 			material_compare_hook.create(0x14075B0E0, material_compare_stub);
 #endif
+
+			set_frame_fog_hook.create(0x1407A97B0, set_frame_fog_stub);
+			r_legacy_fog_patch = dvars::register_bool("r_legacyFogPatch", false, game::DVAR_FLAG_SCRIPT, "enable legacy fog patch (fixes black fx with legacy fog)");
 		}
 	};
 }

@@ -3431,12 +3431,12 @@ namespace game
 
 	};
 
-	enum WeaponSlotRestriction : std::int32_t
+	enum weapAutoHolsterType_t : std::int32_t
 	{
-		SLOT_RESTRICTION_NONE = 0x0,
-		SLOT_RESTRICTION_OPEN = 0x1,
-		SLOT_RESTRICTION_PRESET = 0x2,
-		SLOT_RESTRICTION_COUNT = 0x3,
+		WEAPON_AUTOHOLSTER_ALWAYS = 0x0,
+		WEAPON_AUTOHOLSTER_ONEMPTYFIRE = 0x1,
+		WEAPON_AUTOHOLSTER_NEVER = 0x2,
+		WEAPON_AUTOHOLSTER_NUM = 0x3,
 	};
 
 	enum AttachmentType : std::int32_t
@@ -3449,12 +3449,35 @@ namespace game
 
 	struct AttChargeInfo
 	{
-		char __pad0[28];
+		float minChargeTime;
+		float overChargeTime;
+		float timePerChargeShot;
+		int maxChargeShots;
+		float minChargeAngle;
+		float maxChargeAngle;
+		bool autoFireOnMaxCharge;
 	}; static_assert(sizeof(AttChargeInfo) == 28);
 
 	struct AttHybridSettings
 	{
-		char __pad0[72];
+		float adsSpread;
+		float adsAimPitch;
+		float adsTransInTime;
+		float adsTransInFromSprintTime;
+		float adsTransOutTime;
+		int adsReloadTransTime;
+		float adsCrosshairInFrac;
+		float adsCrosshairOutFrac;
+		float adsZoomFov;
+		float adsZoomInFrac;
+		float adsZoomOutFrac;
+		float adsFovLerpInTime;
+		float adsFovLerpOutTime;
+		float adsBobFactor;
+		float adsViewBobMult;
+		float adsViewErrorMin;
+		float adsViewErrorMax;
+		float adsFireAnimFrac;
 	}; static_assert(sizeof(AttHybridSettings) == 72);
 
 	union WAFieldParm
@@ -3488,6 +3511,9 @@ namespace game
 		FIELD_OP_STRING_APPEND = 2,
 		FIELD_OP_NUMBER_BEGIN = 3,
 		FIELD_OP_NUMBER_SET = 3,
+		FIELD_OP_NUMBER_ADD = 4,
+		//FIELD_OP_NUMBER_ADD_MULTIPLY = 5,
+		FIELD_OP_NUMBER_MULTIPLY = 6,
 		FIELD_OP_NUMBER_END = 6,
 		FIELD_OP_COUNT = 7,
 	};
@@ -3495,7 +3521,7 @@ namespace game
 	struct WAField
 	{
 		unsigned char index;
-		unsigned char fieldType; //WAFieldType fieldType;
+		unsigned char type; // WAFieldType type;
 		unsigned char code; // WAFieldCode code;
 		WAFieldParm parm;
 	}; static_assert(sizeof(WAField) == 16);
@@ -3511,6 +3537,7 @@ namespace game
 		AttachmentType type; // 16
 		weapType_t weaponType; // 20
 		weapClass_t weapClass; // 24
+		weapGreebleType_t greebleType; // 28
 		XModel** worldModels; // 32 (2 xmodels)
 		XModel** viewModels; // 40 (2 xmodels)
 		XModel** reticleViewModels; // 48 (64 xmodels)
@@ -3518,14 +3545,22 @@ namespace game
 		snd_alias_list_t** rollingSounds; // 64 (53 sounds)
 		AttChargeInfo* chargeInfo; // 72
 		AttHybridSettings* hybridSettings; // 80
-		scr_string_t* stringArray1; // 88 (4 strings) (hideTags?)
-		scr_string_t* stringArray2; // 96 (4 strings) (showTags?)
-		unsigned short* waFieldOffsets; // 104
-		WAField* waFields; // 112
-		unsigned int waFieldsCount; // 120 (MAX_ATTACH_FIELDS_PER_WEAPON = 256)
-		char __pad0[14];
+		scr_string_t* hideTags; // 88 (4 strings)
+		scr_string_t* showTags; // 96 (4 strings)
+		unsigned short* fieldOffsets; // 104
+		WAField* fields; // 112
+		unsigned int numFields; // 120 (MAX_ATTACH_FIELDS_PER_WEAPON = 256)
+		int loadIndex;
+		int unused1;
+		bool isAlternateAmmo;
+		bool hideIronSightsWithThisAttachment;
+		bool showMasterRail;
+		bool showSideRail;
+		bool shareAmmoWithAlt; // 136
+		bool knifeAlwaysAttached;
 		bool riotShield; // 138
-		char __pad1[5];
+		bool automaticAttachment;
+		int unused2;
 		// size: 144
 	}; static_assert(sizeof(WeaponAttachment) == 0x90);
 	static_assert(offsetof(WeaponAttachment, riotShield) == 138);
@@ -3719,8 +3754,8 @@ namespace game
 		int reloadAddTimeDualWield; // 1728 * x
 		int reloadEmptyDualMag; // 1732 * x
 		int reloadEmptyAddTimeDualMag; // 1736 * x
-		int u25; // 1740 * x // (unused)
-		int u26; // 1744 * x // (unused)
+		int speedReloadTime; // 1740 * x // (unused)
+		int speedReloadAddTime; // 1744 * x // (unused)
 		int dropTime; // 1748 * x
 		int raiseTime; // 1752 * x
 		int altDropTime; // 1756 * x
@@ -3752,28 +3787,40 @@ namespace game
 		int blastRightTime; // 1860 * x
 		int blastBackTime; // 1864 * x
 		int blastLeftTime; // 1868 * x
-		int u58; // 1872 * x (unused)
-		int u59; // 1876 * x (unused)
-		int u60; // 1880 * x (unused)
-		int u61; // 1884 * x (unused)
-		int u62; // 1888 * x (unused)
-		int u63; // 1892 * x (unused)
-		int u64; // 1896 * x (unused)
-		int u65; // 1900 * x (unused)
-		int u66; // 1904 * x (unused)
-		int u67; // 1908 * x (unused)
-		int u68; // 1912 * x (unused)
+		int slideInTime; // 1872 * x (unused)
+		int slideLoopTime; // 1876 * x (unused)
+		int slideOutTime; // 1880 * x (unused)
+		int highJumpInTime; // 1884 * x (unused)
+		int highJumpDropInTime; // 1888 * x (unused)
+		int highJumpDropLoopTime; // 1892 * x (unused)
+		int highJumpDropLandTime; // 1896 * x (unused)
+		int dodgeTime; // 1900 * x (unused)
+		int landDipTime; // 1904 * x (unused)
+		int hybridSightInTime; // 1908 * x (unused)
+		int hybridSightOutTime; // 1912 * x (unused)
 		int offhandSwitchTime; // 1916 * x
-		int u70; // 1920 * x (unknown)
-		int u71; // 1924 * x (unknown)
-		int u72; // 1928 * x (unknown)
-		int u73; // 1932 * x (unknown)
-		int u74; // 1936 * x (unknown)
+		int heatCooldownInTime; // 1920 * x
+		int heatCooldownOutTime; // 1924 * x
+		int heatCooldownOutReadyTime; // 1928 * x
+		int overheatOutTime; // 1932 * x
+		int overheatOutReadyTime; // 1936 * x
 		int u75; // 1936 * x (unknown)
 		int u76; // 1936 * x (unknown)
 		int u77; // 1936 * x (unknown)
 		int u78; // 1936 * x (unknown)
 	}; static_assert(sizeof(StateTimers) == 316);
+
+	struct clipindex_t
+	{
+		int clipIndex;
+		bool isAlternate;
+	};
+
+	struct ammoindex_t
+	{
+		int ammoIndex;
+		bool isAlternate;
+	};
 
 	struct WeaponDef
 	{
@@ -3785,12 +3832,12 @@ namespace game
 		const char* szDisplayName; // 8
 		const char* szOverlayName; // 16
 		const char* szAttachmentName;
-		const char* szUnknownName;
+		const char* szAltWeaponName;
 		XModel** gunModel; // 24 (2 xmodels)
 		XModel* handModel; // 32
-		XModel* unknownModel; // 40
+		XModel* persistentArmXModel; // 40
 		XModel** reticleViewModels; // 48 (64 xmodels)
-		const char* szModeName; // 56
+		const char* lobWorldModelName; // 56
 		XAnimParts** szXAnimsRightHanded; // 64 (190 xanims)
 		XAnimParts** szXAnimsLeftHanded; // 72 (190 xanims)
 		scr_string_t* hideTags; // 80 (32 xstrings)
@@ -3808,22 +3855,22 @@ namespace game
 		scr_string_t* notetrackFXMapKeys; // 176 (16 xstrings)
 		FxEffectDef** notetrackFXMapValues; // 184 (16 effects)
 		scr_string_t* notetrackFXMapTagValues; // 192 (16 xstrings)
-		scr_string_t* notetrackUnknownKeys; // 200 (16 xstrings)
-		char* notetrackUnknown; // 208 (16 chars)
-		scr_string_t* notetrackUnknownValues; // 216 (16 xstrings)
-		const char* szAltWeaponName; // 224
+		scr_string_t* notetrackHideTagKeys; // 200 (16 xstrings)
+		bool* notetrackHideTagValues; // 208 (16 chars)
+		scr_string_t* notetrackHideTagTagValues; // 216 (16 xstrings)
+		const char* szAdsrBaseSetting; // 224
 		FxEffectDef* viewFlashEffect; // 232
 		FxEffectDef* viewBodyFlashEffect; // 240
 		FxEffectDef* worldFlashEffect; // 248
 		FxEffectDef* viewFlashADSEffect; // 256
 		FxEffectDef* viewBodyFlashADSEffect; // 264
-		FxEffectDef* effect06; // 272
-		FxEffectDef* effect07; // 280
-		FxEffectDef* effect08; // 288
-		FxEffectDef* effect09; // 296
-		FxEffectDef* effect10; // 304
-		FxEffectDef* effect11; // 312
-		FxEffectDef* effect12; // 320
+		FxEffectDef* signatureViewFlashEffect; // 272
+		FxEffectDef* signatureViewBodyFlashEffect; // 280
+		FxEffectDef* signatureWorldFlashEffect; // 288
+		FxEffectDef* signatureViewFlashADSEffect; // 296
+		FxEffectDef* signatureViewBodyFlashADSEffect; // 304
+		FxEffectDef* meleeHitEffect; // 312
+		FxEffectDef* meleeMissEffect; // 320
 		snd_alias_list_t* pickupSound; // 1
 		snd_alias_list_t* pickupSoundPlayer; // 2
 		snd_alias_list_t* ammoPickupSound; // 3
@@ -3930,9 +3977,9 @@ namespace game
 		XModel* worldKnifeModel; // 1024
 		Material* hudIcon; // 1032
 		Material* pickupIcon; // 1040
-		Material* unknownIcon2; // 1048
-		Material* unknownIcon3; // 1056
-		Material* unknownIcon4; // 1064
+		Material* minimapIconFriendly; // 1048
+		Material* minimapIconEnemy; // 1056
+		Material* minimapIconNeutral; // 1064
 		Material* ammoCounterIcon; // 1072
 		const char* szAmmoName; // 1080
 		const char* szClipName; // 1088
@@ -3946,9 +3993,9 @@ namespace game
 		const char* fireMedRumble; // 1152
 		const char* fireHighRumble; // 1160
 		const char* meleeImpactRumble; // 1168
-		TracerDef* tracer1; // 1176
-		TracerDef* tracer2; // 1184
-		LaserDef* laser; // 1192
+		TracerDef* tracerType; // 1176
+		TracerDef* signatureTracerType; // 1184
+		LaserDef* laserType; // 1192
 		snd_alias_list_t* turretOverheatSound; // 1200
 		FxEffectDef* turretOverheatEffect; // 1208
 		const char* turretBarrelSpinRumble; // 1216
@@ -3960,7 +4007,7 @@ namespace game
 		XModel* stowOffsetModel; // 1312
 		TurretHydraulicSettings* turretHydraulicSettings; // 1320
 		int altWeapon; // 1328
-		unsigned char numWeaponAttachments; // 1332
+		unsigned char numAttachments; // 1332
 		unsigned char numAnimOverrides; // 1333
 		unsigned char numSoundOverrides; // 1334
 		unsigned char numFXOverrides; // 1335
@@ -3980,7 +4027,7 @@ namespace game
 		float burstFireCooldown; // 1376
 		weapGreebleType_t greebleType; // 1380
 		weapAutoReloadType_t autoReloadType; // 1384
-		WeaponSlotRestriction slotRestriction; // 1388
+		weapAutoHolsterType_t autoHolsterType; // 1388
 		OffhandClass offhandClass; // 1392
 		weapStance_t stance; // 1396
 		int reticleCenterSize; // 1400
@@ -4011,12 +4058,8 @@ namespace game
 		weaponIconRatioType_t ammoCounterIconRatio; // 1572
 		int ammoCounterClip; // 1576
 		int startAmmo; // 1580
-		int ammoIndex; // 1752
-		char ammoIndexUnknown; // 1588 (runtime variable)
-		char __pad002[3]; // padding?
-		int clipIndex; // 1592 (runtime variable)
-		char clipIndexUnknown; // 1596 (runtime variable)
-		char __pad003[3]; // padding?
+		ammoindex_t iAmmoIndex; // 1584 (runtime variable)
+		clipindex_t iClipIndex; // 1592 (runtime variable)
 		int maxAmmo; // 1600
 		int minAmmoReq; // 1604
 		int clipSize; // 1608
@@ -4040,9 +4083,9 @@ namespace game
 		float adsZoomFov; // 2272
 		float adsZoomInFrac; // 2276
 		float adsZoomOutFrac; // 2280
-		float adsSceneBlur; // 2284 (1401FC630) : float
-		float fU_007; // 2288 (1400CF870) : float (related to scene blur)
-		float xU_008; // 2292 X
+		float adsSceneBlurStrength; // 2284 (1401FC630)
+		float adsSceneBlurPhysicalScale; // 2288 (1400CF870)
+		float pad3; // 2292 X
 		ADSOverlay overlay; // 2296
 		WeapOverlayInteface_t overlayInterface; // 2352
 		float adsBobFactor; // 2356
@@ -4051,8 +4094,8 @@ namespace game
 		float hipSpreadDuckedMin; // 2368
 		float hipSpreadProneMin; // 2372
 		float hipSpreadStandMax; // 2376
-		float xU_009; // 2380 X
-		float xU_010; // 2384 X
+		float hipSpreadSprintMax; // 2380 X
+		float hipSpreadSlideMax; // 2384 X
 		float hipSpreadDuckedMax; // 2388
 		float hipSpreadProneMax; // 2392
 		float hipSpreadDecayRate; // 2396
@@ -4073,9 +4116,9 @@ namespace game
 		float adsIdleLerpStartTime; // 2456
 		float adsIdleLerpTime; // 2460
 		int adsTransInTime; // 2464
-		int xU_011; // 2468 X
+		int adsTransInFromSprintTime; // 2468 X
 		int adsTransOutTime; // 2472
-		float xU_012; // 2476 X
+		float swayMaxAngleSteadyAim; // 2476 X
 		float swayMaxAngle; // 2480
 		float swayLerpSpeed; // 2484
 		float swayPitchScale; // 2488
@@ -4203,19 +4246,20 @@ namespace game
 		float hipViewKickCenterSpeed; // 3044
 		float hipViewScatterMin; // 3048 //*
 		float hipViewScatterMax; // 3052 //*
-		float xU_043; // 3056 //*
-		int adsReloadTransTime; // 3060
+		float viewKickScale; // 3056 //*
+		int positionReloadTransTime; // 3060
 		float fightDist; // 3064
 		float maxDist; // 3068
 		const char* accuracyGraphName[2]; // 3072
 		vec2_t* accuracyGraphKnots[2]; // 3088
 		vec2_t* originalAccuracyGraphKnots[2]; // 3104
 		short accuracyGraphKnotCount[2]; // 3120
-		int positionReloadTransTime; // 3124 X
+		short originalAccuracyGraphKnotCount[2]; // 3120
 		float leftArc; // 3128
 		float rightArc; // 3132
 		float topArc; // 3136
 		float bottomArc; // 3140
+		char __pad[16];
 		float accuracy; // 3144
 		float aiSpread; // 3148
 		float playerSpread; // 3152
@@ -4234,7 +4278,6 @@ namespace game
 		float scanSpeed; // 3212
 		float scanAccel; // 3216
 		int scanPauseTime; // 3220
-		char __pad[16];
 		const char* szScript; // 3224
 		int minDamage; // 3232
 		int midDamage; // 3236
@@ -4242,12 +4285,12 @@ namespace game
 		int midPlayerDamage; // 3244
 		float maxDamageRange; // 3248
 		float minDamageRange; // 3252
-		int iU_045; // 3256 X
-		int iU_046; // 3260 X
-		int iU_047; // 3264 X
-		int iU_048; // 3268 X
-		float fU_049; // 3272 X
-		float fU_050; // 3276 X
+		int signatureAmmoInClip; // 3256 X
+		int signatureDamage; // 3260 X
+		int signatureMidDamage; // 3264 X
+		int signatureMinDamage; // 3268 X
+		float signatureMaxDamageRange; // 3272 X
+		float signatureMinDamageRange; // 3276 X
 		float destabilizationRateTime; // 3280
 		float destabilizationCurvatureMax; // 3284
 		int destabilizeDistance; // 3288
@@ -4257,10 +4300,10 @@ namespace game
 		float turretScopeZoomRate; // 3304 X
 		float turretScopeZoomMin; // 3308 X
 		float turretScopeZoomMax; // 3312 X
-		float xU_056; // 3316 X
-		float xU_057; // 3320 X
-		float xU_058; // 3324 X
-		float xU_059; // 3328 X
+		float overheatUpRate; // 3316 X
+		float overheatDownRate; // 3320 X
+		float overheatCooldownRate; // 3324 X
+		float overheatPenalty; // 3328 X
 		float turretBarrelSpinSpeed; // 3332
 		float turretBarrelSpinUpTime; // 3336
 		float turretBarrelSpinDownTime; // 3340 X
@@ -4284,26 +4327,26 @@ namespace game
 		float player_meleeHeight; // 3412
 		float player_meleeRange; // 3416
 		float player_meleeWidth; // 3420
-		float signatureFireTime; // 3424
-		int signatureNumBullets; // 3428
+		float changedFireTime; // 3424
+		int changedFireTimeNumBullets; // 3428
 		weapFireTimeInterpolation_t fireTimeInterpolationType; // 3432
-		int xU_075; // 3436 X
-		int ammoUsedPerShot; // 3440
-		int xU_076; // 3444 X
-		int xU_077; // 3448 X
-		int xU_078; // 3452 X
-		int iU_079; // 3456 // int numBulletTags (BG_ShowHideTagsBasedOnAltMode)
-		int iU_080; // 3460 // int tagForAmmo (1400C77D0)
+		int generateAmmo; // 3436 X
+		int ammoPerShot; // 3440
+		int explodeCount; // 3444 X
+		int batteryDischargeRate; // 3448 X
+		int extendedBattery; // 3452 X
+		int bulletsPerTag; // 3456 (1400C77D0)
+		int maxTags; // 3460 (1400C77D0)
 		scr_string_t stowTag; // 3464
-		bool bU_081; // 3468 X
-		bool unknownReticleBooleanValue1; // 3469 (CG_DrawCrosshair)
-		bool unknownReticleBooleanValue2; // 3470 (CG_DrawCrosshair)
+		unsigned char rattleSoundType; // 3468 X
+		bool adsShouldShowCrosshair; // 3469 (CG_DrawCrosshair)
+		bool adsCrosshairShouldScale; // 3470 (CG_DrawCrosshair)
 		bool turretADSEnabled; // 3471 X
 		bool knifeAttachTagLeft; // 3472
 		bool knifeAlwaysAttached; // 3473
 		bool meleeOverrideValues; // 3474
-		bool bU_083; // 3475 X
-		bool bU_084; // 3476 X
+		bool riotShieldEnableDamage; // 3475 X
+		bool allowPrimaryWeaponPickup; // 3476 X
 		bool sharedAmmo; // 3477
 		bool lockonSupported; // 3478
 		bool requireLockonToFire; // 3479
@@ -4319,20 +4362,20 @@ namespace game
 		bool aimDownSight; // 3489
 		bool canHoldBreath; // 3490
 		bool meleeOnly; // 3491
-		bool bU_085; // 3492 bool isMeleeAnimDelayed;? (0x14009FDC0)(1401F2BC0)
+		bool quickMelee; // 3492 (0x14009FDC0)(1401F2BC0)
 		bool bU_086; // 3493 X bool oldWeaponBot;?
 		bool canVariableZoom; // 3494
 		bool rechamberWhileAds; // 3495
 		bool bulletExplosiveDamage; // 3496
 		bool cookOffHold; // 3497
-		bool reticleSpin45; // 3498 X
-		bool reticleSideEnabled; // 3499
+		bool useBattery; // 3498 X
+		bool reticleSpin45; // 3499
 		bool clipOnly; // 3500
 		bool noAmmoPickup; // 3501
 		bool disableSwitchToWhenEmpty; // 3502
-		bool bU_088; // 3503 (14017E520) bool hiddenAmmo;?
-		bool hasMotionTracker; // 3504
-		bool bU_089; // 3505 X
+		bool suppressAmmoReserveDisplay; // 3503 (14017E520)
+		bool motionTracker; // 3504
+		bool markableViewmodel; // 3505 X
 		bool noDualWield; // 3506
 		bool flipKillIcon; // 3507
 		bool actionSlotShowAmmo; // 3508
@@ -4355,8 +4398,8 @@ namespace game
 		bool hasDetonatorDoubleTap; // 3525
 		bool disableFiring; // 3526
 		bool timedDetonation; // 3527
-		bool bU_090; // 3528 (G_FireGrenade)(CheckCrumpleMissile) bool usesGrenadeTimer?
-		bool bU_091; // 3529 (G_FireRocket) bool usesRocketTimer?
+		bool noCrumpleMissile; // 3528 (G_FireGrenade)(CheckCrumpleMissile)
+		bool fuseLitAfterImpact; // 3529 (G_FireRocket)
 		bool rotate; // 3530
 		bool holdButtonToThrow; // 3531 X
 		bool freezeMovementWhenFiring; // 3532
@@ -4373,40 +4416,45 @@ namespace game
 		bool useFastReloadAnims; // 3543 (140202800)
 		bool dualMagReloadSupported; // 3544
 		bool reloadStopsAlt; // 3545 X
-		bool bU_092; // 3546 X
+		bool useScopeDrift; // 3546 X
 		bool alwaysShatterGlassOnImpact; // 
 		bool bU_093; //
 		bool oldWeapon; // 3773 !!
-		bool bU_094; // 
-		bool xU_095; // 
-		bool hasCounterSilencer; // 
-		bool xU_097; // 
-		bool xU_098; // 
-		bool disableVariableAutosimRate; // 
-		bool bU_100; // 
-		bool bU_101; // 
-		bool bU_102; // 
-		bool bU_103; // 
-		bool bU_104; // 
-		bool bU_105; // 
-		bool cloakedWeapon; //
+		bool raiseToHold; // 3549 (BulletRicochet)(PM_Weapon_OffHandPrepare)
+		bool notifyOnPlayerImpact; // 3550 (BG_WeaponFireRecoil)(Missile_Impact)
+		bool decreasingKick; // 3551 X
+		bool counterSilencer; // 3552 (BG_HasCounterSilencer)
+		bool projSuppressedByEMP; // 3553 X
+		bool projDisabledByEMP; // 3554 X
+		bool autosimDisableVariableRate; // 3555
+		bool projPlayTrailEffectForOwnerOnly; // 3556 (CG_Missile)
+		bool projPlayBeaconEffectForOwnerOnly; // 3557 (CG_Missile)
+		bool projKillTrailEffectOnDeath; // 3558 (CG_Missile)
+		bool projKillBeaconEffectOnDeath; // 3559 (CG_Missile)
+		bool reticleDetonateHide; // 3560 X
+		bool cloaked; //
 		bool adsHideWeapon; //
 		bool adsHideHands; // 
 		bool bU_108; // 
-		bool adsBlurSceneEnabled; // 
+		bool adsSceneBlur; // 
 		bool usesSniperScope; // 
-		bool bU_112; // 
-		bool bU_113; // 
-		bool bU_114; // 
-		bool bU_115; // 
-		float xU_03_1;
-		float adsDofPhysicalFStop; // 
+		bool hasTransientModels; // 3567 (140499130) (14049CE70) (14049B890) (14049B680)
+		bool signatureAmmoAlternate; // 3568 X
+		bool useScriptCallbackForHit; // 3569 X
+		bool useBulletTagSystem; // 3570 (1400C77D0)
+		bool hideBulletTags; // 3571 (1400C77D0)
+		float adsDofPhysicalFstop; // 
 		float adsDofPhysicalFocusDistance; // 
-		float autosimSpeedScalar; //
-		float explosionReactiveMotionParts[5]; // 
-		char __pad_unknown[12]; //
+		float autosimSpeedScale; //
+		float reactiveMotionRadiusScale; // 3584 (BG_GetExplosionReactiveMotionParams)
+		float reactiveMotionFrequencyScale;
+		float reactiveMotionAmplitudeScale;
+		float reactiveMotionFalloff;
+		float reactiveMotionLifetime;
+		float fU_3604[3]; // 3604
 	}; static_assert(sizeof(WeaponDef) == 0xF08);
 
+	static_assert(offsetof(WeaponDef, accuracy) == 3368);
 	static_assert(offsetof(WeaponDef, viewFlashEffect) == 248);
 	static_assert(offsetof(WeaponDef, usesSniperScope) == 3791);
 	static_assert(offsetof(WeaponDef, adsHideWeapon) == 3787);
@@ -4414,7 +4462,7 @@ namespace game
 	static_assert(offsetof(WeaponDef, oldWeapon) == 3773);
 	static_assert(offsetof(WeaponDef, gunModel) == 0x28);
 	static_assert(offsetof(WeaponDef, handModel) == 0x30);
-	static_assert(offsetof(WeaponDef, szModeName) == 0x48);
+	static_assert(offsetof(WeaponDef, lobWorldModelName) == 0x48);
 	static_assert(offsetof(WeaponDef, szXAnimsLeftHanded) == 88);
 	static_assert(offsetof(WeaponDef, hideTags) == 0x60);
 	static_assert(offsetof(WeaponDef, attachments) == 104);
@@ -4436,11 +4484,11 @@ namespace game
 	static_assert(offsetof(WeaponDef, szScript) == 3448);
 	static_assert(offsetof(WeaponDef, stowTag) == 3688);
 
-	static_assert(offsetof(WeaponDef, ammoIndex) == 1752);
+	static_assert(offsetof(WeaponDef, iAmmoIndex) == 1752);
 	static_assert(offsetof(WeaponDef, standMoveMinSpeed) == 1712);
 	static_assert(offsetof(WeaponDef, weapType) == 1484);
 	static_assert(offsetof(WeaponDef, altWeapon) == 1472);
-	static_assert(offsetof(WeaponDef, clipIndex) == 1760);
+	static_assert(offsetof(WeaponDef, iClipIndex) == 1760);
 	static_assert(offsetof(WeaponDef, burstFireCooldown) == 1520);
 	static_assert(offsetof(WeaponDef, greebleType) == 1524);
 
@@ -6312,31 +6360,76 @@ namespace game
 		VEH_AXLE_COUNT = 0x3,
 	};
 
-	struct VehicleUnknown
-	{
-		char __pad[36];
-	};
-
-	static_assert(sizeof(VehicleUnknown) == 36);
-
 	struct VehiclePhysDef
 	{
 		int physicsEnabled;
 		const char* physPresetName;
 		PhysPreset* physPreset;
-		const char* unkString01;
-		VehicleUnknown* vehicleUnknown01;
+		const char* physMassName;
+		PhysMass* physMass;
 		const char* accelGraphName;
 		VehicleAxleType steeringAxle;
 		VehicleAxleType powerAxle;
 		VehicleAxleType brakingAxle;
-		float floatValues01[53];
+		float topSpeed;
+		float topSpeedTurbo;
+		float reverseSpeed;
+		float maxVelocity;
+		float maxPitch;
+		float maxRoll;
+		float wheelRadius;
+		float suspensionTravelFront;
+		float suspensionTravelRear;
+		float suspensionStrengthFront;
+		float suspensionDampingFront;
+		float suspensionStrengthRear;
+		float suspensionDampingRear;
+		float frictionBraking;
+		float frictionCoasting;
+		float frictionTopSpeed;
+		float frictionSide;
+		float frictionSideRear;
+		float handBrakeLongitudinalSteerableFrictionScale;
+		float handBrakeLateralSteerableFrictionScale;
+		float handBrakeLongitudinalNonsteerableFrictionScale;
+		float handBrakeLateralNonsteerableFrictionScale;
+		float handBrakingStrength;
+		float handBrakeExtraYawTorque;
+		float speedAtMaxHandBrakeExtraYawTorque;
+		float driveForceFalloffFraction;
+		float velocityDependentSlip;
+		float rollStability;
+		float rollResistance;
+		float pitchResistance;
+		float yawResistance;
+		float uprightStrengthPitch;
+		float uprightStrengthRoll;
+		float targetAirPitch;
+		float airYawTorque;
+		float airPitchTorque;
+		float minimumMomentumForCollision;
+		float collisionLaunchForceScale;
+		float wreckedMassScale;
+		float wreckedBodyFriction;
+		float minimumJoltForNotify;
+		float slipThresholdFront;
+		float slipThresholdRear;
+		float slipFricScaleFront;
+		float slipFricScaleRear;
+		float slipFricRateFront;
+		float slipFricRateRear;
+		float slipYawTorque;
+		float cruiseControlProportionalGain;
+		float cruiseControlIntegralGain;
+		float unk_float1;
+		float unk_float2;
+		float unk_float3;
 	};
 
 	static_assert(offsetof(VehiclePhysDef, physPreset) == 16);
-	static_assert(offsetof(VehiclePhysDef, unkString01) == 24);
+	static_assert(offsetof(VehiclePhysDef, physMassName) == 24);
 	static_assert(offsetof(VehiclePhysDef, physPresetName) == 8);
-	static_assert(offsetof(VehiclePhysDef, vehicleUnknown01) == 32);
+	static_assert(offsetof(VehiclePhysDef, physMass) == 32);
 	static_assert(offsetof(VehiclePhysDef, accelGraphName) == 40);
 	static_assert(sizeof(VehiclePhysDef) == 0x110);
 
@@ -6348,32 +6441,291 @@ namespace game
 		VEH_TURRET_FIRE_TYPE_COUNT = 0x3,
 	};
 
+	enum VehCamZOffsetMode : std::int32_t
+	{
+		VEHCAM_ZMODE_WORLD = 0x0,
+		VEHCAM_ZMODE_VEHICLE = 0x1,
+		VEHCAM_ZMODE_VIEW = 0x2,
+		VEHCAM_ZMODE_COUNT = 0x3,
+	};
+
 	struct VehicleDef
 	{
-		const char* internalName;
-		VehicleType vehicleType;
+		union
+		{
+			const char* name;
+			const char* internalName;
+		};
+		VehicleType type;
 		const char* useHintString;
 		int health;
-		float floatValues01[37]; // 184
-		int intValues01[8];
+		int quadBarrel;
+		int hitClientScriptables;
+		int multipleLinkedGroundEntities;
+		int hideVehicleForDriver;
+		float texScrollScale;
+		float topSpeed;
+		float accel;
+		float rotRate;
+		float rotAccel;
+		float maxBodyPitch;
+		float maxBodyRoll;
+		int legIK;
+		float fakeBodyAccelPitch;
+		float fakeBodyAccelRoll;
+		float fakeBodyVelPitch;
+		float fakeBodyVelRoll;
+		float fakeBodySideVelPitch;
+		float fakeBodyPitchStrength;
+		float fakeBodyRollStrength;
+		float fakeBodyPitchDampening;
+		float fakeBodyRollDampening;
+		float fakeBodyBoatRockingAmplitude;
+		float fakeBodyBoatRockingPeriod;
+		float fakeBodyBoatRockingRotationPeriod;
+		float fakeBodyBoatRockingFadeoutSpeed;
+		float boatBouncingMinForce;
+		float boatBouncingMaxForce;
+		float boatBouncingRate;
+		float boatBouncingFadeinSpeed;
+		float boatBouncingFadeoutSteeringAngle;
+		float collisionDamage;
+		float collisionSpeed;
+		float killcamOffset[3];
+		float unk_float1;
+		float unk_float2;
+		int playerProtected;
+		int bulletDamage;
+		int armorPiercingDamage;
+		int grenadeDamage;
+		int projectileDamage;
+		int projectileSplashDamage;
+		int heavyExplosiveDamage;
+		int pad1;
 		VehiclePhysDef vehPhysDef;
-		float floatValues02[12]; // 48
+		float boostDuration;
+		float boostRechargeTime;
+		float boostAcceleration;
+		float boostTopSpeed;
+		float suspensionTravel;
+		float maxSteeringAngle;
+		float steeringLerp;
+		float steeringLerpCentering;
+		float minSteeringScale;
+		float minSteeringSpeed;
+		int disableWheelsTurning;
+		float pad2;
 		const char* unkString01;
-		FxEffectDef* effect01; // 536
-		FxEffectDef* effect02;
-		FxEffectDef* effect03;
-		FxEffectDef* effect04;
-		FxEffectDef* effect05;
-		float floatValues03[7]; // 168
-		int intValues02[1];
-		float floatValues04[32]; // 168
+		FxEffectDef* treadDefaultFx;
+		FxEffectDef* handBrakeDefaultFx;
+		FxEffectDef* handBrakeLeftFx;
+		FxEffectDef* handBrakeRightFx;
+		FxEffectDef* boostFx;
+		float treadFxSlowestRepeatRate;
+		float treadFxFastestRepeatRate;
+		float treadFxMinSpeed;
+		float treadFxMaxSpeed;
+		int vehHelicopterIsASplinePlane;
+		int vehHelicopterOrbitsAroundPoint;
+		int vehHelicopterLockAltitude;
+		int vehHelicopterOffsetFromMesh;
+		float vehHelicopterAltitudeOffset;
+		float vehHelicopterPitchOffset;
+		float vehHelicopterBoundsRadius;
+		float vehHelicopterBoundsOffsetZ;
+		float vehHelicopterMaxSpeed;
+		float vehHelicopterMaxSpeedVertical;
+		float vehHelicopterMaxAccel;
+		float vehHelicopterMaxAccelVertical;
+		float vehHelicopterDecelerationFwd;
+		float vehHelicopterDecelerationSide;
+		float vehHelicopterDecelerationUp;
+		float vehHelicopterMaxYawRate;
+		float vehHelicopterMaxYawAccel;
+		float vehHelicopterTiltFromVelocity;
+		float vehHelicopterTiltFromControllerAxes;
+		float vehHelicopterTiltFromAcceleration;
+		float vehHelicopterTiltFromDeceleration;
+		float vehHelicopterTiltFromFwdAndYaw_VelAtMaxTilt;
+		float vehHelicopterTiltFromFwdAndYaw;
+		float vehHelicopterTiltMomentum;
+		float vehHelicopterTiltSpeed;
+		float vehHelicopterMaxPitch;
+		float vehHelicopterMaxRoll;
+		float vehHelicopterHoverSpeedThreshold;
+		float vehHelicopterJitterJerkyness;
+		int vehHelicopterUseHoverWobble;
+		float vehHelicopterHoverWobblePhase;
+		float vehHelicopterHoverWobbleAmplitude;
+		int vehHelicopterUseBob;
+		float vehHelicopterBobPhase;
+		float vehHelicopterBobAmplitude;
+		float vehHelicopterLookaheadTime;
 		int vehHelicopterSoftCollisions;
 		int vehHelicopterUseGroundFX;
 		FxEffectDef* vehHelicopterGroundFx;
 		FxEffectDef* vehHelicopterGroundWaterFx;
-		float floatValues05[78];
-		const char* unkString02;
-		float floatValues06[82];
+		float vehHelicopterGroundFxDefaultRepeatRate;
+		float vehHelicopterGroundFxSlowestRepeatRate;
+		float vehHelicopterGroundFxFastestRepeatRate;
+		float vehHelicopterGroundFxMinGroundDist;
+		float vehHelicopterGroundFxMaxGroundDist;
+		float vehSplinePlaneCorridorMaxXVel;
+		float vehSplinePlaneCorridorMaxZVel;
+		float vehSplinePlaneCorridorMaxXAccel;
+		float vehSplinePlaneCorridorMaxZAccel;
+		float vehSplinePlaneTangentLookAtRate;
+		float vehSplinePlaneMaxPitchSpeed;
+		float vehSplinePlaneMaxYawSpeed;
+		float vehSplinePlaneMaxRollSpeed;
+		float vehSplinePlanePitchSpeedRate;
+		float vehSplinePlaneYawSpeedRate;
+		float vehSplinePlaneRollSpeedRateUp;
+		float vehSplinePlaneRollSpeedRateDown;
+		float vehSplinePlaneMaxPitchAccel;
+		float vehSplinePlaneMaxYawAccel;
+		float vehSplinePlaneMaxRollAccel;
+		float vehSplinePlaneYawToRollFactor;
+		float vehSplinePlaneRollToYawFactor;
+		float vehSplinePlaneRollToYawFactorBlend;
+		float vehSplinePlaneMaxPitch;
+		float vehSplinePlaneMaxRoll;
+		float vehSplinePlaneMaxPitchFromRoll;
+		float vehSplinePlaneMaxRollYawOffset;
+		float vehSplinePlaneRollYawOffsetThreshold;
+		float vehSplinePlaneMaxTiltRoll;
+		float vehSplinePlaneMaxTiltPitch;
+		float vehSplinePlaneTiltRollRate;
+		float vehSplinePlaneTiltPitchRate;
+		float vehJetbikeThrottleForce;
+		float vehJetbikeStrafeForce;
+		float vehJetbikeYawTorque;
+		float vehJetbikePitchTorque;
+		float vehJetbikeYawDamping;
+		float vehJetbikePitchDamping;
+		float vehJetbikeRollDamping;
+		float vehJetbikeRepulsorMaxForceFraction;
+		float vehJetbikeRepulsorMinForceFraction;
+		float vehJetbikeRepulsorCompressionDampingConstant;
+		float vehJetbikeRepulsorReboundDampingConstant;
+		float vehJetbikeRepulsorTorqueScale;
+		float vehJetbikeRepulsorCrossCoupling;
+		float vehJetbikeAntislipConstant;
+		float vehJetbikeAntislipMaxForce;
+		float vehJetbikeControlForceLocalOffsetX;
+		float vehJetbikeControlForceLocalOffsetZ;
+		float vehJetbikeControlTorqueLocalOffsetX;
+		float vehJetbikeControlTorqueLocalOffsetZ;
+		float vehJetbikeMaxControlForce;
+		float vehJetbikeMinContactForFullControl;
+		float vehJetbikeThrustScaleWithNoContact;
+		float vehJetbikeTorqueScaleWithNoContact;
+		float vehJetbikeUprightingTorque;
+		float vehJetbikeUprightingTorqueWithNoContact;
+		float vehJetbikeWeathervaneTorque;
+		float vehJetbikeWeathervaneTorqueWithNoContact;
+		float vehJetbikeAiSteeringConstant;
+		float vehJetbikeAiStationarySteeringScale;
+		float vehJetbikeAiThrottleConstant;
+		float vehHovertankAutoYawForce;
+		float vehHovertankAutoBrakeForce;
+		float vehHovertankRandomHoverForceMagMin;
+		float vehHovertankRandomHoverForceMagMax;
+		float vehHovertankRandomHoverForceStartTimerMin;
+		float vehHovertankRandomHoverForceStartTimerMax;
+		float vehHovertankRandomHoverForceDurationMin;
+		float vehHovertankRandomHoverForceDurationMax;
+		float vehDiveboatInitialDiveForceFactor;
+		float vehDiveboatContinuingDiveForceFactor;
+		float vehDiveboatMaxDiveTime;
+		float vehDiveboatDiveResetTime;
+		float vehDiveboatSubmergedDragFactor;
+		float vehDiveboatRollFactor;
+		float vehDiveboatBuoyancyOffset;
+		float pad3;
+		const char* vehDiveboatSteeringGraphName;
+		int steeringGraphIndex;
+		float vehOrbiterMinYaw;
+		float vehOrbiterMaxYaw;
+		float vehOrbiterMinZ;
+		float vehOrbiterMaxZ;
+		float vehOrbiterAngularAcceleration;
+		float vehOrbiterAngularMaxVelocity;
+		float vehOrbiterAngularDeceleration;
+		float vehOrbiterAngularADSDeceleration;
+		float vehOrbiterAngularBraking;
+		float vehOrbiterAngularADSBraking;
+		float vehOrbiterAngularLookAheadTime;
+		float vehOrbiterVerticalAcceleration;
+		float vehOrbiterVerticalMaxVelocity;
+		float vehOrbiterVerticalDeceleration;
+		float vehOrbiterVerticalADSDeceleration;
+		float vehOrbiterVerticalBraking;
+		float vehOrbiterVerticalADSBraking;
+		float vehOrbiterVerticalLookAheadTime;
+		float vehOrbiterADSVelocityMult;
+		float vehOrbiterTiltRollMax;
+		float vehOrbiterTiltRollRate;
+		float vehOrbiterTiltPitchMax;
+		float vehOrbiterTiltPitchRate;
+		int camLookEnabled;
+		int camRelativeControl;
+		int camRemoteDrive;
+		float camLerp;
+		float camHeight;
+		float camRadius;
+		float camPitchInfluence;
+		float camYawInfluence;
+		float camRollInfluence;
+		float camFovIncrease;
+		float camFovOffset;
+		float camFovSpeed;
+		float camReturnSpeed;
+		float camReturnLerp;
+		float camVehicleAnglePitchRate;
+		float camVehicleAngleYawRate;
+		float camVehicleAngleRollRate;
+		float camShakeMinSpeed;
+		float camShakeMaxSpeed;
+		float camShakeMinFreq;
+		float camShakeMaxFreq;
+		float camShakeMaxAmplitudePitch;
+		float camShakeMaxAmplitudeYaw;
+		float camShakeMaxAmplitudeRoll;
+		float camShakeMaxAmplitudeX;
+		float camShakeMaxAmplitudeY;
+		float camShakeMaxAmplitudeZ;
+		float camShakeMinAmplitudeScale;
+		int camShakeTurretInherit;
+		int vehCam_UseGDT;
+		float vehCam_anglesPitch;
+		float vehCam_anglesYaw;
+		float vehCam_anglesRoll;
+		float vehCam_offsetX;
+		float vehCam_offsetY;
+		float vehCam_offsetZ;
+		float vehCam_radius;
+		float vehCam_speedInfluence;
+		float vehCam_pitchTurnRate;
+		float vehCam_pitchClamp;
+		float vehCam_yawTurnRate;
+		float vehCam_yawClamp;
+		VehCamZOffsetMode vehCam_zOffsetMode;
+		float vehCam_anglesPitch3P;
+		float vehCam_anglesYaw3P;
+		float vehCam_anglesRoll3P;
+		float vehCam_offsetX3P;
+		float vehCam_offsetY3P;
+		float vehCam_offsetZ3P;
+		float vehCam_radius3P;
+		float vehCam_speedInfluence3P;
+		float vehCam_pitchTurnRate3P;
+		float vehCam_pitchClamp3P;
+		float vehCam_yawTurnRate3P;
+		float vehCam_yawTurnRate3PHandbrakeInc;
+		float vehCam_yawClamp3P;
+		VehCamZOffsetMode vehCam_zOffsetMode3P;
+		float pad4;
 		const char* turretWeaponName;
 		WeaponDef* turretWeapon;
 		float turretHorizSpanLeft;
@@ -6406,7 +6758,7 @@ namespace game
 		snd_alias_list_t* idleHighSnd;
 		snd_alias_list_t* engineLowSnd;
 		snd_alias_list_t* engineHighSnd;
-		snd_alias_list_t* sound01; // rename
+		snd_alias_list_t* boostSnd;
 		float engineSndSpeed;
 		scr_string_t audioOriginTag;
 		snd_alias_list_t* idleLowSndAlt;
@@ -6451,18 +6803,18 @@ namespace game
 	};
 
 	static_assert(offsetof(VehicleDef, unkString01) == 528);
-	static_assert(offsetof(VehicleDef, unkString02) == 1072);
+	static_assert(offsetof(VehicleDef, vehDiveboatSteeringGraphName) == 1072);
 	static_assert(offsetof(VehicleDef, turretWeaponName) == 1408);
 	static_assert(offsetof(VehicleDef, turretSpinSnd) == 1464);
 	static_assert(offsetof(VehicleDef, turretStopSnd) == 1472);
-	static_assert(offsetof(VehicleDef, effect01) == 536);
+	static_assert(offsetof(VehicleDef, treadDefaultFx) == 536);
 	static_assert(offsetof(VehicleDef, compassFriendlyIcon) == 1536);
 	static_assert(offsetof(VehicleDef, compassEnemyAltIcon) == 1560);
 	//static_assert(offsetof(VehicleDef, effect07) == 752);
 	static_assert(offsetof(VehicleDef, trophyTags) == 1500);
 	static_assert(offsetof(VehicleDef, trophyExplodeFx) == 1520);
 	static_assert(offsetof(VehicleDef, idleLowSnd) == 1576);
-	static_assert(offsetof(VehicleDef, sound01) == 1608);
+	static_assert(offsetof(VehicleDef, boostSnd) == 1608);
 	static_assert(offsetof(VehicleDef, audioOriginTag) == 1620);
 	static_assert(offsetof(VehicleDef, idleLowSndAlt) == 1624);
 	static_assert(offsetof(VehicleDef, engineHighSndAlt) == 1648);
