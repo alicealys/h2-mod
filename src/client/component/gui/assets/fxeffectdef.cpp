@@ -120,9 +120,9 @@ namespace gui::asset_list::fxeffectdef
 				add_view_button(index, game::ASSET_TYPE_XMODEL, visual->model->name);
 				break;
 			case game::FX_ELEM_TYPE_RUNNER:
-				ImGui::Text(visual->effectDef.name);
+				ImGui::Text(visual->effectDef.handle->name);
 				ImGui::SameLine();
-				add_view_button(index, game::ASSET_TYPE_FX, visual->effectDef.name);
+				add_view_button(index, game::ASSET_TYPE_FX, visual->effectDef.handle->name);
 				break;
 			case game::FX_ELEM_TYPE_SOUND:
 				ImGui::Text(visual->soundName);

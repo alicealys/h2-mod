@@ -70,8 +70,8 @@ namespace command
 						desc = info.value().description;
 					}
 
-					console::info("\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX\n",
-						name.data(), current, reset, dvar->name);
+					console::info("\"%s\" is: \"%s\" default: \"%s\" hash: 0x%08lX flags: 0x%08lX\n",
+						name.data(), current, reset, dvar->name, dvar->flags);
 
 					console::info("%s\n", desc.data());
 					console::info("   %s\n", dvars::dvar_get_domain(dvar->type, dvar->domain).data());

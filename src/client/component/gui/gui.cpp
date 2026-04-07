@@ -11,6 +11,7 @@
 #include <utils/string.hpp>
 #include <utils/hook.hpp>
 #include <utils/concurrency.hpp>
+#include <utils/properties.hpp>
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -54,6 +55,15 @@ namespace gui
 			bool toggled = false;
 		} globals;
 
+		void set_cfg_path()
+		{
+			const auto path = utils::properties::get_appdata_path() / "imgui.ini";
+			const auto path_str = utils::memory::duplicate_string(path.generic_string());
+
+			auto& io = ImGui::GetIO();
+			io.IniFilename = path_str;
+		}
+
 		void initialize_gui_context()
 		{
 			ImGui::CreateContext();
@@ -63,6 +73,8 @@ namespace gui
 			ImGui_ImplDX11_Init(globals.device, globals.device_context);
 
 			globals.initialized = true;
+
+			set_cfg_path();
 		}
 
 		void run_event_queue()
@@ -465,7 +477,6 @@ namespace gui
 				show_notifications();
 				draw_main_menu_bar();
 			});
-
 		}
 
 		void pre_destroy() override
