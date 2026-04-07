@@ -16,8 +16,6 @@ namespace renderer
 		utils::hook::detour r_init_draw_method_hook;
 		utils::hook::detour r_update_front_end_dvar_options_hook;
 
-		game::dvar_t* r_legacy_fog_patch = nullptr;
-
 		int get_fullbright_technique()
 		{
 			switch (dvars::r_fullbright->current.integer)
@@ -58,22 +56,6 @@ namespace renderer
 
 			return r_update_front_end_dvar_options_hook.invoke<bool>();
 		}
-
-		struct GfxCmdBufInput
-		{
-			float consts[363][4];
-		};
-
-		utils::hook::detour set_frame_fog_hook;
-		void set_frame_fog_stub(void* a1, GfxCmdBufInput* input, __m128* a3)
-		{
-			set_frame_fog_hook.invoke<void>(a1, input, a3);
-
-			if (r_legacy_fog_patch->current.enabled)
-			{
-				input->consts[game::CONST_SRC_CODE_ATMOS_FOG_PARMS_5][2] = 1.f;
-			}
-		}
 	}
 
 	class component final : public component_interface
@@ -85,9 +67,6 @@ namespace renderer
 
 			r_init_draw_method_hook.create(0x14072F950, &r_init_draw_method_stub);
 			r_update_front_end_dvar_options_hook.create(0x14076EE70, &r_update_front_end_dvar_options_stub);
-
-			set_frame_fog_hook.create(0x1407A97B0, set_frame_fog_stub);
-			r_legacy_fog_patch = dvars::register_bool("r_legacyFogPatch", false, 0x40, "enable legacy fog patch (fixes black fx with legacy fog)");
 		}
 	};
 }
