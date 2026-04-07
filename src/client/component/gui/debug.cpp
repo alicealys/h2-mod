@@ -75,6 +75,7 @@ namespace gui::debug
 		struct : draw_settings
 		{
 			bool draw_node_links;
+			bool negotation_links_only;
 			float size = 10.f;
 			float link_thickness = 1.f;
 			float color[4] = {1.f, 0.f, 0.f, 1.f};
@@ -436,6 +437,7 @@ namespace gui::debug
 				ImGui::Checkbox("Lock camera", &path_node_settings.camera_locked);
 
 				ImGui::Checkbox("Draw node links", &path_node_settings.draw_node_links);
+				ImGui::Checkbox("Negotation links only", &path_node_settings.negotation_links_only);
 
 				if (ImGui::TreeNode("Object type"))
 				{
@@ -539,6 +541,12 @@ namespace gui::debug
 				const auto num = node->constant.Links[i].nodeNum;
 				const auto linked = &game::pathData->nodes[num];
 
+				if (path_node_settings.negotation_links_only &&
+					linked->constant.type != game::NODE_NEGOTIATION_BEGIN && linked->constant.type != game::NODE_NEGOTIATION_END)
+				{
+					continue;
+				}
+
 				get_pathnode_origin(linked, linked_origin);
 				if (distance_2d(path_node_settings.camera, linked_origin) < path_node_settings.range)
 				{
@@ -582,6 +590,12 @@ namespace gui::debug
 			{
 				float origin[3] = {};
 				const auto node = &game::pathData->nodes[i];
+
+				if (path_node_settings.negotation_links_only && 
+					node->constant.type != game::NODE_NEGOTIATION_BEGIN && node->constant.type != game::NODE_NEGOTIATION_END)
+				{
+					continue;
+				}
 
 				get_pathnode_origin(node, origin);
 				if (distance_2d(path_node_settings.camera, origin) >= path_node_settings.range)
