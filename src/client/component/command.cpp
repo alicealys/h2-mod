@@ -386,9 +386,9 @@ namespace command
 						else
 						{
 							const auto wp = game::G_GetWeaponForName(arg.data());
-							if (wp)
+							if (wp.data)
 							{
-								const auto def = game::weapon_defs[wp];
+								const auto def = game::weapon_defs[wp.fields.weaponIdx];
 
 								const auto want_dual_wield = std::atoi(params.get(2));
 								const auto dual_wield = !def->noDualWield && want_dual_wield;
@@ -539,6 +539,28 @@ namespace command
 					{
 					}
 				}, scheduler::pipeline::server);
+			});
+
+			add("fxDumpActive", []()
+			{
+				const auto system = game::FX_GetSystem(0);
+				if (system == nullptr)
+				{
+					return;
+				}
+
+				printf("============================================================\n");
+
+				for (auto i = system->firstActiveEffect; i < system->firstFreeEffect; i++)
+				{
+					const auto handle = system->allEffectHandles[2 * (i & 0x7FF)];
+					const auto fx = reinterpret_cast<game::FxEffect*>(reinterpret_cast<size_t>(system->effects) + 16 * handle);
+					printf("\t%s @ (%f, %f, %f)\n", fx->def->name, fx->frameNow.origin[0], fx->frameNow.origin[1], fx->frameNow.origin[2]);
+				}
+
+				printf("TOTAL FX: %d\n", system->firstFreeEffect - system->firstActiveEffect);
+			
+				printf("============================================================\n");
 			});
 		}
 	};

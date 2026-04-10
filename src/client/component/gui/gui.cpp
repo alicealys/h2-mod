@@ -462,7 +462,6 @@ namespace gui
 		return ImGui::InputScalar(label, ImGuiDataType_U16, (void*)v, (void*)(step > 0 ? &step : NULL), (void*)(step_fast > 0 ? &step_fast : NULL), format, flags);
 	}
 
-
 	class component final : public component_interface
 	{
 	public:

@@ -23,15 +23,24 @@ namespace gui::asset_list
 		std::string assets_value_filter[game::XAssetType::ASSET_TYPE_COUNT];
 		std::string zone_name_filter[game::XAssetType::ASSET_TYPE_COUNT];
 
+		struct asset_button_t
+		{
+			std::string name;
+			std::optional<std::function<bool()>> enabled;
+			std::function<void(const game::XAssetHeader)> callback;
+		};
+
 		std::unordered_map<game::XAssetType, std::function<void(const std::string&)>> asset_view_callbacks;
 		std::unordered_map<game::XAssetType, std::function<std::string(const std::string&)>> asset_name_override_callbacks;
+		std::vector<asset_button_t> asset_buttons[game::XAssetType::ASSET_TYPE_COUNT];
 
 		bool default_only[game::ASSET_TYPE_COUNT] = {};
 		int asset_count[game::ASSET_TYPE_COUNT] = {};
 		bool disabled_zones[game::ASSET_TYPE_COUNT][0x100] = {};
 		bool show_asset_zone = true;
+		int flags_filter[game::ASSET_TYPE_COUNT] = {};
 
-		void draw_table_row(game::XAssetType type, const game::XAssetEntry* entry, bool should_add_view_btn)
+		void draw_table_row(game::XAssetType type, const game::XAssetEntry* entry, bool should_add_view_btn, bool has_buttons)
 		{
 			const auto asset = entry->asset;
 			auto asset_name = game::DB_GetXAssetName(&asset);
@@ -71,16 +80,39 @@ namespace gui::asset_list
 				}
 			}
 
+			if (type == game::ASSET_TYPE_FX && ((entry->asset.header.fx->flags & flags_filter[type]) == 0) && flags_filter[type] != 0)
+			{
+				return;
+			}
+
 			ImGui::TableNextRow();
 
-			if (should_add_view_btn)
+			if (has_buttons || should_add_view_btn)
 			{
 				ImGui::TableSetColumnIndex(col_index++);
 				ImGui::PushID(asset_count[type]);
-				if (ImGui::Button("view"))
+
+				if (should_add_view_btn)
 				{
-					asset_view_callbacks.at(type)(asset_name);
+					if (ImGui::Button("view"))
+					{
+						asset_view_callbacks.at(type)(asset_name);
+					}
 				}
+
+				for (const auto& btn : asset_buttons[type])
+				{
+					if (!btn.enabled.has_value() || btn.enabled->operator()())
+					{
+						ImGui::SameLine();
+
+						if (ImGui::Button(btn.name.data()))
+						{
+							btn.callback(entry->asset.header);
+						}
+					}
+				}
+
 				ImGui::PopID();
 			}
 
@@ -170,6 +202,11 @@ namespace gui::asset_list
 				ImGui::InputText("value", &assets_value_filter[type]);
 			}
 
+			if (type == game::ASSET_TYPE_FX)
+			{
+				ImGui::InputInt("flags", &flags_filter[type]);
+			}
+
 			if (ImGui::InputText("zone name", &zone_name_filter[type]))
 			{
 				for (auto zone = 0u; zone <= *game::g_zoneCount; zone++)
@@ -205,8 +242,18 @@ namespace gui::asset_list
 
 			ImGui::BeginChild("assets list");
 
+			auto has_buttons = false;
+			for (const auto& btn : asset_buttons[type])
+			{
+				if (!btn.enabled.has_value() || btn.enabled->operator()())
+				{
+					has_buttons = true;
+					break;
+				}
+			}
+
 			auto column_count = 1;
-			column_count += should_add_view_btn;
+			column_count += should_add_view_btn || has_buttons;
 			column_count += show_asset_zone;
 			column_count += type == game::ASSET_TYPE_LOCALIZE_ENTRY;
 
@@ -215,7 +262,7 @@ namespace gui::asset_list
 				fastfiles::enum_asset_entries(type, [&](const game::XAssetEntry* entry)
 				{
 					asset_count[type]++;
-					draw_table_row(type, entry, should_add_view_btn);
+					draw_table_row(type, entry, should_add_view_btn, has_buttons);
 				}, true);
 
 				ImGui::EndTable();
@@ -281,6 +328,16 @@ namespace gui::asset_list
 	void add_asset_name_override_callback(game::XAssetType type, const std::function<std::string(const std::string&)>& callback)
 	{
 		asset_name_override_callbacks.insert(std::make_pair(type, callback));
+	}
+
+	void add_asset_button(game::XAssetType type, const std::string& name, const std::function<void(const game::XAssetHeader)>& callback,
+		const std::optional<std::function<bool()>>& enabled_callback)
+	{
+		asset_button_t button{};
+		button.name = name;
+		button.callback = callback;
+		button.enabled = enabled_callback;
+		asset_buttons[type].emplace_back(button);
 	}
 
 	class component final : public component_interface

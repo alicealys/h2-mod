@@ -140,7 +140,7 @@ namespace notifies
 			return scripting::lua::convert(state, entity);
 		}
 
-		std::string get_weapon_name(unsigned int weapon, bool isAlternate)
+		std::string get_weapon_name(game::Weapon weapon, bool isAlternate)
 		{
 			char output[1024] = {0};
 			game::BG_GetWeaponNameComplete(weapon, isAlternate, output, 1024);
@@ -164,7 +164,7 @@ namespace notifies
 		}
 
 		void scr_entity_damage_stub(game::gentity_s* self, game::gentity_s* inflictor, game::gentity_s* attacker, const float* v_dir, const float* v_point,
-			int damage, int dflags, const unsigned int means_of_death, const unsigned int weapon, bool is_alternate, 
+			int damage, int dflags, const unsigned int means_of_death, const game::Weapon weapon, bool is_alternate, 
 			unsigned int a11, const int hit_loc, unsigned int a13, unsigned int a14)
 		{
 			{

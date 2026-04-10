@@ -6,7 +6,9 @@ namespace game
 {
 	// Functions
 	
-	WEAK symbol<void(float* angles, float(*axis)[3])> AnglesToAxis{0x140613090};
+	WEAK symbol<void(const float* angles, float(*axis)[3])> AnglesToAxis{0x140613090};
+	WEAK symbol<void(const float (*axis)[3], float* angles)> AxisToAngles{0x14060D410};
+	WEAK symbol<void(const float* angles, float* forward, float* right, float* up)> AngleVectors{0x140612ED0};
 	
 	WEAK symbol<void(int type, VariableUnion u)> AddRefToValue{0x1405C0EB0};
 	WEAK symbol<void(unsigned int id)> AddRefToObject{0x1405C0EA0};
@@ -15,14 +17,14 @@ namespace game
 	WEAK symbol<void(int type, VariableUnion u)> RemoveRefToValue{0x1405C29B0};
 	WEAK symbol<void(unsigned int id)> RemoveRefToObject{0x1405C28A0};
 
-	WEAK symbol<void(unsigned int weapon, bool isAlternate, 
+	WEAK symbol<void(Weapon weapon, bool isAlternate,
 		char* output, unsigned int maxStringLen)> BG_GetWeaponNameComplete{0x1406A0800};
 
 	WEAK symbol<void(int localClientNum, const char* text)> Cbuf_AddText{0x14059A050};
 
 	WEAK symbol<void(int localClientNum, const char* message, int style)> CG_GameMessage{0x14037F450};
 	WEAK symbol<void(int localClientNum, const char* message)> CG_GameMessageBold{0x14037F1B0};
-	WEAK symbol<char*(const unsigned int weapon, 
+	WEAK symbol<char*(const Weapon weapon, 
 		bool isAlternate, char* outputBuffer, int bufferLen)> CG_GetWeaponDisplayName{0x1403B9210};
 	WEAK symbol<int(int localClientNum)> CG_GetGameTime{0x14037F580};
 
@@ -57,8 +59,9 @@ namespace game
 	WEAK symbol<size_t(XAssetType type)> DB_GetXAssetTypeSize{0x1403E40D0};
 	WEAK symbol<void(void* levelLoad, const char* name, 
 		const unsigned int allocFlags, const unsigned __int64 sizeEst)> DB_LevelLoadAddZone{0x1404145D0};
-	WEAK symbol<int(game::XAssetType type, const char* name)> DB_IsXAssetDefault{0x1404143C0};
-	WEAK symbol<int(game::XAssetType type, const char* name)> DB_XAssetExists{0x140417FD0};
+	WEAK symbol<int(XAssetType type, const char* name)> DB_IsXAssetDefault{0x1404143C0};
+	WEAK symbol<int(XAssetType type, const char* name)> DB_XAssetExists{0x140417FD0};
+	WEAK symbol<int(XAssetType type, XAssetHeader* assets, int maxCount)> DB_GetAllXAssetOfType{0x140613D30};
 	
 	WEAK symbol<dvar_t*(const char* name)> Dvar_FindVar{0x140618F90};
 	WEAK symbol<dvar_t*(int hash)> Dvar_FindMalleableVar{0x140618F00};
@@ -99,15 +102,19 @@ namespace game
 	WEAK symbol<GamerProfileData*(GamerProfileData*, int controllerIndex, 
 		const char* name, __int64 a4)> GamerProfile_GetDataByName{0x1403DCB70};
 
-	WEAK symbol<unsigned int(const char* name)> G_GetWeaponForName{0x14051B260};
-	WEAK symbol<int(void* ps, unsigned int weapon, int a3, int a4, __int64 a5, int a6)> 
+	WEAK symbol<Weapon(const char* name)> G_GetWeaponForName{0x14051B260};
+	WEAK symbol<unsigned int(const char* name)> G_PrecacheModel{0x1402902C0};
+	WEAK symbol<int(void* ps, Weapon weapon, int a3, int a4, __int64 a5, int a6)>
 		G_GivePlayerWeapon{0x14051B660};
-	WEAK symbol<void(void* ps, const unsigned int weapon, int hadWeapon)> G_InitializeAmmo{0x1404C4110};
-	WEAK symbol<void(int localClientNum, const unsigned int weapon)> G_SelectWeapon{0x14051C0D0};
+	WEAK symbol<void(void* ps, const Weapon weapon, int hadWeapon)> G_InitializeAmmo{0x1404C4110};
+	WEAK symbol<void(int localClientNum, const Weapon weapon)> G_SelectWeapon{0x14051C0D0};
 	WEAK symbol<void(trace_t* results, const float* start, const float* end, 
 		const Bounds* bounds, int passEntityNum, int contentmask)> G_TraceCapsule{0x1404CBFE0};
 	WEAK symbol<void(int* hitNum, const float* start, const float* end, 
 		int passEntityNum, int passEntityNum1, int contentmask)> G_SightTrace{0x1404CBCA0};
+
+	WEAK symbol<FxSystem*(int localClientNum)> FX_GetSystem{0x140459940};
+
 	WEAK symbol<bool(int localClientNum, ScreenPlacement* screenPlacement, const float* worldDir, float* outScreenPos)> WorldPosToScreenPos{0x14036F310};
 
 	WEAK symbol<char*(const size_t size)> Hunk_AllocateTempMemoryHigh{0x140614790};
@@ -189,6 +196,8 @@ namespace game
 	WEAK symbol<void(const void* obj, void* pose, unsigned int entnum, unsigned int renderFxFlags, float* lightingOrigin, 
 		float materialTime, __int64 a7, __int64 a8)> R_AddDObjToScene{0x140775C40};
 	WEAK symbol<HANDLE(unsigned __int64* outUserData, void* dest, unsigned __int64 bytes)> R_Cinematic_SysIO_BinkRead{0x1407191B0};
+	WEAK symbol<void(XModel* model, game::GfxScaledPlacement* placement, unsigned int renderFlags,
+		unsigned __int16* cachedLightingHandle, float* colorLit, float* colorUnlit, float* colorEmissive)> R_FilterXModelIntoScene{0x1407249D0};
 
 	WEAK symbol<void()> RB_SetIdentity{0x1407A0590};
 	WEAK symbol<void(Material* material, 

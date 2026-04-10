@@ -4829,6 +4829,12 @@ namespace game
 		float origin[3];
 	};
 
+	struct GfxScaledPlacement
+	{
+		GfxPlacement base;
+		float scale;
+	};
+
 	struct DynEntityHingeDef
 	{
 		float axisOrigin[3];
