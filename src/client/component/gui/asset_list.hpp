@@ -7,7 +7,8 @@ namespace gui::asset_list
 {
 	void add_asset_view_callback(game::XAssetType, const std::function<void(const std::string&)>& callback);
 	void add_asset_name_override_callback(game::XAssetType type, const std::function<std::string(const std::string&)>& callback);
-	
+	void add_asset_button(const game::XAssetType, const std::string& name, const std::function<void(const game::XAssetHeader)>& callback,
+		const std::optional<std::function<bool()>>& enabled_callback);
 	void add_view_button(int id, game::XAssetType type, const char* name);
 
 	template <typename T>
@@ -57,5 +58,15 @@ namespace gui::asset_list
 				}
 			}
 		}, false);
+	}
+
+	template <typename T>
+	void add_asset_button(const game::XAssetType type, const std::string& name, const std::function<void(T*)>& callback,
+		const std::optional<std::function<bool()>>& enabled_callback = {})
+	{
+		add_asset_button(type, name, [=](const game::XAssetHeader header)
+		{
+			callback(reinterpret_cast<T*>(header.data));
+		}, enabled_callback);
 	}
 }

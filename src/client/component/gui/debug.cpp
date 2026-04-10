@@ -67,7 +67,7 @@ namespace gui::debug
 			bool enabled;
 			bool camera_locked;
 			object_type type;
-			float mesh_thickness = 1.f;
+			float mesh_thickness = 2.f;
 			float range = 500.f;
 			float camera[3] = {};
 		};
@@ -80,6 +80,11 @@ namespace gui::debug
 			float link_thickness = 1.f;
 			float color[4] = {1.f, 0.f, 0.f, 1.f};
 		} path_node_settings{};
+
+		struct : draw_settings
+		{
+			float color[4] = {0.f, 1.0f, 1.f, 0.3f};
+		} fx_settings{};
 
 		struct : draw_settings
 		{
@@ -421,6 +426,21 @@ namespace gui::debug
 			draw_square_from_points(vertices[7], vertices[4], vertices[0], vertices[3], color, thickness, mesh_only);
 		}
 
+		void draw_text(const char* text, float* origin, float* color)
+		{
+			float screen_center[2];
+			if (!world_pos_to_screen_pos(origin, screen_center))
+			{
+				return;
+			}
+
+			ImGuiWindow* window = ImGui::GetCurrentWindow();
+
+			const auto text_size = ImGui::CalcTextSize(text);
+			window->DrawList->AddText(ImGui::GetDefaultFont(), ImGui::GetFontSize() * 2.f, ImVec2(screen_center[0] - text_size[0],
+				screen_center[1]), ImColor(color[0], color[1], color[2], 1.f), text, 0, 0.f, 0);
+		}
+
 		void draw_window()
 		{
 			static auto* enabled = &gui::enabled_menus["debug"];
@@ -512,6 +532,23 @@ namespace gui::debug
 				ImGui::SliderFloat("mesh thickness", &entity_bound_settings.mesh_thickness, 1.f, 20.f);
 				ImGui::Checkbox("mesh only", &entity_bound_settings.mesh_only);
 				ImGui::SliderInt("circle max points", &entity_bound_settings.point_count, 3, 360);
+
+				ImGui::TreePop();
+			}
+
+			if (ImGui::TreeNode("Effects"))
+			{
+				ImGui::Checkbox("Draw", &fx_settings.enabled);
+				ImGui::Checkbox("Lock camera", &fx_settings.camera_locked);
+
+				ImGui::SliderFloat("range", &fx_settings.range, 0.f, 10000.f);
+				ImGui::SliderFloat("mesh thickness", &fx_settings.mesh_thickness, 1.f, 20.f);
+
+				if (ImGui::TreeNode("Color picker"))
+				{
+					ImGui::ColorPicker4("color", fx_settings.color);
+					ImGui::TreePop();
+				}
 
 				ImGui::TreePop();
 			}
@@ -718,6 +755,42 @@ namespace gui::debug
 			}
 		}
 
+		void draw_active_fx()
+		{
+			if (!fx_settings.enabled)
+			{
+				return;
+			}
+
+			const auto system = game::FX_GetSystem(0);
+			if (system == nullptr)
+			{
+				return;
+			}
+
+			for (auto i = system->firstActiveEffect; i < system->firstFreeEffect; i++)
+			{
+				const auto handle = system->allEffectHandles[2 * (i & 0x7FF)];
+				const auto fx = reinterpret_cast<game::FxEffect*>(reinterpret_cast<size_t>(system->effects) + 16 * handle);
+
+				const auto distance = distance_2d(entity_bound_settings.camera, fx->frameNow.origin);
+				if (distance > fx_settings.range)
+				{
+					continue;
+				}
+
+				constexpr const auto box_size = 25.f;
+				float box_origin[3]{};
+				box_origin[0] = fx->frameNow.origin[0];
+				box_origin[1] = fx->frameNow.origin[1];
+				box_origin[2] = fx->frameNow.origin[2] - box_size / 2;
+				draw_cylinder(box_origin, box_size, box_size, 6,
+					fx_settings.color, fx_settings.mesh_thickness, 1);
+				draw_text(fx->def->name, fx->frameNow.origin, fx_settings.color);
+
+			}
+		}
+
 		void update_camera()
 		{
 			camera[0] = game::refdef->org[0];
@@ -848,6 +921,7 @@ namespace gui::debug
 				draw_nodes();
 				draw_triggers();
 				draw_debug_items();
+				draw_active_fx();
 				end_render_window();
 			}, true);
 

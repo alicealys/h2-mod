@@ -455,6 +455,31 @@ namespace fastfiles
 			replace_offset(0x140422649 + 6, &xmodel_data.unk_array, 0x10);
 		}
 
+		void g_precache_attachments_stub()
+		{
+			constexpr const auto max_count = 256;
+			game::XAssetHeader assets[max_count]{};
+			const auto count = game::DB_GetAllXAssetOfType(game::ASSET_TYPE_ATTACHMENT, assets, max_count);
+
+			for (auto i = 0; i < count; i++)
+			{
+				const auto attachment = assets[i].attachment;
+				if (attachment->worldModels == nullptr)
+				{
+					continue;
+				}
+
+				for (auto o = 0; o < 2; o++)
+				{
+					const auto world_model = attachment->worldModels[o];
+					if (world_model != nullptr)
+					{
+						game::G_PrecacheModel(world_model->name);
+					}
+				}
+			}
+		}
+
 		void reallocate_asset_pools()
 		{
 			reallocate_xmodel_pool();
@@ -464,6 +489,8 @@ namespace fastfiles
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_XANIM, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_LOCALIZE_ENTRY, 2>();
 			reallocate_asset_pool_multiplier<game::ASSET_TYPE_SOUND_CURVE, 2>();
+			reallocate_asset_pool_multiplier<game::ASSET_TYPE_ATTACHMENT, 2>();
+			utils::hook::jump(0x14051B9B0, g_precache_attachments_stub);
 		}
 
 		void add_custom_level_load_zone(game::LevelLoad* load, const std::string& name, const size_t size_est)

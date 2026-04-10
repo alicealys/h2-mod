@@ -1628,7 +1628,7 @@ namespace d3d11
 			severity_levels[severity_level_count] = nullptr;
 
 			d3d11_debug = dvars::register_bool("d3d11_debug", false, game::DVAR_FLAG_SAVED, "enable d3d11 debug layer");
-			d3d11_debug_level = dvars::register_enum("d3d11_debugLevel", severity_levels, D3D11_MESSAGE_SEVERITY_WARNING, game::DVAR_FLAG_SAVED,
+			d3d11_debug_level = dvars::register_enum("d3d11_debugLevel", severity_levels, D3D11_MESSAGE_SEVERITY_WARNING, game::DVAR_FLAG_NONE,
 				"d3d11 debug message severity level");
 			d3d11_debug_legacy = dvars::register_bool("d3d11_debugLegacyMode", false, game::DVAR_FLAG_SAVED, "use legacy d3d11 debug messages mode (dbgview)");
 

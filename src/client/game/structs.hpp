@@ -1097,6 +1097,169 @@ namespace game
 		// ...
 	};
 
+	struct $39EF277EA8613772F6FC6094760A0E98
+	{
+		unsigned __int32 weaponIdx : 8;
+		unsigned __int32 weaponVariation : 6;
+		unsigned __int32 weaponScopes : 3;
+		unsigned __int32 weaponUnderBarrels : 2;
+		unsigned __int32 weaponOthers : 8;
+		unsigned __int32 scopeVariation : 5;
+	};
+
+	union Weapon
+	{
+		$39EF277EA8613772F6FC6094760A0E98 fields;
+		unsigned int data;
+	};
+
+	struct FxLighting
+	{
+		float intensity[3];
+	};
+
+	struct trajectory_t
+	{
+		int trType;
+		int trTime;
+		int trDuration;
+		float trBase[3];
+		float trDelta[3];
+	};
+
+	struct FxEffect
+	{
+		FxEffectDef* def;
+		int status;
+		unsigned __int16 firstElemHandle[3];
+		unsigned __int16 firstSortedElemHandle;
+		unsigned __int16 firstTrailHandle;
+		unsigned __int16 firstSparkFountainHandle;
+		unsigned __int16 firstSpotLightHandle;
+		unsigned __int16 occlusionQueryHandle[1];
+		float occlusionFade;
+		char __pad0[18];
+		unsigned __int16 randomSeed;
+		unsigned __int16 owner;
+		FxLighting lighting;
+		unsigned __int16 updateCount;
+		unsigned __int16 markEntnum;
+		unsigned __int16 flags;
+		unsigned __int16 scriptableInstanceIndex;
+		unsigned __int8 scriptablePartIndex;
+		unsigned __int8 scriptableBoneIndex;
+		unsigned __int8 bolt;
+		unsigned __int8 exploderID;
+		unsigned __int8 markViewmodelClientIndex;
+		unsigned __int8 runnerSortOrder;
+		int frameCount;
+		int msecBegin;
+		int msecLastUpdate;
+		int unk;
+		float distanceTravelled;
+		FxSpatialFrame frameAtSpawn;
+		FxSpatialFrame frameNow;
+		FxSpatialFrame framePrev;
+		trajectory_t trajectory;
+		int endTime;
+	};
+
+	struct FxCamera
+	{
+		float origin[3];
+		int isValid;
+		float frustum[6][4];
+		float axis[3][3];
+		unsigned int frustumPlaneCount;
+		bool thermal;
+		float viewOffset[3];
+		float tanHalfFov[2];
+		float znear;
+		unsigned int pad[3];
+	};
+
+	struct FxSpriteData
+	{
+		void* indices;
+		Material* material;
+		const char* name;
+		unsigned int indexCount;
+		unsigned int vertIndexBase;
+		unsigned int pad[3];
+	};
+
+	struct FxSystem
+	{
+		FxSpriteData sprite;
+		FxEffect* effects;
+		void* trails;
+		void* bolts;
+		void* sparkFountains;
+		void* sparkFountainClusters;
+		int firstFreeTrail;
+		int firstFreeBolt;
+		int firstFreeSparkFountain;
+		int firstFreeSparkFountainCluster;
+		void* sparkClouds;
+		void* trailElems;
+		void* elems;
+		void* elemChild;
+		unsigned __int16* nextElemHandleInEffect;
+		unsigned __int16* prevElemHandleInEffect;
+		int firstFreeElem;
+		int firstFreeSparkCloud;
+		int firstFreeTrailElem;
+		int gfxCloudCount;
+		void* visState;
+		void* visStateBufferRead;
+		void* visStateBufferWrite;
+		char __pad1[40];
+		int firstActiveEffect;
+		int firstNewEffect;
+		int firstFreeEffect;
+		unsigned __int16* allEffectHandles;
+		unsigned __int16 activeSpotLightEffectHandle[1];
+		int activeSpotLightEffectCount;
+		int msecNow;
+		int msecDelta;
+		int msecDraw;
+		int frameCount;
+		float radiometricUnit;
+		float radiometricScale;
+		int localClientNum;
+		void** restartEffectsList;
+		unsigned int restartCount;
+		void* spawnCmdList;
+		int* spawnCmdRead;
+		int* spawnCmdWrite;
+		void* lock;
+		unsigned int systemFlags;
+		void* command;
+		void* deleteElementRequest;
+		int numDeleteElementRequest;
+		void* spawnElementRequest;
+		int numSpawnElementRequest;
+		void* updateElement;
+		int numUpdateElement;
+		FxCamera camera;
+		FxCamera cameraPrevArray[1];
+		float sunFxPosition[3];
+		int activeTrailCount;
+		int trailIndicesCount;
+		int activeBoltCount;
+		int activeSparkFountainCount;
+		int activeSparkFountainClusterCount;
+		int activeElemCount;
+		int activeSparkCloudCount;
+		int activeTrailElemCount;
+		int numProf0PPU;
+		int numProf0SPU;
+		int numProf1PPU;
+		int numProf1SPU;
+	};
+
+	static_assert(offsetof(FxSystem, firstActiveEffect) == 0xE8);
+
 	namespace hks
 	{
 		struct lua_State;
