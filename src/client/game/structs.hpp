@@ -1213,7 +1213,7 @@ namespace game
 		void* visState;
 		void* visStateBufferRead;
 		void* visStateBufferWrite;
-		char __pad1[40];
+		char __pad0[40];
 		int firstActiveEffect;
 		int firstNewEffect;
 		int firstFreeEffect;
@@ -1243,6 +1243,7 @@ namespace game
 		int numUpdateElement;
 		FxCamera camera;
 		FxCamera cameraPrevArray[1];
+		char __pad1[1568]; 
 		float sunFxPosition[3];
 		int activeTrailCount;
 		int trailIndicesCount;
