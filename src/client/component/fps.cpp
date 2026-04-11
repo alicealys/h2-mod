@@ -35,6 +35,8 @@ namespace fps
 
 		game::dvar_t* com_wait_end_frame_mode = nullptr;
 
+		game::dvar_t* fx_profile = nullptr;
+
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
 		float fps_color_ok[4] = {1.0f, 0.7f, 0.3f, 1.0f};
 		float fps_color_bad[4] = {1.0f, 0.3f, 0.3f, 1.0f};
@@ -340,6 +342,40 @@ namespace fps
 				text_y, 1.0f, 1.0f, 0.0f, cg_speed_graph_font_color->current.vector, 0);
 		}
 
+		void draw_fx_profile()
+		{
+			if (!fx_profile->current.enabled)
+			{
+				return;
+			}
+
+			const auto system = game::FX_GetSystem(0);
+			static float color[4]{};
+			color[0] = 0.f;
+			color[1] = 1.f;
+			color[2] = 1.f;
+			color[3] = 1.f;
+
+			auto line = 0;
+			const auto draw_line = [&](const char* name, int count, int max)
+			{
+				const auto font = fps_font;
+				const auto text = utils::string::va("%5i of %5i %s", count, max, name);
+				const auto x = screen_max[0] - 500.f;
+				game::R_AddCmdDrawText(text, 0x7FFFFFFF, font, x, 85.f + 25.f * line++, 1.0f, 1.0f, 0.0f, color, 0);
+			};
+
+			const auto get_count = [&](void* elems, int first_free)
+			{
+				const auto free_elem = reinterpret_cast<size_t>(elems) + first_free * 32;
+				return static_cast<int>((free_elem - reinterpret_cast<size_t>(elems)) >> 5);
+			};
+
+			draw_line("effect objects", system->firstFreeEffect - system->firstActiveEffect, 2048);
+			draw_line("bolts", get_count(system->bolts, system->firstFreeBolt), 512);
+			draw_line("trails", get_count(system->trails, system->firstFreeTrail), 256);
+		}
+
 		void draw()
 		{
 			if (*dvars::cg_draw_2d && !(*dvars::cg_draw_2d)->current.enabled)
@@ -359,6 +395,7 @@ namespace fps
 			draw_speed();
 			draw_speed_graph();
 			draw_game_time();
+			draw_fx_profile();
 		}
 
 		void r_process_workers_with_timeout_stub(void* a1, void* a2)
@@ -443,6 +480,9 @@ namespace fps
 				"Include velocity on the z axis when calculating the speed");
 
 			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
+
+
+			fx_profile = dvars::register_bool("fx_profile", false, game::DVAR_FLAG_NONE, "Turn on FX profiling");
 
 			// Make fps capping accurate
 			com_wait_end_frame_mode = dvars::register_int("com_waitEndFrameMode", 0, 0, 2, game::DVAR_FLAG_SAVED, "Wait end frame mode (0 = default, 1 = sleep(n), 2 = loop sleep(0)");

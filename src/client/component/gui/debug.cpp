@@ -83,6 +83,7 @@ namespace gui::debug
 
 		struct : draw_settings
 		{
+			std::string name_filter;
 			float color[4] = {0.f, 1.0f, 1.f, 0.3f};
 		} fx_settings{};
 
@@ -544,6 +545,8 @@ namespace gui::debug
 				ImGui::SliderFloat("range", &fx_settings.range, 0.f, 10000.f);
 				ImGui::SliderFloat("mesh thickness", &fx_settings.mesh_thickness, 1.f, 20.f);
 
+				ImGui::InputText("name filter", &fx_settings.name_filter);
+
 				if (ImGui::TreeNode("Color picker"))
 				{
 					ImGui::ColorPicker4("color", fx_settings.color);
@@ -774,7 +777,7 @@ namespace gui::debug
 				const auto fx = reinterpret_cast<game::FxEffect*>(reinterpret_cast<size_t>(system->effects) + 16 * handle);
 
 				const auto distance = distance_2d(entity_bound_settings.camera, fx->frameNow.origin);
-				if (distance > fx_settings.range)
+				if (distance > fx_settings.range || !utils::string::strstr_lower(fx->def->name, fx_settings.name_filter.data()))
 				{
 					continue;
 				}

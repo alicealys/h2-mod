@@ -1010,19 +1010,19 @@ namespace map_patches
 		}
 
 		utils::hook::detour r_get_lighting_info_for_effects_hook;
-		void r_get_lighting_info_for_effects_stub(float* samplePos, char tryUseCache, float radiometricUnit, float* outColor, GfxPrimaryLightsAndWeights* outPrimaryLightsAndWeights, void* a6)
+		void r_get_lighting_info_for_effects_stub(__int64* a1, char a2, char a3, float a4, float* a5, void* a6)
 		{
 			if (r_lightGridNonCompressed && r_lightGridNonCompressed->current.enabled)
 			{
 				auto* world = (*game::gfx_map);
 				if (world->lightGrid.colors)
 				{
-					r_get_lighting_info_for_effects_hook.invoke<void>(samplePos, 0, radiometricUnit, outColor, outPrimaryLightsAndWeights, a6);
+					r_get_lighting_info_for_effects_hook.invoke<void>(a1, 0, a3, a4, a5, a6);
 					return;
 				}
 			}
 
-			r_get_lighting_info_for_effects_hook.invoke<void>(samplePos, tryUseCache, radiometricUnit, outColor, outPrimaryLightsAndWeights, a6);
+			r_get_lighting_info_for_effects_hook.invoke<void>(a1, a2, a3, a4, a5, a6);
 		}
 
 		utils::hook::detour material_compare_hook;
