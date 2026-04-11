@@ -14,7 +14,7 @@
 #define speed_font game::R_RegisterFont("fonts/bank.ttf", 70)
 #define material_white game::Material_RegisterHandle("white")
 
-namespace fps
+namespace overlay
 {
 	namespace
 	{
@@ -33,8 +33,6 @@ namespace fps
 
 		game::dvar_t* cg_draw_game_time = nullptr;
 
-		game::dvar_t* com_wait_end_frame_mode = nullptr;
-
 		game::dvar_t* fx_profile = nullptr;
 
 		float fps_color_good[4] = {0.6f, 1.0f, 0.0f, 1.0f};
@@ -51,7 +49,6 @@ namespace fps
 		std::deque<float> speed_history;
 
 		utils::hook::detour sub_1407C55D0_hook;
-		utils::hook::detour com_frame_hook;
 
 		struct cg_perf_data
 		{
@@ -397,56 +394,6 @@ namespace fps
 			draw_game_time();
 			draw_fx_profile();
 		}
-
-		void r_process_workers_with_timeout_stub(void* a1, void* a2)
-		{
-			if (com_wait_end_frame_mode->current.enabled)
-			{
-				return;
-			}
-
-			utils::hook::invoke<void>(0x140793DE0, a1, a2);
-		}
-
-		void com_frame_stub()
-		{
-			const auto value = com_wait_end_frame_mode->current.integer;
-			if (value == 0)
-			{
-				return com_frame_hook.invoke<void>();
-			}
-
-			const auto start = std::chrono::high_resolution_clock::now();
-			com_frame_hook.invoke<void>();
-
-			auto max_fps = (*dvars::com_max_fps)->current.integer;
-			if (max_fps == 0)
-			{
-				max_fps = 1000;
-			}
-
-			constexpr auto nano_secs = std::chrono::duration_cast<std::chrono::nanoseconds>(1s);
-			const auto frame_time = nano_secs / max_fps;
-			
-			if (value == 1)
-			{
-				const auto diff = (std::chrono::high_resolution_clock::now() - start);
-				if (diff > frame_time)
-				{
-					return;
-				}
-
-				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff);
-				std::this_thread::sleep_for(ms);
-			}
-			else if (value == 2)
-			{
-				while (std::chrono::high_resolution_clock::now() - start < frame_time)
-				{
-					std::this_thread::sleep_for(0ms);
-				}
-			}
-		}
 	}
 
 	class component final : public component_interface
@@ -481,15 +428,9 @@ namespace fps
 
 			cg_draw_game_time = dvars::register_bool("cg_drawGameTime", false, game::DVAR_FLAG_SAVED, "Draw game time");
 
-
 			fx_profile = dvars::register_bool("fx_profile", false, game::DVAR_FLAG_NONE, "Turn on FX profiling");
-
-			// Make fps capping accurate
-			com_wait_end_frame_mode = dvars::register_int("com_waitEndFrameMode", 0, 0, 2, game::DVAR_FLAG_SAVED, "Wait end frame mode (0 = default, 1 = sleep(n), 2 = loop sleep(0)");
-			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
-			com_frame_hook.create(0x1405A3740, com_frame_stub);
 		}
 	};
 }
 
-REGISTER_COMPONENT(fps::component)
+REGISTER_COMPONENT(overlay::component)
