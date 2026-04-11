@@ -15,6 +15,10 @@ namespace patches
 		utils::hook::detour gscr_set_save_dvar_hook;
 		utils::hook::detour dvar_register_float_hook;
 
+		utils::hook::detour com_frame_hook;
+
+		game::dvar_t* com_wait_end_frame_mode = nullptr;
+
 		DECLSPEC_NORETURN void quit_stub()
 		{
 			utils::hook::invoke<void>(0x1408B1BA0);
@@ -65,6 +69,63 @@ namespace patches
 			{
 				return utils::hook::invoke<const char*>(0x140619240, dvar);
 			}
+		}
+
+		void r_process_workers_with_timeout_stub(void* a1, void* a2)
+		{
+			if (com_wait_end_frame_mode->current.enabled)
+			{
+				return;
+			}
+
+			utils::hook::invoke<void>(0x140793DE0, a1, a2);
+		}
+
+		void com_frame_stub()
+		{
+			const auto value = com_wait_end_frame_mode->current.integer;
+			if (value == 0)
+			{
+				return com_frame_hook.invoke<void>();
+			}
+
+			const auto start = std::chrono::high_resolution_clock::now();
+			com_frame_hook.invoke<void>();
+
+			auto max_fps = (*dvars::com_max_fps)->current.integer;
+			if (max_fps == 0)
+			{
+				max_fps = 1000;
+			}
+
+			constexpr auto nano_secs = std::chrono::duration_cast<std::chrono::nanoseconds>(1s);
+			const auto frame_time = nano_secs / max_fps;
+
+			if (value == 1)
+			{
+				const auto diff = (std::chrono::high_resolution_clock::now() - start);
+				if (diff > frame_time)
+				{
+					return;
+				}
+
+				const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(frame_time - diff);
+				std::this_thread::sleep_for(ms);
+			}
+			else if (value == 2)
+			{
+				while (std::chrono::high_resolution_clock::now() - start < frame_time)
+				{
+					std::this_thread::sleep_for(0ms);
+				}
+			}
+		}
+
+		void set_timer_resolution()
+		{
+			ULONG data{};
+			const utils::nt::library ntdll("ntdll.dll");
+			ntdll.invoke_pascal<void>("NtSetTimerResolution", 5000, TRUE, &data);
 		}
 	}
 
@@ -122,6 +183,13 @@ namespace patches
 			dvars::override::register_float("safeArea_vertical", 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
 			dvars::override::register_float("safeArea_adjusted_horizontal", 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
 			dvars::override::register_float("safeArea_adjusted_vertical", 1.f, 0.f, 1.f, game::DVAR_FLAG_SAVED);
+
+			// Make fps capping accurate
+			com_wait_end_frame_mode = dvars::register_int("com_waitEndFrameMode", 0, 0, 2, game::DVAR_FLAG_SAVED, "Wait end frame mode (0 = default, 1 = sleep(n), 2 = loop sleep(0)");
+			utils::hook::call(0x1405A38B9, r_process_workers_with_timeout_stub);
+			com_frame_hook.create(0x1405A3740, com_frame_stub);
+
+			set_timer_resolution();
 		}
 	};
 }
