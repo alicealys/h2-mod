@@ -324,7 +324,7 @@ namespace motd
 		bool get_current_wordle(motd_data_t& motd_data_)
 		{
 			const auto url = get_wordle_url();
-			const auto data = utils::http::get_data(url);
+			const auto data = download_file(url, false);
 			if (!data.has_value())
 			{
 				console::debug("failed to get current wordle %s\n", url.data());
