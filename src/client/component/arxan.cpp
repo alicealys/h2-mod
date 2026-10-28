@@ -65,7 +65,10 @@ namespace arxan
 			for (auto i = 0; i < DBG_FUNCS_COUNT; i++)
 			{
 				dbg_func_procs[i] = ntdll.get_proc<void*>(dbg_funcs_names[i]);
-				std::memcpy(dbg_func_bytes[i].buffer, dbg_func_procs[i], sizeof(dbg_func_bytes[i].buffer));
+				if (dbg_func_procs[i] != nullptr)
+				{
+					std::memcpy(dbg_func_bytes[i].buffer, dbg_func_procs[i], sizeof(dbg_func_bytes[i].buffer));
+				}
 			}
 		}
 
@@ -73,7 +76,10 @@ namespace arxan
 		{
 			for (auto i = 0; i < DBG_FUNCS_COUNT; i++)
 			{
-				utils::hook::copy(dbg_func_procs[i], dbg_func_bytes[i].buffer, sizeof(dbg_func_bytes[i].buffer));
+				if (dbg_func_procs[i] != nullptr)
+				{
+					utils::hook::copy(dbg_func_procs[i], dbg_func_bytes[i].buffer, sizeof(dbg_func_bytes[i].buffer));
+				}
 			}
 		}
 	}

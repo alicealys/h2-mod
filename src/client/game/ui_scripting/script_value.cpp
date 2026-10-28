@@ -37,8 +37,12 @@ namespace ui_scripting
 		if (this != &other)
 		{
 			this->release();
+
+			this->ref_ = other.ref_;
 			this->value_ = other.value_;
-			other.value_.t = game::hks::TNONE;
+
+			other.ref_ = 0;
+			other.value_ = {game::hks::TNONE, {}};
 		}
 
 		return *this;
@@ -71,7 +75,8 @@ namespace ui_scripting
 		if (this->ref_)
 		{
 			game::hks::hksi_luaL_unref(*game::hks::lua_state, -10000, this->ref_);
-			this->value_.t = game::hks::TNONE;
+			this->ref_ = 0;
+			this->value_ = {game::hks::TNONE, {}};
 		}
 	}
 
