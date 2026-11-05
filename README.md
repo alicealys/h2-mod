@@ -33,8 +33,8 @@ Any issue mentioning things like "h2-mod doesn't work" with no other information
 ## Compile from source
 
 - Clone the Git repo. Do NOT download it as ZIP, that won't work.
-- Update the submodules and run `premake5 vs2019` or simply use the delivered `generate.bat`.
-- Build via solution file in `build\h2-mod.sln`.
+- Install [premake5](https://premake.github.io/download) on your PATH
+- Run `generate.bat` and build via solution file in `build\h2-mod.sln` (Visual Studio 2022).
 
   ### Premake arguments
 

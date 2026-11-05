@@ -11,6 +11,8 @@ on:
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: false
+env:
+  PREMAKE_VERSION: "5.0.0"
 jobs:
   build:
     name: Build binaries
@@ -28,11 +30,16 @@ jobs:
           fetch-depth: 0
           lfs: false
 
+      - name: Install Premake5
+        uses: diamante0018/setup-premake@master
+        with:
+          version: ${{ env.PREMAKE_VERSION }}
+
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v2
 
       - name: Generate project files
-        run: tools/premake5 vs2022
+        run: premake5 vs2022
 
       - name: Set up problem matching
         uses: ammaraskar/msvc-problem-matcher@master
