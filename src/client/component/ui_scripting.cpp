@@ -487,11 +487,10 @@ namespace ui_scripting
 					return info_table;
 				}
 
-				const auto& map = info.value();
-				for (const auto& [key, value] : map.items())
-				{
-					info_table[key] = json_to_lua(value);
-				}
+				info_table["author"] = info->author;
+				info_table["description"] = info->description;
+				info_table["name"] = info->name;
+				info_table["version"] = info->version;
 
 				return info_table;
 			};
