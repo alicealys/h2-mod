@@ -220,106 +220,107 @@ newaction {
 dependencies.load()
 
 workspace "h2-mod"
-startproject "client"
-location "./build"
-objdir "%{wks.location}/obj"
-targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
+	startproject "client"
+		location "./build"
+		objdir "%{wks.location}/obj"
+		targetdir "%{wks.location}/bin/%{cfg.platform}/%{cfg.buildcfg}"
 
-configurations {"Debug", "Release"}
+		configurations {"Debug", "Release"}
 
-language "C++"
-cppdialect "C++latest"
+		language "C++"
+		cppdialect "C++latest"
 
-architecture "x86_64"
-platforms "x64"
+		architecture "x86_64"
+		platforms "x64"
 
-systemversion "latest"
-symbols "On"
-staticruntime "On"
-editandcontinue "Off"
-warnings "Extra"
-characterset "ASCII"
+		systemversion "latest"
+		symbols "On"
+		staticruntime "On"
+		editandcontinue "Off"
+		warnings "Extra"
+		characterset "ASCII"
 
-if _OPTIONS["dev-build"] then
-	defines {"DEV_BUILD"}
-end
+		if _OPTIONS["dev-build"] then
+			defines {"DEV_BUILD"}
+		end
 
-if os.getenv("CI") then
-	defines {"CI"}
-end
+		if os.getenv("CI") then
+			defines {"CI"}
+		end
 
-flags {"NoIncrementalLink", "NoMinimalRebuild", "MultiProcessorCompile", "No64BitChecks"}
+		incrementallink "Off"
+		minimalrebuild "Off"
+		multiprocessorcompile "On"
 
-filter "platforms:x64"
-	defines {"_WINDOWS", "WIN32"}
-filter {}
+		filter "platforms:x64"
+			defines {"_WINDOWS", "WIN32"}
+		filter {}
 
-filter "configurations:Release"
-	optimize "Size"
-	buildoptions {"/GL"}
-	linkoptions {"/IGNORE:4702", "/LTCG"}
-	defines {"NDEBUG"}
-	flags {"FatalCompileWarnings"}
-filter {}
+		filter "configurations:Release"
+			optimize "Full"
+			defines {"NDEBUG"}
+			buildoptions {"/bigobj"}
+			fatalwarnings {"All"}
+		filter {}
 
-filter "configurations:Debug"
-	optimize "Debug"
-	buildoptions {"/bigobj"}
-	defines {"DEBUG", "_DEBUG"}
-filter {}
+		filter "configurations:Debug"
+			optimize "Debug"
+			buildoptions {"/bigobj"}
+			defines {"DEBUG", "_DEBUG"}
+		filter {}
 
-project "common"
-kind "StaticLib"
-language "C++"
+		project "common"
+			kind "StaticLib"
+			language "C++"
 
-files {"./src/common/**.hpp", "./src/common/**.cpp"}
+			files {"./src/common/**.hpp", "./src/common/**.cpp"}
 
-includedirs {"./src/common", "%{prj.location}/src"}
+			includedirs {"./src/common", "%{prj.location}/src"}
 
-resincludedirs {"$(ProjectDir)src"}
+			resincludedirs {"$(ProjectDir)src"}
 
-dependencies.imports()
+			dependencies.imports()
 
-project "client"
-kind "ConsoleApp"
-language "C++"
+		project "client"
+			kind "ConsoleApp"
+			language "C++"
 
-targetname "h2-mod"
+			targetname "h2-mod"
 
-pchheader "std_include.hpp"
-pchsource "src/client/std_include.cpp"
+			pchheader "std_include.hpp"
+			pchsource "src/client/std_include.cpp"
 
-linkoptions {"/IGNORE:4254", "/DYNAMICBASE:NO", "/SAFESEH:NO", "/LARGEADDRESSAWARE", "/LAST:.main", "/PDBCompress"}
+			linkoptions {"/IGNORE:4254", "/DYNAMICBASE:NO", "/SAFESEH:NO", "/LARGEADDRESSAWARE", "/LAST:.main", "/PDBCompress"}
 
-files {"./src/client/**.rc", "./src/client/**.hpp", "./src/client/**.cpp", "./src/client/resources/**.*"}
+			files {"./src/client/**.rc", "./src/client/**.hpp", "./src/client/**.cpp", "./src/client/resources/**.*"}
 
-includedirs {"./src/client", "./src/common", "%{prj.location}/src"}
+			includedirs {"./src/client", "./src/common", "%{prj.location}/src"}
 
-resincludedirs {"$(ProjectDir)src"}
+			resincludedirs {"$(ProjectDir)src"}
 
-dependson {"tlsdll"}
+			dependson {"tlsdll"}
 
-links {"common"}
+			links {"common"}
 
-prebuildcommands {"pushd %{_MAIN_SCRIPT_DIR}", "tools\\premake5 generate-buildinfo", "popd"}
+			prebuildcommands {"pushd %{_MAIN_SCRIPT_DIR}", "premake5 generate-buildinfo", "popd"}
 
-if _OPTIONS["copy-to"] then
-	postbuildcommands {"copy /y \"$(TargetPath)\" \"" .. _OPTIONS["copy-to"] .. "\""}
-end
+			if _OPTIONS["copy-to"] then
+				postbuildcommands {"copy /y \"$(TargetPath)\" \"" .. _OPTIONS["copy-to"] .. "\""}
+			end
 
-dependencies.imports()
+			dependencies.imports()
 
-project "tlsdll"
-kind "SharedLib"
-language "C++"
+		project "tlsdll"
+			kind "SharedLib"
+			language "C++"
 
-files {"./src/tlsdll/**.rc", "./src/tlsdll/**.hpp", "./src/tlsdll/**.cpp", "./src/tlsdll/resources/**.*"}
+			files {"./src/tlsdll/**.rc", "./src/tlsdll/**.hpp", "./src/tlsdll/**.cpp", "./src/tlsdll/resources/**.*"}
 
-includedirs {"./src/tlsdll", "%{prj.location}/src"}
+			includedirs {"./src/tlsdll", "%{prj.location}/src"}
 
-links {"common"}
+			links {"common"}
 
-resincludedirs {"$(ProjectDir)src"}
+			resincludedirs {"$(ProjectDir)src"}
 
-group "Dependencies"
-dependencies.projects()
+		group "Dependencies"
+			dependencies.projects()
