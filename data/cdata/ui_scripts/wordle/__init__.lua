@@ -40,6 +40,7 @@ state.currentrow = 1
 state.completed = false
 state.result = false
 state.guesses = {}
+local validletters = {"a" = true, "b" = true, "c" = true, "d" = true, "e" = true, "f" = true, "g" = true, "h" = true, "i" = true, "j" = true, "k" = true, "l" = true, "m" = true, "n" = true, "o" = true, "p" = true, "q" = true, "r" = true, "s" = true, "t" = true, "u" = true, "v" = true, "w" = true, "x" = true, "y" = true, "z" = true}
 
 local keyboardwidget = function()
     local spacing = 1
@@ -421,7 +422,7 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
             bg:addElement(timerstart)
 
             bg:registerEventHandler("flip_start", function()
-                local timerend = LUI.UITimer.new(250, "flip_end")
+                local timerend = LUI.UITimer.new(200, "flip_end")
                 bg:addElement(timerend)
                 bg:registerEventHandler("flip_end", function()
                     timerend:close()
@@ -437,22 +438,22 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
                 bg:animateInSequence({
                     {
                         "flip_start",
-                        250,
+                        200,
                     },
                     {
                         "flip_end",
-                        250
+                        200
                     }
                 })
 
                 letter:animateInSequence({
                     {
                         "flip_start",
-                        250,
+                        200,
                     },
                     {
                         "flip_end",
-                        250
+                        200
                     }
                 })
             end)
@@ -621,6 +622,7 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
         return colors
     end
 
+    local lettertime = 250
     local isguessing = false
     local addguess = function(index, word, immediate)
         local colors = calculateguess(word)
@@ -636,7 +638,7 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
                 widget.keyboard:setkeycolor(word:sub(i, i), color)
             end
             
-            grid.rows[index].boxes[i]:doflip(color, (i - 1) * 500)
+            grid.rows[index].boxes[i]:doflip(color, (i - 1) * lettertime)
         end
 
         if (motd.getwordlesolution() == word) then
@@ -648,7 +650,7 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
         if (not immediate) then
             isguessing = true
 
-            local timer = LUI.UITimer.new(2500, "finish_guess")
+            local timer = LUI.UITimer.new(lettertime * 5, "finish_guess")
             widget:addElement(timer)
             widget:registerEventHandler("finish_guess", function()
                 isguessing = false
@@ -719,12 +721,19 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
 	        LUI.FlowManager.RequestLeaveMenu(element)
         end
 
+        print(event.key)
+
         if (state.completed or isguessing or motd.hassolvedwordle()) then
             return
         end
 
         if (#event.key == 1 and #state.currentword < maxcols) then
-            state.currentword = string.lower(state.currentword .. event.key)
+            local letter = string.lower(event.key)
+            if (not validwords[letter]) then
+                return
+            end
+
+            state.currentword = string.lower(state.currentword .. letter)
             grid.rows[state.currentrow].boxes[#state.currentword]:dopulse()
             Engine.PlaySound(CoD.SFX.MenuScroll)
         elseif (event.key == "BACKSPACE" and #state.currentword > 0) then
