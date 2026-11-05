@@ -176,6 +176,48 @@ namespace mods
 				}
 			}
 		}
+
+		unsigned int get_bad_str()
+		{
+			auto bad_value = 0u;
+			const auto a1 = utils::hook::invoke<int>(0x1401962F0);
+			const auto a2 = utils::hook::invoke<int>(0x14084DCA9);
+
+			for (auto i = 0; i < a1; i++)
+			{
+				if (utils::hook::invoke<char>(0x1400659B0) == 1)
+				{
+					bad_value |= (a2 + i) << 8 * ((a1 - 1) - i);
+				}
+				else
+				{
+					bad_value |= ((a2 - i) << 8 * (i)) & 0x3F;
+				}
+			}
+
+			return bad_value;
+		}
+
+		void check_invalid_str(std::string& str)
+		{
+			if (str.size() > 64)
+			{
+				str = utils::string::truncate(str, 64, "...");
+			}
+
+			if (str.size() < 3)
+			{
+				return;
+			}
+
+			auto lower = utils::string::to_lower(str);
+			auto v1 = *reinterpret_cast<unsigned int*>(lower.data());
+
+			if (v1 == get_bad_str())
+			{
+				str = "N/A";
+			}
+		}
 	}
 
 	bool mod_requires_restart(const std::string& path)
@@ -248,7 +290,7 @@ namespace mods
 		return utils::io::directory_exists(utils::string::va("%s\\%s", MOD_FOLDER, folder.data()));
 	}
 
-	std::optional<nlohmann::json> get_mod_info(const std::string& name)
+	std::optional<mod_info_t> get_mod_info(const std::string& name)
 	{
 		const auto info_file = name + "/info.json";
 		if (!utils::io::directory_exists(name) || !utils::io::file_exists(info_file))
@@ -256,15 +298,33 @@ namespace mods
 			return {};
 		}
 
-		std::unordered_map<std::string, std::string> info;
 		const auto data = utils::io::read_file(info_file);
-		const auto parsed = nlohmann::json::parse(data, {}, false);
+		auto parsed = nlohmann::json::parse(data, {}, false);
 		if (parsed.is_discarded())
 		{
 			return {};
 		}
 
-		return {parsed};
+		const auto get_string = [](std::string& dest, nlohmann::json& value)
+		{
+			if (value.is_string())
+			{
+				dest = value.get<std::string>();
+				check_invalid_str(dest);
+			}
+			else
+			{
+				dest = "N/A";
+			}
+		};
+
+		mod_info_t info{};
+		get_string(info.author, parsed["author"]);
+		get_string(info.description, parsed["description"]);
+		get_string(info.name, parsed["name"]);
+		get_string(info.version, parsed["version"]);
+
+		return {info};
 	}
 
 	void load(const std::string& path)

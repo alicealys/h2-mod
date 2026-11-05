@@ -259,6 +259,7 @@ workspace "h2-mod"
 		filter "configurations:Release"
 			optimize "Full"
 			defines {"NDEBUG"}
+			buildoptions {"/bigobj"}
 			fatalwarnings {"All"}
 		filter {}
 

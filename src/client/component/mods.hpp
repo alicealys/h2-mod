@@ -23,6 +23,14 @@ namespace mods
 		zone_priority priority;
 	};
 
+	struct mod_info_t
+	{
+		std::string name;
+		std::string author;
+		std::string version;
+		std::string description;
+	};
+
 	bool mod_requires_restart(const std::string& path);
 	void set_mod(const std::string& path);
 	std::optional<std::string> get_mod();
@@ -32,6 +40,6 @@ namespace mods
 	void unload();
 
 	std::vector<std::string> get_mod_list();
-	std::optional<nlohmann::json> get_mod_info(const std::string& mod);
+	std::optional<mod_info_t> get_mod_info(const std::string& mod);
 	bool mod_exists(const std::string& folder);
 }

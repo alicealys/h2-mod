@@ -491,7 +491,7 @@ namespace gsc
 
 			add_function("statssetstruct", []()
 			{
-				console::warn("statssetstruct is deprecated, use statset\n");
+				//console::warn("statssetstruct is deprecated, use statset\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto value = get_argument(2);
@@ -527,7 +527,7 @@ namespace gsc
 
 			add_function("statsgetstruct", []()
 			{
-				console::warn("statsgetstruct is deprecated, use statget\n");
+				//console::warn("statsgetstruct is deprecated, use statget\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto value = mod_stats::get_struct(struct_, field);
@@ -536,7 +536,7 @@ namespace gsc
 
 			add_function("statsgetstructor", []()
 			{
-				console::warn("statsgetstructor is deprecated, use statgetor\n");
+				//console::warn("statsgetstructor is deprecated, use statgetor\n");
 				const auto struct_ = game::Scr_GetString(0);
 				const auto field = game::Scr_GetString(1);
 				const auto default_value = get_argument(2);
