@@ -40,7 +40,7 @@ state.currentrow = 1
 state.completed = false
 state.result = false
 state.guesses = {}
-local validletters = {"a" = true, "b" = true, "c" = true, "d" = true, "e" = true, "f" = true, "g" = true, "h" = true, "i" = true, "j" = true, "k" = true, "l" = true, "m" = true, "n" = true, "o" = true, "p" = true, "q" = true, "r" = true, "s" = true, "t" = true, "u" = true, "v" = true, "w" = true, "x" = true, "y" = true, "z" = true}
+local validletters = {["a"] = true, ["b"] = true, ["c"] = true, ["d"] = true, ["e"] = true, ["f"] = true, ["g"] = true, ["h"] = true, ["i"] = true, ["j"] = true, ["k"] = true, ["l"] = true, ["m"] = true, ["n"] = true, ["o"] = true, ["p"] = true, ["q"] = true, ["r"] = true, ["s"] = true, ["t"] = true, ["u"] = true, ["v"] = true, ["w"] = true, ["x"] = true, ["y"] = true, ["z"] = true}
 
 local keyboardwidget = function()
     local spacing = 1
@@ -721,15 +721,13 @@ LUI.MenuBuilder.registerPopupType("wordle_widget", function(menu, controller)
 	        LUI.FlowManager.RequestLeaveMenu(element)
         end
 
-        print(event.key)
-
         if (state.completed or isguessing or motd.hassolvedwordle()) then
             return
         end
 
         if (#event.key == 1 and #state.currentword < maxcols) then
             local letter = string.lower(event.key)
-            if (not validwords[letter]) then
+            if (not validletters[letter]) then
                 return
             end
 
