@@ -257,9 +257,10 @@ workspace "h2-mod"
 		filter {}
 
 		filter "configurations:Release"
-			optimize "Full"
+			optimize "Size"
+			buildoptions {"/GL"}
+			linkoptions { "/IGNORE:4702", "/LTCG" }
 			defines {"NDEBUG"}
-			buildoptions {"/bigobj"}
 			fatalwarnings {"All"}
 		filter {}
 
